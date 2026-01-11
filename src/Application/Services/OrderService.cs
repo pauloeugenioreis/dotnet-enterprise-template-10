@@ -26,7 +26,7 @@ public class OrderService : Service<Order>, IOrderService
         _logger = logger;
     }
 
-    public async Task<OrderResponseDto> CreateOrderAsync(CreateOrderDto dto, CancellationToken cancellationToken = default)
+    public async Task<OrderResponseDto> CreateOrderAsync(CreateOrderRequest dto, CancellationToken cancellationToken = default)
     {
         // Validate items
         if (dto.Items == null || dto.Items.Count == 0)
@@ -85,7 +85,7 @@ public class OrderService : Service<Order>, IOrderService
 
             // Update product stock
             product.Stock -= itemDto.Quantity;
-            await _productRepository.UpdateAsync(product.Id, product, cancellationToken);
+            await _productRepository.UpdateAsync(product, cancellationToken);
         }
 
         // Calculate totals
@@ -95,7 +95,7 @@ public class OrderService : Service<Order>, IOrderService
         order.Total = order.Subtotal + order.Tax + order.ShippingCost;
 
         // Save order
-        var createdOrder = await _orderRepository.CreateAsync(order, cancellationToken);
+        var createdOrder = await _orderRepository.AddAsync(order, cancellationToken);
 
         _logger.LogInformation("Order {OrderNumber} created for {CustomerEmail}. Total: {Total:C}",
             order.OrderNumber, order.CustomerEmail, order.Total);
@@ -120,7 +120,7 @@ public class OrderService : Service<Order>, IOrderService
             order.Notes = $"{order.Notes}\n[{DateTime.UtcNow:yyyy-MM-dd HH:mm}] Status changed to {dto.Status}: {dto.Reason}";
         }
 
-        await _orderRepository.UpdateAsync(id, order, cancellationToken);
+        await _orderRepository.UpdateAsync(order, cancellationToken);
 
         _logger.LogInformation("Order {OrderNumber} status updated: {OldStatus} -> {NewStatus}",
             order.OrderNumber, previousStatus, dto.Status);

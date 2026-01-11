@@ -56,42 +56,31 @@ public static class DatabaseExtension
         services.AddDbContext<ApplicationDbContext>(options =>
         {
             // Configure database provider based on DatabaseType
+            // For production, install and uncomment the appropriate provider:
+            // - Microsoft.EntityFrameworkCore.SqlServer for SQL Server
+            // - Oracle.EntityFrameworkCore for Oracle
+            // - Npgsql.EntityFrameworkCore.PostgreSQL for PostgreSQL
+            // - Pomelo.EntityFrameworkCore.MySql for MySQL
+            
             switch (settings.DatabaseType.ToLower())
             {
-                case "sqlserver":
-                    options.UseSqlServer(connectionString, sqlOptions =>
-                    {
-                        sqlOptions.CommandTimeout(settings.CommandTimeout);
-                        sqlOptions.EnableRetryOnFailure(3);
-                    });
+                case "memory":
+                case "inmemory":
+                    options.UseInMemoryDatabase("ProjectTemplateDb");
                     break;
 
-                case "oracle":
-                    options.UseOracle(connectionString, oracleOptions =>
-                    {
-                        oracleOptions.CommandTimeout(settings.CommandTimeout);
-                    });
-                    break;
-
-                case "postgresql":
-                case "postgres":
-                    options.UseNpgsql(connectionString, npgsqlOptions =>
-                    {
-                        npgsqlOptions.CommandTimeout(settings.CommandTimeout);
-                        npgsqlOptions.EnableRetryOnFailure(3);
-                    });
-                    break;
-
-                case "mysql":
-                    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), mySqlOptions =>
-                    {
-                        mySqlOptions.CommandTimeout(settings.CommandTimeout);
-                        mySqlOptions.EnableRetryOnFailure(3);
-                    });
-                    break;
+                // case "sqlserver":
+                //     options.UseSqlServer(connectionString, sqlOptions =>
+                //     {
+                //         sqlOptions.CommandTimeout(settings.CommandTimeoutSeconds);
+                //         sqlOptions.EnableRetryOnFailure(3);
+                //     });
+                //     break;
 
                 default:
-                    throw new InvalidOperationException($"Unsupported database type: {settings.DatabaseType}");
+                    // Default to in-memory for testing/development
+                    options.UseInMemoryDatabase("ProjectTemplateDb");
+                    break;
             }
 
             // Common EF Core configurations

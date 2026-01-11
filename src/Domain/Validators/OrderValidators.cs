@@ -4,9 +4,9 @@ using ProjectTemplate.Domain.Dtos;
 namespace ProjectTemplate.Domain.Validators;
 
 /// <summary>
-/// Validator for CreateOrderDto
+/// Validator for CreateOrderRequest
 /// </summary>
-public class CreateOrderValidator : AbstractValidator<CreateOrderDto>
+public class CreateOrderValidator : AbstractValidator<CreateOrderRequest>
 {
     public CreateOrderValidator()
     {

@@ -50,7 +50,7 @@ public class RedisSettings
 public class DatabaseSettings
 {
     public string Provider { get; set; } = "EntityFrameworkCore"; // EntityFrameworkCore, Dapper, NHibernate, Linq2Db
-    public string DatabaseType { get; set; } = "SqlServer"; // SqlServer, Oracle, PostgreSQL, MySQL
+    public string DatabaseType { get; set; } = "InMemory"; // InMemory, SqlServer, Oracle, PostgreSQL, MySQL
     public int CommandTimeoutSeconds { get; set; } = 30;
     public bool EnableSensitiveDataLogging { get; set; } = false;
     public bool EnableDetailedErrors { get; set; } = false;

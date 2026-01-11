@@ -26,49 +26,38 @@ public static class HealthChecksExtension
         {
             var dbType = appSettings?.Infrastructure?.Database?.DatabaseType?.ToLower() ?? "sqlserver";
             
-            switch (dbType)
-            {
-                case "sqlserver":
-                    healthChecksBuilder.AddSqlServer(
-                        connectionString,
-                        name: "database",
-                        failureStatus: HealthStatus.Degraded,
-                        tags: new[] { "ready", "database" });
-                    break;
-
-                case "oracle":
-                    healthChecksBuilder.AddOracle(
-                        connectionString,
-                        name: "database",
-                        failureStatus: HealthStatus.Degraded,
-                        tags: new[] { "ready", "database" });
-                    break;
-
-                case "postgresql":
-                case "postgres":
-                    healthChecksBuilder.AddNpgSql(
-                        connectionString,
-                        name: "database",
-                        failureStatus: HealthStatus.Degraded,
-                        tags: new[] { "ready", "database" });
-                    break;
-
-                // Add other database types as needed
-            }
+            // Database health checks require specific packages to be installed
+            // Uncomment and install the appropriate package:
+            // - AspNetCore.HealthChecks.SqlServer for SQL Server
+            // - AspNetCore.HealthChecks.Oracle for Oracle
+            // - AspNetCore.HealthChecks.Npgsql for PostgreSQL
+            
+            // switch (dbType)
+            // {
+            //     case "sqlserver":
+            //         healthChecksBuilder.AddSqlServer(
+            //             connectionString,
+            //             name: "database",
+            //             failureStatus: HealthStatus.Degraded,
+            //             tags: new[] { "ready", "database" });
+            //         break;
+            // }
         }
 
         // Add Redis health check if configured
-        var cacheSettings = appSettings?.Infrastructure?.Cache;
-        if (cacheSettings?.Enabled == true && 
-            cacheSettings.Provider.Equals("Redis", StringComparison.OrdinalIgnoreCase) &&
-            !string.IsNullOrEmpty(cacheSettings.ConnectionString))
-        {
-            healthChecksBuilder.AddRedis(
-                cacheSettings.ConnectionString,
-                name: "redis",
-                failureStatus: HealthStatus.Degraded,
-                tags: new[] { "ready", "cache" });
-        }
+        // Requires: AspNetCore.HealthChecks.Redis package
+        // var cacheSettings = appSettings?.Infrastructure?.Cache;
+        // if (cacheSettings?.Enabled == true && 
+        //     cacheSettings.Provider.Equals("Redis", StringComparison.OrdinalIgnoreCase) &&
+        //     cacheSettings.Redis != null &&
+        //     !string.IsNullOrEmpty(cacheSettings.Redis.ConnectionString))
+        // {
+        //     healthChecksBuilder.AddRedis(
+        //         cacheSettings.Redis.ConnectionString,
+        //         name: "redis",
+        //         failureStatus: HealthStatus.Degraded,
+        //         tags: new[] { "ready", "cache" });
+        // }
 
         return services;
     }

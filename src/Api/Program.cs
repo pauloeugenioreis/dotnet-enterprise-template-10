@@ -12,8 +12,9 @@ builder.Configuration
 // Add services
 builder.Services.AddControllers();
 
-// Add Swagger with custom configuration
-builder.Services.AddCustomizedSwagger();
+// Add Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 // Add infrastructure services
 builder.Services.AddInfrastructureServices(builder.Configuration, builder.Environment);
@@ -23,7 +24,8 @@ var app = builder.Build();
 // Configure HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseCustomizedSwagger();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

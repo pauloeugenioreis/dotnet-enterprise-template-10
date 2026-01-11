@@ -11,7 +11,7 @@ public interface IOrderService : IService<Order>
     /// <summary>
     /// Create order from DTO
     /// </summary>
-    Task<OrderResponseDto> CreateOrderAsync(CreateOrderDto dto, CancellationToken cancellationToken = default);
+    Task<OrderResponseDto> CreateOrderAsync(CreateOrderRequest dto, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Update order status

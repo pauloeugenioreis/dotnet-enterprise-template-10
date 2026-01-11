@@ -21,7 +21,7 @@ public static class AuthenticationExtension
     /// Adds JWT Authentication and Authorization services
     /// Configure in appsettings.json under AppSettings:Authentication
     /// </summary>
-    public static IServiceCollection AddAuthentication Extension(this IServiceCollection services)
+    public static IServiceCollection AddAuthenticationExtension(this IServiceCollection services)
     {
         services.AddAuthentication(options =>
         {

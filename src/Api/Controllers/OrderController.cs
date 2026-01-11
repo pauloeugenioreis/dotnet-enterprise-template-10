@@ -97,7 +97,7 @@ public class OrderController : ApiControllerBase
     [ProducesResponseType(typeof(OrderResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateAsync(
-        [FromBody] CreateOrderDto dto,
+        [FromBody] CreateOrderRequest dto,
         CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)

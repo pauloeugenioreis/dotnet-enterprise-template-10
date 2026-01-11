@@ -30,31 +30,24 @@ public static class CacheExtension
         switch (cacheSettings.Provider.ToLower())
         {
             case "redis":
-                if (string.IsNullOrEmpty(cacheSettings.ConnectionString))
+                var redisConnectionString = cacheSettings.Redis?.ConnectionString;
+                if (string.IsNullOrEmpty(redisConnectionString))
                 {
                     throw new InvalidOperationException("Redis connection string is required when Redis provider is selected");
                 }
                 
                 services.AddStackExchangeRedisCache(options =>
                 {
-                    options.Configuration = cacheSettings.ConnectionString;
+                    options.Configuration = redisConnectionString;
                     options.InstanceName = "ProjectTemplate_";
                 });
                 break;
 
             case "sqlserver":
-                if (string.IsNullOrEmpty(cacheSettings.ConnectionString))
-                {
-                    throw new InvalidOperationException("SQL Server connection string is required when SqlServer provider is selected");
-                }
-                
-                services.AddDistributedSqlServerCache(options =>
-                {
-                    options.ConnectionString = cacheSettings.ConnectionString;
-                    options.SchemaName = "dbo";
-                    options.TableName = "Cache";
-                });
-                break;
+                // SQL Server distributed cache requires:
+                // Install-Package Microsoft.Extensions.Caching.SqlServer
+                // dotnet sql-cache create "connection-string" dbo Cache
+                throw new NotImplementedException("SQL Server cache requires Microsoft.Extensions.Caching.SqlServer package");
 
             case "memory":
             default:
