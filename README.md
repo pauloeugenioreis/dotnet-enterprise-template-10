@@ -119,8 +119,6 @@ ProjectTemplate/
 ├── tests/
 │   ├── UnitTests/                    # Testes unitários (xUnit + Moq + FluentAssertions)
 │   │   ├── Controllers/              # Testes de controllers
-│   │   │   ├── ProductControllerTests.cs  # 9 testes
-│   │   │   └── OrderControllerTests.cs    # 7 testes
 │   │   ├── UnitTests.csproj          # Projeto de testes unitários
 │   │   └── README.md                 # Documentação dos testes
 │   │
