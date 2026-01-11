@@ -108,16 +108,27 @@ public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture
         var createResponse = await _client.PostAsJsonAsync("/api/v1/Product", product);
         var createdProduct = await createResponse.Content.ReadFromJsonAsync<Product>();
 
-        // Modify the product
-        createdProduct!.Name = "Updated Name";
-        createdProduct.Price = 25.00m;
+        // Create a new instance to avoid EF Core tracking conflict
+        var productToUpdate = new Product
+        {
+            Id = createdProduct!.Id,
+            Name = "Updated Name",
+            Description = createdProduct.Description,
+            Price = 25.00m,
+            Stock = createdProduct.Stock,
+            Category = createdProduct.Category,
+            IsActive = createdProduct.IsActive
+        };
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/Product/{createdProduct.Id}", createdProduct);
+        var response = await _client.PutAsJsonAsync($"/api/v1/Product/{productToUpdate.Id}", productToUpdate);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var updatedProduct = await response.Content.ReadFromJsonAsync<Product>();
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        
+        // Verify the update by getting the product
+        var getResponse = await _client.GetAsync($"/api/v1/Product/{productToUpdate.Id}");
+        var updatedProduct = await getResponse.Content.ReadFromJsonAsync<Product>();
         updatedProduct!.Name.Should().Be("Updated Name");
         updatedProduct.Price.Should().Be(25.00m);
     }
@@ -147,5 +158,34 @@ public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture
         // Verify it's deleted
         var getResponse = await _client.GetAsync($"/api/v1/Product/{createdProduct.Id}");
         getResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task ExportToExcel_WithoutFilters_ReturnsExcelFile()
+    {
+        // Act
+        var response = await _client.GetAsync("/api/v1/Product/ExportToExcel");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        
+        var content = await response.Content.ReadAsByteArrayAsync();
+        content.Should().NotBeEmpty();
+        content.Length.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
+    public async Task ExportToExcel_WithFilters_ReturnsFilteredExcelFile()
+    {
+        // Act
+        var response = await _client.GetAsync("/api/v1/Product/ExportToExcel?isActive=true&category=Electronics");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        
+        var content = await response.Content.ReadAsByteArrayAsync();
+        content.Should().NotBeEmpty();
     }
 }

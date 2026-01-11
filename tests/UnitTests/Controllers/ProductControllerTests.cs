@@ -1,5 +1,7 @@
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ProjectTemplate.Api.Controllers;
@@ -24,6 +26,13 @@ public class ProductControllerTests
         _mockService = new Mock<IService<Product>>();
         _mockLogger = new Mock<ILogger<ProductController>>();
         _controller = new ProductController(_mockService.Object, _mockLogger.Object);
+        
+        // Mock IUrlHelper for Create methods
+        var mockUrlHelper = new Mock<IUrlHelper>();
+        mockUrlHelper
+            .Setup(x => x.Action(It.IsAny<UrlActionContext>()))
+            .Returns("http://localhost/api/v1/Product/1");
+        _controller.Url = mockUrlHelper.Object;
     }
 
     [Fact]
@@ -108,7 +117,7 @@ public class ProductControllerTests
         var result = await _controller.CreateAsync(newProduct, CancellationToken.None);
 
         // Assert
-        result.Should().BeOfType<CreatedAtActionResult>();
+        result.Should().BeOfType<CreatedResult>();
     }
 
     [Fact]

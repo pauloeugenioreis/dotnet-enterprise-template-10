@@ -94,7 +94,8 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
             ShippingAddress = "456 Oak Ave",
             Items = new List<OrderItemDto> { new(createdProduct!.Id, 1, 30.00m) }
         };
-        await _client.PostAsJsonAsync("/api/v1/Order", orderDto);
+        var orderCreateResponse = await _client.PostAsJsonAsync("/api/v1/Order", orderDto);
+        orderCreateResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
         // Act
         var response = await _client.GetAsync("/api/v1/Order/customer/jane@example.com");
@@ -103,7 +104,7 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var orders = await response.Content.ReadFromJsonAsync<List<OrderResponseDto>>();
         orders.Should().NotBeNull();
-        orders!.Should().HaveCountGreaterThan(0);
+        orders!.Should().NotBeEmpty("because we just created an order for this customer");
         orders.First().CustomerEmail.Should().Be("jane@example.com");
     }
 
@@ -129,7 +130,9 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
             Items = new List<OrderItemDto> { new(createdProduct!.Id, 1, 40.00m) }
         };
         var orderResponse = await _client.PostAsJsonAsync("/api/v1/Order", orderDto);
+        orderResponse.StatusCode.Should().Be(HttpStatusCode.Created);
         var createdOrder = await orderResponse.Content.ReadFromJsonAsync<OrderResponseDto>();
+        createdOrder.Should().NotBeNull();
 
         var statusDto = new UpdateOrderStatusDto("Processing", "Order is being processed");
 
@@ -137,8 +140,12 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
         var response = await _client.PatchAsJsonAsync($"/api/v1/Order/{createdOrder!.Id}/status", statusDto);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var updatedOrder = await response.Content.ReadFromJsonAsync<OrderResponseDto>();
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        
+        // Verify the update by getting the order
+        var getResponse = await _client.GetAsync($"/api/v1/Order/{createdOrder.Id}");
+        getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var updatedOrder = await getResponse.Content.ReadFromJsonAsync<OrderResponseDto>();
         updatedOrder!.Status.Should().Be("Processing");
     }
 
@@ -150,7 +157,37 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var stats = await response.Content.ReadFromJsonAsync<dynamic>();
-        stats.Should().NotBeNull();
+        var content = await response.Content.ReadAsStringAsync();
+        content.Should().NotBeNullOrEmpty();
+        content.Should().Contain("totalOrders");
+    }
+
+    [Fact]
+    public async Task ExportToExcel_WithoutFilters_ReturnsExcelFile()
+    {
+        // Act
+        var response = await _client.GetAsync("/api/v1/Order/ExportToExcel");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        
+        var content = await response.Content.ReadAsByteArrayAsync();
+        content.Should().NotBeEmpty();
+        content.Length.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
+    public async Task ExportToExcel_WithStatusFilter_ReturnsFilteredExcelFile()
+    {
+        // Act
+        var response = await _client.GetAsync("/api/v1/Order/ExportToExcel?status=Pending");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        
+        var content = await response.Content.ReadAsByteArrayAsync();
+        content.Should().NotBeEmpty();
     }
 }

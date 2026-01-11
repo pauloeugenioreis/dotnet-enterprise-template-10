@@ -92,6 +92,9 @@ public static class DatabaseExtension
             options.EnableDetailedErrors();
         });
 
+        // Register DbContext as generic DbContext for Repository<T> to resolve
+        services.AddScoped<DbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+
         return services;
     }
 

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using ProjectTemplate.Data.Context;
+using Asp.Versioning;
 
 namespace ProjectTemplate.Integration.Tests;
 
@@ -19,11 +20,33 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
             // Remove the existing DbContext registration
             services.RemoveAll(typeof(DbContextOptions<ApplicationDbContext>));
             services.RemoveAll(typeof(ApplicationDbContext));
+            services.RemoveAll(typeof(DbContext));
 
             // Add in-memory database for testing
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseInMemoryDatabase("TestDatabase");
+            });
+
+            // Register DbContext as ApplicationDbContext for Repository<T> that expects DbContext
+            services.AddScoped<DbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+
+            // Configure API Versioning for tests
+            services.AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+                options.ApiVersionReader = ApiVersionReader.Combine(
+                    new UrlSegmentApiVersionReader(),
+                    new HeaderApiVersionReader("X-Api-Version"),
+                    new QueryStringApiVersionReader("api-version")
+                );
+            })
+            .AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
             });
 
             // Build service provider
@@ -40,7 +63,8 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
             SeedTestData(db);
         });
 
-        builder.UseEnvironment("Test");
+        // Use Test environment but don't override the whole configuration
+        builder.UseEnvironment("Development");
     }
 
     private static void SeedTestData(ApplicationDbContext context)

@@ -55,6 +55,9 @@ public static class InfrastructureExtensions
             options.EnableForHttps = true;
         });
 
+        // API Versioning
+        services.AddCustomizedApiVersioning();
+
         // Application dependencies
         services.AddApplicationDependencies();
 

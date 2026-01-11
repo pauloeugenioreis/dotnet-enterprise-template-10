@@ -115,10 +115,11 @@ public class ProductController : ApiControllerBase
         _logger.LogInformation("Product {ProductName} created with ID {ProductId}", 
             created.Name, created.Id);
 
-        return CreatedAtAction(
+        var location = Url.Action(
             nameof(GetByIdAsync),
-            new { id = created.Id },
-            created);
+            values: new { id = created.Id }) ?? $"/api/v1/product/{created.Id}";
+        
+        return Created(location, created);
     }
 
     /// <summary>

@@ -96,6 +96,7 @@ public class OrderService : Service<Order>, IOrderService
 
         // Save order
         var createdOrder = await _orderRepository.AddAsync(order, cancellationToken);
+        await _orderRepository.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Order {OrderNumber} created for {CustomerEmail}. Total: {Total:C}",
             order.OrderNumber, order.CustomerEmail, order.Total);
@@ -120,8 +121,7 @@ public class OrderService : Service<Order>, IOrderService
             order.Notes = $"{order.Notes}\n[{DateTime.UtcNow:yyyy-MM-dd HH:mm}] Status changed to {dto.Status}: {dto.Reason}";
         }
 
-        await _orderRepository.UpdateAsync(order, cancellationToken);
-
+        await _orderRepository.UpdateAsync(order, cancellationToken);        await _orderRepository.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("Order {OrderNumber} status updated: {OldStatus} -> {NewStatus}",
             order.OrderNumber, previousStatus, dto.Status);
 

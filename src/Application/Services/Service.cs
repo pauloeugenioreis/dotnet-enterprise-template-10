@@ -10,9 +10,9 @@ namespace ProjectTemplate.Application.Services;
 public class Service<TEntity> : IService<TEntity> where TEntity : class
 {
     protected readonly IRepository<TEntity> _repository;
-    protected readonly ILogger _logger;
+    protected readonly ILogger<Service<TEntity>> _logger;
 
-    public Service(IRepository<TEntity> repository, ILogger logger)
+    public Service(IRepository<TEntity> repository, ILogger<Service<TEntity>> logger)
     {
         _repository = repository;
         _logger = logger;

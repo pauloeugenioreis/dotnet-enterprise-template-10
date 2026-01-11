@@ -51,10 +51,26 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
         return entityList;
     }
 
-    public virtual Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public virtual async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        _dbSet.Update(entity);
-        return Task.CompletedTask;
+        // Get the ID value from the incoming entity
+        var entityEntry = _context.Entry(entity);
+        var idValue = entityEntry.Property("Id").CurrentValue;
+        
+        // Find the existing tracked entity with the same ID
+        var existingEntity = await _dbSet.FindAsync(new object[] { idValue }, cancellationToken);
+        
+        if (existingEntity != null)
+        {
+            // Copy values from the incoming entity to the tracked entity
+            _context.Entry(existingEntity).CurrentValues.SetValues(entity);
+        }
+        else
+        {
+            // If entity doesn't exist in the database, attach and mark as modified
+            _dbSet.Attach(entity);
+            entityEntry.State = EntityState.Modified;
+        }
     }
 
     public virtual Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)

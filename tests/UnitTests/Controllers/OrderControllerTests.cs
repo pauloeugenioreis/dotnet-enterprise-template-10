@@ -1,5 +1,7 @@
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ProjectTemplate.Api.Controllers;
@@ -27,6 +29,13 @@ public class OrderControllerTests
         _mockOrderService = new Mock<IOrderService>();
         _mockLogger = new Mock<ILogger<OrderController>>();
         _controller = new OrderController(_mockOrderService.Object, _mockLogger.Object);
+        
+        // Mock IUrlHelper for Create methods
+        var mockUrlHelper = new Mock<IUrlHelper>();
+        mockUrlHelper
+            .Setup(x => x.Action(It.IsAny<UrlActionContext>()))
+            .Returns("http://localhost/api/v1/Order/1");
+        _controller.Url = mockUrlHelper.Object;
     }
 
     [Fact]
@@ -162,7 +171,7 @@ public class OrderControllerTests
         var result = await _controller.CreateAsync(createRequest, CancellationToken.None);
 
         // Assert
-        result.Should().BeOfType<CreatedAtActionResult>();
+        result.Should().BeOfType<CreatedResult>();
     }
 
     [Fact]
@@ -197,7 +206,7 @@ public class OrderControllerTests
         var result = await _controller.UpdateStatusAsync(orderId, updateRequest, CancellationToken.None);
 
         // Assert
-        result.Should().BeOfType<OkObjectResult>();
+        result.Should().BeOfType<NoContentResult>();
     }
 
     [Fact]

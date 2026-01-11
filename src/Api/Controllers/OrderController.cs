@@ -114,25 +114,26 @@ public class OrderController : ApiControllerBase
 
         _logger.LogInformation("Order {OrderNumber} created", order.OrderNumber);
 
-        return CreatedAtAction(
+        var location = Url.Action(
             nameof(GetByIdAsync),
-            new { id = order.Id },
-            order);
+            values: new { id = order.Id }) ?? $"/api/v1/order/{order.Id}";
+        
+        return Created(location, order);
     }
 
     /// <summary>
     /// Update order status
     /// </summary>
     [HttpPatch("{id}/status")]
-    [ProducesResponseType(typeof(OrderResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateStatusAsync(
         long id,
         [FromBody] UpdateOrderStatusDto dto,
         CancellationToken cancellationToken)
     {
-        var order = await _orderService.UpdateOrderStatusAsync(id, dto, cancellationToken);
-        return Ok(order);
+        await _orderService.UpdateOrderStatusAsync(id, dto, cancellationToken);
+        return NoContent();
     }
 
     /// <summary>
