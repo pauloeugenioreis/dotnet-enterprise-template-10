@@ -59,7 +59,7 @@ ProjectTemplate/
 │   │   ├── Controllers/              # Controllers da API
 │   │   │   └── ApiControllerBase.cs # Base controller com métodos helper
 │   │   ├── appsettings.json          # Configurações base
-│   │   └── Program.cs                # Entry point da aplicação
+│   │   └── Program.cs                # Entry point da aplicação (com seeding automático)
 │   │
 │   ├── Application/                  # Camada de aplicação (Services, Business Logic)
 │   │   └── Services/                 # Application services
@@ -76,11 +76,13 @@ ProjectTemplate/
 │   │   │   └── DomainExceptions.cs   # BusinessException, NotFoundException, ValidationException
 │   │   └── AppSettings.cs            # Configurações fortemente tipadas
 │   │
-│   ├── Data/                         # Camada de dados (Repositories, Context)
+│   ├── Data/                         # Camada de dados (Repositories, Context, Seeders)
 │   │   ├── Context/                  # DbContext do EF Core
 │   │   │   └── ApplicationDbContext.cs
-│   │   └── Repository/               # Implementação dos repositórios
-│   │       └── Repository.cs         # Repositório genérico base
+│   │   ├── Repository/               # Implementação dos repositórios
+│   │   │   └── Repository.cs         # Repositório genérico base
+│   │   └── Seeders/                  # Database seeders
+│   │       └── DbSeeder.cs           # Seed de dados iniciais (150 produtos, 120 pedidos)
 │   │
 │   └── Infrastructure/               # Camada de infraestrutura (Extensions, Middleware, Services)
 │       ├── Extensions/               # Extension methods modulares
@@ -115,8 +117,13 @@ ProjectTemplate/
 │           └── SwaggerGroupByController.cs      # Agrupamento por controller
 │
 ├── tests/
+│   ├── UnitTests/                    # Testes unitários (xUnit + Moq + FluentAssertions)
+│   │   ├── Controllers/              # Testes de controllers
+│   │   │   ├── ProductControllerTests.cs  # 9 testes
+│   │   │   └── OrderControllerTests.cs    # 7 testes
+│   │   └── README.md                 # Documentação dos testes
+│   │
 │   ├── Integration/                  # Testes de integração
-│   └── Infrastructure.UnitTests/     # Testes unitários de infraestrutura
 │
 ├── scripts/                          # Scripts de automação
 │   ├── linux/                        # Scripts bash (Minikube deploy/destroy/tests)
