@@ -762,13 +762,3 @@ Contribuições são bem-vindas! Para contribuir:
 Este template está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 
 ---
-
-## 👥 Autores
-
-Template criado com base nas melhores práticas do projeto PNE-API.
-
----
-
-## 🎉 Agradecimentos
-
-Baseado na experiência e aprendizados do projeto PNE-API, incorporando todas as melhorias e refinamentos implementados durante sua evolução para .NET 10.

@@ -15,6 +15,9 @@ public class ApplicationDbContext : DbContext
     {
     }
 
+    // DbSets
+    public DbSet<Product> Products { get; set; }
+
     // Add your DbSets here
     // Example: public DbSet<YourEntity> YourEntities { get; set; }
 
