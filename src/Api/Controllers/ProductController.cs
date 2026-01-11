@@ -190,16 +190,16 @@ public class ProductController : ApiControllerBase
     }
 
     /// <summary>
-    /// Generate Excel file with products
+    /// Export products to Excel file
     /// Uses MiniExcelLibs for high-performance Excel generation
     /// </summary>
     /// <param name="isActive">Filter by active status</param>
     /// <param name="category">Filter by category</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Excel file</returns>
-    [HttpGet("GerarExcel")]
+    [HttpGet("ExportToExcel")]
     [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
-    public async Task<ActionResult> GerarExcelAsync(
+    public async Task<ActionResult> ExportToExcelAsync(
         [FromQuery] bool? isActive,
         [FromQuery] string? category,
         CancellationToken cancellationToken)
