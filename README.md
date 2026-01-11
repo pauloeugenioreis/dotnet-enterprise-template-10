@@ -1,0 +1,774 @@
+# .NET 10 Clean Architecture Template
+
+> Template moderno e completo para criação de APIs .NET 10 seguindo Clean Architecture e melhores práticas de mercado.
+
+[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+---
+
+## 📖 Documentação
+
+- **[🚀 Início Rápido](QUICK-START.md)** - Comece em 5 minutos
+- **[📚 Guia Completo](README.md)** - Este documento
+- **[🎛️ Recursos Avançados](docs/FEATURES.md)** - MongoDB, Quartz, RabbitMQ, Storage, etc.
+- **[🔄 Guia de ORMs](docs/ORM-GUIDE.md)** - Como alternar entre ORMs
+- **[☸️ Guia Kubernetes](docs/KUBERNETES.md)** - Deploy em K8s
+- **[📝 Changelog](CHANGELOG.md)** - Histórico de mudanças
+- **[🤝 Contribuindo](CONTRIBUTING.md)** - Como contribuir
+
+---
+
+## 🎯 Visão Geral
+
+Este template fornece uma estrutura completa e moderna para desenvolvimento de APIs em .NET 10, baseado nas melhores práticas e padrões de arquitetura. Foi criado a partir da experiência do projeto PNE-API e incorpora todos os aprendizados e melhorias implementados.
+
+### ✨ Características Principais
+
+- **Clean Architecture** com separação clara de responsabilidades
+- **Suporte a múltiplos ORMs** (Entity Framework Core por padrão)
+- **Infraestrutura modular** com extension methods
+- **Configurações validadas** em tempo de startup
+- **Health checks** prontos para produção
+- **Cache distribuído** (Memory, Redis, SQL Server)
+- **Logging estruturado** e observabilidade (Google Cloud Logging)
+- **CORS configurável** por ambiente
+- **Response compression** (Brotli/Gzip)
+- **Dependency injection** automático com Scrutor
+- **API versionamento** (URL, Header, Query)
+- **Swagger customizado** (agrupamento, JWT, XML docs)
+- **Exception notifications** (extensível para email/Slack)
+- **Kubernetes ready** com manifests e scripts de deploy
+- **Docker e Docker Compose** pré-configurados
+- **MongoDB support** (NoSQL opcional)
+- **Background jobs** com Quartz.NET
+- **Message queue** com RabbitMQ
+- **Cloud storage** (Google Cloud Storage)
+- **JWT Authentication** ready
+- **Global exception handler** com ProblemDetails
+- **Automatic validation** com FluentValidation
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+ProjectTemplate/
+├── src/
+│   ├── Api/                          # Camada de apresentação (Controllers, Program.cs)
+│   │   ├── Controllers/              # Controllers da API
+│   │   │   └── ApiControllerBase.cs # Base controller com métodos helper
+│   │   ├── appsettings.json          # Configurações base
+│   │   └── Program.cs                # Entry point da aplicação
+│   │
+│   ├── Application/                  # Camada de aplicação (Services, Business Logic)
+│   │   └── Services/                 # Application services
+│   │
+│   ├── Domain/                       # Camada de domínio (Entities, Interfaces)
+│   │   ├── Entities/                 # Entidades de negócio
+│   │   ├── Interfaces/               # Contratos e interfaces
+│   │   │   ├── IRepository.cs        # Interface genérica de repositório
+│   │   │   ├── IService.cs           # Interface genérica de serviço
+│   │   │   ├── IQueueService.cs      # Interface para message queue
+│   │   │   ├── IStorageService.cs    # Interface para cloud storage
+│   │   │   └── IExceptionNotificationService.cs  # Interface para notificações
+│   │   ├── Exceptions/               # Exceções customizadas
+│   │   │   └── DomainExceptions.cs   # BusinessException, NotFoundException, ValidationException
+│   │   └── AppSettings.cs            # Configurações fortemente tipadas
+│   │
+│   ├── Data/                         # Camada de dados (Repositories, Context)
+│   │   ├── Context/                  # DbContext do EF Core
+│   │   │   └── ApplicationDbContext.cs
+│   │   └── Repository/               # Implementação dos repositórios
+│   │       └── Repository.cs         # Repositório genérico base
+│   │
+│   └── Infrastructure/               # Camada de infraestrutura (Extensions, Middleware, Services)
+│       ├── Extensions/               # Extension methods modulares
+│       │   ├── InfrastructureExtensions.cs      # Orquestrador principal
+│       │   ├── AppSettingsExtension.cs          # Validação de configurações
+│       │   ├── DatabaseExtension.cs             # Configuração de banco de dados
+│       │   ├── CacheExtension.cs                # Memory/Redis/SQL Server cache
+│       │   ├── HealthChecksExtension.cs         # Health checks
+│       │   ├── DependencyInjectionExtension.cs  # Scrutor auto-registration
+│       │   ├── MongoExtension.cs                # MongoDB support
+│       │   ├── QuartzExtension.cs               # Background jobs (Quartz.NET)
+│       │   ├── RabbitMqExtension.cs             # Message queue (RabbitMQ)
+│       │   ├── StorageExtension.cs              # Google Cloud Storage
+│       │   ├── AuthenticationExtension.cs       # JWT Authentication
+│       │   ├── ApiVersioningExtension.cs        # API Versioning
+│       │   ├── LoggingExtensions.cs             # Google Cloud Logging
+│       │   ├── SwaggerExtension.cs              # Swagger customizado
+│       │   └── ExceptionHandlerExtension.cs     # Exception handler registration
+│       │
+│       ├── Middleware/               # Middleware customizado
+│       │   └── GlobalExceptionHandler.cs        # Tratamento global de exceções
+│       │
+│       ├── Filters/                  # Action filters
+│       │   └── ValidationFilter.cs   # Validação automática com FluentValidation
+│       │
+│       ├── Services/                 # Serviços de infraestrutura
+│       │   ├── QueueService.cs       # Implementação RabbitMQ
+│       │   ├── StorageService.cs     # Implementação Google Cloud Storage
+│       │   └── ExceptionNotificationService.cs  # Notificações de exceção
+│       │
+│       └── Swagger/                  # Configurações Swagger/OpenAPI
+│           └── SwaggerGroupByController.cs      # Agrupamento por controller
+│
+├── tests/
+│   ├── Integration/                  # Testes de integração
+│   └── Infrastructure.UnitTests/     # Testes unitários de infraestrutura
+│
+├── scripts/                          # Scripts de automação
+│   ├── linux/                        # Scripts bash (Minikube deploy/destroy/tests)
+│   ├── windows/                      # Scripts PowerShell e Batch
+│   ├── new-project.sh               # Script Linux/Mac de inicialização
+│   ├── new-project.ps1              # Script PowerShell de inicialização
+│   └── new-project.bat              # Script Windows CMD de inicialização
+│
+├── .k8s/                             # Kubernetes manifests
+│   ├── namespace.yaml               # Namespace definition
+│   ├── configmap.yaml               # Environment configuration
+│   ├── deployment.yaml              # Deployment specification
+│   ├── service.yaml                 # Service definition
+│   ├── ingress.yaml                 # Ingress rules
+│   └── kustomization.yaml           # Kustomize configuration
+│
+├── docs/                             # Documentação adicional
+│   ├── FEATURES.md                  # Recursos avançados (MongoDB, Queue, Jobs, etc.)
+│   ├── ORM-GUIDE.md                 # Guia de ORMs
+│   └── KUBERNETES.md                # Guia de deploy Kubernetes
+│
+├── Dockerfile                        # Multi-stage build
+├── docker-compose.yml                # Compose para desenvolvimento
+├── global.json                       # Versão do .NET SDK
+├── ProjectTemplate.sln               # Solution file
+└── .gitignore                        # Git ignore configurado
+```
+
+---
+
+## 🚀 Como Usar o Template
+
+### Opção 1: Usando Script PowerShell (Recomendado para Windows)
+
+```powershell
+cd template/scripts
+.\new-project.ps1 -ProjectName "MeuProjeto"
+```
+
+### Opção 2: Usando Script Bash (Linux/Mac)
+
+```bash
+cd template/scripts
+chmod +x new-project.sh
+./new-project.sh MeuProjeto
+```
+
+### Opção 3: Usando Script Batch (Windows CMD)
+
+```cmd
+cd template\scripts
+new-project.bat MeuProjeto
+```
+
+---
+
+## ⚙️ Configuração Inicial
+
+Após criar seu projeto, siga estes passos:
+
+### 1. Navegue até o diretório do projeto
+
+```bash
+cd MeuProjeto
+```
+
+### 2. Configure a Connection String
+
+Edite `src/Api/appsettings.json` e ajuste a connection string:
+
+```json
+{
+  "AppSettings": {
+    "ConnectionStrings": {
+      "DefaultConnection": "Server=localhost;Database=MeuBanco;Trusted_Connection=True;"
+    }
+  }
+}
+```
+
+### 3. Escolha seu Provedor de Banco de Dados
+
+Edite `src/Data/Data.csproj` e descomente o provider desejado:
+
+```xml
+<!-- Para SQL Server -->
+<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.1" />
+
+<!-- Para Oracle -->
+<!-- <PackageReference Include="Oracle.EntityFrameworkCore" Version="10.23.26000" /> -->
+
+<!-- Para PostgreSQL -->
+<!-- <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" /> -->
+
+<!-- Para MySQL -->
+<!-- <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" /> -->
+```
+
+### 4. Atualize as Configurações do Banco
+
+Edite `src/Api/appsettings.json`:
+
+```json
+{
+  "AppSettings": {
+    "Infrastructure": {
+      "Database": {
+        "Provider": "EntityFramework",
+        "DatabaseType": "SqlServer"
+      }
+    }
+  }
+}
+```
+
+Valores aceitos para `DatabaseType`: `SqlServer`, `Oracle`, `PostgreSQL`, `MySQL`
+
+### 5. Restaure os Pacotes
+
+```bash
+dotnet restore
+```
+
+### 6. Compile o Projeto
+
+```bash
+dotnet build
+```
+
+### 7. Crie a Primeira Migration
+
+```bash
+dotnet ef migrations add InitialCreate --project src/Data --startup-project src/Api
+```
+
+### 8. Aplique a Migration no Banco
+
+```bash
+dotnet ef database update --project src/Data --startup-project src/Api
+```
+
+### 9. Execute o Projeto
+
+```bash
+dotnet run --project src/Api
+```
+
+### 10. Acesse a API
+
+- API: `https://localhost:5001`
+- Swagger: `https://localhost:5001/swagger`
+- Health Check: `https://localhost:5001/health`
+
+---
+
+## 🔧 Configurações Avançadas
+
+### Suporte a Múltiplos ORMs
+
+O template foi projetado para suportar diferentes ORMs. Para trocar de ORM:
+
+#### Entity Framework Core (Padrão)
+
+```json
+{
+  "AppSettings": {
+    "Infrastructure": {
+      "Database": {
+        "Provider": "EntityFramework"
+      }
+    }
+  }
+}
+```
+
+#### Dapper (Para queries de alta performance)
+
+```json
+{
+  "AppSettings": {
+    "Infrastructure": {
+      "Database": {
+        "Provider": "Dapper"
+      }
+    }
+  }
+}
+```
+
+Crie seus repositórios implementando `IRepository<T>` usando Dapper.
+
+#### NHibernate (Futuro)
+
+```json
+{
+  "AppSettings": {
+    "Infrastructure": {
+      "Database": {
+        "Provider": "NHibernate"
+      }
+    }
+  }
+}
+```
+
+#### Linq2Db (Futuro)
+
+```json
+{
+  "AppSettings": {
+    "Infrastructure": {
+      "Database": {
+        "Provider": "Linq2Db"
+      }
+    }
+  }
+}
+```
+
+### Configuração de Cache
+
+#### Memory Cache (Padrão para desenvolvimento)
+
+```json
+{
+  "AppSettings": {
+    "Infrastructure": {
+      "Cache": {
+        "Enabled": true,
+        "Provider": "Memory",
+        "DefaultExpirationMinutes": 60
+      }
+    }
+  }
+}
+```
+
+#### Redis (Recomendado para produção)
+
+```json
+{
+  "AppSettings": {
+    "Infrastructure": {
+      "Cache": {
+        "Enabled": true,
+        "Provider": "Redis",
+        "ConnectionString": "localhost:6379",
+        "DefaultExpirationMinutes": 60
+      }
+    }
+  }
+}
+```
+
+#### SQL Server Cache
+
+```json
+{
+  "AppSettings": {
+    "Infrastructure": {
+      "Cache": {
+        "Enabled": true,
+        "Provider": "SqlServer",
+        "ConnectionString": "Server=localhost;Database=CacheDb;...",
+        "DefaultExpirationMinutes": 60
+      }
+    }
+  }
+}
+```
+
+---
+
+## 📊 Health Checks
+
+O template inclui health checks configurados:
+
+- `/health` - Status geral da aplicação
+- `/health/ready` - Readiness check (para Kubernetes)
+
+Para adicionar health checks personalizados, edite `src/Infrastructure/Extensions/HealthChecksExtension.cs`
+
+---
+
+## 🏗️ Arquitetura
+
+### Camadas
+
+1. **Domain** - Entidades, interfaces e regras de negócio puras
+2. **Data** - Implementação de acesso a dados e repositórios
+3. **Application** - Casos de uso e lógica de aplicação
+4. **Infrastructure** - Configurações, extensões e serviços externos
+5. **Api** - Controllers, endpoints e apresentação
+
+### Fluxo de Dependências
+
+```
+Api → Infrastructure → Application → Data → Domain
+                                       ↓
+                                    Domain
+```
+
+---
+
+## 🎨 Criando Novas Entidades
+
+### 1. Crie a Entidade no Domain
+
+```csharp
+// src/Domain/Entities/Product.cs
+namespace MeuProjeto.Domain.Entities;
+
+public class Product : EntityBase
+{
+    public string Name { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public string? Description { get; set; }
+}
+```
+
+### 2. Crie o Repositório (se necessário customização)
+
+```csharp
+// src/Data/Repository/ProductRepository.cs
+namespace MeuProjeto.Data.Repository;
+
+public class ProductRepository : Repository<Product>, IProductRepository
+{
+    public ProductRepository(ApplicationDbContext context) : base(context)
+    {
+    }
+    
+    // Métodos customizados aqui
+}
+```
+
+### 3. Crie o Service (se necessário customização)
+
+```csharp
+// src/Application/Services/ProductService.cs
+namespace MeuProjeto.Application.Services;
+
+public class ProductService : Service<Product>, IProductService
+{
+    public ProductService(IRepository<Product> repository, ILogger<ProductService> logger) 
+        : base(repository, logger)
+    {
+    }
+    
+    // Lógica de negócio customizada aqui
+}
+```
+
+### 4. Crie o Controller
+
+```csharp
+// src/Api/Controllers/ProductController.cs
+namespace MeuProjeto.Api.Controllers;
+
+public class ProductController : ApiControllerBase
+{
+    private readonly IService<Product> _service;
+
+    public ProductController(IService<Product> service)
+    {
+        _service = service;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    {
+        var products = await _service.GetAllAsync(cancellationToken);
+        return Ok(products);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
+    {
+        var product = await _service.GetByIdAsync(id, cancellationToken);
+        return HandleResult(product);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] Product product, CancellationToken cancellationToken)
+    {
+        var created = await _service.CreateAsync(product, cancellationToken);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(long id, [FromBody] Product product, CancellationToken cancellationToken)
+    {
+        await _service.UpdateAsync(id, product, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
+    {
+        await _service.DeleteAsync(id, cancellationToken);
+        return NoContent();
+    }
+}
+```
+
+### 5. Adicione o DbSet ao Context
+
+```csharp
+// src/Data/Context/ApplicationDbContext.cs
+public DbSet<Product> Products { get; set; }
+```
+
+### 6. Crie a Migration
+
+```bash
+dotnet ef migrations add AddProduct --project src/Data --startup-project src/Api
+dotnet ef database update --project src/Data --startup-project src/Api
+```
+
+---
+
+## 📝 Boas Práticas
+
+### Dependency Injection
+
+O template usa Scrutor para registro automático. Seus repositórios e services serão automaticamente registrados se seguirem as convenções:
+
+- Implementam `IRepository<T>` ou `IService<T>`
+- Estão nos assemblies corretos
+
+### Async/Await
+
+Sempre use operações assíncronas:
+
+```csharp
+// ✅ Correto
+var result = await _service.GetByIdAsync(id, cancellationToken);
+
+// ❌ Errado
+var result = _service.GetByIdAsync(id).Result;
+```
+
+### CancellationToken
+
+Sempre propague o CancellationToken em métodos assíncronos:
+
+```csharp
+public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+{
+    var items = await _service.GetAllAsync(cancellationToken);
+    return Ok(items);
+}
+```
+
+### Logging
+
+Use ILogger para logging estruturado:
+
+```csharp
+_logger.LogInformation("Processing request for {Id}", id);
+_logger.LogError(ex, "Error processing {Id}", id);
+```
+
+---
+
+## 🐳 Docker
+
+Para criar uma imagem Docker do seu projeto:
+
+```dockerfile
+# Dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+COPY ["src/Api/Api.csproj", "src/Api/"]
+COPY ["src/Application/Application.csproj", "src/Application/"]
+COPY ["src/Data/Data.csproj", "src/Data/"]
+COPY ["src/Domain/Domain.csproj", "src/Domain/"]
+COPY ["src/Infrastructure/Infrastructure.csproj", "src/Infrastructure/"]
+RUN dotnet restore "src/Api/Api.csproj"
+COPY . .
+WORKDIR "/src/src/Api"
+RUN dotnet build "Api.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "Api.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "MeuProjeto.Api.dll"]
+```
+
+---
+
+## 🐳 Docker e Kubernetes
+
+### Docker
+
+#### Build da imagem
+
+```bash
+docker build -t projecttemplate-api:latest .
+```
+
+#### Executar com docker-compose
+
+```bash
+docker-compose up -d
+```
+
+Acesse: `http://localhost:8080`
+
+### Kubernetes
+
+O template inclui manifestos Kubernetes prontos para deploy em Minikube (local) ou clusters em produção.
+
+#### Deploy Local (Minikube)
+
+**Windows (PowerShell):**
+```powershell
+cd scripts/windows
+.\minikube-deploy.ps1
+```
+
+**Linux/macOS:**
+```bash
+cd scripts/linux
+chmod +x minikube-deploy.sh
+./minikube-deploy.sh
+```
+
+O script automaticamente:
+1. Verifica pré-requisitos (Docker, Minikube, kubectl)
+2. Inicia o Minikube
+3. Constrói a imagem Docker
+4. Carrega a imagem no Minikube
+5. Aplica os manifestos Kubernetes
+6. Exibe o status dos pods
+
+#### Acessar a aplicação no Minikube
+
+```bash
+# Port forward
+kubectl port-forward svc/projecttemplate-api 8080:80 -n projecttemplate
+
+# Ou usar Minikube tunnel
+minikube tunnel
+```
+
+#### Remover deploy do Minikube
+
+**Windows (PowerShell):**
+```powershell
+cd scripts/windows
+.\minikube-destroy.ps1
+```
+
+**Linux/macOS:**
+```bash
+cd scripts/linux
+chmod +x minikube-destroy.sh
+./minikube-destroy.sh
+```
+
+#### Deploy em Produção
+
+Para deploy em clusters de produção (AKS, EKS, GKE, etc.), consulte o guia detalhado em [`docs/KUBERNETES.md`](docs/KUBERNETES.md).
+
+---
+
+## 🧪 Testes
+
+O template inclui estrutura para testes:
+
+### Testes de Integração
+
+```bash
+dotnet test tests/Integration/
+```
+
+### Testes Unitários
+
+```bash
+dotnet test tests/Infrastructure.UnitTests/
+```
+
+### Script Automatizado (Minikube)
+
+Execute testes de integração automaticamente no Minikube:
+
+**Windows (PowerShell):**
+```powershell
+cd scripts/windows
+.\run-integration-tests.ps1
+```
+
+**Linux/macOS:**
+```bash
+cd scripts/linux
+chmod +x run-integration-tests.sh
+./run-integration-tests.sh
+```
+
+---
+
+## 📚 Recursos Adicionais
+
+### Documentação do Template
+
+- **[ORM-GUIDE.md](docs/ORM-GUIDE.md)** - Guia completo sobre ORMs suportados e como alternar entre eles
+- **[KUBERNETES.md](docs/KUBERNETES.md)** - Guia detalhado de deploy no Kubernetes (local e produção)
+
+### Documentação Externa
+
+- [Documentação .NET 10](https://docs.microsoft.com/dotnet/)
+- [Entity Framework Core](https://docs.microsoft.com/ef/core/)
+- [ASP.NET Core](https://docs.microsoft.com/aspnet/core/)
+- [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [Kubernetes](https://kubernetes.io/docs/)
+- [Docker](https://docs.docker.com/)
+
+---
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Para contribuir:
+
+1. Fork o repositório
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+---
+
+## 📄 Licença
+
+Este template está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+
+---
+
+## 👥 Autores
+
+Template criado com base nas melhores práticas do projeto PNE-API.
+
+---
+
+## 🎉 Agradecimentos
+
+Baseado na experiência e aprendizados do projeto PNE-API, incorporando todas as melhorias e refinamentos implementados durante sua evolução para .NET 10.

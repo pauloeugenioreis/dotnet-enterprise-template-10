@@ -1,0 +1,90 @@
+using Microsoft.EntityFrameworkCore;
+using ProjectTemplate.Domain.Interfaces;
+
+namespace ProjectTemplate.Data.Repository;
+
+/// <summary>
+/// Generic Repository implementation using Entity Framework Core
+/// This is the default ORM implementation
+/// </summary>
+/// <typeparam name="TEntity">Entity type</typeparam>
+public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
+{
+    protected readonly DbContext _context;
+    protected readonly DbSet<TEntity> _dbSet;
+
+    public Repository(DbContext context)
+    {
+        _context = context;
+        _dbSet = context.Set<TEntity>();
+    }
+
+    public virtual async Task<TEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+    }
+
+    public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _dbSet.ToListAsync(cancellationToken);
+    }
+
+    public virtual async Task<IEnumerable<TEntity>> FindAsync(
+        Func<TEntity, bool> predicate, 
+        CancellationToken cancellationToken = default)
+    {
+        return await Task.Run(() => _dbSet.Where(predicate).ToList(), cancellationToken);
+    }
+
+    public virtual async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
+    {
+        await _dbSet.AddAsync(entity, cancellationToken);
+        return entity;
+    }
+
+    public virtual async Task<IEnumerable<TEntity>> AddRangeAsync(
+        IEnumerable<TEntity> entities, 
+        CancellationToken cancellationToken = default)
+    {
+        var entityList = entities.ToList();
+        await _dbSet.AddRangeAsync(entityList, cancellationToken);
+        return entityList;
+    }
+
+    public virtual Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
+    {
+        _dbSet.Update(entity);
+        return Task.CompletedTask;
+    }
+
+    public virtual Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
+    {
+        _dbSet.Remove(entity);
+        return Task.CompletedTask;
+    }
+
+    public virtual Task DeleteRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    {
+        _dbSet.RemoveRange(entities);
+        return Task.CompletedTask;
+    }
+
+    public virtual async Task<(IEnumerable<TEntity> Items, int Total)> GetPagedAsync(
+        int page, 
+        int pageSize, 
+        CancellationToken cancellationToken = default)
+    {
+        var total = await _dbSet.CountAsync(cancellationToken);
+        var items = await _dbSet
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, total);
+    }
+
+    public virtual async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.SaveChangesAsync(cancellationToken);
+    }
+}

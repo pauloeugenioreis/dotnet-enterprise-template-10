@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ProjectTemplate.Data</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Entity Framework Core (Default ORM) -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    
+    <!-- Database Providers - Uncomment as needed -->
+    <!-- <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.1" /> -->
+    <!-- <PackageReference Include="Oracle.EntityFrameworkCore" Version="10.23.26000" /> -->
+    <!-- <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" /> -->
+    <!-- <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" /> -->
+    
+    <!-- Dapper (Alternative/Complementary ORM for high-performance queries) -->
+    <PackageReference Include="Dapper" Version="2.1.66" />
+    
+    <!-- Other ORMs - Uncomment if needed -->
+    <!-- NHibernate -->
+    <!-- <PackageReference Include="NHibernate" Version="5.5.2" /> -->
+    <!-- <PackageReference Include="FluentNHibernate" Version="3.4.0" /> -->
+    
+    <!-- Linq2Db (Alternative ORM) -->
+    <!-- <PackageReference Include="linq2db" Version="5.4.1" /> -->
+    <!-- <PackageReference Include="linq2db.EntityFrameworkCore" Version="8.1.0" /> -->
+    
+    <!-- AutoMapper for object mapping -->
+    <PackageReference Include="AutoMapper" Version="16.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\Domain.csproj" />
+  </ItemGroup>
+
+</Project>

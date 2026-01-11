@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: projecttemplate-api
+  namespace: projecttemplate
+  labels:
+    app: projecttemplate-api
+spec:
+  type: ClusterIP
+  selector:
+    app: projecttemplate-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+  sessionAffinity: None
