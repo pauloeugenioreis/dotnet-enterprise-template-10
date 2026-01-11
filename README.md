@@ -121,9 +121,15 @@ ProjectTemplate/
 │   │   ├── Controllers/              # Testes de controllers
 │   │   │   ├── ProductControllerTests.cs  # 9 testes
 │   │   │   └── OrderControllerTests.cs    # 7 testes
+│   │   ├── UnitTests.csproj          # Projeto de testes unitários
 │   │   └── README.md                 # Documentação dos testes
 │   │
-│   ├── Integration/                  # Testes de integração
+│   └── Integration/                  # Testes de integração
+│       ├── Controllers/              # Testes de integração dos controllers
+│       ├── Infrastructure/           # Configuração de testes
+│       ├── Examples/                 # Exemplos de payloads
+│       ├── Integration.csproj        # Projeto de testes de integração
+│       └── README.md                 # Documentação de testes de integração
 │
 ├── scripts/                          # Scripts de automação
 │   ├── linux/                        # Scripts bash (Minikube deploy/destroy/tests)
