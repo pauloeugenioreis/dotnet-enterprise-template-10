@@ -37,6 +37,10 @@
     <!-- InMemory Database -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.1" />
     
+    <!-- ORM Support (Uncomment as needed) -->
+    <!-- Linq2Db - Required when using Linq2Db ORM -->
+    <!-- <PackageReference Include="linq2db.AspNet" Version="5.4.1" /> -->
+    
     <!-- Rate Limiting -->
     <PackageReference Include="AspNetCoreRateLimit" Version="5.0.0" />
     

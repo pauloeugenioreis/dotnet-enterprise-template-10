@@ -23,6 +23,7 @@
     
     <!-- Dapper (Alternative/Complementary ORM for high-performance queries) -->
     <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
     
     <!-- Other ORMs - Uncomment if needed -->
     <!-- NHibernate -->
@@ -40,5 +41,21 @@
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
+
+  <!-- Exclude NHibernate files from compilation when NHibernate is not installed -->
+  <ItemGroup>
+    <Compile Remove="Mappings\NHibernate\**" />
+    <Compile Remove="Repository\NHibernate\**" />
+  </ItemGroup>
+
+  <!-- Exclude Linq2Db files from compilation when Linq2Db is not installed -->
+  <ItemGroup>
+    <Compile Remove="Context\ApplicationDataConnection.cs" />
+    <Compile Remove="Repository\Linq2Db\**" />
+  </ItemGroup>
+
+  <!-- All ORM implementations are now compiled -->
+  <!-- Scrutor is configured to only auto-register EF Core repositories -->
+  <!-- Dapper, ADO.NET, NHibernate, and Linq2Db are registered manually when their Add methods are called -->
 
 </Project>

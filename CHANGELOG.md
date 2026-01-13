@@ -7,6 +7,49 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [Unreleased]
+
+### ✨ Adicionado
+
+#### Implementações Completas de ORMs Alternativos
+- **ADO.NET**: Repositórios completos com máximo controle e performance
+  - `ProductAdoRepository` e `OrderAdoRepository` usando SqlCommand/SqlDataReader
+  - Controle total sobre comandos SQL, parâmetros e transações
+  - Mapping manual de DataReader para objetos
+  - Performance máxima sem overhead de ORM
+  - Usa `IDbConnectionFactory` para gerenciamento de conexões via DI
+  - Pronto para uso imediato, basta descomentar no `DatabaseExtension.cs`
+- **Dapper**: Repositórios completos para Product e Order com SQL raw
+  - `ProductDapperRepository` e `OrderDapperRepository` totalmente funcionais
+  - `IDbConnectionFactory` e `SqlConnectionFactory` para gerenciamento adequado de conexões
+  - Connection factory registrada no DI seguindo melhores práticas
+  - Exemplos de transações, paginação e multi-table queries
+  - Pronto para uso imediato, basta descomentar no `DatabaseExtension.cs`
+- **NHibernate**: Repositórios completos com FluentNHibernate mappings
+  - `ProductNHibernateRepository` e `OrderNHibernateRepository` 
+  - Mappings completos (`ProductMap`, `OrderMap`, `OrderItemMap`)
+  - SessionFactory configurado
+  - Requer descomentário de pacotes e arquivos de compilação
+- **Linq2Db**: Repositórios completos com DataConnection
+  - `ProductLinq2DbRepository` e `OrderLinq2DbRepository`
+  - `ApplicationDataConnection` configurado
+  - Suporte a transações e bulk operations
+  - Requer descomentário de pacotes e arquivos de compilação
+- **README detalhado** em `src/Data/Repository/README.md` com instruções passo a passo
+
+### 🔄 Alterado
+
+#### Configuração de ORM Simplificada
+- **BREAKING CHANGE**: Removida configuração `Provider` do `appsettings.json`
+- Entity Framework Core agora é o ORM padrão habilitado diretamente no código
+- Para trocar de ORM, edite `src/Infrastructure/Extensions/DatabaseExtension.cs` (linha ~26)
+- ORMs alternativos (Dapper, NHibernate, Linq2Db) estão comentados no código
+- Documentação atualizada em `docs/ORM-GUIDE.md` com instruções claras de linha e arquivo
+- **Vantagens**: Configuração mais simples, menos erros, "convention over configuration"
+- **Migração**: Remova `"Provider": "EntityFramework"` do seu `appsettings.json`
+
+---
+
 ## [1.0.0] - 2025-01-XX
 
 ### ✨ Adicionado
@@ -21,6 +64,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - Suporte a múltiplos ORMs através de abstrações
 - Entity Framework Core 10.0.1 (padrão)
 - Dapper 2.1.66 (pronto para uso)
+- ADO.NET (pronto para uso - máxima performance)
 - NHibernate 5.5.2 (preparado)
 - Linq2Db 5.4.1 (preparado)
 - Documentação completa em `docs/ORM-GUIDE.md`

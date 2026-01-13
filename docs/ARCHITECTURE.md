@@ -328,8 +328,37 @@ public class ProductController : ApiControllerBase
 
 ### 3. Dependency Injection
 - Constructor injection
-- Scrutor para registro automático
+- **Scrutor para registro automático inteligente**
+  - `.AsMatchingInterface()` - Registra apenas interface correspondente ao nome
+  - `.AsImplementedInterfaces()` - Registra todas as interfaces implementadas
+  - **Zero configuração manual** para novos repositórios/serviços
 - Lifetime management (Scoped, Singleton, Transient)
+
+#### Como funciona o registro automático:
+
+```csharp
+// Registra TODOS os repositórios automaticamente
+services.Scan(scan => scan
+    .FromAssembliesOf(typeof(Repository<>))
+    .AddClasses(classes => classes.AssignableTo(typeof(IRepository<>)))
+    .AsMatchingInterface()  // ← Evita conflitos de DI!
+    .WithScopedLifetime()
+);
+```
+
+**Exemplo de mapeamento automático:**
+| Classe | Interface Registrada |
+|--------|---------------------|
+| `Repository<Product>` | `IRepository<Product>` |
+| `ProductDapperRepository` | `IProductDapperRepository` |
+| `ProductAdoRepository` | `IProductAdoRepository` |
+| `OrderService` | `IOrderService` |
+
+**Benefícios:**
+- ✅ Adicione um novo repositório → Registrado automaticamente
+- ✅ Múltiplos ORMs sem conflito
+- ✅ Testes isolados (usam `IRepository<T>` com InMemory)
+- ✅ Produção escolhe o ORM específico via injeção
 
 ### 4. Options Pattern
 - `AppSettings.cs` fortemente tipado

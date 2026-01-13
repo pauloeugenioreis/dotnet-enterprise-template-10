@@ -331,19 +331,15 @@ Teste os endpoints criados!
 
 ### Alternar ORM
 
-`appsettings.json`:
+**Entity Framework Core é o padrão** e está habilitado no código.
 
-```json
-{
-  "AppSettings": {
-    "Infrastructure": {
-      "Database": {
-        "Provider": "EntityFrameworkCore"  // ou "Dapper", "NHibernate", "Linq2Db"
-      }
-    }
-  }
-}
-```
+Para trocar de ORM, **não use appsettings.json**:
+
+1. Abra `src/Infrastructure/Extensions/DatabaseExtension.cs`
+2. Comente a linha do EF Core (linha ~26)
+3. Descomente a linha do ORM desejado (Dapper, NHibernate ou Linq2Db)
+
+**Documentação completa**: [`docs/ORM-GUIDE.md`](docs/ORM-GUIDE.md)
 
 ---
 

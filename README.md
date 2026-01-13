@@ -235,7 +235,6 @@ Edite `src/Api/appsettings.json`:
   "AppSettings": {
     "Infrastructure": {
       "Database": {
-        "Provider": "EntityFramework",
         "DatabaseType": "SqlServer"
       }
     }
@@ -244,6 +243,8 @@ Edite `src/Api/appsettings.json`:
 ```
 
 Valores aceitos para `DatabaseType`: `SqlServer`, `Oracle`, `PostgreSQL`, `MySQL`
+
+**Nota sobre ORM**: Entity Framework Core é usado por padrão. Para trocar de ORM (Dapper, ADO.NET, NHibernate, Linq2Db), veja [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md).
 
 ### 5. Restaure os Pacotes
 
@@ -287,65 +288,31 @@ dotnet run --project src/Api
 
 ### Suporte a Múltiplos ORMs
 
-O template foi projetado para suportar diferentes ORMs. Para trocar de ORM:
+O template foi projetado para suportar diferentes ORMs.
 
-#### Entity Framework Core (Padrão)
+**Entity Framework Core é o padrão** e está habilitado no código.
 
-```json
-{
-  "AppSettings": {
-    "Infrastructure": {
-      "Database": {
-        "Provider": "EntityFramework"
-      }
-    }
-  }
-}
-```
+Para trocar de ORM, **não use appsettings.json**. Edite diretamente o arquivo:
+- **Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`
+- **Linha**: ~26 (procure por "DEFAULT: Entity Framework Core")
 
-#### Dapper (Para queries de alta performance)
+#### Entity Framework Core (Padrão ✅)
 
-```json
-{
-  "AppSettings": {
-    "Infrastructure": {
-      "Database": {
-        "Provider": "Dapper"
-      }
-    }
-  }
-}
-```
+Já está habilitado. Não precisa fazer nada!
 
-Crie seus repositórios implementando `IRepository<T>` usando Dapper.
+#### Dapper (Alta Performance 💤)
 
-#### NHibernate (Futuro)
+1. Abra `src/Infrastructure/Extensions/DatabaseExtension.cs`
+2. Comente a linha do EF Core (linha ~26)
+3. Descomente a linha do Dapper (linha ~29)
+4. Veja [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md) para implementação completa
 
-```json
-{
-  "AppSettings": {
-    "Infrastructure": {
-      "Database": {
-        "Provider": "NHibernate"
-      }
-    }
-  }
-}
-```
+#### NHibernate / Linq2Db (Preparados 💤)
 
-#### Linq2Db (Futuro)
-
-```json
-{
-  "AppSettings": {
-    "Infrastructure": {
-      "Database": {
-        "Provider": "Linq2Db"
-      }
-    }
-  }
-}
-```
+1. Abra `src/Infrastructure/Extensions/DatabaseExtension.cs`
+2. Comente a linha do EF Core (linha ~26)
+3. Descomente a linha do ORM desejado
+4. Veja [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md) para implementação completa
 
 ### Configuração de Cache
 
@@ -553,10 +520,67 @@ dotnet ef database update --project src/Data --startup-project src/Api
 
 ### Dependency Injection
 
-O template usa Scrutor para registro automático. Seus repositórios e services serão automaticamente registrados se seguirem as convenções:
+O template usa **Scrutor** com `.AsMatchingInterface()` para registro automático inteligente. 
 
-- Implementam `IRepository<T>` ou `IService<T>`
-- Estão nos assemblies corretos
+#### 🚀 Registro Automático
+
+Seus repositórios e services são **automaticamente registrados** sem necessidade de configuração manual:
+
+```csharp
+// src/Infrastructure/Extensions/DependencyInjectionExtensions.cs
+services.Scan(scan => scan
+    .FromAssembliesOf(typeof(Repository<>))
+    .AddClasses(classes => classes.AssignableTo(typeof(IRepository<>)))
+    .AsMatchingInterface()  // ← Registra apenas interface correspondente
+    .WithScopedLifetime()
+);
+```
+
+**Como funciona:**
+- `Repository<Product>` → registrado como `IRepository<Product>`
+- `ProductDapperRepository` → registrado como `IProductDapperRepository`
+- `ProductAdoRepository` → registrado como `IProductAdoRepository`
+- **Sem conflitos** entre múltiplos ORMs! ✅
+
+#### ✨ Adicionando Novos Repositórios
+
+**1. Crie a interface específica:**
+```csharp
+public interface IProductDapperRepository : IRepository<Product>
+{
+    Task<IEnumerable<Product>> GetTopSellingProductsAsync();
+}
+```
+
+**2. Implemente a classe:**
+```csharp
+public class ProductDapperRepository : IProductDapperRepository
+{
+    // Implementação...
+}
+```
+
+**3. Pronto!** 🎉 O Scrutor registrará automaticamente. Basta injetar:
+```csharp
+public class ProductService
+{
+    private readonly IRepository<Product> _efRepository;          // EF Core
+    private readonly IProductDapperRepository _dapperRepository;  // Dapper
+    
+    public ProductService(
+        IRepository<Product> efRepository,
+        IProductDapperRepository dapperRepository)
+    {
+        _efRepository = efRepository;
+        _dapperRepository = dapperRepository;
+    }
+}
+```
+
+**Convenções necessárias:**
+- Interface: `IProductDapperRepository` (prefixo `I` + nome da classe)
+- Classe: `ProductDapperRepository` (implementa a interface)
+- Herança: `IProductDapperRepository : IRepository<T>`
 
 ### Async/Await
 

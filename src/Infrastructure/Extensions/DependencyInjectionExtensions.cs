@@ -13,11 +13,22 @@ public static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddApplicationDependencies(this IServiceCollection services)
     {
-        // Scan and register repositories
+        // Scan and register ALL repositories automatically using AsMatchingInterface()
+        // AsMatchingInterface() registers only the interface that matches the class name:
+        // 
+        // ✅ Repository<Product> → IRepository<Product>
+        // ✅ ProductDapperRepository → IProductDapperRepository (NOT IRepository<Product>)
+        // ✅ ProductAdoRepository → IProductAdoRepository (NOT IRepository<Product>)
+        // ✅ OrderDapperRepository → IOrderDapperRepository (NOT IRepository<Order>)
+        // ✅ OrderAdoRepository → IOrderAdoRepository (NOT IRepository<Order>)
+        //
+        // This prevents conflicts: alternative ORMs won't overwrite base IRepository<T>
+        // Tests use IRepository<T> → EF Core InMemory ✅
+        // Production can inject specific ORMs: IProductDapperRepository → ProductDapperRepository ✅
         services.Scan(scan => scan
             .FromAssembliesOf(typeof(Repository<>))
             .AddClasses(classes => classes.AssignableTo(typeof(IRepository<>)))
-            .AsImplementedInterfaces()
+            .AsMatchingInterface()
             .WithScopedLifetime()
         );
 
