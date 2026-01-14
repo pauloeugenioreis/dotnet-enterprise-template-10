@@ -54,6 +54,27 @@ Inclui:
 
 ---
 
+### [CONFIGURATION-GUIDE.md](CONFIGURATION-GUIDE.md)
+**Guia de Configuração com IOptions<T>**
+
+Documentação essencial sobre como trabalhar com configurações no projeto:
+
+- **Padrão IOptions<T>** - Injeção de dependência de configurações
+- **Validação de Configurações** - Validação no startup
+- **Melhores Práticas** - DO's e DON'Ts
+- **Exemplos Práticos** - Controllers, Services, Repositories
+
+Inclui:
+- Como injetar IOptions<AppSettings> corretamente
+- 5 exemplos práticos completos
+- Padrões de validação com IValidateOptions<T>
+- Troubleshooting comum
+- Checklist de boas práticas
+
+**Quando usar:** SEMPRE que precisar acessar configurações em qualquer parte do código (controllers, services, repositories, middleware, etc.).
+
+---
+
 ## 🚀 Início Rápido
 
 Se você está começando, **não comece por aqui!** Primeiro:
@@ -68,9 +89,10 @@ Se você está começando, **não comece por aqui!** Primeiro:
 
 ```
 docs/
-├── README.md           # Este arquivo
-├── ORM-GUIDE.md        # Guia de ORMs
-└── KUBERNETES.md       # Guia de Kubernetes
+├── README.md                # Este arquivo
+├── CONFIGURATION-GUIDE.md   # Guia de Configuração (IOptions<T>)
+├── ORM-GUIDE.md             # Guia de ORMs
+└── KUBERNETES.md            # Guia de Kubernetes
 ```
 
 ### Documentos Futuros
@@ -86,6 +108,10 @@ Planejamos adicionar:
 - **CI-CD.md** - Pipelines de CI/CD
 - **MIGRATION.md** - Migração de projetos existentes
 
+### Documentos Recentes
+
+- ✅ **[CONFIGURATION-GUIDE.md](CONFIGURATION-GUIDE.md)** - Guia de Configuração com IOptions<T> (NOVO!)
+
 ---
 
 ## 🎯 Guia de Uso por Perfil
@@ -93,6 +119,7 @@ Planejamos adicionar:
 ### Desenvolvedor Backend
 
 Foco principal:
+- [CONFIGURATION-GUIDE.md](CONFIGURATION-GUIDE.md) - **ESSENCIAL**: Como usar configurações corretamente
 - [ORM-GUIDE.md](ORM-GUIDE.md) - Entender opções de acesso a dados
 - ../[README.md](../README.md) - Entender arquitetura e padrões
 
@@ -134,6 +161,7 @@ Foco principal:
 
 ### Configuração
 
+- **Configurações**: [CONFIGURATION-GUIDE.md](CONFIGURATION-GUIDE.md) ⭐ **IMPORTANTE**
 - ORMs: [ORM-GUIDE.md](ORM-GUIDE.md#como-alternar-entre-orms)
 - Cache: ../[README.md](../README.md#configuracao-de-cache)
 - Health Checks: [KUBERNETES.md](KUBERNETES.md#health-checks)
@@ -235,10 +263,10 @@ Ao criar nova documentação:
 
 ## 📊 Estatísticas
 
-- **Documentos**: 2 guias técnicos
-- **Linhas**: ~3000+ linhas de documentação
-- **Exemplos de código**: 50+ snippets
-- **Tópicos cobertos**: ORMs, Kubernetes, Docker, Clean Architecture
+- **Documentos**: 3 guias técnicos + 1 guia de configuração
+- **Linhas**: ~4000+ linhas de documentação
+- **Exemplos de código**: 60+ snippets
+- **Tópicos cobertos**: IOptions<T>, ORMs, Kubernetes, Docker, Clean Architecture
 
 ---
 
