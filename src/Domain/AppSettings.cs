@@ -70,7 +70,30 @@ public class StorageSettings
 
 public class AuthenticationSettings
 {
-    public JwtSettings? Jwt { get; set; }
+    /// <summary>
+    /// Enable/disable authentication globally
+    /// </summary>
+    public bool Enabled { get; set; } = true;
+    
+    /// <summary>
+    /// JWT Bearer token settings
+    /// </summary>
+    public JwtSettings Jwt { get; set; } = new();
+    
+    /// <summary>
+    /// OAuth2 external providers settings
+    /// </summary>
+    public OAuth2Settings OAuth2 { get; set; } = new();
+    
+    /// <summary>
+    /// Password policy settings
+    /// </summary>
+    public PasswordPolicySettings PasswordPolicy { get; set; } = new();
+    
+    /// <summary>
+    /// Refresh token settings
+    /// </summary>
+    public RefreshTokenSettings RefreshToken { get; set; } = new();
 }
 
 public class JwtSettings
@@ -79,6 +102,58 @@ public class JwtSettings
     public string Issuer { get; set; } = string.Empty;
     public string Audience { get; set; } = string.Empty;
     public int ExpirationMinutes { get; set; } = 60;
+    public int RefreshTokenExpirationDays { get; set; } = 7;
+    public bool ValidateIssuer { get; set; } = true;
+    public bool ValidateAudience { get; set; } = true;
+    public bool ValidateLifetime { get; set; } = true;
+    public bool ValidateIssuerSigningKey { get; set; } = true;
+}
+
+public class OAuth2Settings
+{
+    public bool Enabled { get; set; } = false;
+    public GoogleOAuthSettings Google { get; set; } = new();
+    public MicrosoftOAuthSettings Microsoft { get; set; } = new();
+    public GitHubOAuthSettings GitHub { get; set; } = new();
+}
+
+public class GoogleOAuthSettings
+{
+    public bool Enabled { get; set; } = false;
+    public string ClientId { get; set; } = string.Empty;
+    public string ClientSecret { get; set; } = string.Empty;
+}
+
+public class MicrosoftOAuthSettings
+{
+    public bool Enabled { get; set; } = false;
+    public string ClientId { get; set; } = string.Empty;
+    public string ClientSecret { get; set; } = string.Empty;
+    public string TenantId { get; set; } = "common";
+}
+
+public class GitHubOAuthSettings
+{
+    public bool Enabled { get; set; } = false;
+    public string ClientId { get; set; } = string.Empty;
+    public string ClientSecret { get; set; } = string.Empty;
+}
+
+public class PasswordPolicySettings
+{
+    public int MinimumLength { get; set; } = 8;
+    public bool RequireDigit { get; set; } = true;
+    public bool RequireLowercase { get; set; } = true;
+    public bool RequireUppercase { get; set; } = true;
+    public bool RequireNonAlphanumeric { get; set; } = true;
+    public int MaxFailedAccessAttempts { get; set; } = 5;
+    public int LockoutMinutes { get; set; } = 15;
+}
+
+public class RefreshTokenSettings
+{
+    public int ExpirationDays { get; set; } = 7;
+    public bool ReuseTokens { get; set; } = false;
 }
 
 public class TelemetrySettings

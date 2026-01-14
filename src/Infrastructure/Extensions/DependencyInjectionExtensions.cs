@@ -44,6 +44,9 @@ public static class DependencyInjectionExtensions
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped(typeof(IService<>), typeof(Service<>));
 
+        // Register UserRepository explicitly (doesn't inherit from Repository<T>)
+        services.AddScoped<IUserRepository, UserRepository>();
+
         return services;
     }
 }

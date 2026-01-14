@@ -37,6 +37,9 @@ public static class InfrastructureExtensions
         // Event Sourcing
         services.AddEventSourcing(configuration);
 
+        // Authentication (JWT + OAuth2)
+        services.AddJwtAuthentication(configuration);
+
         // CORS
         services.AddCors(options =>
         {
@@ -81,6 +84,9 @@ public static class InfrastructureExtensions
 
         // Response compression
         app.UseResponseCompression();
+
+        // Authentication & Authorization
+        app.UseJwtAuthentication();
 
         // Rate Limiting - Only if enabled in configuration
         var rateLimitingSettings = configuration.GetSection("AppSettings:Infrastructure:RateLimiting").Get<RateLimitingSettings>();
