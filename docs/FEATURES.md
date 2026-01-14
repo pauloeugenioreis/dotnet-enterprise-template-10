@@ -17,6 +17,8 @@ Este guia explica como habilitar e configurar os recursos avançados incluídos 
 9. [Advanced Logging](#advanced-logging)
 10. [Swagger/OpenAPI](#swaggeropenapi)
 11. [Exception Notification](#exception-notification)
+12. [📊 Telemetria e Observabilidade](#telemetria-e-observabilidade)
+13. [🚦 Rate Limiting](#rate-limiting)
 
 ---
 
@@ -1017,6 +1019,329 @@ public async Task NotifyAsync(HttpContext context, Exception exception)
 - ✅ Use throttling para evitar spam
 - ✅ Filtre exceções não críticas (400, 404, ValidationException)
 - ❌ Nunca envie informações sensíveis nas notificações
+
+---
+
+## 📊 Telemetria e Observabilidade
+
+### O que é?
+
+Sistema completo de **observabilidade** com **OpenTelemetry** incluindo:
+- **Traces**: Rastreamento distribuído de requests
+- **Metrics**: Métricas de performance e negócio
+- **Logs**: Logging estruturado (já implementado)
+
+### Provedores Suportados
+
+✅ **Jaeger** - Distributed tracing (open source)  
+✅ **Grafana Cloud** - Stack completa gerenciada  
+✅ **Prometheus** - Metrics collection (open source)  
+✅ **Application Insights** - APM Azure  
+✅ **Datadog** - APM enterprise completo  
+✅ **Dynatrace** - APM enterprise avançado  
+✅ **Console** - Debug local  
+
+### Como Habilitar
+
+**1. Configurar appsettings.json:**
+
+```json
+{
+  "AppSettings": {
+    "Infrastructure": {
+      "Telemetry": {
+        "Enabled": true,
+        "Providers": ["jaeger", "prometheus"],
+        "SamplingRatio": 1.0,
+        "Jaeger": {
+          "Host": "localhost",
+          "Port": 6831
+        }
+      }
+    }
+  }
+}
+```
+
+**2. Iniciar Stack de Observabilidade:**
+
+```bash
+# Jaeger + Prometheus + Grafana
+docker-compose up -d
+```
+
+**3. Acessar UIs:**
+
+- **Jaeger**: http://localhost:16686 (traces)
+- **Prometheus**: http://localhost:9090 (metrics)
+- **Grafana**: http://localhost:3000 (dashboards)
+
+### Métricas Automáticas
+
+✅ HTTP request duration  
+✅ HTTP active requests  
+✅ SQL query duration  
+✅ Entity Framework operations  
+✅ GC collections  
+✅ Memory usage  
+✅ Thread pool  
+
+### Exemplo: Métrica Customizada
+
+```csharp
+public class ProductService : Service<Product>
+{
+    private readonly Counter<long> _productCreatedCounter;
+    
+    public ProductService(IRepository<Product> repository, IMeterFactory meterFactory)
+    {
+        var meter = meterFactory.Create("ProjectTemplate.Api");
+        _productCreatedCounter = meter.CreateCounter<long>("products.created");
+    }
+    
+    public override async Task<Product> AddAsync(Product entity, CancellationToken ct = default)
+    {
+        var result = await base.AddAsync(entity, ct);
+        _productCreatedCounter.Add(1, new KeyValuePair<string, object>("category", entity.Category));
+        return result;
+    }
+}
+```
+
+### Configurações de Produção
+
+```json
+{
+  "Telemetry": {
+    "Enabled": true,
+    "Providers": ["applicationinsights", "prometheus"],
+    "SamplingRatio": 0.1,
+    "ApplicationInsights": {
+      "ConnectionString": "InstrumentationKey=...;IngestionEndpoint=https://..."
+    }
+  }
+}
+```
+
+### Mais Informações
+
+📖 **Documentação completa**: [docs/TELEMETRY.md](TELEMETRY.md)
+
+**Configurar provedores específicos:**
+- Application Insights (Azure)
+- Datadog
+- Dynatrace
+- Grafana Cloud
+- Custom OTLP endpoints
+
+---
+
+## 🚦 Rate Limiting
+
+### O que é?
+
+Rate Limiting controla a taxa de requisições que clientes podem fazer à API, protegendo contra abusos, DDoS e garantindo disponibilidade para todos os usuários.
+
+### Quando Usar?
+
+- ✅ APIs públicas expostas à internet
+- ✅ Proteger contra ataques DDoS
+- ✅ Garantir fair usage entre clientes
+- ✅ Controlar custos de infraestrutura
+- ✅ Limitar operações pesadas (exports, relatórios)
+
+### Estratégias Disponíveis
+
+#### 1. **Fixed Window** (Janela Fixa)
+- Limite fixo por período (ex: 100 req/min)
+- Simples e previsível
+- Ideal para APIs públicas
+
+#### 2. **Sliding Window** (Janela Deslizante)
+- Janela "desliza" suavemente
+- Evita picos no reset da janela
+- Melhor para alto tráfego
+
+#### 3. **Token Bucket** (Balde de Tokens)
+- Permite bursts ocasionais
+- Taxa sustentada configurável
+- Mais flexível e realista
+
+#### 4. **Concurrency** (Concorrência)
+- Limita requisições **simultâneas**
+- Protege recursos limitados (DB, threads)
+- Ideal para operações pesadas
+
+### Como Habilitar
+
+**1. Configure no appsettings.json:**
+
+```json
+{
+  "AppSettings": {
+    "Infrastructure": {
+      "RateLimiting": {
+        "Enabled": true,
+        "EnableWhitelist": true,
+        "WhitelistedIps": ["192.168.1.100", "10.0.0.0/24"],
+        "Policies": {
+          "FixedWindow": {
+            "Enabled": true,
+            "PermitLimit": 100,
+            "WindowSeconds": 60,
+            "QueueLimit": 10
+          },
+          "SlidingWindow": {
+            "Enabled": true,
+            "PermitLimit": 200,
+            "WindowSeconds": 60,
+            "SegmentsPerWindow": 6
+          },
+          "TokenBucket": {
+            "Enabled": true,
+            "TokenLimit": 50,
+            "ReplenishmentPeriodSeconds": 10,
+            "TokensPerPeriod": 10
+          },
+          "Concurrency": {
+            "Enabled": true,
+            "PermitLimit": 10,
+            "QueueLimit": 20
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+**2. Aplique nos endpoints:**
+
+```csharp
+using Microsoft.AspNetCore.RateLimiting;
+
+[Route("api/v1/[controller]")]
+public class ProductController : ControllerBase
+{
+    // Leitura: Sliding Window (suave)
+    [EnableRateLimiting("sliding")]
+    [HttpGet]
+    public async Task<IActionResult> GetAll() { ... }
+
+    // Escrita: Fixed Window (previsível)
+    [EnableRateLimiting("fixed")]
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] Product product) { ... }
+
+    // Operação pesada: Concurrency
+    [EnableRateLimiting("concurrent")]
+    [HttpGet("ExportToExcel")]
+    public async Task<IActionResult> ExportToExcel() { ... }
+
+    // Sem limite (público)
+    [DisableRateLimiting]
+    [HttpGet("health")]
+    public IActionResult Health() => Ok();
+}
+```
+
+### Resposta de Limite Excedido (429)
+
+Quando o limite é excedido:
+
+**Headers:**
+```http
+HTTP/1.1 429 Too Many Requests
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1705330260
+Retry-After: 45
+```
+
+**Body:**
+```json
+{
+  "error": "Rate limit exceeded",
+  "message": "Too many requests. Limit: 100 per window.",
+  "clientIp": "192.168.1.100",
+  "retryAfter": 45,
+  "resetAt": "2024-01-15T10:51:00Z"
+}
+```
+
+### Limites Recomendados
+
+| Tipo de API | Fixed Window | Token Bucket | Concurrency |
+|---|---|---|---|
+| **API Pública** | 100 req/min | 50 tokens, 10/10s | 5 simultâneas |
+| **API Autenticada** | 1000 req/min | 500 tokens, 100/10s | 20 simultâneas |
+| **API Interna** | 5000 req/min | 2000 tokens, 500/10s | 50 simultâneas |
+| **API Premium** | 10000 req/min | 5000 tokens, 1000/10s | 100 simultâneas |
+
+### Whitelist de IPs
+
+IPs whitelistados não sofrem limitação:
+
+```json
+{
+  "RateLimiting": {
+    "EnableWhitelist": true,
+    "WhitelistedIps": [
+      "192.168.1.100",    // IP único
+      "10.0.0.0/24",      // Rede CIDR
+      "172.16.0.0/16"     // Rede privada
+    ]
+  }
+}
+```
+
+**Usa casos:**
+- Servidores internos (CI/CD, monitoramento)
+- IPs de parceiros
+- Load balancers e proxies
+
+### Testando Rate Limiting
+
+**PowerShell:**
+```powershell
+1..105 | ForEach-Object {
+    $response = Invoke-WebRequest -Uri "http://localhost:5000/api/v1/Product" -SkipHttpErrorCheck
+    Write-Host "Request $_: $($response.StatusCode)"
+}
+```
+
+**curl:**
+```bash
+for i in {1..105}; do
+  curl -i http://localhost:5000/api/v1/Product
+done
+```
+
+**Verificar headers:**
+```bash
+curl -i http://localhost:5000/api/v1/Product | grep -i "x-ratelimit"
+```
+
+### Logs
+
+```
+✅  Rate Limiting enabled: 4 policies configured
+📊  Fixed Window: 100 req/60s
+📊  Sliding Window: 200 req/60s (6 segments)
+📊  Token Bucket: 50 tokens, refill 10/10s
+📊  Concurrency: 10 simultaneous requests
+```
+
+### Mais Informações
+
+📖 **Documentação completa**: [docs/RATE-LIMITING.md](RATE-LIMITING.md)
+
+**Tópicos detalhados:**
+- Comparação de estratégias
+- Configuração por ambiente
+- Whitelist de IPs
+- Testes e troubleshooting
+- Melhores práticas
 
 ---
 

@@ -48,7 +48,15 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Use infrastructure middleware
-app.UseInfrastructureMiddleware();
+app.UseInfrastructureMiddleware(app.Configuration);
+
+// Prometheus metrics endpoint (if telemetry is enabled)
+var telemetryEnabled = app.Configuration.GetValue<bool>("AppSettings:Infrastructure:Telemetry:Enabled");
+var telemetryProviders = app.Configuration.GetSection("AppSettings:Infrastructure:Telemetry:Providers").Get<string[]>() ?? Array.Empty<string>();
+if (telemetryEnabled && telemetryProviders.Contains("prometheus", StringComparer.OrdinalIgnoreCase))
+{
+    app.MapPrometheusScrapingEndpoint();
+}
 
 app.UseAuthorization();
 

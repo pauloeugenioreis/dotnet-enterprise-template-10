@@ -12,7 +12,9 @@
 - **[🚀 Início Rápido](QUICK-START.md)** - Comece em 5 minutos
 - **[📚 Guia Completo](README.md)** - Este documento
 - **[🎛️ Recursos Avançados](docs/FEATURES.md)** - MongoDB, Quartz, RabbitMQ, Storage, etc.
-- **[🔄 Guia de ORMs](docs/ORM-GUIDE.md)** - Como alternar entre ORMs
+- **[🔄 Guia de ORMs](docs/ORM-GUIDE.md)** - Como alternar entre ORMs (EF Core, Dapper, ADO.NET)
+- **[📊 Guia de Telemetria](docs/TELEMETRY.md)** - Observabilidade com OpenTelemetry
+- **[🚦 Guia de Rate Limiting](docs/RATE-LIMITING.md)** - Controle de taxa de requisições
 - **[☸️ Guia Kubernetes](docs/KUBERNETES.md)** - Deploy em K8s
 - **[📝 Changelog](CHANGELOG.md)** - Histórico de mudanças
 - **[🤝 Contribuindo](CONTRIBUTING.md)** - Como contribuir
@@ -26,7 +28,9 @@ Este template fornece uma estrutura completa e moderna para desenvolvimento de A
 ### ✨ Características Principais
 
 - **Clean Architecture** com separação clara de responsabilidades
-- **Suporte a múltiplos ORMs** (Entity Framework Core por padrão)
+- **Suporte a múltiplos ORMs** (Entity Framework Core, Dapper, ADO.NET, NHibernate, Linq2Db)
+- **Telemetria completa** com OpenTelemetry (Jaeger, Prometheus, Grafana, Application Insights, Datadog, Dynatrace)
+- **Rate Limiting** com 4 estratégias (Fixed Window, Sliding Window, Token Bucket, Concurrency)
 - **Infraestrutura modular** com extension methods
 - **Configurações validadas** em tempo de startup
 - **Health checks** prontos para produção
@@ -39,7 +43,7 @@ Este template fornece uma estrutura completa e moderna para desenvolvimento de A
 - **Swagger customizado** (agrupamento, JWT, XML docs)
 - **Exception notifications** (extensível para email/Slack)
 - **Kubernetes ready** com manifests e scripts de deploy
-- **Docker e Docker Compose** pré-configurados
+- **Docker e Docker Compose** pré-configurados com stack completa de observabilidade
 - **MongoDB support** (NoSQL opcional)
 - **Background jobs** com Quartz.NET
 - **Message queue** com RabbitMQ

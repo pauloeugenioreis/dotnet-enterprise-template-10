@@ -1,0 +1,20 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'projecttemplate-monitor'
+
+scrape_configs:
+  # ProjectTemplate API
+  - job_name: 'projecttemplate-api'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['api:80']
+        labels:
+          service: 'api'
+          environment: 'development'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

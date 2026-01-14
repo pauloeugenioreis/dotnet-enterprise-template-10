@@ -12,8 +12,14 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:443;http://+:80
       - AppSettings__ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ProjectTemplate;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+      - AppSettings__Infrastructure__Telemetry__Enabled=true
+      - AppSettings__Infrastructure__Telemetry__Providers__0=jaeger
+      - AppSettings__Infrastructure__Telemetry__Providers__1=prometheus
+      - AppSettings__Infrastructure__Telemetry__Jaeger__Host=jaeger
     depends_on:
       - sqlserver
+      - jaeger
+      - prometheus
     networks:
       - app-network
 
@@ -29,9 +35,84 @@ services:
     networks:
       - app-network
 
+  # Jaeger - Distributed Tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    ports:
+      - "5775:5775/udp"   # accept zipkin.thrift over compact thrift protocol
+      - "6831:6831/udp"   # accept jaeger.thrift over compact thrift protocol
+      - "6832:6832/udp"   # accept jaeger.thrift over binary thrift protocol
+      - "5778:5778"       # serve configs
+      - "16686:16686"     # serve frontend (UI)
+      - "14268:14268"     # accept jaeger.thrift directly from clients
+      - "14250:14250"     # accept model.proto
+      - "9411:9411"       # Zipkin compatible endpoint
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+    networks:
+      - app-network
+
+  # Prometheus - Metrics Collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - app-network
+
+  # Grafana - Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - jaeger
+    networks:
+      - app-network
+
+  # OpenTelemetry Collector (Optional - Advanced)
+  # Uncomment if you want a centralized collector
+  # otel-collector:
+  #   image: otel/opentelemetry-collector-contrib:latest
+  #   container_name: otel-collector
+  #   command: ["--config=/etc/otel-collector-config.yaml"]
+  #   volumes:
+  #     - ./monitoring/otel-collector/config.yaml:/etc/otel-collector-config.yaml
+  #   ports:
+  #     - "4317:4317"   # OTLP gRPC receiver
+  #     - "4318:4318"   # OTLP HTTP receiver
+  #     - "8888:8888"   # Prometheus metrics exposed by the collector
+  #     - "8889:8889"   # Prometheus exporter metrics
+  #   networks:
+  #     - app-network
+
 networks:
   app-network:
     driver: bridge
 
 volumes:
   sqlserver-data:
+  prometheus-data:
+  grafana-data:
+

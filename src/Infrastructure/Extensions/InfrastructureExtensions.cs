@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ProjectTemplate.Domain;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
 
@@ -26,6 +27,12 @@ public static class InfrastructureExtensions
 
         // Health checks
         services.AddHealthChecksConfiguration(configuration);
+
+        // Telemetry (OpenTelemetry)
+        services.AddTelemetry(configuration, environment);
+
+        // Rate Limiting
+        services.AddRateLimitingConfiguration(configuration);
 
         // CORS
         services.AddCors(options =>
@@ -64,13 +71,20 @@ public static class InfrastructureExtensions
         return services;
     }
 
-    public static IApplicationBuilder UseInfrastructureMiddleware(this IApplicationBuilder app)
+    public static IApplicationBuilder UseInfrastructureMiddleware(this IApplicationBuilder app, IConfiguration configuration)
     {
         // CORS
         app.UseCors("DefaultCorsPolicy");
 
         // Response compression
         app.UseResponseCompression();
+
+        // Rate Limiting - Only if enabled in configuration
+        var rateLimitingSettings = configuration.GetSection("AppSettings:Infrastructure:RateLimiting").Get<RateLimitingSettings>();
+        if (rateLimitingSettings?.Enabled == true)
+        {
+            app.UseRateLimiter();
+        }
 
         // Health checks
         app.UseHealthChecks("/health");
