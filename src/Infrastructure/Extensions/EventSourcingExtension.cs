@@ -1,6 +1,5 @@
 using Marten;
 using Weasel.Core;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Entities;
@@ -17,15 +16,13 @@ public static class EventSourcingExtension
     /// <summary>
     /// Add Event Sourcing services to the DI container
     /// </summary>
-    public static IServiceCollection AddEventSourcing(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddEventSourcing(this IServiceCollection services)
     {
-        var settings = configuration
-            .GetSection("Infrastructure:EventSourcing")
-            .Get<EventSourcingSettings>();
+        var serviceProvider = services.BuildServiceProvider();
+        var appSettings = serviceProvider.GetRequiredService<AppSettings>();
+        var settings = appSettings.Infrastructure.EventSourcing;
 
-        if (settings == null || !settings.Enabled)
+        if (!settings.Enabled)
         {
             // Event Sourcing disabled - register empty implementation
             services.AddScoped<IEventStore, NoOpEventStore>();

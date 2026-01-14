@@ -3,8 +3,8 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Interfaces;
@@ -20,17 +20,30 @@ public static class AuthenticationExtension
     /// <summary>
     /// Add JWT Authentication services
     /// </summary>
-    public static IServiceCollection AddJwtAuthentication(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddJwtAuthentication(this IServiceCollection services)
     {
-        var authSettings = configuration.GetSection("Authentication").Get<AuthenticationSettings>() 
-            ?? new AuthenticationSettings();
+        // Build a temporary service provider to get AppSettings
+        var serviceProvider = services.BuildServiceProvider();
+        var appSettings = serviceProvider.GetRequiredService<AppSettings>();
+        var authSettings = appSettings.Authentication;
 
         if (!authSettings.Enabled)
         {
             Console.WriteLine("⚠️  Authentication is disabled");
             return services;
+        }
+
+        // Validate JWT Secret
+        if (string.IsNullOrWhiteSpace(authSettings.Jwt.Secret))
+        {
+            throw new InvalidOperationException(
+                "JWT Secret is not configured. Please set 'AppSettings:Authentication:Jwt:Secret' in appsettings.json with a secure key of at least 32 characters.");
+        }
+
+        if (authSettings.Jwt.Secret.Length < 32)
+        {
+            throw new InvalidOperationException(
+                $"JWT Secret must be at least 32 characters long for security. Current length: {authSettings.Jwt.Secret.Length}");
         }
 
         // Register authentication services

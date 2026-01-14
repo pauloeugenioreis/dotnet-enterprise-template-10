@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Configuration;
 using ProjectTemplate.Domain;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
@@ -10,21 +9,20 @@ namespace ProjectTemplate.Infrastructure.Extensions;
 /// </summary>
 public static class HealthChecksExtension
 {
-    public static IServiceCollection AddHealthChecksConfiguration(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddHealthChecksConfiguration(this IServiceCollection services)
     {
-        var appSettings = configuration.GetSection("AppSettings").Get<AppSettings>();
+        var serviceProvider = services.BuildServiceProvider();
+        var appSettings = serviceProvider.GetRequiredService<AppSettings>();
         var healthChecksBuilder = services.AddHealthChecks();
 
         // Application self-check
         healthChecksBuilder.AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "ready" });
 
         // Database health check
-        var connectionString = appSettings?.ConnectionStrings?.DefaultConnection;
+        var connectionString = appSettings.ConnectionStrings.DefaultConnection;
         if (!string.IsNullOrEmpty(connectionString))
         {
-            var dbType = appSettings?.Infrastructure?.Database?.DatabaseType?.ToLower() ?? "sqlserver";
+            var dbType = appSettings.Infrastructure.Database.DatabaseType.ToLower();
             
             // Database health checks require specific packages to be installed
             // Uncomment and install the appropriate package:

@@ -20,25 +20,25 @@ public static class InfrastructureExtensions
         services.AddAppSettingsConfiguration(configuration, environment);
 
         // Database
-        services.AddDatabaseConfiguration(configuration);
+        services.AddDatabaseConfiguration();
 
         // Cache
-        services.AddCacheConfiguration(configuration);
+        services.AddCacheConfiguration();
 
         // Health checks
-        services.AddHealthChecksConfiguration(configuration);
+        services.AddHealthChecksConfiguration();
 
         // Telemetry (OpenTelemetry)
-        services.AddTelemetry(configuration, environment);
+        services.AddTelemetry(environment);
 
         // Rate Limiting
-        services.AddRateLimitingConfiguration(configuration);
+        services.AddRateLimitingConfiguration();
 
         // Event Sourcing
-        services.AddEventSourcing(configuration);
+        services.AddEventSourcing();
 
         // Authentication (JWT + OAuth2)
-        services.AddJwtAuthentication(configuration);
+        services.AddJwtAuthentication();
 
         // CORS
         services.AddCors(options =>
@@ -89,8 +89,9 @@ public static class InfrastructureExtensions
         app.UseJwtAuthentication();
 
         // Rate Limiting - Only if enabled in configuration
-        var rateLimitingSettings = configuration.GetSection("AppSettings:Infrastructure:RateLimiting").Get<RateLimitingSettings>();
-        if (rateLimitingSettings?.Enabled == true)
+        var serviceProvider = app.ApplicationServices;
+        var appSettings = serviceProvider.GetRequiredService<AppSettings>();
+        if (appSettings.Infrastructure.RateLimiting.Enabled)
         {
             app.UseRateLimiter();
         }

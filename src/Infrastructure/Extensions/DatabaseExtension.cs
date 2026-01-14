@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProjectTemplate.Data.Context;
 using ProjectTemplate.Domain;
@@ -48,13 +47,12 @@ namespace ProjectTemplate.Infrastructure.Extensions;
 /// </summary>
 public static class DatabaseExtension
 {
-    public static IServiceCollection AddDatabaseConfiguration(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddDatabaseConfiguration(this IServiceCollection services)
     {
-        var appSettings = configuration.GetSection("AppSettings").Get<AppSettings>();
-        var dbSettings = appSettings?.Infrastructure?.Database ?? new DatabaseSettings();
-        var connectionString = appSettings?.ConnectionStrings?.DefaultConnection 
+        var serviceProvider = services.BuildServiceProvider();
+        var appSettings = serviceProvider.GetRequiredService<AppSettings>();
+        var dbSettings = appSettings.Infrastructure.Database;
+        var connectionString = appSettings.ConnectionStrings.DefaultConnection 
             ?? throw new InvalidOperationException("DefaultConnection string is required");
 
         // ==============================================================================

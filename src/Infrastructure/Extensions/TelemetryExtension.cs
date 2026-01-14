@@ -19,19 +19,20 @@ public static class TelemetryExtension
 {
     public static IServiceCollection AddTelemetry(
         this IServiceCollection services,
-        IConfiguration configuration,
         IHostEnvironment environment)
     {
-        var settings = configuration.GetSection("AppSettings:Infrastructure:Telemetry").Get<TelemetrySettings>();
+        var serviceProvider = services.BuildServiceProvider();
+        var appSettings = serviceProvider.GetRequiredService<AppSettings>();
+        var settings = appSettings.Infrastructure.Telemetry;
 
-        if (settings?.Enabled != true)
+        if (!settings.Enabled)
         {
             Console.WriteLine("⚠️  Telemetry is disabled");
             return services;
         }
 
-        var serviceName = configuration["AppSettings:Application:Name"] ?? "ProjectTemplate.Api";
-        var serviceVersion = configuration["AppSettings:Application:Version"] ?? "1.0.0";
+        var serviceName = "ProjectTemplate.Api";
+        var serviceVersion = "1.0.0";
 
         // Resource attributes (identificação do serviço)
         var resourceBuilder = ResourceBuilder.CreateDefault()

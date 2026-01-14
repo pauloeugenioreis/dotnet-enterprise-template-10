@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProjectTemplate.Domain;
 
@@ -12,12 +11,11 @@ namespace ProjectTemplate.Infrastructure.Extensions;
 /// </summary>
 public static class CacheExtension
 {
-    public static IServiceCollection AddCacheConfiguration(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddCacheConfiguration(this IServiceCollection services)
     {
-        var appSettings = configuration.GetSection("AppSettings").Get<AppSettings>();
-        var cacheSettings = appSettings?.Infrastructure?.Cache ?? new CacheSettings();
+        var serviceProvider = services.BuildServiceProvider();
+        var appSettings = serviceProvider.GetRequiredService<AppSettings>();
+        var cacheSettings = appSettings.Infrastructure.Cache;
 
         if (!cacheSettings.Enabled)
         {

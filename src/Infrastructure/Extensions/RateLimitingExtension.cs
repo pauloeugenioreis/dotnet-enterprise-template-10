@@ -17,13 +17,13 @@ namespace ProjectTemplate.Infrastructure.Extensions;
 /// </summary>
 public static class RateLimitingExtension
 {
-    public static IServiceCollection AddRateLimitingConfiguration(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddRateLimitingConfiguration(this IServiceCollection services)
     {
-        var settings = configuration.GetSection("AppSettings:Infrastructure:RateLimiting").Get<RateLimitingSettings>();
+        var serviceProvider = services.BuildServiceProvider();
+        var appSettings = serviceProvider.GetRequiredService<AppSettings>();
+        var settings = appSettings.Infrastructure.RateLimiting;
 
-        if (settings?.Enabled != true)
+        if (!settings.Enabled)
         {
             Console.WriteLine("⚠️  Rate Limiting is disabled");
             return services;
