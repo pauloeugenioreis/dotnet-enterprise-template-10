@@ -1,7 +1,9 @@
 using Marten;
+using Weasel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProjectTemplate.Domain;
+using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 using ProjectTemplate.Infrastructure.Services;
 
@@ -61,31 +63,8 @@ public static class EventSourcingExtension
                 "EventSourcing:ConnectionString is required when using Marten provider");
         }
 
-        // Configure Marten
-        services.AddMarten(options =>
-        {
-            options.Connection(settings.ConnectionString);
-
-            // Auto-create/update database schema
-            options.AutoCreateSchemaObjects = Weasel.Core.AutoCreate.CreateOrUpdate;
-
-            // Configure event store
-            options.Events.StreamIdentity = Marten.Events.StreamIdentity.AsString;
-
-            // Performance optimizations
-            options.Events.UseOptimisticConcurrency = true;
-            
-            if (settings.StoreSnapshots)
-            {
-                // Enable snapshot storage
-                options.Events.UseArchivedStreamPartitioning = true;
-            }
-
-            // JSON serialization settings
-            options.UseDefaultSerialization(
-                serializerType: Weasel.Core.SerializerType.SystemTextJson,
-                enumStorage: Weasel.Core.EnumStorage.AsString);
-        });
+        // Configure Marten with simplified settings for Marten 8.x
+        services.AddMarten(settings.ConnectionString);
 
         // Register Event Store implementation
         services.AddScoped<IEventStore, MartenEventStore>();
@@ -109,51 +88,51 @@ internal class NoOpEventStore : IEventStore
         return Task.CompletedTask;
     }
 
-    public Task<List<Domain.Events.DomainEvent>> GetEventsAsync(
+    public Task<List<DomainEvent>> GetEventsAsync(
         string aggregateType,
         string aggregateId,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(new List<Domain.Events.DomainEvent>());
+        return Task.FromResult(new List<DomainEvent>());
     }
 
-    public Task<List<Domain.Events.DomainEvent>> GetEventsAsync(
+    public Task<List<DomainEvent>> GetEventsAsync(
         string aggregateType,
         string aggregateId,
         DateTime until,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(new List<Domain.Events.DomainEvent>());
+        return Task.FromResult(new List<DomainEvent>());
     }
 
-    public Task<List<Domain.Events.DomainEvent>> GetEventsByVersionAsync(
+    public Task<List<DomainEvent>> GetEventsByVersionAsync(
         string aggregateType,
         string aggregateId,
         int fromVersion,
         int toVersion,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(new List<Domain.Events.DomainEvent>());
+        return Task.FromResult(new List<DomainEvent>());
     }
 
-    public Task<List<Domain.Events.DomainEvent>> GetEventsByTypeAsync(
+    public Task<List<DomainEvent>> GetEventsByTypeAsync(
         string aggregateType,
         DateTime? from = null,
         DateTime? to = null,
         int? limit = null,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(new List<Domain.Events.DomainEvent>());
+        return Task.FromResult(new List<DomainEvent>());
     }
 
-    public Task<List<Domain.Events.DomainEvent>> GetEventsByUserAsync(
+    public Task<List<DomainEvent>> GetEventsByUserAsync(
         string userId,
         DateTime? from = null,
         DateTime? to = null,
         int? limit = null,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(new List<Domain.Events.DomainEvent>());
+        return Task.FromResult(new List<DomainEvent>());
     }
 
     public Task<int> GetLatestVersionAsync(

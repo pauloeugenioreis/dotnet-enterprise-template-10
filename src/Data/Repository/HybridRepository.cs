@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ProjectTemplate.Domain;
@@ -266,9 +267,8 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
             Name = product.Name,
             Description = product.Description,
             Price = product.Price,
-            StockQuantity = product.StockQuantity,
+            Stock = product.Stock,  // Changed from StockQuantity
             Category = product.Category,
-            ImageUrl = product.ImageUrl,
             IsActive = product.IsActive
         };
     }

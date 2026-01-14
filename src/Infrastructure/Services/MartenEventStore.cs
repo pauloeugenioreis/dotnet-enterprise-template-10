@@ -2,7 +2,7 @@ using Marten;
 using Marten.Events;
 using Marten.Events.Projections;
 using ProjectTemplate.Domain;
-using ProjectTemplate.Domain.Events;
+using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 using System.Text.Json;
 
@@ -35,21 +35,8 @@ public class MartenEventStore : IEventStore
         // Create stream ID combining type and ID
         var streamId = $"{aggregateType}-{aggregateId}";
 
-        // Create domain event wrapper
-        var domainEvent = new DomainEvent<TEvent>
-        {
-            EventId = Guid.NewGuid(),
-            EventType = typeof(TEvent).Name,
-            AggregateId = aggregateId,
-            AggregateType = aggregateType,
-            Data = eventData,
-            OccurredOn = DateTime.UtcNow,
-            UserId = userId,
-            Metadata = metadata ?? new Dictionary<string, string>()
-        };
-
         // Append to Marten event stream
-        session.Events.Append(streamId, domainEvent);
+        session.Events.Append(streamId, eventData);
         
         await session.SaveChangesAsync(cancellationToken);
     }
@@ -66,8 +53,7 @@ public class MartenEventStore : IEventStore
         
         return events
             .Select(e => ConvertToTypedEvent(e.Data))
-            .Where(e => e != null)
-            .Cast<DomainEvent>()
+            .OfType<DomainEvent>()
             .ToList();
     }
 
@@ -85,8 +71,7 @@ public class MartenEventStore : IEventStore
         return events
             .Where(e => e.Timestamp <= until)
             .Select(e => ConvertToTypedEvent(e.Data))
-            .Where(e => e != null)
-            .Cast<DomainEvent>()
+            .OfType<DomainEvent>()
             .ToList();
     }
 
@@ -105,8 +90,7 @@ public class MartenEventStore : IEventStore
         return events
             .Where(e => e.Version >= fromVersion && e.Version <= toVersion)
             .Select(e => ConvertToTypedEvent(e.Data))
-            .Where(e => e != null)
-            .Cast<DomainEvent>()
+            .OfType<DomainEvent>()
             .ToList();
     }
 
@@ -138,8 +122,7 @@ public class MartenEventStore : IEventStore
 
         return events
             .Select(e => ConvertToTypedEvent(e.Data))
-            .Where(e => e != null)
-            .Cast<DomainEvent>()
+            .OfType<DomainEvent>()
             .ToList();
     }
 
@@ -171,8 +154,7 @@ public class MartenEventStore : IEventStore
 
         return events
             .Select(e => ConvertToTypedEvent(e.Data))
-            .Where(e => e != null)
-            .Cast<DomainEvent>()
+            .OfType<DomainEvent>()
             .ToList();
     }
 
@@ -186,7 +168,7 @@ public class MartenEventStore : IEventStore
 
         var state = await session.Events.FetchStreamStateAsync(streamId, cancellationToken);
         
-        return state?.Version ?? 0;
+        return (int)(state?.Version ?? 0);
     }
 
     public async Task SaveSnapshotAsync<TSnapshot>(
@@ -258,8 +240,8 @@ public class MartenEventStore : IEventStore
 
         if (events.Any())
         {
-            stats.OldestEvent = events.Min(e => e.Timestamp);
-            stats.LatestEvent = events.Max(e => e.Timestamp);
+            stats.OldestEvent = events.Min(e => e.Timestamp).DateTime;
+            stats.LatestEvent = events.Max(e => e.Timestamp).DateTime;
 
             // Group by event type
             stats.EventsByType = events

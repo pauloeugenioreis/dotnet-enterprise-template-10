@@ -1,3 +1,5 @@
+using ProjectTemplate.Domain.Entities;
+
 namespace ProjectTemplate.Domain.Interfaces;
 
 /// <summary>
