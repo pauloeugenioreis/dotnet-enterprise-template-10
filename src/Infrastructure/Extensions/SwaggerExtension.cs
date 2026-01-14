@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
 
@@ -38,6 +38,9 @@ public static class SwaggerExtension
                 Scheme = "Bearer"
             });
 
+            // TODO: AddSecurityRequirement API mudou no Microsoft.OpenApi 2.x
+            // Temporariamente comentado até ajustar para a nova API
+            /*
             c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                 {
@@ -52,6 +55,7 @@ public static class SwaggerExtension
                     Array.Empty<string>()
                 }
             });
+            */
 
             // Include XML comments if available
             var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";

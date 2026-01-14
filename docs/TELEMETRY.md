@@ -2,6 +2,12 @@
 
 Este guia explica como configurar e usar telemetria (tracing, metrics, logs) no ProjectTemplate usando OpenTelemetry.
 
+> ⚠️ **IMPORTANTE - Atualização Jaeger (Janeiro 2026):**  
+> O pacote `OpenTelemetry.Exporter.Jaeger` foi descontinuado (deprecated/legacy).  
+> Este template agora usa **OTLP (OpenTelemetry Protocol)** para enviar dados ao Jaeger.  
+> Jaeger suporta nativamente OTLP desde a versão 1.35+.  
+> Todas as configurações foram atualizadas para usar OTLP (portas 4317/4318).
+
 ## 🎯 Visão Geral
 
 O template suporta **múltiplos backends de telemetria** através do **OpenTelemetry**, permitindo que você escolha o provedor que melhor atende suas necessidades:
@@ -10,7 +16,7 @@ O template suporta **múltiplos backends de telemetria** através do **OpenTelem
 
 | Provedor | Tipo | Uso | Custo |
 |----------|------|-----|-------|
-| **Jaeger** | Traces | Local/Self-hosted | 🆓 Gratuito |
+| **Jaeger (via OTLP)** | Traces | Local/Self-hosted | 🆓 Gratuito |
 | **Grafana Cloud** | Traces + Metrics | Cloud/Self-hosted | 💰 Freemium |
 | **Prometheus** | Metrics | Local/Self-hosted | 🆓 Gratuito |
 | **Application Insights** | APM Completo | Azure Cloud | 💰💰 Pago |
@@ -60,6 +66,7 @@ docker-compose up -d
 
 **Melhor para:** Desenvolvimento local, aprendizado, POCs
 
+**Configuração Atualizada (OTLP Protocol):**
 ```json
 {
   "Telemetry": {
@@ -67,21 +74,42 @@ docker-compose up -d
     "Providers": ["jaeger"],
     "Jaeger": {
       "Host": "localhost",
-      "Port": 6831
+      "Port": 4317,
+      "UseGrpc": true
     }
   }
 }
 ```
 
-**Docker:**
+**⚠️ Mudança Importante:**
+- **Antes (Deprecated):** Porta 6831 (protocolo nativo Jaeger)
+- **Agora (Recomendado):** Porta 4317 (OTLP gRPC) ou 4318 (OTLP HTTP)
+- O exporter nativo `OpenTelemetry.Exporter.Jaeger` foi removido
+- Agora usamos `OpenTelemetry.Exporter.OpenTelemetryProtocol` (OTLP)
+
+**Docker (com OTLP habilitado):**
 ```bash
 docker run -d --name jaeger \
+  -e COLLECTOR_OTLP_ENABLED=true \
   -p 16686:16686 \
-  -p 6831:6831/udp \
+  -p 4317:4317 \
+  -p 4318:4318 \
   jaegertracing/all-in-one:latest
 ```
 
-**Acessar:** http://localhost:16686
+**Portas do Jaeger:**
+- `16686` - Jaeger UI (Web interface)
+- `4317` - OTLP gRPC receiver ✅ **RECOMENDADO**
+- `4318` - OTLP HTTP receiver ✅ **RECOMENDADO**
+- `14250` - Jaeger gRPC (model.proto)
+- `9411` - Zipkin compatible endpoint
+- ~~`6831`~~ - ❌ **DEPRECATED** (Jaeger native UDP)
+
+**Acessar UI:** http://localhost:16686
+
+**Documentação:**
+- [Jaeger OTLP Support](https://www.jaegertracing.io/docs/1.46/apis/#opentelemetry-protocol-otlp)
+- [OpenTelemetry Migration Guide](https://opentelemetry.io/docs/instrumentation/net/exporters/)
 
 ---
 

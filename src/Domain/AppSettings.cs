@@ -159,7 +159,7 @@ public class RefreshTokenSettings
 public class TelemetrySettings
 {
     public bool Enabled { get; set; } = false;
-    public string[] Providers { get; set; } = Array.Empty<string>(); // console, jaeger, otlp, grafana, prometheus, applicationinsights, datadog, dynatrace
+    public string[] Providers { get; set; } = Array.Empty<string>(); // console, jaeger (via OTLP), otlp, grafana, prometheus, applicationinsights, datadog, dynatrace
     public double SamplingRatio { get; set; } = 1.0; // 0.0 to 1.0 (1.0 = 100%)
     public bool EnableSqlInstrumentation { get; set; } = true;
     public bool EnableHttpInstrumentation { get; set; } = true;
@@ -175,8 +175,11 @@ public class TelemetrySettings
 public class JaegerSettings
 {
     public string Host { get; set; } = "localhost";
-    public int Port { get; set; } = 6831;
-    public int MaxPayloadSizeInBytes { get; set; } = 4096;
+    public int Port { get; set; } = 4317; // OTLP gRPC port (was 6831 for deprecated Jaeger native)
+    public bool UseGrpc { get; set; } = true; // true = gRPC (4317), false = HTTP (4318)
+    
+    [Obsolete("MaxPayloadSizeInBytes is no longer used with OTLP protocol")]
+    public int MaxPayloadSizeInBytes { get; set; } = 4096; // Kept for backward compatibility
 }
 
 public class ZipkinSettings

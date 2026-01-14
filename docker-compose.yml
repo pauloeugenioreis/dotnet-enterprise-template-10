@@ -16,6 +16,8 @@ services:
       - AppSettings__Infrastructure__Telemetry__Providers__0=jaeger
       - AppSettings__Infrastructure__Telemetry__Providers__1=prometheus
       - AppSettings__Infrastructure__Telemetry__Jaeger__Host=jaeger
+      - AppSettings__Infrastructure__Telemetry__Jaeger__Port=4317
+      - AppSettings__Infrastructure__Telemetry__Jaeger__UseGrpc=true
       - AppSettings__Infrastructure__EventSourcing__Enabled=true
       - AppSettings__Infrastructure__EventSourcing__ConnectionString=Host=postgres-events;Database=ProjectTemplateEvents;Username=postgres;Password=postgres
     depends_on:
@@ -58,24 +60,33 @@ services:
       timeout: 5s
       retries: 5
 
-  # Jaeger - Distributed Tracing
+  # Jaeger - Distributed Tracing (using OTLP protocol)
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: jaeger
     ports:
-      - "5775:5775/udp"   # accept zipkin.thrift over compact thrift protocol
-      - "6831:6831/udp"   # accept jaeger.thrift over compact thrift protocol
-      - "6832:6832/udp"   # accept jaeger.thrift over binary thrift protocol
-      - "5778:5778"       # serve configs
-      - "16686:16686"     # serve frontend (UI)
-      - "14268:14268"     # accept jaeger.thrift directly from clients
-      - "14250:14250"     # accept model.proto
+      - "16686:16686"     # Jaeger UI
+      - "4317:4317"       # OTLP gRPC receiver (PRIMARY - replaces deprecated 6831)
+      - "4318:4318"       # OTLP HTTP receiver (PRIMARY)
+      - "14250:14250"     # Jaeger gRPC
       - "9411:9411"       # Zipkin compatible endpoint
+      # Legacy ports (deprecated, kept for backward compatibility):
+      # - "5775:5775/udp"   # deprecated: zipkin.thrift compact
+      # - "6831:6831/udp"   # deprecated: jaeger.thrift compact (use OTLP 4317 instead)
+      # - "6832:6832/udp"   # deprecated: jaeger.thrift binary
+      # - "5778:5778"       # deprecated: serve configs
+      # - "14268:14268"     # deprecated: jaeger.thrift HTTP
     environment:
       - COLLECTOR_OTLP_ENABLED=true
       - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+      - LOG_LEVEL=info
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:14269/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Prometheus - Metrics Collection
   prometheus:

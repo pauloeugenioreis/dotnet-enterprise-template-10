@@ -15,7 +15,7 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     
     <!-- Swagger/API Documentation -->
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
     <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.1" />
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
     
@@ -30,11 +30,11 @@
     <!-- <PackageReference Include="AspNetCore.HealthChecks.RabbitMQ" Version="9.0.0" /> -->
     
     <!-- Caching -->
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.2" />
     
     <!-- InMemory Database -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.2" />
     
     <!-- ORM Support (Uncomment as needed) -->
     <!-- Linq2Db - Required when using Linq2Db ORM -->
@@ -69,18 +69,19 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.14.0-beta.1" />
     
     <!-- Telemetry Exporters -->
-    <PackageReference Include="OpenTelemetry.Exporter.Jaeger" Version="1.5.1" />
+    <!-- OpenTelemetry.Exporter.Jaeger REMOVED - Deprecated/Legacy -->
+    <!-- Use OpenTelemetry.Exporter.OpenTelemetryProtocol instead (already included above) -->
     <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.14.0" />
     <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.14.0-alpha.1" />
     <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.5.0" />
     
     <!-- Event Sourcing -->
-    <PackageReference Include="Marten" Version="8.3.0" />
-    <PackageReference Include="Marten.AspNetCore" Version="8.3.0" />
-    <PackageReference Include="Npgsql" Version="10.0.0" />
+    <PackageReference Include="Marten" Version="8.17.0" />
+    <PackageReference Include="Marten.AspNetCore" Version="8.17.0" />
+    <PackageReference Include="Npgsql" Version="10.0.1" />
     
     <!-- Authentication -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.2" />
     
     <!-- Resilience -->
     <PackageReference Include="Polly" Version="8.6.5" />

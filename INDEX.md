@@ -47,6 +47,7 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 | **[QUICK-START.md](QUICK-START.md)** | Início rápido em 5 minutos | Primeira vez usando o template |
 | **[CHANGELOG.md](CHANGELOG.md)** | Histórico de mudanças e versões | Ver o que mudou entre versões |
 | **[CONTRIBUTING.md](CONTRIBUTING.md)** | Guia de contribuição | Contribuir com código ou documentação |
+| **[DEPRECATED-PACKAGES-REPORT.md](DEPRECATED-PACKAGES-REPORT.md)** | 📦 Relatório de pacotes deprecated | Manutenção e atualização de dependências |
 | **[LICENSE](LICENSE)** | Licença do projeto (MIT) | Entender termos de uso |
 
 ### Guias Técnicos

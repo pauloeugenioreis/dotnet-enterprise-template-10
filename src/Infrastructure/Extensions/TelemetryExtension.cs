@@ -12,7 +12,8 @@ namespace ProjectTemplate.Infrastructure.Extensions;
 
 /// <summary>
 /// Telemetry and observability configuration using OpenTelemetry
-/// Supports multiple backends: Jaeger, Grafana, Prometheus, Datadog, Dynatrace, Application Insights
+/// Supports multiple backends: OTLP (Jaeger, Grafana, Tempo), Prometheus, Datadog, Dynatrace, Application Insights
+/// Note: Jaeger now uses OTLP protocol instead of deprecated native exporter
 /// </summary>
 public static class TelemetryExtension
 {
@@ -137,13 +138,20 @@ public static class TelemetryExtension
                     break;
 
                 case "jaeger":
-                    builder.AddJaegerExporter(options =>
+                    // Jaeger now uses OTLP protocol (native exporter is deprecated)
+                    // Configure OTLP exporter to send to Jaeger's OTLP endpoints
+                    var jaegerOtlpEndpoint = settings.Jaeger.UseGrpc 
+                        ? $"http://{settings.Jaeger.Host}:4317" 
+                        : $"http://{settings.Jaeger.Host}:4318";
+                    
+                    builder.AddOtlpExporter(options =>
                     {
-                        options.AgentHost = settings.Jaeger.Host;
-                        options.AgentPort = settings.Jaeger.Port;
-                        options.MaxPayloadSizeInBytes = settings.Jaeger.MaxPayloadSizeInBytes;
+                        options.Endpoint = new Uri(jaegerOtlpEndpoint);
+                        options.Protocol = settings.Jaeger.UseGrpc 
+                            ? OtlpExportProtocol.Grpc 
+                            : OtlpExportProtocol.HttpProtobuf;
                     });
-                    Console.WriteLine($"  📊 Jaeger exporter enabled: {settings.Jaeger.Host}:{settings.Jaeger.Port}");
+                    Console.WriteLine($"  📊 Jaeger (via OTLP) exporter enabled: {jaegerOtlpEndpoint}");
                     break;
 
                 case "zipkin":
