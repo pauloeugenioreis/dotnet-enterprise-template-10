@@ -1,0 +1,176 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  SOLUTION_FILE: 'ProjectTemplate.sln'
+  DOCKER_IMAGE: 'projecttemplate-api'
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🔔 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Shallow clones disabled for better analysis
+
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 📦 Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: 📥 Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_FILE }}
+
+    - name: 🏗️ Build
+      run: dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore
+
+    - name: 🧪 Run Unit Tests
+      run: dotnet test tests/UnitTests/UnitTests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=unit-test-results.trx"
+
+    - name: 🧪 Run Integration Tests
+      run: dotnet test tests/Integration/Integration.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=integration-test-results.trx"
+
+    - name: 📊 Publish Test Results
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: Test Results
+        path: '**/*.trx'
+        reporter: dotnet-trx
+
+    - name: 📦 Publish Artifacts
+      if: success() && github.ref == 'refs/heads/main'
+      run: dotnet publish src/Api/Api.csproj --configuration Release --output ./publish --no-build
+
+    - name: 📤 Upload Artifacts
+      if: success() && github.ref == 'refs/heads/main'
+      uses: actions/upload-artifact@v4
+      with:
+        name: api-artifacts
+        path: ./publish
+        retention-days: 7
+
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+    - name: 🔔 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 📥 Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_FILE }}
+
+    - name: 📊 Run Tests with Coverage
+      run: |
+        dotnet test ${{ env.SOLUTION_FILE }} \
+          --configuration Release \
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./coverage \
+          --verbosity normal
+
+    - name: 📈 Upload Coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        directory: ./coverage
+        fail_ci_if_error: false
+        verbose: true
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    steps:
+    - name: 🔔 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🐳 Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: 🔐 Login to Docker Hub
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: 🏷️ Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha,prefix={{branch}}-
+
+    - name: 🏗️ Build and push
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+    - name: 🔔 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 🔍 Run Security Scan
+      run: |
+        dotnet list package --vulnerable --include-transitive 2>&1 | tee security-scan.log
+        if grep -q "has the following vulnerable packages" security-scan.log; then
+          echo "⚠️ Vulnerable packages found!"
+          exit 1
+        fi
+
+    - name: 📤 Upload Security Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-scan-report
+        path: security-scan.log
+        retention-days: 30

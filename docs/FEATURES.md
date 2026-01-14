@@ -19,6 +19,7 @@ Este guia explica como habilitar e configurar os recursos avançados incluídos 
 11. [Exception Notification](#exception-notification)
 12. [📊 Telemetria e Observabilidade](#telemetria-e-observabilidade)
 13. [🚦 Rate Limiting](#rate-limiting)
+14. [🔄 CI/CD](#cicd)
 
 ---
 
@@ -1342,6 +1343,221 @@ curl -i http://localhost:5000/api/v1/Product | grep -i "x-ratelimit"
 - Whitelist de IPs
 - Testes e troubleshooting
 - Melhores práticas
+
+---
+
+## 🔄 CI/CD
+
+### O que é?
+
+CI/CD (Continuous Integration/Continuous Deployment) automatiza build, testes e deploy da aplicação.
+
+### Quando Usar?
+
+- ✅ **Sempre!** Todo projeto moderno precisa de CI/CD
+- ✅ Garantir que código compila antes de merge
+- ✅ Executar testes automaticamente em cada commit
+- ✅ Deploy automático para ambientes de staging/produção
+- ✅ Manter qualidade de código com análises automáticas
+
+### Plataformas Suportadas
+
+O template inclui pipelines prontos para:
+
+#### 1. **GitHub Actions**
+- Pipeline completo em `.github/workflows/ci.yml`
+- Build, testes, coverage, Docker, deploy
+- Integração nativa com GitHub
+- Cache de NuGet packages
+- Artifacts com retenção de 7 dias
+
+#### 2. **Azure DevOps**
+- Pipeline multi-stage em `azure-pipelines.yml`
+- Suporte a environments (staging, production)
+- Integração com Azure Container Registry
+- Approvals para deploy em produção
+- Relatórios de testes e cobertura
+
+#### 3. **GitLab CI/CD**
+- Pipeline de 5 stages em `.gitlab-ci.yml`
+- GitLab Container Registry integrado
+- Environments automáticos
+- JUnit test reports
+- Manual deploy com rollback
+
+### Features Incluídas
+
+| Feature | GitHub Actions | Azure DevOps | GitLab CI |
+|---------|----------------|--------------|-----------|
+| **Build** | ✅ | ✅ | ✅ |
+| **Unit Tests** | ✅ | ✅ | ✅ |
+| **Integration Tests** | ✅ | ✅ | ✅ |
+| **Code Coverage** | ✅ Codecov | ✅ Built-in | ✅ Built-in |
+| **Security Scan** | ✅ | ✅ | ✅ |
+| **Docker Build** | ✅ | ✅ | ✅ |
+| **Auto Deploy** | ✅ Manual | ✅ Approval | ✅ Manual |
+| **Cache** | ✅ | ✅ | ✅ |
+
+### Quick Start - GitHub Actions
+
+**1. Nenhuma configuração necessária!** O arquivo já está pronto.
+
+**2. Configure secrets** (Settings → Secrets):
+```
+DOCKER_USERNAME=seu-usuario
+DOCKER_PASSWORD=seu-token
+```
+
+**3. Push para `main` ou `develop`** - Pipeline executa automaticamente!
+
+**4. Ver resultados** na aba **Actions**.
+
+### Quick Start - Azure DevOps
+
+**1. Criar pipeline:**
+- Pipelines → New pipeline
+- Selecione seu repositório
+- Use existing YAML: `azure-pipelines.yml`
+
+**2. Criar service connection** para Docker Hub:
+- Project Settings → Service connections
+- New → Docker Registry
+- Nome: `DockerHubConnection`
+
+**3. Push para `main` ou `develop`** - Pipeline executa!
+
+### Quick Start - GitLab CI
+
+**1. Nenhuma configuração necessária!** O arquivo `.gitlab-ci.yml` já está pronto.
+
+**2. Pipeline executa automaticamente** em todo push.
+
+**3. Habilite Container Registry**:
+- Settings → General → Container Registry → Enable
+
+**4. Ver resultados** em CI/CD → Pipelines.
+
+### Pipeline Stages
+
+Todos os pipelines seguem este fluxo:
+
+```
+1. 🏗️  Build
+   ├── Restore dependencies
+   ├── Build solution
+   └── Publish artifacts
+
+2. 🧪 Test
+   ├── Run unit tests
+   ├── Run integration tests
+   └── Generate coverage report
+
+3. 📊 Quality
+   ├── Code coverage analysis
+   ├── Security vulnerability scan
+   └── Check outdated packages
+
+4. 🐳 Docker
+   ├── Build Docker image
+   ├── Tag with version/branch
+   └── Push to registry
+
+5. 🚀 Deploy (Manual)
+   ├── Deploy to Staging
+   └── Deploy to Production (with approval)
+```
+
+### Badges
+
+Adicione ao seu README.md:
+
+**GitHub Actions:**
+```markdown
+![CI/CD](https://github.com/usuario/repo/actions/workflows/ci.yml/badge.svg)
+```
+
+**Azure DevOps:**
+```markdown
+[![Build Status](https://dev.azure.com/org/project/_apis/build/status/pipeline)](https://dev.azure.com/org/project/_build)
+```
+
+**GitLab CI:**
+```markdown
+[![pipeline status](https://gitlab.com/usuario/repo/badges/main/pipeline.svg)](https://gitlab.com/usuario/repo/-/commits/main)
+[![coverage report](https://gitlab.com/usuario/repo/badges/main/coverage.svg)](https://gitlab.com/usuario/repo/-/commits/main)
+```
+
+### Personalização
+
+**Alterar versão do .NET:**
+
+```yaml
+# GitHub Actions
+env:
+  DOTNET_VERSION: '10.0.x'
+
+# Azure DevOps
+variables:
+  dotnetVersion: '10.0.x'
+
+# GitLab CI
+image: mcr.microsoft.com/dotnet/sdk:10.0
+```
+
+**Deploy automático** (remover aprovação manual):
+
+```yaml
+# GitHub Actions - remover condição
+if: github.ref == 'refs/heads/main'
+
+# Azure DevOps - remover condition
+# condition: manual
+
+# GitLab CI - remover when
+# when: manual
+```
+
+### Logs e Resultados
+
+Todos os pipelines geram:
+
+- ✅ **Test Results**: TRX/JUnit format
+- ✅ **Coverage Report**: Cobertura de código
+- ✅ **Security Scan**: Vulnerabilidades encontradas
+- ✅ **Build Artifacts**: DLLs e executáveis
+- ✅ **Docker Images**: Imagens versionadas
+
+### Troubleshooting
+
+**Build falha:**
+```bash
+# Testar localmente primeiro
+dotnet restore
+dotnet build --configuration Release
+dotnet test
+```
+
+**Docker build falha:**
+- Verifique se Dockerfile está na raiz
+- Verifique se serviços Docker estão ativos
+- Para GitLab CI, use `docker:dind` service
+
+**Secrets não funcionam:**
+- Verifique se estão configurados corretamente
+- Case-sensitive (diferenciam maiúsculas/minúsculas)
+- GitLab: marque como "Protected" para branches protegidas
+
+### Mais Informações
+
+📖 **Documentação completa**: [docs/CICD.md](CICD.md)
+
+**Tópicos detalhados:**
+- Configuração step-by-step para cada plataforma
+- Service connections e secrets
+- Environments e approvals
+- Personalização avançada
+- Testes locais de pipelines
+- Troubleshooting completo
 
 ---
 
