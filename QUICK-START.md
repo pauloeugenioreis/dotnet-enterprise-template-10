@@ -76,7 +76,37 @@ cd src/Api
 dotnet run
 ```
 
-Acesse: `http://localhost:5000` ou `https://localhost:5001`
+Acesse: 
+- **API**: `http://localhost:5000` ou `https://localhost:5001`
+- **Swagger UI**: `http://localhost:5000/swagger`
+
+### 🔑 Credenciais Padrão (Admin)
+
+O sistema cria automaticamente um usuário administrador:
+
+```
+Username: admin
+Password: Admin@2026!Secure
+Email:    admin@projecttemplate.com
+```
+
+> ⚠️ **IMPORTANTE**: Altere esta senha em produção!
+
+**Testar autenticação:**
+
+```bash
+# Login
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "usernameOrEmail": "admin",
+    "password": "Admin@2026!Secure"
+  }'
+
+# Copie o accessToken da resposta e use:
+curl -X GET http://localhost:5000/api/auth/me \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI"
+```
 
 Swagger: `http://localhost:5000/swagger`
 

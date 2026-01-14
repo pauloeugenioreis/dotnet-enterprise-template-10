@@ -1604,6 +1604,179 @@ docker-compose up -d postgres-events
 
 ---
 
+## 🔐 Authentication
+
+### O que é?
+
+Sistema completo de **autenticação e autorização** com JWT (JSON Web Tokens) e OAuth2. Fornece registro de usuários, login, refresh tokens, gerenciamento de perfil e integração com provedores externos (Google, Microsoft, GitHub).
+
+### Quando Usar
+
+| Cenário | Recomendação |
+|---------|--------------|
+| APIs públicas que precisam de autenticação | ✅ Essencial |
+| Aplicações multi-usuário | ✅ Essencial |
+| Sistemas com diferentes níveis de acesso | ✅ Recomendado |
+| Integração com login social | ✅ Recomendado |
+
+### Recursos
+
+- **JWT Authentication** - Token-based authentication
+- **Refresh Tokens** - Long-lived tokens for token renewal
+- **OAuth2 Providers** - Google, Microsoft, GitHub
+- **Password Policy** - Configurable requirements
+- **Role-Based Authorization** - User roles and permissions
+- **Token Revocation** - Logout and invalidate tokens
+- **IP Tracking** - Security auditing
+
+### Quick Start
+
+**1. Habilitar no appsettings.json:**
+```json
+{
+  "Authentication": {
+    "Enabled": true,
+    "JwtSettings": {
+      "Secret": "your-256-bit-secret-key-change-this",
+      "Issuer": "ProjectTemplate",
+      "Audience": "ProjectTemplate",
+      "ExpirationMinutes": 60
+    }
+  }
+}
+```
+
+**2. Criar migration:**
+```bash
+dotnet ef migrations add AddAuthentication --project src/Data --startup-project src/Api
+dotnet ef database update --project src/Data --startup-project src/Api
+```
+
+**3. Testar no Swagger:**
+```bash
+dotnet run --project src/Api
+# Acesse http://localhost:5000
+# POST /api/auth/register - Registrar usuário
+# POST /api/auth/login - Fazer login
+# Use o botão "Authorize" no Swagger com: Bearer {token}
+```
+
+### Endpoints Disponíveis
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST | `/api/auth/register` | Registrar novo usuário |
+| POST | `/api/auth/login` | Login com username/email e senha |
+| POST | `/api/auth/refresh-token` | Renovar access token |
+| POST | `/api/auth/revoke-token` | Revogar refresh token (logout) |
+| GET | `/api/auth/me` | Obter informações do usuário logado |
+| POST | `/api/auth/change-password` | Alterar senha |
+| PUT | `/api/auth/profile` | Atualizar perfil do usuário |
+| POST | `/api/auth/oauth2/login` | Login com OAuth2 providers |
+
+### Exemplo de Uso
+
+```csharp
+// Register
+var registerDto = new RegisterDto
+{
+    Username = "john.doe",
+    Email = "john@example.com",
+    Password = "P@ssw0rd123",
+    FirstName = "John",
+    LastName = "Doe"
+};
+
+var response = await authService.RegisterAsync(registerDto);
+// response.AccessToken
+// response.RefreshToken
+
+// Login
+var loginDto = new LoginDto
+{
+    UsernameOrEmail = "john.doe",
+    Password = "P@ssw0rd123"
+};
+
+var authResponse = await authService.LoginAsync(loginDto, "127.0.0.1");
+
+// Use token in API calls
+httpClient.DefaultRequestHeaders.Authorization = 
+    new AuthenticationHeaderValue("Bearer", authResponse.AccessToken);
+```
+
+### OAuth2 Providers
+
+**Google:**
+```json
+{
+  "OAuth2Settings": {
+    "GoogleOAuthSettings": {
+      "Enabled": true,
+      "ClientId": "your-google-client-id",
+      "ClientSecret": "your-google-client-secret"
+    }
+  }
+}
+```
+
+**Microsoft:**
+```json
+{
+  "MicrosoftOAuthSettings": {
+    "Enabled": true,
+    "ClientId": "your-microsoft-client-id",
+    "ClientSecret": "your-microsoft-client-secret",
+    "TenantId": "common"
+  }
+}
+```
+
+**GitHub:**
+```json
+{
+  "GitHubOAuthSettings": {
+    "Enabled": true,
+    "ClientId": "your-github-client-id",
+    "ClientSecret": "your-github-client-secret"
+  }
+}
+```
+
+### Password Policy
+
+Configure requisitos de senha:
+```json
+{
+  "PasswordPolicySettings": {
+    "MinimumLength": 8,
+    "RequireDigit": true,
+    "RequireLowercase": true,
+    "RequireUppercase": true,
+    "RequireNonAlphanumeric": true,
+    "MaxFailedAccessAttempts": 5,
+    "LockoutMinutes": 15
+  }
+}
+```
+
+### Security Best Practices
+
+- ✅ Use HTTPS in production (`RequireHttpsMetadata = true`)
+- ✅ Store JWT secret in environment variables or Key Vault
+- ✅ Keep access tokens short-lived (15-60 minutes)
+- ✅ Use refresh token rotation
+- ✅ Store refresh tokens in HttpOnly cookies
+- ✅ Implement rate limiting on auth endpoints
+- ✅ Log authentication events for auditing
+- ⚠️ **Production:** Replace SHA256 with BCrypt or Argon2
+
+### Mais Informações
+
+📖 **[Documentação completa de Authentication](AUTHENTICATION.md)**
+
+---
+
 **Navegação:**
 - [⬆️ Voltar ao README](../README.md)
 - [📖 Ver Índice](../INDEX.md)

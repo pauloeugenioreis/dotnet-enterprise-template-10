@@ -15,8 +15,9 @@
 - **[🔄 Guia de ORMs](docs/ORM-GUIDE.md)** - Como alternar entre ORMs (EF Core, Dapper, ADO.NET)
 - **[📊 Guia de Telemetria](docs/TELEMETRY.md)** - Observabilidade com OpenTelemetry
 - **[🚦 Guia de Rate Limiting](docs/RATE-LIMITING.md)** - Controle de taxa de requisições
-- **[� Guia de Event Sourcing](docs/EVENT-SOURCING.md)** - Auditoria completa e time travel
-- **[�🔄 Guia de CI/CD](docs/CICD.md)** - GitHub Actions, Azure DevOps, GitLab CI
+- **[📜 Guia de Event Sourcing](docs/EVENT-SOURCING.md)** - Auditoria completa e time travel
+- **[🔐 Guia de Authentication](docs/AUTHENTICATION.md)** - JWT & OAuth2
+- **[🔄 Guia de CI/CD](docs/CICD.md)** - GitHub Actions, Azure DevOps, GitLab CI
 - **[☸️ Guia Kubernetes](docs/KUBERNETES.md)** - Deploy em K8s
 - **[📝 Changelog](CHANGELOG.md)** - Histórico de mudanças
 - **[🤝 Contribuindo](CONTRIBUTING.md)** - Como contribuir
@@ -34,6 +35,7 @@ Este template fornece uma estrutura completa e moderna para desenvolvimento de A
 - **Telemetria completa** com OpenTelemetry (Jaeger, Prometheus, Grafana, Application Insights, Datadog, Dynatrace)
 - **Rate Limiting** com 4 estratégias (Fixed Window, Sliding Window, Token Bucket, Concurrency)
 - **Event Sourcing** com Marten (PostgreSQL) para auditoria completa e time travel
+- **Authentication** com JWT e OAuth2 (Google, Microsoft, GitHub)
 - **CI/CD pronto** para GitHub Actions, Azure DevOps e GitLab CI
 - **Infraestrutura modular** com extension methods
 - **Configurações validadas** em tempo de startup
@@ -289,6 +291,29 @@ dotnet run --project src/Api
 - API: `https://localhost:5001`
 - Swagger: `https://localhost:5001/swagger`
 - Health Check: `https://localhost:5001/health`
+
+### 11. Login com Credenciais Padrão 🔑
+
+O sistema cria automaticamente um usuário administrador na primeira execução:
+
+```
+Username: admin
+Password: Admin@2026!Secure
+Email:    admin@projecttemplate.com
+Role:     Admin
+```
+
+**Teste no Swagger:**
+1. Vá para `/swagger`
+2. Execute `POST /api/auth/login` com as credenciais acima
+3. Copie o `accessToken` da resposta
+4. Clique no botão "🔒 Authorize" no topo
+5. Digite: `Bearer SEU_ACCESS_TOKEN`
+6. Agora você pode testar todos os endpoints autenticados!
+
+> ⚠️ **IMPORTANTE**: Altere esta senha em produção!
+
+Para mais detalhes sobre autenticação, veja [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md)
 
 ---
 

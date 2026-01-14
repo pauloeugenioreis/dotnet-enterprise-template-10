@@ -122,10 +122,10 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 
 ### "Quero adicionar autenticação"
 
-1. Leia: [docs/FEATURES.md](docs/FEATURES.md) - Seção "JWT Authentication"
+1. Leia: [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md) - Guia completo de JWT & OAuth2
 2. Configure: `AppSettings.Authentication` em appsettings.json
-3. Descomente: Pacotes JWT em Infrastructure.csproj
-4. Ative: `builder.AddAuthentication()` em Program.cs
+3. Migration: `dotnet ef migrations add AddAuthentication`
+4. Teste: Use o Swagger com "Authorize" button
 
 ### "Quero usar MongoDB"
 
@@ -175,9 +175,16 @@ template/
 ├── 📄 docker-compose.yml            # Docker compose
 │
 ├── 📁 docs/                         # Documentação adicional
+│   ├── 📄 ARCHITECTURE.md          # Arquitetura detalhada
 │   ├── 📄 FEATURES.md              # Recursos avançados
 │   ├── 📄 ORM-GUIDE.md             # Guia de ORMs
-│   └── 📄 KUBERNETES.md            # Guia Kubernetes
+│   ├── 📄 TELEMETRY.md             # Telemetria e observabilidade
+│   ├── 📄 RATE-LIMITING.md         # Rate limiting
+│   ├── 📄 EVENT-SOURCING.md        # Event sourcing
+│   ├── 📄 AUTHENTICATION.md        # JWT & OAuth2
+│   ├── 📄 CICD.md                  # CI/CD pipelines
+│   ├── 📄 KUBERNETES.md            # Guia Kubernetes
+│   └── 📁 examples/                # Exemplos práticos
 │
 ├── 📁 src/                          # Código fonte
 │   ├── 📁 Api/                     # Camada de apresentação
