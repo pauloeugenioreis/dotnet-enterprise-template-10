@@ -15,9 +15,11 @@ builder.Configuration
 // Add services
 builder.Services.AddControllers();
 
-// Add Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// Add Swagger with JWT authentication (skip in Testing environment to avoid version conflicts)
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddSwaggerWithAuth();
+}
 
 // Add infrastructure services
 builder.Services.AddInfrastructureServices(builder.Configuration, builder.Environment);
@@ -41,8 +43,11 @@ if (app.Environment.IsDevelopment())
 // Configure HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerWithAuth();
+}
+else if (app.Environment.IsEnvironment("Testing"))
+{
+    // Skip Swagger in Testing environment
 }
 
 app.UseHttpsRedirection();

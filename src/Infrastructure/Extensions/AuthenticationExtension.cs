@@ -1,28 +1,45 @@
+using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using ProjectTemplate.Domain;
-using System;
-using System.Text;
-using System.Threading.Tasks;
+using ProjectTemplate.Domain.Interfaces;
+using ProjectTemplate.Infrastructure.Services;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
 
 /// <summary>
-/// Extension methods for Authentication and Authorization
-/// Provides JWT Bearer authentication and policy-based authorization
+/// Authentication extension methods for configuring JWT Bearer authentication
 /// </summary>
 public static class AuthenticationExtension
 {
     /// <summary>
-    /// Adds JWT Authentication and Authorization services
-    /// Configure in appsettings.json under AppSettings:Authentication
+    /// Add JWT Authentication services
     /// </summary>
-    public static IServiceCollection AddAuthenticationExtension(this IServiceCollection services)
+    public static IServiceCollection AddJwtAuthentication(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
+        var authSettings = configuration.GetSection("Authentication").Get<AuthenticationSettings>() 
+            ?? new AuthenticationSettings();
+
+        if (!authSettings.Enabled)
+        {
+            Console.WriteLine("⚠️  Authentication is disabled");
+            return services;
+        }
+
+        // Register authentication services
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ITokenService, JwtTokenService>();
+
+        // Configure JWT Bearer Authentication
+        var key = Encoding.ASCII.GetBytes(authSettings.Jwt.Secret);
+
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -30,61 +47,115 @@ public static class AuthenticationExtension
         })
         .AddJwtBearer(options =>
         {
-            var sp = services.BuildServiceProvider();
-            var appSettings = sp.GetRequiredService<IOptions<AppSettings>>().Value;
-            var jwtSettings = appSettings.Authentication?.Jwt;
-
-            if (jwtSettings != null)
+            options.RequireHttpsMetadata = false; // Set to true in production
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters
             {
-                options.RequireHttpsMetadata = appSettings.Infrastructure?.Environment != "Development";
-                options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = !string.IsNullOrWhiteSpace(jwtSettings.Issuer),
-                    ValidIssuer = jwtSettings.Issuer,
-                    ValidateAudience = !string.IsNullOrWhiteSpace(jwtSettings.Audience),
-                    ValidAudience = jwtSettings.Audience,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtSettings.Secret ?? throw new InvalidOperationException("JWT Secret is required"))),
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.FromMinutes(5)
-                };
-            }
+                ValidateIssuer = authSettings.Jwt.ValidateIssuer,
+                ValidateAudience = authSettings.Jwt.ValidateAudience,
+                ValidateLifetime = authSettings.Jwt.ValidateLifetime,
+                ValidateIssuerSigningKey = authSettings.Jwt.ValidateIssuerSigningKey,
+                ValidIssuer = authSettings.Jwt.Issuer,
+                ValidAudience = authSettings.Jwt.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ClockSkew = TimeSpan.Zero // Remove default 5 minute tolerance
+            };
 
             options.Events = new JwtBearerEvents
             {
-                OnAuthenticationFailed = ctx =>
+                OnAuthenticationFailed = context =>
                 {
-                    var logger = ctx.HttpContext.RequestServices
-                        .GetRequiredService<ILoggerFactory>()
-                        .CreateLogger("JwtBearer");
-                    logger.LogError(ctx.Exception, "JWT authentication failed.");
+                    if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                    {
+                        context.Response.Headers.Add("Token-Expired", "true");
+                    }
                     return Task.CompletedTask;
                 },
-                OnTokenValidated = ctx =>
+                OnChallenge = context =>
                 {
-                    var logger = ctx.HttpContext.RequestServices
-                        .GetRequiredService<ILoggerFactory>()
-                        .CreateLogger("JwtBearer");
-                    logger.LogInformation("JWT token validated for user: {User}", 
-                        ctx.Principal?.Identity?.Name ?? "Unknown");
-                    return Task.CompletedTask;
+                    context.HandleResponse();
+                    context.Response.StatusCode = 401;
+                    context.Response.ContentType = "application/json";
+                    var result = System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        error = "Unauthorized",
+                        message = "You are not authorized to access this resource"
+                    });
+                    return context.Response.WriteAsync(result);
                 }
             };
         });
 
-        services.AddAuthorization(options =>
+        // Configure OAuth2 providers if enabled
+        // Note: OAuth2 providers require additional NuGet packages:
+        // - Google: Microsoft.AspNetCore.Authentication.Google
+        // - Microsoft: Microsoft.AspNetCore.Authentication.MicrosoftAccount
+        // - GitHub: AspNet.Security.OAuth.GitHub
+        /*
+        if (authSettings.OAuth2.Enabled)
         {
-            // Default policy requires authentication
-            options.FallbackPolicy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
-                .Build();
+            var authBuilder = services.AddAuthentication();
 
-            // Add custom policies here
-            // Example: options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-        });
+            // Google OAuth2
+            if (authSettings.OAuth2.Google.Enabled)
+            {
+                authBuilder.AddGoogle(options =>
+                {
+                    options.ClientId = authSettings.OAuth2.Google.ClientId;
+                    options.ClientSecret = authSettings.OAuth2.Google.ClientSecret;
+                });
+                Console.WriteLine("✅ Google OAuth2 enabled");
+            }
 
+            // Microsoft OAuth2
+            if (authSettings.OAuth2.Microsoft.Enabled)
+            {
+                authBuilder.AddMicrosoftAccount(options =>
+                {
+                    options.ClientId = authSettings.OAuth2.Microsoft.ClientId;
+                    options.ClientSecret = authSettings.OAuth2.Microsoft.ClientSecret;
+                    if (!string.IsNullOrEmpty(authSettings.OAuth2.Microsoft.TenantId))
+                    {
+                        options.AuthorizationEndpoint = $"https://login.microsoftonline.com/{authSettings.OAuth2.Microsoft.TenantId}/oauth2/v2.0/authorize";
+                        options.TokenEndpoint = $"https://login.microsoftonline.com/{authSettings.OAuth2.Microsoft.TenantId}/oauth2/v2.0/token";
+                    }
+                });
+                Console.WriteLine("✅ Microsoft OAuth2 enabled");
+            }
+
+            // GitHub OAuth2
+            if (authSettings.OAuth2.GitHub.Enabled)
+            {
+                authBuilder.AddGitHub(options =>
+                {
+                    options.ClientId = authSettings.OAuth2.GitHub.ClientId;
+                    options.ClientSecret = authSettings.OAuth2.GitHub.ClientSecret;
+                });
+                Console.WriteLine("✅ GitHub OAuth2 enabled");
+            }
+        }
+        */
+
+        services.AddAuthorization();
+
+        Console.WriteLine("✅ JWT Authentication enabled");
         return services;
+    }
+
+    /// <summary>
+    /// Use Authentication middleware
+    /// </summary>
+    public static IApplicationBuilder UseJwtAuthentication(this IApplicationBuilder app)
+    {
+        // Skip authentication in Testing environment
+        var env = app.ApplicationServices.GetService<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+        if (env?.EnvironmentName == "Testing")
+        {
+            return app;
+        }
+        
+        app.UseAuthentication();
+        app.UseAuthorization();
+        return app;
     }
 }

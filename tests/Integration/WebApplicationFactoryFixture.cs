@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Configuration;
 using ProjectTemplate.Data.Context;
 using Asp.Versioning;
 
@@ -15,8 +16,44 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        // Set environment to Testing to disable Swagger in Program.cs
+        builder.UseEnvironment("Testing");
+        
+        // Add test configuration with valid JWT secret
+        builder.ConfigureAppConfiguration((context, config) =>
+        {
+            config.AddInMemoryCollection(new Dictionary<string, string>
+            {
+                ["Authentication:Enabled"] = "false"
+            }!);
+        });
+        
         builder.ConfigureServices(services =>
         {
+            // Remove ALL Swagger-related services to avoid OpenAPI version conflicts
+            var swaggerDescriptors = services
+                .Where(d => d.ServiceType.Namespace != null && 
+                           (d.ServiceType.Namespace.StartsWith("Swashbuckle") ||
+                            d.ServiceType.Namespace.StartsWith("Microsoft.OpenApi")))
+                .ToList();
+            
+            foreach (var descriptor in swaggerDescriptors)
+            {
+                services.Remove(descriptor);
+            }
+            
+            // Remove ALL Authentication services to avoid JWT configuration issues
+            var authDescriptors = services
+                .Where(d => d.ServiceType.Namespace != null && 
+                           (d.ServiceType.Namespace.StartsWith("Microsoft.AspNetCore.Authentication") ||
+                            d.ServiceType.FullName?.Contains("Authentication") == true))
+                .ToList();
+            
+            foreach (var descriptor in authDescriptors)
+            {
+                services.Remove(descriptor);
+            }
+
             // Remove the existing DbContext registration
             services.RemoveAll(typeof(DbContextOptions<ApplicationDbContext>));
             services.RemoveAll(typeof(ApplicationDbContext));
@@ -62,9 +99,6 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
             // Seed test data if needed
             SeedTestData(db);
         });
-
-        // Use Test environment but don't override the whole configuration
-        builder.UseEnvironment("Development");
     }
 
     private static void SeedTestData(ApplicationDbContext context)
