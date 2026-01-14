@@ -19,7 +19,8 @@ Este guia explica como habilitar e configurar os recursos avançados incluídos 
 11. [Exception Notification](#exception-notification)
 12. [📊 Telemetria e Observabilidade](#telemetria-e-observabilidade)
 13. [🚦 Rate Limiting](#rate-limiting)
-14. [🔄 CI/CD](#cicd)
+14. [� Event Sourcing](#event-sourcing)
+15. [�🔄 CI/CD](#cicd)
 
 ---
 
@@ -1558,6 +1559,48 @@ dotnet test
 - Personalização avançada
 - Testes locais de pipelines
 - Troubleshooting completo
+
+---
+
+## 📜 Event Sourcing
+
+### O que é?
+
+**Event Sourcing** é um padrão arquitetural onde o estado da aplicação é determinado por uma sequência de eventos imutáveis, ao invés de armazenar apenas o estado atual. Fornece auditoria completa, rastreabilidade e capacidade de "time travel".
+
+### Quando Usar
+
+| Cenário | Recomendação |
+|---------|--------------|
+| Sistemas financeiros | ✅ Altamente recomendado |
+| E-commerce (pedidos, pagamentos) | ✅ Recomendado |
+| Healthcare (prontuários) | ✅ Recomendado |
+
+### Quick Start
+
+```json
+{
+  "Infrastructure": {
+    "EventSourcing": {
+      "Enabled": true,
+      "Mode": "Hybrid",
+      "AuditEntities": ["Order"]
+    }
+  }
+}
+```
+
+```bash
+docker-compose up -d postgres-events
+```
+
+**API de Auditoria:**
+- `GET /api/audit/Order/123` - Histórico completo
+- `GET /api/audit/Order/123/at/2026-01-11T12:00:00Z` - Time travel
+
+### Mais Informações
+
+📖 **[Documentação completa de Event Sourcing](EVENT-SOURCING.md)**
 
 ---
 

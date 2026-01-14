@@ -16,8 +16,11 @@ services:
       - AppSettings__Infrastructure__Telemetry__Providers__0=jaeger
       - AppSettings__Infrastructure__Telemetry__Providers__1=prometheus
       - AppSettings__Infrastructure__Telemetry__Jaeger__Host=jaeger
+      - AppSettings__Infrastructure__EventSourcing__Enabled=true
+      - AppSettings__Infrastructure__EventSourcing__ConnectionString=Host=postgres-events;Database=ProjectTemplateEvents;Username=postgres;Password=postgres
     depends_on:
       - sqlserver
+      - postgres-events
       - jaeger
       - prometheus
     networks:
@@ -34,6 +37,26 @@ services:
       - sqlserver-data:/var/opt/mssql
     networks:
       - app-network
+
+  # PostgreSQL - Event Store for Event Sourcing
+  postgres-events:
+    image: postgres:17-alpine
+    container_name: postgres-events
+    environment:
+      - POSTGRES_DB=ProjectTemplateEvents
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-events-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Jaeger - Distributed Tracing
   jaeger:
@@ -113,6 +136,7 @@ networks:
 
 volumes:
   sqlserver-data:
+  postgres-events-data:
   prometheus-data:
   grafana-data:
 

@@ -34,6 +34,9 @@ public static class InfrastructureExtensions
         // Rate Limiting
         services.AddRateLimitingConfiguration(configuration);
 
+        // Event Sourcing
+        services.AddEventSourcing(configuration);
+
         // CORS
         services.AddCors(options =>
         {

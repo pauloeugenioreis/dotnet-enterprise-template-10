@@ -34,6 +34,7 @@ public class InfrastructureSettings
     public StorageSettings Storage { get; set; } = new();
     public TelemetrySettings Telemetry { get; set; } = new();
     public RateLimitingSettings RateLimiting { get; set; } = new();
+    public EventSourcingSettings EventSourcing { get; set; } = new();
 }
 
 public class CacheSettings
@@ -186,5 +187,79 @@ public class ConcurrencyPolicy
     public bool Enabled { get; set; } = true;
     public int PermitLimit { get; set; } = 50; // Requests simultâneas permitidas
     public int QueueLimit { get; set; } = 100; // Requests enfileiradas
+}
+
+/// <summary>
+/// Event Sourcing configuration settings
+/// </summary>
+public class EventSourcingSettings
+{
+    /// <summary>
+    /// Enable/disable Event Sourcing globally
+    /// </summary>
+    public bool Enabled { get; set; } = false;
+    
+    /// <summary>
+    /// Event Sourcing mode: Traditional, Hybrid, or EventStore
+    /// </summary>
+    public EventSourcingMode Mode { get; set; } = EventSourcingMode.Hybrid;
+    
+    /// <summary>
+    /// Event Store provider: Marten, Custom, EventStoreDB
+    /// </summary>
+    public string Provider { get; set; } = "Marten";
+    
+    /// <summary>
+    /// PostgreSQL connection string for Event Store (required for Marten)
+    /// </summary>
+    public string ConnectionString { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// Entities to audit via Event Sourcing (empty = all entities)
+    /// </summary>
+    public List<string> AuditEntities { get; set; } = new();
+    
+    /// <summary>
+    /// Enable snapshot storage for performance optimization
+    /// </summary>
+    public bool StoreSnapshots { get; set; } = true;
+    
+    /// <summary>
+    /// Create snapshot every N events (improves read performance)
+    /// </summary>
+    public int SnapshotInterval { get; set; } = 10;
+    
+    /// <summary>
+    /// Enable audit API endpoints
+    /// </summary>
+    public bool EnableAuditApi { get; set; } = true;
+    
+    /// <summary>
+    /// Store additional metadata (IP address, user agent, etc.)
+    /// </summary>
+    public bool StoreMetadata { get; set; } = true;
+}
+
+/// <summary>
+/// Event Sourcing operational mode
+/// </summary>
+public enum EventSourcingMode
+{
+    /// <summary>
+    /// Traditional CRUD - No event sourcing (EF Core only)
+    /// </summary>
+    Traditional = 0,
+    
+    /// <summary>
+    /// Hybrid mode - EF Core as source of truth + Events for audit trail
+    /// Best for gradual adoption and simple audit requirements
+    /// </summary>
+    Hybrid = 1,
+    
+    /// <summary>
+    /// Event Store as source of truth - All state derived from events
+    /// Best for full event sourcing, time travel, and complex audit requirements
+    /// </summary>
+    EventStore = 2
 }
 
