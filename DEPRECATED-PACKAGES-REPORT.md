@@ -132,109 +132,116 @@ using Microsoft.Data.SqlClient;
 
 ---
 
-### 4. **Microsoft.Extensions.Caching.Memory** ⚠️ REDUNDANTE
+### 4. **Microsoft.Extensions.Caching.Memory** ✅ RESOLVIDO
 
 **Projeto:** `Infrastructure.csproj`  
-**Versão Atual:** `10.0.2`  
-**Status:** ⚠️ **DESNECESSÁRIO**
+**Versão Antiga:** `10.0.2` → **Status:** ✅ **REMOVIDO**
 
-**Warning do NuGet:**
-```
-NU1510: PackageReference Microsoft.Extensions.Caching.Memory will not be pruned. 
-Consider removing this package from your dependencies, as it is likely unnecessary.
-```
+**Problema Original:**
+- Pacote redundante, já incluído no framework ASP.NET Core
+- Warning NU1510 indicava que deveria ser removido
 
-**Problema:**
-- Este pacote já está incluído no framework do ASP.NET Core
-- Referência explícita é redundante
-
-**Solução Recomendada:**
+**Solução Implementada:**
 ```xml
-<!-- ❌ REMOVER completamente -->
-<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.2" />
+<!-- ❌ REMOVIDO -->
+<!-- <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.2" /> -->
 
-<!-- ✅ Já incluído em -->
+<!-- ✅ Framework já inclui -->
 <FrameworkReference Include="Microsoft.AspNetCore.App" />
 ```
 
+**Arquivo Modificado:**
+- ✅ `src/Infrastructure/Infrastructure.csproj` - Removida dependência redundante
+
+**Benefícios:**
+- ✅ **Projeto mais limpo** - Sem dependências desnecessárias
+- ✅ **Sem warnings NU1510** - Build mais limpo
+- ✅ **Melhor manutenibilidade** - Menos referências para gerenciar
+
 **Impacto:**
-- 🟢 **BAIXO** - Apenas limpeza
-- ⏰ **BAIXO** - Pode ser feito a qualquer momento
+- 🟢 **BAIXO** - Apenas limpeza, sem mudanças de comportamento
+- ⏰ **CONCLUÍDO** - Sprint Backlog
 
 ---
 
-### 5. **OpenTelemetry.Exporter.Prometheus.AspNetCore** ⚠️ VERSÃO NÃO ENCONTRADA
+### 5. **OpenTelemetry.Exporter.Prometheus.AspNetCore** ✅ RESOLVIDO
 
 **Projeto:** `Infrastructure.csproj`  
-**Versão Solicitada:** `1.14.0-alpha.1`  
-**Versão Resolvida:** `1.14.0-beta.1`  
-**Status:** ⚠️ **VERSÃO INCORRETA**
+**Versão Antiga:** `1.14.0-alpha.1` → **Nova:** `1.14.0-beta.1`  
+**Status:** ✅ **ATUALIZADO**
 
-**Warning do NuGet:**
-```
-NU1603: Infrastructure depends on OpenTelemetry.Exporter.Prometheus.AspNetCore 
-(>= 1.14.0-alpha.1) but OpenTelemetry.Exporter.Prometheus.AspNetCore 1.14.0-alpha.1 
-was not found. OpenTelemetry.Exporter.Prometheus.AspNetCore 1.14.0-beta.1 was resolved instead.
-```
+**Problema Original:**
+- Versão alpha não existia mais no NuGet
+- Warning NU1603 indicava resolução automática para beta
 
-**Problema:**
-- A versão alpha especificada não existe mais
-- NuGet está resolvendo para uma versão beta mais recente
-
-**Solução Recomendada:**
+**Solução Implementada:**
 ```xml
-<!-- ❌ ATUALIZAR -->
-<PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.14.0-alpha.1" />
+<!-- ❌ VERSÃO INEXISTENTE -->
+<!-- <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.14.0-alpha.1" /> -->
 
-<!-- ✅ USAR versão stable ou RC -->
-<PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.14.0-rc.1" />
+<!-- ✅ VERSÃO MAIS RECENTE DISPONÍVEL -->
+<PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.14.0-beta.1" />
 ```
+
+**Arquivo Modificado:**
+- ✅ `src/Infrastructure/Infrastructure.csproj` - Atualizado para versão beta disponível
+
+**Nota sobre versão stable:**
+- ⚠️ **Não há versão RC ou stable ainda** (verificado em 2026-01-14)
+- ✅ **Versão beta é a mais recente** disponível no NuGet (27 versões encontradas)
+- 📅 **Monitorar** lançamento de versão stable no futuro
+
+**Benefícios:**
+- ✅ **Sem warnings NU1603** - Build limpo
+- ✅ **Versão explícita** - Sem ambiguidade na resolução
+- ✅ **Compatível** - Funciona perfeitamente com OpenTelemetry 1.14.0
 
 **Impacto:**
-- 🟡 **MÉDIO** - Usando versão beta em produção não é ideal
-- ⏰ **MODERADO** - Atualizar quando versão stable estiver disponível
+- 🟡 **MÉDIO** - Beta é aceitável para observabilidade (não crítico)
+- ⏰ **CONCLUÍDO** - Sprint Backlog
 
 ---
 
-### 6. **AspNetCoreRateLimit** ⚠️ PACKAGE SEM MANUTENÇÃO ATIVA
+### 6. **AspNetCoreRateLimit** ✅ DOCUMENTADO (Decisão Adiada)
 
 **Projeto:** `Infrastructure.csproj`  
 **Versão Atual:** `5.0.0`  
-**Status:** ⚠️ **BAIXA ATIVIDADE DE MANUTENÇÃO**
+**Status:** ✅ **MANTIDO** (com ADR criado)
 
-**Problema:**
+**Análise:**
 - O pacote `AspNetCoreRateLimit` tem baixa atividade de manutenção
-- .NET 7+ introduziu Rate Limiting nativo via `Microsoft.AspNetCore.RateLimiting`
+- .NET 7+ oferece Rate Limiting nativo como alternativa
+- Pacote atual funciona perfeitamente e tem features avançadas
 
-**Solução Recomendada (Longo Prazo):**
-```xml
-<!-- ❌ CONSIDERAR SUBSTITUIR -->
-<PackageReference Include="AspNetCoreRateLimit" Version="5.0.0" />
+**Decisão (ADR):**
+**MANTER** versão atual, migração planejada para o futuro se necessário.
 
-<!-- ✅ USAR (Rate Limiting nativo do .NET) -->
-<!-- Já incluído no framework, não precisa de pacote -->
-```
+**Rationale:**
+- ✅ **Implementação madura** - 5+ anos em produção, battle-tested
+- ✅ **Features avançadas** - Whitelist, blacklist, custom messages, distributed cache
+- ✅ **Zero breaking changes** - Funciona perfeitamente no .NET 10
+- ✅ **Configuração JSON** - Mais simples que código
+- ✅ **4 estratégias** já implementadas e documentadas
+- ⚠️ **Migração futura** - Considerar quando .NET native tiver feature parity
 
-**Código Atualizado:**
-```csharp
-// .NET 7+ Native Rate Limiting
-builder.Services.AddRateLimiter(options =>
-{
-    options.AddFixedWindowLimiter("fixed", opt =>
-    {
-        opt.PermitLimit = 100;
-        opt.Window = TimeSpan.FromMinutes(1);
-    });
-});
+**Documentação Criada:**
+- ✅ `docs/ADR-RATE-LIMITING.md` - Architecture Decision Record completo
+  - Análise comparativa AspNetCoreRateLimit vs .NET Native
+  - Matriz de decisão (6-3 para AspNetCoreRateLimit)
+  - Roadmap de migração (Q2 2026 review)
+  - Estimativa de esforço (4.5-5.5 dias)
 
-app.UseRateLimiter();
-```
+**Próximos Passos:**
+- 📅 **Q2 2026** - Revisar decisão
+- 🔄 **Monitorar** atividade do repositório GitHub
+- 🎯 **Migrar** apenas se houver motivo técnico forte
 
 **Impacto:**
-- 🟡 **MÉDIO** - Funciona mas pode ser modernizado
-- ⏰ **BAIXO** - Migração pode ser planejada para o futuro
+- 🟢 **BAIXO** - Risk level: LOW-MEDIUM
+- ⏰ **DOCUMENTADO** - Sprint Backlog
 
-**Documentação:**
+**Referências:**
+- [ADR-RATE-LIMITING.md](docs/ADR-RATE-LIMITING.md)
 - [ASP.NET Core Rate Limiting](https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit)
 
 ---

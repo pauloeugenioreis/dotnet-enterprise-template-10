@@ -31,7 +31,7 @@
     
     <!-- Caching -->
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.2" />
+    <!-- Microsoft.Extensions.Caching.Memory REMOVED - Already included in Microsoft.AspNetCore.App framework -->
     
     <!-- InMemory Database -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.2" />
@@ -72,7 +72,8 @@
     <!-- OpenTelemetry.Exporter.Jaeger REMOVED - Deprecated/Legacy -->
     <!-- Use OpenTelemetry.Exporter.OpenTelemetryProtocol instead (already included above) -->
     <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.14.0" />
-    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.14.0-alpha.1" />
+    <!-- Using latest available version (1.14.0-beta.1 - no stable version yet) -->
+    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.14.0-beta.1" />
     <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.5.0" />
     
     <!-- Event Sourcing -->
