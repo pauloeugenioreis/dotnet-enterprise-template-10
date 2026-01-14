@@ -44,6 +44,10 @@ public class DbSeeder
 
         Console.WriteLine("Starting database seed...");
 
+        // Seed Roles and Admin User
+        await SeedRolesAndAdminUserAsync();
+        Console.WriteLine("✓ Seeded roles and admin user");
+
         // Seed Products (150 products)
         var products = await SeedProductsAsync(150);
         Console.WriteLine($"✓ Seeded {products.Count} products");
@@ -53,6 +57,105 @@ public class DbSeeder
         Console.WriteLine($"✓ Seeded {orderCount} orders with items");
 
         Console.WriteLine("Database seed completed successfully!");
+    }
+
+    /// <summary>
+    /// Seeds roles and creates the default admin user
+    /// Default Credentials: admin / Admin@2026!Secure
+    /// </summary>
+    private async Task SeedRolesAndAdminUserAsync()
+    {
+        // Create Roles
+        if (!await _context.Roles.AnyAsync())
+        {
+            var roles = new List<Role>
+            {
+                new Role
+                {
+                    Name = "Admin",
+                    Description = "Administrator with full system access",
+                    IsSystemRole = true,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Role
+                {
+                    Name = "User",
+                    Description = "Standard user with limited access",
+                    IsSystemRole = true,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Role
+                {
+                    Name = "Manager",
+                    Description = "Manager with elevated access",
+                    IsSystemRole = false,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                }
+            };
+
+            await _context.Roles.AddRangeAsync(roles);
+            await _context.SaveChangesAsync();
+        }
+
+        // Create Default Admin User
+        if (!await _context.Users.AnyAsync())
+        {
+            // Password: Admin@2026!Secure
+            var passwordHash = HashPassword("Admin@2026!Secure");
+            
+            var adminUser = new User
+            {
+                Username = "admin",
+                Email = "admin@projecttemplate.com",
+                PasswordHash = passwordHash,
+                FirstName = "System",
+                LastName = "Administrator",
+                PhoneNumber = "+55 11 99999-9999",
+                IsActive = true,
+                EmailConfirmed = true,
+                TwoFactorEnabled = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _context.Users.AddAsync(adminUser);
+            await _context.SaveChangesAsync();
+
+            // Assign Admin role
+            var adminRole = await _context.Roles.FirstAsync(r => r.Name == "Admin");
+            var userRole = new UserRole
+            {
+                UserId = adminUser.Id,
+                RoleId = adminRole.Id,
+                AssignedAt = DateTime.UtcNow
+            };
+
+            await _context.UserRoles.AddAsync(userRole);
+            await _context.SaveChangesAsync();
+
+            Console.WriteLine("═══════════════════════════════════════════════════════");
+            Console.WriteLine("   DEFAULT ADMIN CREDENTIALS");
+            Console.WriteLine("═══════════════════════════════════════════════════════");
+            Console.WriteLine("   Username: admin");
+            Console.WriteLine("   Password: Admin@2026!Secure");
+            Console.WriteLine("   Email:    admin@projecttemplate.com");
+            Console.WriteLine("═══════════════════════════════════════════════════════");
+            Console.WriteLine("   ⚠️  CHANGE THIS PASSWORD IN PRODUCTION!");
+            Console.WriteLine("═══════════════════════════════════════════════════════");
+        }
+    }
+
+    /// <summary>
+    /// Simple password hashing using SHA256 (matches AuthService implementation)
+    /// </summary>
+    private string HashPassword(string password)
+    {
+        using var sha256 = System.Security.Cryptography.SHA256.Create();
+        var bytes = System.Text.Encoding.UTF8.GetBytes(password);
+        var hash = sha256.ComputeHash(bytes);
+        return Convert.ToBase64String(hash);
     }
 
     /// <summary>
