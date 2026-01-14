@@ -133,7 +133,8 @@ services.AddDapper(connectionString);
 ```csharp
 using Dapper;
 using System.Data;
-using System.Data.SqlClient;
+// ✅ Use Microsoft.Data.SqlClient (moderno, mantido)
+using Microsoft.Data.SqlClient;
 
 public class ProductDapperRepository : IRepository<Product>
 {
@@ -213,6 +214,20 @@ private static IServiceCollection AddDapper(
     return services;
 }
 ```
+
+### ⚠️ Importante: Microsoft.Data.SqlClient
+
+**Desde .NET 10**, o projeto utiliza **Microsoft.Data.SqlClient** (versão moderna e ativa) ao invés do obsoleto `System.Data.SqlClient`.
+
+```csharp
+// ✅ Use Microsoft.Data.SqlClient (moderno, mantido)
+using Microsoft.Data.SqlClient;
+
+// ❌ NÃO use System.Data.SqlClient (obsoleto)
+// using System.Data.SqlClient;
+```
+
+**Compatibilidade**: O `Microsoft.Data.SqlClient` implementa `IDbConnection`, funcionando perfeitamente com **Dapper** e **ADO.NET**!
 
 **Pacotes Necessários**: Dapper já está incluído no `src/Data/Data.csproj` ✅
 
@@ -303,7 +318,25 @@ public class ProductAdoRepository : IRepository<Product>
 - ✅ Stored procedures complexas
 - ✅ **Cenários educacionais** para entender como ORMs funcionam por baixo dos panos
 
-**Pacotes Necessários**: `System.Data.SqlClient` já está incluído no projeto ✅
+### ⚠️ Importante: Microsoft.Data.SqlClient
+
+**Desde .NET 10**, o projeto utiliza **Microsoft.Data.SqlClient** (versão moderna e ativa) ao invés do obsoleto `System.Data.SqlClient`.
+
+```csharp
+// ✅ Use Microsoft.Data.SqlClient (moderno, mantido)
+using Microsoft.Data.SqlClient;
+
+// ❌ NÃO use System.Data.SqlClient (obsoleto)
+// using System.Data.SqlClient;
+```
+
+**Pacotes Necessários**: `Microsoft.Data.SqlClient >= 6.1.1` já está incluído no projeto ✅
+
+**Benefícios**:
+- ✅ **Suporte ativo** da Microsoft
+- ✅ **Novas features** do SQL Server
+- ✅ **Melhor segurança** e correções de bugs
+- ✅ **Compatível com .NET 10** e versões futuras
 
 ---
 

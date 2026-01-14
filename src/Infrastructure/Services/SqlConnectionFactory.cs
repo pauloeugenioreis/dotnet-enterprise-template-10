@@ -1,6 +1,6 @@
+using Microsoft.Data.SqlClient; // Updated from System.Data.SqlClient (obsolete)
 using ProjectTemplate.Domain.Interfaces;
 using System.Data.Common;
-using System.Data.SqlClient;
 
 namespace ProjectTemplate.Infrastructure.Services;
 
@@ -8,6 +8,7 @@ namespace ProjectTemplate.Infrastructure.Services;
 /// SQL Server connection factory implementation
 /// Registered in DI and injected into Dapper and ADO.NET repositories
 /// Returns DbConnection to support async operations
+/// Note: Uses Microsoft.Data.SqlClient (modern) instead of System.Data.SqlClient (obsolete)
 /// </summary>
 public class SqlConnectionFactory : IDbConnectionFactory
 {

@@ -51,7 +51,23 @@ public class GlobalExceptionHandler
             var notificationService = context.RequestServices.GetService<IExceptionNotificationService>();
             if (notificationService != null)
             {
-                await notificationService.NotifyAsync(context, exception);
+                // Create exception context DTO (decoupled from HttpContext)
+                var exceptionContext = new Domain.Dtos.ExceptionContext
+                {
+                    User = context.User.Identity?.Name ?? "Anonymous",
+                    Path = context.Request.Path,
+                    Method = context.Request.Method,
+                    IpAddress = context.Connection.RemoteIpAddress?.ToString(),
+                    UserAgent = context.Request.Headers.UserAgent.ToString(),
+                    Timestamp = DateTime.UtcNow,
+                    AdditionalInfo = new Dictionary<string, string>
+                    {
+                        ["TraceId"] = context.TraceIdentifier,
+                        ["ContentType"] = context.Request.ContentType ?? "N/A"
+                    }
+                };
+
+                await notificationService.NotifyAsync(exceptionContext, exception);
             }
         }
         catch (Exception notificationEx)

@@ -1,8 +1,7 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using ProjectTemplate.Domain.Dtos;
 using ProjectTemplate.Domain.Interfaces;
 using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace ProjectTemplate.Infrastructure.Services;
@@ -20,25 +19,25 @@ public class ExceptionNotificationService : IExceptionNotificationService
         _logger = logger;
     }
 
-    public Task NotifyAsync(HttpContext context, Exception exception)
+    public Task NotifyAsync(ExceptionContext context, Exception exception)
     {
         try
         {
-            var user = context.User.Identity?.Name ?? "Anonymous";
-            var path = context.Request.Path;
-            var method = context.Request.Method;
-
             // Log exception details
             _logger.LogError(exception,
-                "Exception occurred for user {User} on {Method} {Path}",
-                user, method, path);
+                "Exception occurred for user {User} on {Method} {Path} at {Timestamp}",
+                context.User, context.Method, context.Path, context.Timestamp);
 
-            // Add user claims if available
-            if (context.User.Identity is ClaimsIdentity claimsIdentity)
+            // Log additional context if available
+            if (context.AdditionalInfo != null && context.AdditionalInfo.Any())
             {
-                var claims = claimsIdentity.Claims;
-                _logger.LogDebug("User claims: {Claims}",
-                    string.Join(", ", claims.Select(c => $"{c.Type}={c.Value}")));
+                _logger.LogDebug("Additional context: {Context}",
+                    string.Join(", ", context.AdditionalInfo.Select(kvp => $"{kvp.Key}={kvp.Value}")));
+            }
+
+            if (!string.IsNullOrEmpty(context.IpAddress))
+            {
+                _logger.LogDebug("Client IP: {IpAddress}", context.IpAddress);
             }
 
             // TODO: Implement custom notification logic here

@@ -53,66 +53,79 @@ services.AddOpenTelemetry()
 
 ## ⚠️ Pacotes com Avisos
 
-### 2. **Microsoft.AspNetCore.Http.Abstractions** ⚠️ POTENCIALMENTE DESNECESSÁRIO
+### 2. **Microsoft.AspNetCore.Http.Abstractions** ✅ RESOLVIDO
 
 **Projeto:** `Domain.csproj`  
-**Versão Atual:** `2.3.9` (MUITO DESATUALIZADA)  
-**Status:** ⚠️ **VERSÃO ANTIGA**
+**Versão Antiga:** `2.3.9` → **Status:** ✅ **REMOVIDO**
 
-**Problema:**
-- Versão 2.3.9 é do .NET Core 2.x (lançada em 2018)
-- Em um projeto .NET 10, esta versão é extremamente antiga
-- Pode causar conflitos de dependências
+**Problema Original:**
+- Versão 2.3.9 do .NET Core 2.x violava Clean Architecture
+- Domain layer tinha dependência HTTP inadequada
 
-**Análise:**
-- O Domain layer NÃO deveria ter dependência de abstrações HTTP (viola Clean Architecture)
-- Esta dependência provavelmente vem de alguma classe que não deveria estar no Domain
+**Solução Implementada:**
+1. ✅ **Criado DTO de contexto** - `src/Domain/Dtos/ExceptionContext.cs`
+2. ✅ **Refatorado IExceptionNotificationService** - Usa ExceptionContext ao invés de HttpContext
+3. ✅ **Removida dependência HTTP** - Domain.csproj agora limpo
+4. ✅ **Criado IExecutionContextService** - Nova interface para contexto de execução
+5. ✅ **Implementado ExecutionContextService** - Infrastructure fornece contexto HTTP
+6. ✅ **Refatorado HybridRepository** - Usa IExecutionContextService ao invés de IHttpContextAccessor
 
-**Solução Recomendada:**
-1. **MELHOR:** Remover completamente esta dependência do Domain
-2. **ALTERNATIVA:** Se realmente necessário, atualizar para versão do .NET 10:
-   ```xml
-   <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="10.0.2" />
-   ```
+**Arquivos Modificados:**
+- ✅ `src/Domain/Dtos/ExceptionContext.cs` - Novo DTO para contexto de exceção
+- ✅ `src/Domain/Interfaces/IExceptionNotificationService.cs` - Refatorado
+- ✅ `src/Domain/Interfaces/IExecutionContextService.cs` - Nova interface
+- ✅ `src/Domain/Domain.csproj` - Removida dependência HTTP
+- ✅ `src/Infrastructure/Services/ExceptionNotificationService.cs` - Implementação atualizada
+- ✅ `src/Infrastructure/Services/ExecutionContextService.cs` - Nova implementação
+- ✅ `src/Infrastructure/Middleware/GlobalExceptionHandler.cs` - Cria ExceptionContext
+- ✅ `src/Data/Repository/HybridRepository.cs` - Usa IExecutionContextService
+- ✅ `src/Infrastructure/Extensions/DependencyInjectionExtensions.cs` - Registra novo serviço
+
+**Benefícios:**
+- ✅ **Clean Architecture respeitada** - Domain sem dependências de infraestrutura
+- ✅ **Testabilidade melhorada** - Interfaces podem ser mockadas facilmente
+- ✅ **Desacoplamento total** - Domain não conhece HTTP/ASP.NET Core
+- ✅ **Flexibilidade** - Pode usar contexto de outras fontes (gRPC, mensageria, etc)
 
 **Impacto:**
-- 🟡 **MÉDIO** - Pode causar problemas de compatibilidade
-- ⏰ **MODERADO** - Deve ser corrigido antes de produção
+- 🟡 **MÉDIO** - Refatoração significativa mas isolada
+- ⏰ **MODERADO** - Concluído no Próximo Sprint
 
 ---
 
-### 3. **System.Data.SqlClient** ⚠️ OBSOLETO (mas funcional)
+### 3. **System.Data.SqlClient** ✅ RESOLVIDO
 
 **Projeto:** `Data.csproj`  
-**Versão Atual:** `4.9.0`  
-**Status:** ⚠️ **SUBSTITUÍDO**
+**Versão Antiga:** `4.9.0` → **Nova:** `Microsoft.Data.SqlClient 6.1.1`  
+**Status:** ✅ **MIGRADO**
 
-**Problema:**
-- `System.Data.SqlClient` foi **substituído** por `Microsoft.Data.SqlClient`
-- Embora ainda funcione, não recebe mais atualizações ativas
-- Microsoft recomenda migração para `Microsoft.Data.SqlClient`
-
-**Solução Recomendada:**
+**Solução Implementada:**
 ```xml
-<!-- ❌ SUBSTITUIR -->
-<PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
+<!-- ❌ REMOVIDO -->
+<!-- <PackageReference Include="System.Data.SqlClient" Version="4.9.0" /> -->
 
-<!-- ✅ USAR -->
-<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.0" />
+<!-- ✅ IMPLEMENTADO -->
+<PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.1" />
 ```
 
-**Código a Atualizar:**
+**Código Atualizado:**
 ```csharp
-// ❌ Antigo
-using System.Data.SqlClient;
-
-// ✅ Novo
+// ✅ Atualizado em todos os repositórios
 using Microsoft.Data.SqlClient;
 ```
 
-**Impacto:**
-- 🟡 **MÉDIO** - Funciona mas não é recomendado
-- ⏰ **MODERADO** - Planejar migração em breve
+**Arquivos Modificados:**
+- ✅ `src/Data/Data.csproj` - Atualizado pacote para v6.1.1 (compatível com EF Core 10.0.2)
+- ✅ `src/Infrastructure/Services/SqlConnectionFactory.cs` - using atualizado
+- ✅ `src/Data/Repository/Dapper/*` - Usam IDbConnectionFactory (via Microsoft.Data.SqlClient)
+- ✅ `src/Data/Repository/Ado/*` - Usam IDbConnectionFactory (via Microsoft.Data.SqlClient)
+- ✅ `docs/ORM-GUIDE.md` - Documentação atualizada com exemplos
+
+**Benefícios:**
+- ✅ **Suporte ativo** da Microsoft
+- ✅ **Compatível com .NET 10** e EF Core 10.0.2
+- ✅ **Melhor segurança** e correções de bugs
+- ✅ **Novas features** do SQL Server
 
 **Documentação:**
 - [Microsoft.Data.SqlClient Introduction](https://devblogs.microsoft.com/dotnet/introducing-the-new-microsoftdatasqlclient/)

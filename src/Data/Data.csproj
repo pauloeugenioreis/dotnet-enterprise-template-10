@@ -23,7 +23,10 @@
     
     <!-- Dapper (Alternative/Complementary ORM for high-performance queries) -->
     <PackageReference Include="Dapper" Version="2.1.66" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
+    <!-- System.Data.SqlClient REMOVED - Obsolete/Replaced -->
+    <!-- Use Microsoft.Data.SqlClient instead (modern, actively maintained) -->
+    <!-- Version 6.1.1+ required by EF Core 10.0.2 -->
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.1" />
     
     <!-- Other ORMs - Uncomment if needed -->
     <!-- NHibernate -->

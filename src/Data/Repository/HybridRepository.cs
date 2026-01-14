@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ProjectTemplate.Domain;
@@ -16,18 +15,18 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
 {
     private readonly IEventStore _eventStore;
     private readonly EventSourcingSettings _settings;
-    private readonly IHttpContextAccessor? _httpContextAccessor;
+    private readonly IExecutionContextService? _executionContextService;
 
     public HybridRepository(
         DbContext context,
         IEventStore eventStore,
         EventSourcingSettings settings,
-        IHttpContextAccessor? httpContextAccessor = null)
+        IExecutionContextService? executionContextService = null)
         : base(context)
     {
         _eventStore = eventStore;
         _settings = settings;
-        _httpContextAccessor = httpContextAccessor;
+        _executionContextService = executionContextService;
     }
 
     public override async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
@@ -275,32 +274,18 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
 
     private string? GetCurrentUserId()
     {
-        if (_httpContextAccessor?.HttpContext?.User?.Identity?.IsAuthenticated == true)
-        {
-            return _httpContextAccessor.HttpContext.User.Identity.Name;
-        }
-        return "system";
+        return _executionContextService?.GetCurrentUserId() ?? "system";
     }
 
     private Dictionary<string, string> GetMetadata()
     {
-        var metadata = new Dictionary<string, string>();
-
         if (!_settings.StoreMetadata)
-            return metadata;
+            return new Dictionary<string, string>();
 
-        var httpContext = _httpContextAccessor?.HttpContext;
-        if (httpContext != null)
+        return _executionContextService?.GetMetadata() ?? new Dictionary<string, string>
         {
-            metadata["IpAddress"] = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-            metadata["UserAgent"] = httpContext.Request.Headers["User-Agent"].ToString();
-            metadata["RequestPath"] = httpContext.Request.Path;
-            metadata["RequestMethod"] = httpContext.Request.Method;
-        }
-
-        metadata["Timestamp"] = DateTime.UtcNow.ToString("O");
-        metadata["MachineName"] = Environment.MachineName;
-
-        return metadata;
+            ["Timestamp"] = DateTime.UtcNow.ToString("O"),
+            ["MachineName"] = Environment.MachineName
+        };
     }
 }

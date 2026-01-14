@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ProjectTemplate.Application.Services;
 using ProjectTemplate.Data.Repository;
 using ProjectTemplate.Domain.Interfaces;
+using ProjectTemplate.Infrastructure.Services;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
 
@@ -46,6 +47,9 @@ public static class DependencyInjectionExtensions
 
         // Register UserRepository explicitly (doesn't inherit from Repository<T>)
         services.AddScoped<IUserRepository, UserRepository>();
+
+        // Register execution context service (provides user/metadata without HTTP coupling)
+        services.AddScoped<IExecutionContextService, ExecutionContextService>();
 
         return services;
     }
