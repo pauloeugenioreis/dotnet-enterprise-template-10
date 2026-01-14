@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using ProjectTemplate.Domain;
 using System.Globalization;
 using System.Net;
@@ -17,11 +17,9 @@ namespace ProjectTemplate.Infrastructure.Extensions;
 /// </summary>
 public static class RateLimitingExtension
 {
-    public static IServiceCollection AddRateLimitingConfiguration(this IServiceCollection services)
+    public static IServiceCollection AddRateLimitingConfiguration(this IServiceCollection services, IOptions<AppSettings> appSettings)
     {
-        var serviceProvider = services.BuildServiceProvider();
-        var appSettings = serviceProvider.GetRequiredService<AppSettings>();
-        var settings = appSettings.Infrastructure.RateLimiting;
+        var settings = appSettings.Value.Infrastructure.RateLimiting;
 
         if (!settings.Enabled)
         {

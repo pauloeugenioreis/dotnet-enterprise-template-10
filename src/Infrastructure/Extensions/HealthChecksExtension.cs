@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Options;
 using ProjectTemplate.Domain;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
@@ -9,10 +10,8 @@ namespace ProjectTemplate.Infrastructure.Extensions;
 /// </summary>
 public static class HealthChecksExtension
 {
-    public static IServiceCollection AddHealthChecksConfiguration(this IServiceCollection services)
+    public static IServiceCollection AddHealthChecksConfiguration(this IServiceCollection services, IOptions<AppSettings> appSettings)
     {
-        var serviceProvider = services.BuildServiceProvider();
-        var appSettings = serviceProvider.GetRequiredService<AppSettings>();
         var healthChecksBuilder = services.AddHealthChecks();
 
         // Application self-check

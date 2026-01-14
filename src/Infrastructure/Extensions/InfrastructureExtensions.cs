@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using ProjectTemplate.Domain;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
@@ -16,26 +17,31 @@ public static class InfrastructureExtensions
         IConfiguration configuration,
         IHostEnvironment environment)
     {
-        // Core settings
+        // Core settings - MUST be registered first
         services.AddAppSettingsConfiguration(configuration, environment);
 
+        // Build a service provider to resolve IOptions<AppSettings> for other extensions
+        // This is done once here to avoid multiple BuildServiceProvider calls
+        using var tempProvider = services.BuildServiceProvider();
+        var appSettings = tempProvider.GetRequiredService<IOptions<AppSettings>>();
+
         // Database
-        services.AddDatabaseConfiguration();
+        services.AddDatabaseConfiguration(appSettings);
 
         // Cache
-        services.AddCacheConfiguration();
+        services.AddCacheConfiguration(appSettings);
 
         // Health checks
-        services.AddHealthChecksConfiguration();
+        services.AddHealthChecksConfiguration(appSettings);
 
         // Telemetry (OpenTelemetry)
-        services.AddTelemetry(environment);
+        services.AddTelemetry(appSettings, environment);
 
         // Rate Limiting
-        services.AddRateLimitingConfiguration();
+        services.AddRateLimitingConfiguration(appSettings);
 
         // Event Sourcing
-        services.AddEventSourcing();
+        services.AddEventSourcing(appSettings);
 
         // Authentication (JWT + OAuth2)
         services.AddJwtAuthentication();

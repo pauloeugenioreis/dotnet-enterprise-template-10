@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -19,11 +19,10 @@ public static class TelemetryExtension
 {
     public static IServiceCollection AddTelemetry(
         this IServiceCollection services,
+        IOptions<AppSettings> appSettings,
         IHostEnvironment environment)
     {
-        var serviceProvider = services.BuildServiceProvider();
-        var appSettings = serviceProvider.GetRequiredService<AppSettings>();
-        var settings = appSettings.Infrastructure.Telemetry;
+        var settings = appSettings.Value.Infrastructure.Telemetry;
 
         if (!settings.Enabled)
         {
