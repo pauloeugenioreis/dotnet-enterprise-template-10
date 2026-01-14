@@ -18,10 +18,10 @@ public static class HealthChecksExtension
         healthChecksBuilder.AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "ready" });
 
         // Database health check
-        var connectionString = appSettings.ConnectionStrings.DefaultConnection;
+        var connectionString = appSettings.Value.ConnectionStrings.DefaultConnection;
         if (!string.IsNullOrEmpty(connectionString))
         {
-            var dbType = appSettings.Infrastructure.Database.DatabaseType.ToLower();
+            var dbType = appSettings.Value.Infrastructure.Database.DatabaseType.ToLower();
             
             // Database health checks require specific packages to be installed
             // Uncomment and install the appropriate package:

@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using ProjectTemplate.Domain.Validators;
+
 namespace ProjectTemplate.Domain;
 
 /// <summary>
@@ -5,9 +8,18 @@ namespace ProjectTemplate.Domain;
 /// </summary>
 public class AppSettings
 {
+    [Required(ErrorMessage = "EnvironmentName is required")]
+    [AllowedValues("Development", "Testing", "Staging", "Production", 
+        ErrorMessage = "EnvironmentName must be Development, Testing, Staging, or Production")]
     public string EnvironmentName { get; set; } = string.Empty;
+    
+    [Required(ErrorMessage = "ConnectionStrings section is required")]
     public ConnectionStringSettings ConnectionStrings { get; set; } = new();
+    
+    [Required(ErrorMessage = "Infrastructure section is required")]
     public InfrastructureSettings Infrastructure { get; set; } = new();
+    
+    [Required(ErrorMessage = "Authentication section is required")]
     public AuthenticationSettings Authentication { get; set; } = new();
 
     public bool IsDevelopment() => EnvironmentName == "Development";
@@ -18,7 +30,10 @@ public class AppSettings
 
 public class ConnectionStringSettings
 {
+    [Required(ErrorMessage = "DefaultConnection is required")]
+    [MinLength(10, ErrorMessage = "DefaultConnection must be at least 10 characters")]
     public string DefaultConnection { get; set; } = string.Empty;
+    
     public string ReadOnlyConnection { get; set; } = string.Empty;
     public string? MongoDB { get; set; }
     public string? RabbitMQ { get; set; }
@@ -40,20 +55,36 @@ public class InfrastructureSettings
 public class CacheSettings
 {
     public bool Enabled { get; set; } = true;
+    
+    [Required(ErrorMessage = "Cache Provider is required")]
+    [AllowedValues("Memory", "Redis", "SqlServer", 
+        ErrorMessage = "Provider must be Memory, Redis, or SqlServer")]
     public string Provider { get; set; } = "Memory"; // Memory, Redis, SqlServer
+    
     public RedisSettings? Redis { get; set; }
+    
+    [Range(1, 1440, ErrorMessage = "DefaultExpirationMinutes must be between 1 and 1440 (24 hours)")]
     public int DefaultExpirationMinutes { get; set; } = 60;
 }
 
 public class RedisSettings
 {
+    [RequiredIf(nameof(CacheSettings.Provider), "Redis", 
+        ErrorMessage = "Redis ConnectionString is required when Provider is Redis")]
+    [RedisConnectionString(ErrorMessage = "Invalid Redis connection string format")]
     public string ConnectionString { get; set; } = string.Empty;
 }
 
 public class DatabaseSettings
 {
+    [Required(ErrorMessage = "DatabaseType is required")]
+    [AllowedValues("InMemory", "SqlServer", "Oracle", "PostgreSQL", "MySQL", 
+        ErrorMessage = "DatabaseType must be InMemory, SqlServer, Oracle, PostgreSQL, or MySQL")]
     public string DatabaseType { get; set; } = "InMemory"; // InMemory, SqlServer, Oracle, PostgreSQL, MySQL
+    
+    [Range(1, 300, ErrorMessage = "CommandTimeoutSeconds must be between 1 and 300 seconds")]
     public int CommandTimeoutSeconds { get; set; } = 30;
+    
     public bool EnableSensitiveDataLogging { get; set; } = false;
     public bool EnableDetailedErrors { get; set; } = false;
 }
@@ -98,11 +129,24 @@ public class AuthenticationSettings
 
 public class JwtSettings
 {
+    [Required(ErrorMessage = "JWT Secret is required")]
+    [MinLength(32, ErrorMessage = "JWT Secret must be at least 32 characters for security")]
     public string Secret { get; set; } = string.Empty;
+    
+    [Required(ErrorMessage = "JWT Issuer is required")]
+    [Url(ErrorMessage = "Issuer must be a valid URL")]
     public string Issuer { get; set; } = string.Empty;
+    
+    [Required(ErrorMessage = "JWT Audience is required")]
+    [Url(ErrorMessage = "Audience must be a valid URL")]
     public string Audience { get; set; } = string.Empty;
+    
+    [Range(1, 1440, ErrorMessage = "ExpirationMinutes must be between 1 and 1440 (24 hours)")]
     public int ExpirationMinutes { get; set; } = 60;
+    
+    [Range(1, 90, ErrorMessage = "RefreshTokenExpirationDays must be between 1 and 90 days")]
     public int RefreshTokenExpirationDays { get; set; } = 7;
+    
     public bool ValidateIssuer { get; set; } = true;
     public bool ValidateAudience { get; set; } = true;
     public bool ValidateLifetime { get; set; } = true;
@@ -141,12 +185,18 @@ public class GitHubOAuthSettings
 
 public class PasswordPolicySettings
 {
+    [Range(6, 128, ErrorMessage = "MinimumLength must be between 6 and 128 characters")]
     public int MinimumLength { get; set; } = 8;
+    
     public bool RequireDigit { get; set; } = true;
     public bool RequireLowercase { get; set; } = true;
     public bool RequireUppercase { get; set; } = true;
     public bool RequireNonAlphanumeric { get; set; } = true;
+    
+    [Range(1, 100, ErrorMessage = "MaxFailedAccessAttempts must be between 1 and 100")]
     public int MaxFailedAccessAttempts { get; set; } = 5;
+    
+    [Range(1, 1440, ErrorMessage = "LockoutMinutes must be between 1 and 1440 (24 hours)")]
     public int LockoutMinutes { get; set; } = 15;
 }
 
@@ -160,7 +210,10 @@ public class TelemetrySettings
 {
     public bool Enabled { get; set; } = false;
     public string[] Providers { get; set; } = Array.Empty<string>(); // console, jaeger (via OTLP), otlp, grafana, prometheus, applicationinsights, datadog, dynatrace
+    
+    [Range(0.0, 1.0, ErrorMessage = "SamplingRatio must be between 0.0 and 1.0")]
     public double SamplingRatio { get; set; } = 1.0; // 0.0 to 1.0 (1.0 = 100%)
+    
     public bool EnableSqlInstrumentation { get; set; } = true;
     public bool EnableHttpInstrumentation { get; set; } = true;
     
