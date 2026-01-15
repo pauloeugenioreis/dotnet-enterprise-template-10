@@ -20,83 +20,51 @@ public class Service<TEntity> : IService<TEntity> where TEntity : class
 
     public virtual async Task<TEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            return await _repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving entity with ID {Id}", id);
-            throw;
-        }
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
+        return await _repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
     }
 
     public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        try
-        {
-            return await _repository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving all entities");
-            throw;
-        }
+        return await _repository.GetAllAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public virtual async Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var created = await _repository.AddAsync(entity, cancellationToken).ConfigureAwait(false);
-            await _repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            return created;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating entity");
-            throw;
-        }
+        ArgumentNullException.ThrowIfNull(entity);
+
+        var created = await _repository.AddAsync(entity, cancellationToken).ConfigureAwait(false);
+        await _repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return created;
     }
 
     public virtual async Task UpdateAsync(long id, TEntity entity, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var existing = await _repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
-            if (existing == null)
-            {
-                throw new KeyNotFoundException($"Entity with ID {id} not found");
-            }
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
+        ArgumentNullException.ThrowIfNull(entity);
 
-            await _repository.UpdateAsync(entity, cancellationToken).ConfigureAwait(false);
-            await _repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception ex)
+        var existing = await _repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+        if (existing == null)
         {
-            _logger.LogError(ex, "Error updating entity with ID {Id}", id);
-            throw;
+            throw new KeyNotFoundException($"Entity with ID {id} not found");
         }
+
+        await _repository.UpdateAsync(entity, cancellationToken).ConfigureAwait(false);
+        await _repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public virtual async Task DeleteAsync(long id, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var entity = await _repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
-            if (entity == null)
-            {
-                throw new KeyNotFoundException($"Entity with ID {id} not found");
-            }
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
 
-            await _repository.DeleteAsync(entity, cancellationToken).ConfigureAwait(false);
-            await _repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception ex)
+        var entity = await _repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+        if (entity == null)
         {
-            _logger.LogError(ex, "Error deleting entity with ID {Id}", id);
-            throw;
+            throw new KeyNotFoundException($"Entity with ID {id} not found");
         }
+
+        await _repository.DeleteAsync(entity, cancellationToken).ConfigureAwait(false);
+        await _repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public virtual async Task<(IEnumerable<TEntity> Items, int Total)> GetPagedAsync(
@@ -104,14 +72,9 @@ public class Service<TEntity> : IService<TEntity> where TEntity : class
         int pageSize,
         CancellationToken cancellationToken = default)
     {
-        try
-        {
-            return await _repository.GetPagedAsync(page, pageSize, cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving paged entities");
-            throw;
-        }
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(page);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
+
+        return await _repository.GetPagedAsync(page, pageSize, cancellationToken).ConfigureAwait(false);
     }
 }

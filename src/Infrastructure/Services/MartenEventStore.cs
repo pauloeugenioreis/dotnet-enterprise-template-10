@@ -1,6 +1,7 @@
 using Marten;
 using Marten.Events;
 using Marten.Events.Projections;
+using Microsoft.Extensions.Logging;
 using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
@@ -15,11 +16,13 @@ public class MartenEventStore : IEventStore
 {
     private readonly IDocumentStore _documentStore;
     private readonly EventSourcingSettings _settings;
+    private readonly ILogger<MartenEventStore> _logger;
 
-    public MartenEventStore(IDocumentStore documentStore, EventSourcingSettings settings)
+    public MartenEventStore(IDocumentStore documentStore, EventSourcingSettings settings, ILogger<MartenEventStore> logger)
     {
         _documentStore = documentStore;
         _settings = settings;
+        _logger = logger;
     }
 
     public async Task AppendEventAsync<TEvent>(
@@ -276,8 +279,9 @@ public class MartenEventStore : IEventStore
             var json = JsonSerializer.Serialize(eventData);
             return JsonSerializer.Deserialize<DomainEvent>(json);
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogWarning(ex, "Failed to convert event data to DomainEvent. Type: {Type}", eventData?.GetType().Name ?? "null");
             return null;
         }
     }

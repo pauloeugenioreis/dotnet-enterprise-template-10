@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
+using ProjectTemplate.Domain.Exceptions;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -107,9 +108,17 @@ public class JwtTokenService : ITokenService
 
             return null;
         }
-        catch
+        catch (SecurityTokenExpiredException ex)
         {
-            return null;
+            throw new TokenValidationException("Access token has expired", "AccessToken", ex);
+        }
+        catch (SecurityTokenInvalidSignatureException ex)
+        {
+            throw new TokenValidationException("Invalid token signature", "AccessToken", ex);
+        }
+        catch (SecurityTokenException ex)
+        {
+            throw new TokenValidationException($"Token validation failed: {ex.Message}", "AccessToken", ex);
         }
     }
 

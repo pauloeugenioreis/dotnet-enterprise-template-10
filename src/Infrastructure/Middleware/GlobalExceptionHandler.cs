@@ -79,10 +79,12 @@ public class GlobalExceptionHandler
         {
             var problemDetailsService = context.RequestServices.GetRequiredService<IProblemDetailsService>();
             var hostEnvironment = context.RequestServices.GetService<IHostEnvironment>();
+            var isDevelopment = hostEnvironment?.IsDevelopment() == true;
 
             // Determine status code and details based on exception type
             var (status, title, detail) = exception switch
             {
+                // Domain exceptions
                 ValidationException validationEx => (
                     StatusCodes.Status400BadRequest,
                     "Validation Error",
@@ -99,10 +101,36 @@ public class GlobalExceptionHandler
                     StatusCodes.Status422UnprocessableEntity,
                     "Business Rule Violation",
                     businessEx.Message),
+
+                // Infrastructure exceptions
+                StorageException storageEx => (
+                    StatusCodes.Status500InternalServerError,
+                    "Storage Error",
+                    isDevelopment ? $"Storage operation '{storageEx.Operation}' failed: {storageEx.Message}" : "An error occurred with file storage."),
+                TokenValidationException tokenEx => (
+                    StatusCodes.Status401Unauthorized,
+                    "Invalid Token",
+                    isDevelopment ? tokenEx.Message : "Authentication token is invalid or expired."),
+                EventStoreException eventEx => (
+                    StatusCodes.Status500InternalServerError,
+                    "Event Store Error",
+                    isDevelopment ? $"Event store operation '{eventEx.Operation}' failed: {eventEx.Message}" : "An error occurred with event storage."),
+
+                // Operational exceptions
+                OperationCanceledException => (
+                    StatusCodes.Status499ClientClosedRequest,
+                    "Request Cancelled",
+                    "The operation was cancelled."),
+                TimeoutException => (
+                    StatusCodes.Status504GatewayTimeout,
+                    "Gateway Timeout",
+                    "The operation timed out."),
+
+                // Default fallback
                 _ => (
                     StatusCodes.Status500InternalServerError,
                     "Internal Server Error",
-                    hostEnvironment?.IsDevelopment() == true ? exception.Message : "An error occurred processing your request.")
+                    isDevelopment ? exception.Message : "An error occurred processing your request.")
             };
 
             var problemDetails = new ProblemDetails
