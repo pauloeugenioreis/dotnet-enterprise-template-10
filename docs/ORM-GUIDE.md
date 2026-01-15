@@ -2,6 +2,24 @@
 
 Este documento fornece instruções detalhadas sobre como trocar o ORM padrão (Entity Framework Core) por outras alternativas.
 
+## 📋 Índice
+
+- [ORMs Suportados](#-orms-suportados)
+- [Como Funciona](#-como-funciona)
+- [Entity Framework Core (Padrão)](#-entity-framework-core-padrão)
+- [Dapper (Alta Performance)](#-dapper-alta-performance)
+- [ADO.NET](#-adonet)
+- [NHibernate](#-nhibernate)
+- [Linq2Db](#-linq2db)
+- [Resumo Rápido](#-resumo-rápido)
+- [Comparação de ORMs](#-comparação-de-orms)
+- [Combinando ORMs](#-combinando-orms)
+- [Dicas](#-dicas)
+- [Testes](#-testes)
+- [Como Adicionar um Novo Repositório ORM](#-como-adicionar-um-novo-repositório-orm)
+
+---
+
 ## 📋 ORMs Suportados
 
 1. **Entity Framework Core** (Padrão - Habilitado)

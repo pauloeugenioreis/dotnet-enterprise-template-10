@@ -4,6 +4,22 @@ Este guia detalha como fazer deploy da aplicação em ambientes Kubernetes, incl
 
 ---
 
+## 📋 Índice
+
+- [Pré-requisitos](#-pré-requisitos)
+- [Deploy Local com Minikube](#-deploy-local-com-minikube)
+- [Remover Deploy do Minikube](#-remover-deploy-do-minikube)
+- [Deploy em Produção](#-deploy-em-produção)
+- [Monitoramento e Troubleshooting](#-monitoramento-e-troubleshooting)
+- [Configurações Avançadas](#-configurações-avançadas)
+- [Ambientes (Dev, Staging, Prod)](#-ambientes-dev-staging-prod)
+- [Segurança](#-segurança)
+- [CI/CD Integration](#-cicd-integration)
+- [Recursos Úteis](#-recursos-úteis)
+- [Problemas Comuns](#-problemas-comuns)
+
+---
+
 ## 📋 Pré-requisitos
 
 ### Para Deploy Local (Minikube)

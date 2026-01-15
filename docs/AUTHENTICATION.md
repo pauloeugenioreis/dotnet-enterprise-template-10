@@ -1,5 +1,28 @@
 # Authentication - JWT & OAuth2
 
+## 📋 Índice
+
+- [Overview](#overview)
+- [Default Admin Credentials](#-default-admin-credentials)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Configuration](#configuration)
+- [Quick Start](#-quick-start)
+- [API Endpoints](#api-endpoints)
+- [Usage Examples](#usage-examples)
+- [Security Best Practices](#security-best-practices)
+- [Database Schema](#database-schema)
+- [OAuth2 Setup](#oauth2-setup)
+- [Testing with Swagger](#testing-with-swagger)
+- [Troubleshooting](#troubleshooting)
+- [Migration from Basic Auth](#migration-from-basic-auth)
+- [Performance Considerations](#performance-considerations)
+- [Advanced Features (Future)](#advanced-features-future)
+- [References](#references)
+- [Support](#support)
+
+---
+
 ## Overview
 
 This template provides a comprehensive authentication system with JWT (JSON Web Tokens) and OAuth2 support. The implementation follows security best practices and is fully configurable via `appsettings.json`.

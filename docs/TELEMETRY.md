@@ -8,6 +8,21 @@ Este guia explica como configurar e usar telemetria (tracing, metrics, logs) no 
 > Jaeger suporta nativamente OTLP desde a versão 1.35+.  
 > Todas as configurações foram atualizadas para usar OTLP (portas 4317/4318).
 
+## 📋 Índice
+
+- [Visão Geral](#-visão-geral)
+- [Quick Start](#-quick-start)
+- [Configuração por Provedor](#-configuração-por-provedor)
+- [Configurações Avançadas](#-configurações-avançadas)
+- [Métricas Customizadas](#-métricas-customizadas)
+- [O que é Rastreado Automaticamente](#-o-que-é-rastreado-automaticamente)
+- [Troubleshooting](#-troubleshooting)
+- [Recursos Adicionais](#-recursos-adicionais)
+- [Melhores Práticas](#-melhores-práticas)
+- [Próximos Passos](#-próximos-passos)
+
+---
+
 ## 🎯 Visão Geral
 
 O template suporta **múltiplos backends de telemetria** através do **OpenTelemetry**, permitindo que você escolha o provedor que melhor atende suas necessidades:
