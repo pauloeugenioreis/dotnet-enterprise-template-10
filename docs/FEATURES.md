@@ -19,8 +19,8 @@ Este guia explica como habilitar e configurar os recursos avançados incluídos 
 11. [Exception Notification](#exception-notification)
 12. [📊 Telemetria e Observabilidade](#telemetria-e-observabilidade)
 13. [🚦 Rate Limiting](#rate-limiting)
-14. [� Event Sourcing](#event-sourcing)
-15. [�🔄 CI/CD](#cicd)
+14. [📝 Event Sourcing](#event-sourcing)
+15. [🚀 CI/CD](#cicd)
 
 ---
 

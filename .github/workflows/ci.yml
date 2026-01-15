@@ -99,7 +99,7 @@ jobs:
           --results-directory ./coverage \
           --verbosity normal
 
-    - name: � Upload Coverage Artifacts
+    - name: 📤 Upload Coverage Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: code-coverage
