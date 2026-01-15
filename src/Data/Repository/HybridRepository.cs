@@ -32,13 +32,13 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
     public override async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         // 1. Save to EF Core (traditional approach)
-        var result = await base.AddAsync(entity, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        var result = await base.AddAsync(entity, cancellationToken).ConfigureAwait(false);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         // 2. Record event if Event Sourcing is enabled and entity is in audit list
         if (ShouldAuditEntity(typeof(TEntity).Name))
         {
-            await RecordCreatedEvent(entity, cancellationToken);
+            await RecordCreatedEvent(entity, cancellationToken).ConfigureAwait(false);
         }
 
         return result;
@@ -48,14 +48,14 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         IEnumerable<TEntity> entities,
         CancellationToken cancellationToken = default)
     {
-        var result = await base.AddRangeAsync(entities, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        var result = await base.AddRangeAsync(entities, cancellationToken).ConfigureAwait(false);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         if (ShouldAuditEntity(typeof(TEntity).Name))
         {
             foreach (var entity in entities)
             {
-                await RecordCreatedEvent(entity, cancellationToken);
+                await RecordCreatedEvent(entity, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -68,17 +68,17 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         Dictionary<string, object>? changes = null;
         if (ShouldAuditEntity(typeof(TEntity).Name))
         {
-            changes = await DetectChangesAsync(entity, cancellationToken);
+            changes = await DetectChangesAsync(entity, cancellationToken).ConfigureAwait(false);
         }
 
         // 1. Update in EF Core
-        await base.UpdateAsync(entity, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        await base.UpdateAsync(entity, cancellationToken).ConfigureAwait(false);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         // 2. Record event
         if (changes != null && changes.Any())
         {
-            await RecordUpdatedEvent(entity, changes, cancellationToken);
+            await RecordUpdatedEvent(entity, changes, cancellationToken).ConfigureAwait(false);
         }
 
         return;
@@ -87,13 +87,13 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
     public override async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         // 1. Delete from EF Core
-        await base.DeleteAsync(entity, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        await base.DeleteAsync(entity, cancellationToken).ConfigureAwait(false);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         // 2. Record event
         if (ShouldAuditEntity(typeof(TEntity).Name))
         {
-            await RecordDeletedEvent(entity, cancellationToken);
+            await RecordDeletedEvent(entity, cancellationToken).ConfigureAwait(false);
         }
 
         return;
@@ -168,7 +168,7 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
             eventData: eventData,
             userId: GetCurrentUserId(),
             metadata: metadata,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
     private async Task RecordDeletedEvent(TEntity entity, CancellationToken cancellationToken)
@@ -191,7 +191,7 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
             eventData: eventData,
             userId: GetCurrentUserId(),
             metadata: metadata,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<Dictionary<string, object>> DetectChangesAsync(
@@ -201,7 +201,7 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         var changes = new Dictionary<string, object>();
 
         var entry = _context.Entry(entity);
-        var existingEntity = await _dbSet.FindAsync(new object[] { entity.Id }, cancellationToken);
+        var existingEntity = await _dbSet.FindAsync(new object[] { entity.Id }, cancellationToken).ConfigureAwait(false);
 
         if (existingEntity == null)
             return changes;

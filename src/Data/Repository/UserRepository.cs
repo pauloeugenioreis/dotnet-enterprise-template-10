@@ -80,7 +80,7 @@ public class UserRepository : IUserRepository
     public async Task AddToRoleAsync(long userId, string roleName, CancellationToken cancellationToken = default)
     {
         var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName, cancellationToken).ConfigureAwait(false);
-        
+
         if (role == null)
         {
             role = new Role
@@ -140,7 +140,7 @@ public class UserRepository : IUserRepository
     public async Task RemoveOldRefreshTokensAsync(long userId, CancellationToken cancellationToken = default)
     {
         var oldTokens = await _context.RefreshTokens
-            .Where(rt => rt.UserId == userId && 
+            .Where(rt => rt.UserId == userId &&
                         (rt.IsRevoked || rt.ExpiresAt < DateTime.UtcNow))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 

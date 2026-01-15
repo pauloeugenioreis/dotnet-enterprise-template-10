@@ -37,7 +37,7 @@ public class MartenEventStore : IEventStore
 
         // Append to Marten event stream
         session.Events.Append(streamId, eventData);
-        
+
         await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
@@ -50,7 +50,7 @@ public class MartenEventStore : IEventStore
         var streamId = $"{aggregateType}-{aggregateId}";
 
         var events = await session.Events.FetchStreamAsync(streamId, token: cancellationToken);
-        
+
         return events
             .Select(e => ConvertToTypedEvent(e.Data))
             .OfType<DomainEvent>()
@@ -67,7 +67,7 @@ public class MartenEventStore : IEventStore
         var streamId = $"{aggregateType}-{aggregateId}";
 
         var events = await session.Events.FetchStreamAsync(streamId, token: cancellationToken).ConfigureAwait(false);
-        
+
         return events
             .Where(e => e.Timestamp <= until)
             .Select(e => ConvertToTypedEvent(e.Data))
@@ -86,7 +86,7 @@ public class MartenEventStore : IEventStore
         var streamId = $"{aggregateType}-{aggregateId}";
 
         var events = await session.Events.FetchStreamAsync(streamId, token: cancellationToken).ConfigureAwait(false);
-        
+
         return events
             .Where(e => e.Version >= fromVersion && e.Version <= toVersion)
             .Select(e => ConvertToTypedEvent(e.Data))
@@ -167,7 +167,7 @@ public class MartenEventStore : IEventStore
         var streamId = $"{aggregateType}-{aggregateId}";
 
         var state = await session.Events.FetchStreamStateAsync(streamId, cancellationToken).ConfigureAwait(false);
-        
+
         return (int)(state?.Version ?? 0);
     }
 
