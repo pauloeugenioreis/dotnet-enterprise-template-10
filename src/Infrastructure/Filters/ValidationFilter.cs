@@ -47,7 +47,7 @@ public class ValidationFilter : IAsyncActionFilter
             if (validator != null)
             {
                 _logger.LogDebug("Validating argument {Key} of type {Type}", key, argumentType.Name);
-                
+
                 // Create validation context and execute validation
                 var validationContext = new ValidationContext<object>(argument);
                 var result = await validator.ValidateAsync(validationContext, context.HttpContext.RequestAborted).ConfigureAwait(false);
@@ -55,14 +55,14 @@ public class ValidationFilter : IAsyncActionFilter
                 // If validation fails, add errors to ModelState
                 if (!result.IsValid)
                 {
-                    _logger.LogWarning("Validation failed for {Key} with {ErrorCount} errors", 
+                    _logger.LogWarning("Validation failed for {Key} with {ErrorCount} errors",
                         key, result.Errors.Count);
-                    
+
                     foreach (var error in result.Errors)
                     {
                         context.ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
                     }
-                    
+
                     // Return BadRequest immediately
                     context.Result = new BadRequestObjectResult(context.ModelState);
                     return;
@@ -81,8 +81,8 @@ public class ValidationFilter : IAsyncActionFilter
             return true;
 
         // Common system types
-        if (type == typeof(string) || 
-            type == typeof(decimal) || 
+        if (type == typeof(string) ||
+            type == typeof(decimal) ||
             type == typeof(DateTime) ||
             type == typeof(DateTimeOffset) ||
             type == typeof(TimeSpan) ||
