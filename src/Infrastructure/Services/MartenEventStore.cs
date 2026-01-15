@@ -38,7 +38,7 @@ public class MartenEventStore : IEventStore
         // Append to Marten event stream
         session.Events.Append(streamId, eventData);
         
-        await session.SaveChangesAsync(cancellationToken);
+        await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<List<DomainEvent>> GetEventsAsync(
@@ -66,7 +66,7 @@ public class MartenEventStore : IEventStore
         await using var session = _documentStore.QuerySession();
         var streamId = $"{aggregateType}-{aggregateId}";
 
-        var events = await session.Events.FetchStreamAsync(streamId, token: cancellationToken);
+        var events = await session.Events.FetchStreamAsync(streamId, token: cancellationToken).ConfigureAwait(false);
         
         return events
             .Where(e => e.Timestamp <= until)
@@ -85,7 +85,7 @@ public class MartenEventStore : IEventStore
         await using var session = _documentStore.QuerySession();
         var streamId = $"{aggregateType}-{aggregateId}";
 
-        var events = await session.Events.FetchStreamAsync(streamId, token: cancellationToken);
+        var events = await session.Events.FetchStreamAsync(streamId, token: cancellationToken).ConfigureAwait(false);
         
         return events
             .Where(e => e.Version >= fromVersion && e.Version <= toVersion)
@@ -118,7 +118,7 @@ public class MartenEventStore : IEventStore
         if (limit.HasValue)
             query = query.Take(limit.Value);
 
-        var events = await query.ToListAsync(cancellationToken);
+        var events = await query.ToListAsync(cancellationToken).ConfigureAwait(false);
 
         return events
             .Select(e => ConvertToTypedEvent(e.Data))
@@ -150,7 +150,7 @@ public class MartenEventStore : IEventStore
         if (limit.HasValue)
             query = query.Take(limit.Value);
 
-        var events = await query.ToListAsync(cancellationToken);
+        var events = await query.ToListAsync(cancellationToken).ConfigureAwait(false);
 
         return events
             .Select(e => ConvertToTypedEvent(e.Data))
@@ -166,7 +166,7 @@ public class MartenEventStore : IEventStore
         await using var session = _documentStore.QuerySession();
         var streamId = $"{aggregateType}-{aggregateId}";
 
-        var state = await session.Events.FetchStreamStateAsync(streamId, cancellationToken);
+        var state = await session.Events.FetchStreamStateAsync(streamId, cancellationToken).ConfigureAwait(false);
         
         return (int)(state?.Version ?? 0);
     }
@@ -194,7 +194,7 @@ public class MartenEventStore : IEventStore
         };
 
         session.Store(snapshotDoc);
-        await session.SaveChangesAsync(cancellationToken);
+        await session.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<(TSnapshot? Snapshot, int Version)> GetSnapshotAsync<TSnapshot>(
@@ -208,7 +208,7 @@ public class MartenEventStore : IEventStore
         await using var session = _documentStore.QuerySession();
         var id = $"{aggregateType}-{aggregateId}";
 
-        var snapshot = await session.LoadAsync<SnapshotDocument<TSnapshot>>(id, cancellationToken);
+        var snapshot = await session.LoadAsync<SnapshotDocument<TSnapshot>>(id, cancellationToken).ConfigureAwait(false);
 
         if (snapshot == null)
             return (null, 0);
@@ -231,7 +231,7 @@ public class MartenEventStore : IEventStore
         if (to.HasValue)
             query = query.Where(e => e.Timestamp <= to.Value);
 
-        var events = await query.ToListAsync(cancellationToken);
+        var events = await query.ToListAsync(cancellationToken).ConfigureAwait(false);
 
         var stats = new EventStatistics
         {
