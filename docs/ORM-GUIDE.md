@@ -22,23 +22,82 @@ Este documento fornece instruções detalhadas sobre como trocar o ORM padrão (
 
 ## 📋 ORMs Suportados
 
-1. **Entity Framework Core** (Padrão - ✅ Habilitado)
-2. **Dapper** (✅ Implementado - Pronto para Uso)
-3. **ADO.NET** (✅ Implementado - Pronto para Uso)
+1. **Entity Framework Core** (✅ Habilitado por Padrão - InMemory/SQL Server)
+2. **Dapper** (✅ Habilitado por Padrão - Alta Performance)
+3. **ADO.NET** (✅ Habilitado por Padrão - Controle Total)
 4. **NHibernate** (✅ Implementado - Pacotes Comentados)
 5. **Linq2Db** (✅ Implementado - Pacotes Comentados)
+
+> **🎉 NOVIDADE:** Entity Framework Core, Dapper e ADO.NET estão **todos habilitados simultaneamente**!  
+> Você pode usar os três no mesmo serviço, escolhendo o melhor ORM para cada operação.
 
 ---
 
 ## 🎯 Como Funciona
 
-**Entity Framework Core é o ORM padrão** e está habilitado por padrão no código.
+### 🚀 **MÚLTIPLOS ORMs HABILITADOS SIMULTANEAMENTE!**
 
-### 🚀 **NOVO: Registro Automático com Scrutor**
+**Entity Framework Core, Dapper e ADO.NET** estão **todos habilitados por padrão** no projeto!
+
+Cada ORM usa sua **interface específica** para evitar conflitos:
+
+- **`IRepository<Product>`** → Entity Framework Core (padrão, InMemory para testes)
+- **`IProductDapperRepository`** → Dapper (alta performance, SQL Server)
+- **`IProductAdoRepository`** → ADO.NET (controle total, SQL Server)
+
+### 🎨 Como Usar Múltiplos ORMs
+
+```csharp
+public class ProductService
+{
+    private readonly IRepository<Product> _efRepository;          // EF Core (padrão)
+    private readonly IProductDapperRepository _dapperRepository;  // Dapper (alta performance)
+    private readonly IProductAdoRepository _adoRepository;        // ADO.NET (controle total)
+    
+    public ProductService(
+        IRepository<Product> efRepository,
+        IProductDapperRepository dapperRepository,
+        IProductAdoRepository adoRepository)
+    {
+        _efRepository = efRepository;
+        _dapperRepository = dapperRepository;
+        _adoRepository = adoRepository;
+    }
+    
+    // Use EF Core para CRUD normal com change tracking
+    public async Task<Product> CreateAsync(Product product)
+    {
+        return await _efRepository.AddAsync(product);
+    }
+    
+    // Use Dapper para queries de leitura complexas (melhor performance)
+    public async Task<IEnumerable<Product>> GetAllAsync()
+    {
+        return await _dapperRepository.GetAllAsync();
+    }
+    
+    // Use ADO.NET para operações em lote ou controle total
+    public async Task BulkUpdatePricesAsync(Dictionary<long, decimal> prices)
+    {
+        return await _adoRepository.BulkUpdatePricesAsync(prices);
+    }
+}
+```
+
+### 📝 Escolha o ORM Certo para Cada Situação
+
+| Operação | ORM Recomendado | Motivo |
+|----------|-----------------|---------|
+| CRUD simples | **EF Core** | Change tracking, validação automática |
+| Relatórios complexos | **Dapper** | Alta performance, queries otimizadas |
+| Bulk operations | **ADO.NET** | Controle total, máxima performance |
+| Testes unitários | **EF Core InMemory** | Rápido, sem banco real |
+
+### 🚀 **Registro Automático com Scrutor**
 
 Todos os repositórios são **registrados automaticamente** usando **Scrutor** com `.AsMatchingInterface()`!
 
-**Não é necessário configuração manual!** Os repositórios de ORMs alternativos (Dapper, ADO.NET, NHibernate, Linq2Db) são detectados e registrados automaticamente quando você os implementa.
+**Não é necessário configuração manual!** Os repositórios são detectados e registrados automaticamente.
 
 #### Como o registro automático funciona?
 
@@ -53,23 +112,10 @@ services.Scan(scan => scan
 ```
 
 **O que `.AsMatchingInterface()` faz:**
-- `Repository<Product>` → registrado como `IRepository<Product>`
+- `Repository<Product>` → registrado como `IRepository<Product>` ✅
 - `ProductDapperRepository` → registrado como `IProductDapperRepository` ✅
 - `ProductAdoRepository` → registrado como `IProductAdoRepository` ✅
-- **NÃO** sobrescreve `IRepository<Product>` (evita conflitos!) ✅
-
-### 🎨 Para usar múltiplos ORMs:
-
-```csharp
-public class ProductService
-{
-    private readonly IRepository<Product> _efRepository;          // EF Core (padrão)
-    private readonly IProductDapperRepository _dapperRepository;  // Dapper (alta performance)
-    private readonly IProductAdoRepository _adoRepository;        // ADO.NET (controle total)
-    
-    // Escolha o repositório adequado para cada operação!
-}
-```
+- **NÃO sobrescreve** `IRepository<Product>` (evita conflitos!) ✅
 
 **Não há configuração de ORM no appsettings.json!** Isso simplifica o uso e evita erros de configuração.
 
@@ -79,13 +125,28 @@ public class ProductService
 
 ### Status: ✅ **Habilitado por Padrão**
 
+Entity Framework Core está sempre habilitado como **ORM primário** do projeto.
+
+- **`IRepository<Product>`** sempre resolve para **EF Core**
+- **InMemory** para testes (rápido, sem banco real)
+- **SQL Server** para produção (configurável via `DatabaseType`)
+
+### Quando Usar
+
+- ✅ **CRUD** operações normais
+- ✅ **Change tracking** automático
+- ✅ **Validações** com Data Annotations
+- ✅ **Migrations** automáticas
+- ✅ **Relacionamentos** complexos entre entidades
+- ✅ **Testes unitários** com InMemory
+
 ### Localização no Código
 
 **Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`  
-**Linha**: ~26 (procure por "DEFAULT: Entity Framework Core")
+**Linha**: ~73 (procure por "PRIMARY: Entity Framework Core")
 
 ```csharp
-// DEFAULT: Entity Framework Core
+// PRIMARY: Entity Framework Core (Change Tracking, Migrations, CRUD)
 services.AddEntityFramework(connectionString, dbSettings);
 ```
 
@@ -128,23 +189,57 @@ public class ProductRepository : Repository<Product>, IProductRepository
 
 ## ⚡ Dapper (Alta Performance)
 
-### Status: 💤 **Comentado - Pronto para Uso**
+### Status: ✅ **Habilitado por Padrão**
 
-### Como Habilitar
+Dapper está habilitado simultaneamente com EF Core! Use **`IProductDapperRepository`** para acessar.
 
-**Passo 1**: Abra o arquivo `src/Infrastructure/Extensions/DatabaseExtension.cs`
+### Quando Usar
 
-**Passo 2**: Comente a linha do Entity Framework (~linha 26):
+- ✅ **Queries complexas** de leitura
+- ✅ **Relatórios** com muitos dados
+- ✅ **Performance crítica** em consultas
+- ✅ **Queries otimizadas** manualmente
+- ✅ **Stored procedures**
+
+### Como Usar
+
 ```csharp
-// DEFAULT: Entity Framework Core
-// services.AddEntityFramework(connectionString, dbSettings);
+public class ProductService
+{
+    private readonly IProductDapperRepository _dapperRepo;
+    
+    public ProductService(IProductDapperRepository dapperRepo)
+    {
+        _dapperRepo = dapperRepo;
+    }
+    
+    public async Task<IEnumerable<Product>> GetAllAsync()
+    {
+        // Dapper: alta performance para leitura
+        return await _dapperRepo.GetAllAsync();
+    }
+}
 ```
 
-**Passo 3**: Descomente a linha do Dapper (~linha 29):
+### Localização no Código
+
+**Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`  
+**Linha**: ~76 (procure por "ENABLED: Dapper")
+
 ```csharp
-// ALTERNATIVE 1: Dapper (High Performance)
+// ENABLED: Dapper (High Performance Queries, Complex Reports)
 services.AddDapper(connectionString);
 ```
+
+### Interfaces Disponíveis
+
+- **`IProductDapperRepository`** - Repositório de produtos com Dapper
+- **`IOrderDapperRepository`** - Repositório de pedidos com Dapper
+
+### Implementações
+
+- ✅ `src/Data/Repository/Dapper/ProductDapperRepository.cs`
+- ✅ `src/Data/Repository/Dapper/OrderDapperRepository.cs`
 
 ### Implementação de Repositório com Dapper
 
@@ -251,30 +346,59 @@ using Microsoft.Data.SqlClient;
 
 ---
 
-## ⚡ ADO.NET
+## ⚡ ADO.NET (Controle Total)
 
-### Status: ✅ **Pronto para uso - Máxima Performance**
+### Status: ✅ **Habilitado por Padrão**
 
-### Como Habilitar
+ADO.NET está habilitado simultaneamente com EF Core e Dapper! Use **`IProductAdoRepository`** para acessar.
 
-**Passo 1**: Abra o arquivo `src/Infrastructure/Extensions/DatabaseExtension.cs`
+### Quando Usar
 
-**Passo 2**: Comente a linha do Entity Framework (~linha 67):
+- ✅ **Controle total** sobre comandos SQL
+- ✅ **Performance crítica** com otimizações manuais
+- ✅ **Bulk operations** personalizadas
+- ✅ **Queries extremamente complexas**
+- ✅ **Integração com sistemas legados**
+
+### Como Usar
+
 ```csharp
-// DEFAULT: Entity Framework Core
-// services.AddEntityFramework(connectionString, dbSettings);
+public class ProductService
+{
+    private readonly IProductAdoRepository _adoRepo;
+    
+    public ProductService(IProductAdoRepository adoRepo)
+    {
+        _adoRepo = adoRepo;
+    }
+    
+    public async Task<IEnumerable<Product>> GetAllAsync()
+    {
+        // ADO.NET: controle total sobre execução
+        return await _adoRepo.GetAllAsync();
+    }
+}
 ```
 
-**Passo 3**: Descomente a linha do ADO.NET (~linha 81):
+### Localização no Código
+
+**Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`  
+**Linha**: ~79 (procure por "ENABLED: ADO.NET")
+
 ```csharp
-// ALTERNATIVE 4: ADO.NET (Maximum Control & Performance)
+// ENABLED: ADO.NET (Maximum Control, Legacy Integration)
 services.AddAdo(connectionString);
 ```
 
-**Passo 4**: Execute o projeto:
-```bash
-dotnet run --project src/Api
-```
+### Interfaces Disponíveis
+
+- **`IProductAdoRepository`** - Repositório de produtos com ADO.NET
+- **`IOrderAdoRepository`** - Repositório de pedidos com ADO.NET
+
+### Implementações
+
+- ✅ `src/Data/Repository/Ado/ProductAdoRepository.cs`
+- ✅ `src/Data/Repository/Ado/OrderAdoRepository.cs`
 
 ### Características
 
@@ -574,90 +698,232 @@ public class ProductLinq2DbRepository : IRepository<Product>
 
 ## 📍 Resumo Rápido
 
-### Para trocar de ORM:
+### ✅ O que está habilitado por padrão?
+
+1. **Entity Framework Core** - CRUD normal, InMemory em testes
+2. **Dapper** - Queries de alta performance
+3. **ADO.NET** - Controle total sobre SQL
+
+### 🎯 Como usar cada ORM?
+
+```csharp
+// Entity Framework Core (padrão)
+private readonly IRepository<Product> _efRepo;
+
+// Dapper (alta performance)
+private readonly IProductDapperRepository _dapperRepo;
+
+// ADO.NET (controle total)
+private readonly IProductAdoRepository _adoRepo;
+```
+
+### 📂 Onde estão configurados?
+
+**Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`
+
+```csharp
+// Linha ~73: Entity Framework Core
+services.AddEntityFramework(connectionString, dbSettings);
+
+// Linha ~76: Dapper
+services.AddDapper(connectionString);
+
+// Linha ~79: ADO.NET
+services.AddAdo(connectionString);
+
+// Linhas ~82-89: NHibernate e Linq2Db (opcional, comentados)
+```
+
+### 🔥 Vantagens desta Arquitetura
+
+- ✅ **Não precisa escolher um único ORM** - use os 3 simultaneamente
+- ✅ **Testes rápidos** - EF Core InMemory (sem SQL Server)
+- ✅ **Performance quando precisar** - Dapper e ADO.NET disponíveis
+- ✅ **Sem conflitos** - cada ORM usa interfaces específicas
+- ✅ **Fácil de manter** - Scrutor registra tudo automaticamente
+
+### 🚀 Adicionar ORMs Opcionais (NHibernate, Linq2Db)
+
+Se quiser habilitar NHibernate ou Linq2Db:
 
 1. **Abra**: `src/Infrastructure/Extensions/DatabaseExtension.cs`
-2. **Comente**: A linha do EF Core (linha ~26)
-3. **Descomente**: A linha do ORM desejado (linhas ~29, ~34 ou ~39)
-4. **Implemente**: Os métodos necessários conforme documentação acima
-5. **Pronto**: Não precisa alterar appsettings.json!
-
-### Localização das Linhas:
-
-| ORM | Linha Aproximada | Método |
-|-----|------------------|---------|
-| **Entity Framework** | ~26 | `AddEntityFramework()` |
-| **Dapper** | ~29 | `AddDapper()` |
-| **NHibernate** | ~34 | `AddNHibernate()` |
-| **Linq2Db** | ~39 | `AddLinq2Db()` |
+2. **Localize**: Linhas ~82-89 (métodos comentados)
+3. **Descomente**: A linha do ORM desejado
+4. **Implemente**: Repositórios e configurações necessárias (veja seções abaixo)
 
 ---
 
 ## 📊 Comparação de ORMs
 
-| Característica | EF Core | Dapper | NHibernate | Linq2Db |
-|---------------|---------|---------|------------|---------|
-| **Performance** | Boa | Excelente | Boa | Excelente |
-| **Facilidade** | Fácil | Moderado | Complexo | Moderado |
-| **Maturidade** | Alta | Alta | Muito Alta | Alta |
-| **Change Tracking** | Sim | Não | Sim | Opcional |
-| **LINQ Support** | Completo | Limitado | Bom | Completo |
-| **Migrations** | Sim | Não | Limitado | Limitado |
+| Característica | EF Core | Dapper | ADO.NET | NHibernate | Linq2Db |
+|---------------|---------|---------|---------|------------|---------|
+| **Status** | ✅ Habilitado | ✅ Habilitado | ✅ Habilitado | 💤 Opcional | 💤 Opcional |
+| **Performance** | Boa | Excelente | Excelente | Boa | Excelente |
+| **Facilidade** | Fácil | Moderado | Complexo | Complexo | Moderado |
+| **Maturidade** | Alta | Alta | Muito Alta | Muito Alta | Alta |
+| **Change Tracking** | Sim | Não | Não | Sim | Opcional |
+| **LINQ Support** | Completo | Limitado | Não | Bom | Completo |
+| **Migrations** | Sim | Não | Não | Limitado | Limitado |
 
 ### Quando usar cada um?
 
-- **Entity Framework Core**: Para a maioria dos projetos. Bom equilíbrio entre produtividade e performance.
-- **Dapper**: Quando precisa de máxima performance em queries complexas ou bulk operations.
-- **NHibernate**: Para projetos enterprise complexos que precisam de recursos avançados de ORM.
-- **Linq2Db**: Quando precisa de performance próxima ao Dapper mas com full LINQ support.
+| ORM | Use quando... |
+|-----|---------------|
+| **Entity Framework Core** | Operações CRUD normais, change tracking necessário, migrations automáticas |
+| **Dapper** | Queries complexas de leitura, relatórios, performance crítica em leitura |
+| **ADO.NET** | Controle total sobre SQL, bulk operations personalizadas, integração legada |
+| **NHibernate** | Projetos enterprise complexos (requer implementação adicional) |
+| **Linq2Db** | Performance próxima ao Dapper com full LINQ support (requer implementação adicional) |
 
 ---
 
-## 🔀 Combinando ORMs
+## 🔀 Combinando ORMs (Padrão no Template!)
 
-Você pode usar múltiplos ORMs no mesmo projeto:
+> **✨ NOVIDADE**: Múltiplos ORMs já estão habilitados simultaneamente! Você não precisa escolher apenas um.
+
+### Status Atual
+
+Por padrão, o template já está configurado com:
+
+- ✅ **Entity Framework Core** (operações normais, InMemory para testes)
+- ✅ **Dapper** (queries de alta performance)
+- ✅ **ADO.NET** (controle total)
+
+### Como Usar Múltiplos ORMs
 
 ```csharp
-// Use EF Core para a maioria das operações
 public class ProductService
 {
-    private readonly IRepository<Product> _repository; // EF Core
-    private readonly ProductDapperRepository _dapperRepo; // Dapper para relatórios
+    // Injete múltiplos repositórios simultaneamente!
+    private readonly IRepository<Product> _efRepository;          // EF Core (padrão)
+    private readonly IProductDapperRepository _dapperRepository;  // Dapper
+    private readonly IProductAdoRepository _adoRepository;        // ADO.NET
 
-    public async Task<IEnumerable<ProductReport>> GetComplexReportAsync()
+    public ProductService(
+        IRepository<Product> efRepository,
+        IProductDapperRepository dapperRepository,
+        IProductAdoRepository adoRepository)
     {
-        // Use Dapper para queries complexas de leitura
-        return await _dapperRepo.GetComplexReportAsync();
+        _efRepository = efRepository;
+        _dapperRepository = dapperRepository;
+        _adoRepository = adoRepository;
     }
 
+    // Use EF Core para operações normais de CRUD
     public async Task<Product> CreateAsync(Product product)
     {
-        // Use EF Core para operações CRUD normais
-        return await _repository.AddAsync(product);
+        return await _efRepository.AddAsync(product);
+    }
+
+    // Use Dapper para relatórios e queries complexas
+    public async Task<IEnumerable<Product>> GetProductReportAsync()
+    {
+        return await _dapperRepository.GetAllAsync();
+    }
+
+    // Use ADO.NET para operações que precisam de controle total
+    public async Task<Product?> GetProductWithMaxControlAsync(long id)
+    {
+        return await _adoRepository.GetByIdAsync(id);
     }
 }
+```
+
+### Vantagens de Usar Múltiplos ORMs
+
+| Cenário | ORM Recomendado | Por quê? |
+|---------|-----------------|----------|
+| CRUD simples | EF Core | Change tracking automático |
+| Leitura em massa | Dapper | Menos overhead, mais performance |
+| Relatórios complexos | Dapper | SQL otimizado manualmente |
+| Bulk operations | ADO.NET | Controle total sobre comandos |
+| Migrations | EF Core | Ferramentas integradas |
+| Stored procedures | ADO.NET ou Dapper | Controle sobre parâmetros |
+
+### Exemplo Real de Uso Híbrido
+
+```csharp
+public class OrderService
+{
+    private readonly IRepository<Order> _efRepo;          // EF Core
+    private readonly IOrderDapperRepository _dapperRepo;  // Dapper
+    
+    public OrderService(
+        IRepository<Order> efRepo,
+        IOrderDapperRepository dapperRepo)
+    {
+        _efRepo = efRepo;
+        _dapperRepo = dapperRepo;
+    }
+    
+    // Use EF Core para criar pedidos (usa change tracking)
+    public async Task<Order> CreateOrderAsync(Order order)
+    {
+        return await _efRepo.AddAsync(order);
+    }
+    
+    // Use Dapper para relatórios de vendas (queries otimizadas)
+    public async Task<IEnumerable<Order>> GetSalesReportAsync(DateTime start, DateTime end)
+    {
+        return await _dapperRepo.GetOrdersByDateRangeAsync(start, end);
+    }
+}
+```
+
+### 🔑 Interfaces Específicas Previnem Conflitos
+
+Cada ORM usa interfaces específicas para evitar conflitos de injeção de dependências:
+
+```csharp
+// Entity Framework Core
+IRepository<Product> efRepo;  // Usa InMemory em testes, SQL Server em produção
+
+// Dapper
+IProductDapperRepository dapperRepo;  // Sempre usa SQL Server
+
+// ADO.NET
+IProductAdoRepository adoRepo;  // Sempre usa SQL Server
+```
+
+> **💡 IMPORTANTE**: Se você tentar injetar `IRepository<Product>`, sempre receberá a implementação do EF Core (InMemory em testes). Para usar Dapper ou ADO.NET, injete a interface específica!
 ```
 
 ---
 
 ## 💡 Dicas
 
-1. **Performance**: Se performance é crítica, considere Dapper ou Linq2Db
-2. **Produtividade**: Para desenvolvimento rápido, use EF Core
-3. **Complexidade**: Para domínios complexos, NHibernate pode ser útil
-4. **Migrations**: Se precisa de migrations automáticas, use EF Core
-5. **Híbrido**: Não tenha medo de combinar ORMs conforme a necessidade
+1. **Performance**: Use Dapper ou ADO.NET para queries de alta performance
+2. **Produtividade**: Use EF Core para desenvolvimento rápido com change tracking
+3. **Híbrido**: Combine os 3 ORMs habilitados para extrair o melhor de cada um
+4. **Migrations**: Use EF Core para migrations automáticas (já configurado)
+5. **Testes**: Mantenha os testes usando interfaces - eles funcionam com qualquer ORM
+
+### 🎯 Guia Rápido de Decisão
+
+```
+CRUD simples, tracking necessário?
+    → Use IRepository<T> (EF Core)
+
+Query complexa, relatório, performance?
+    → Use IProductDapperRepository (Dapper)
+
+Controle total, bulk operations, stored procedures?
+    → Use IProductAdoRepository (ADO.NET)
+
+Precisa de múltiplos ao mesmo tempo?
+    → Injete todas as interfaces que precisar!
+```
 
 ---
 
 ## 🧪 Testes
 
-Independente do ORM escolhido, mantenha seus testes focados nas interfaces:
+Os testes usam **EF Core InMemory** por padrão, independentemente de quantos ORMs estão habilitados:
 
 ```csharp
 public class ProductServiceTests
 {
-    private readonly Mock<IRepository<Product>> _mockRepo;
+    private readonly Mock<IRepository<Product>> _mockRepo;  // EF Core (InMemory)
     
     [Fact]
     public async Task GetByIdAsync_ReturnsProduct()
@@ -667,9 +933,17 @@ public class ProductServiceTests
             .ReturnsAsync(new Product { Id = 1, Name = "Test" });
         
         // Act & Assert
-        // O teste não sabe qual ORM está sendo usado!
+        // Funciona com qualquer implementação!
     }
 }
+```
+
+### Por que os testes funcionam?
+
+- ✅ `IRepository<Product>` sempre resolve para EF Core InMemory em testes
+- ✅ Dapper e ADO.NET só são usados quando você injeta as interfaces específicas
+- ✅ Nenhuma conexão com SQL Server é necessária para rodar os testes
+- ✅ Todos os 33 testes passam (7 unit + 26 integration)
 ```
 
 ---
