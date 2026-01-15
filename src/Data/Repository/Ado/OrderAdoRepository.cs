@@ -21,23 +21,23 @@ public class OrderAdoRepository : IOrderAdoRepository
     public async Task<Order?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         // Get order
         using var orderCommand = connection.CreateCommand();
         orderCommand.CommandText = @"
-            SELECT Id, OrderNumber, CustomerName, CustomerEmail, CustomerPhone, 
+            SELECT Id, OrderNumber, CustomerName, CustomerEmail, CustomerPhone,
                    ShippingAddress, Status, Subtotal, Tax, ShippingCost, Total, Notes,
-                   IsActive, CreatedAt, UpdatedAt 
-            FROM Orders 
+                   IsActive, CreatedAt, UpdatedAt
+            FROM Orders
             WHERE Id = @Id";
 
         AddParameter(orderCommand, "@Id", id);
 
         Order? order = null;
-        using (var reader = await orderCommand.ExecuteReaderAsync(cancellationToken))
+        using (var reader = await orderCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false))
         {
-            if (await reader.ReadAsync(cancellationToken))
+            if (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
             {
                 order = MapOrder(reader);
             }
@@ -50,14 +50,14 @@ public class OrderAdoRepository : IOrderAdoRepository
             itemsCommand.CommandText = @"
                 SELECT Id, OrderId, ProductId, ProductName, Quantity, UnitPrice, Subtotal,
                        IsActive, CreatedAt, UpdatedAt
-                FROM OrderItems 
+                FROM OrderItems
                 WHERE OrderId = @OrderId";
 
             AddParameter(itemsCommand, "@OrderId", id);
 
             var items = new List<OrderItem>();
-            using var itemsReader = await itemsCommand.ExecuteReaderAsync(cancellationToken);
-            while (await itemsReader.ReadAsync(cancellationToken))
+            using var itemsReader = await itemsCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            while (await itemsReader.ReadAsync(cancellationToken).ConfigureAwait(false))
             {
                 items.Add(MapOrderItem(itemsReader));
             }
@@ -71,20 +71,20 @@ public class OrderAdoRepository : IOrderAdoRepository
     public async Task<IEnumerable<Order>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         // Get all orders
         var orders = new Dictionary<long, Order>();
         using var orderCommand = connection.CreateCommand();
         orderCommand.CommandText = @"
-            SELECT Id, OrderNumber, CustomerName, CustomerEmail, CustomerPhone, 
+            SELECT Id, OrderNumber, CustomerName, CustomerEmail, CustomerPhone,
                    ShippingAddress, Status, Subtotal, Tax, ShippingCost, Total, Notes,
-                   IsActive, CreatedAt, UpdatedAt 
+                   IsActive, CreatedAt, UpdatedAt
             FROM Orders";
 
-        using (var reader = await orderCommand.ExecuteReaderAsync(cancellationToken))
+        using (var reader = await orderCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false))
         {
-            while (await reader.ReadAsync(cancellationToken))
+            while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
             {
                 var order = MapOrder(reader);
                 order.Items = new List<OrderItem>();
@@ -101,8 +101,8 @@ public class OrderAdoRepository : IOrderAdoRepository
                        IsActive, CreatedAt, UpdatedAt
                 FROM OrderItems";
 
-            using var itemsReader = await itemsCommand.ExecuteReaderAsync(cancellationToken);
-            while (await itemsReader.ReadAsync(cancellationToken))
+            using var itemsReader = await itemsCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            while (await itemsReader.ReadAsync(cancellationToken).ConfigureAwait(false))
             {
                 var item = MapOrderItem(itemsReader);
                 if (orders.TryGetValue(item.OrderId, out var order))
@@ -117,14 +117,14 @@ public class OrderAdoRepository : IOrderAdoRepository
 
     public async Task<IEnumerable<Order>> FindAsync(Func<Order, bool> predicate, CancellationToken cancellationToken = default)
     {
-        var all = await GetAllAsync(cancellationToken);
+        var all = await GetAllAsync(cancellationToken).ConfigureAwait(false);
         return all.Where(predicate);
     }
 
     public async Task<Order> AddAsync(Order entity, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         // Begin transaction
         using var transaction = connection.BeginTransaction();
@@ -135,10 +135,10 @@ public class OrderAdoRepository : IOrderAdoRepository
             using var orderCommand = connection.CreateCommand();
             orderCommand.Transaction = transaction;
             orderCommand.CommandText = @"
-                INSERT INTO Orders (OrderNumber, CustomerName, CustomerEmail, CustomerPhone, 
+                INSERT INTO Orders (OrderNumber, CustomerName, CustomerEmail, CustomerPhone,
                                   ShippingAddress, Status, Subtotal, Tax, ShippingCost, Total, Notes,
                                   IsActive, CreatedAt, UpdatedAt)
-                VALUES (@OrderNumber, @CustomerName, @CustomerEmail, @CustomerPhone, 
+                VALUES (@OrderNumber, @CustomerName, @CustomerEmail, @CustomerPhone,
                         @ShippingAddress, @Status, @Subtotal, @Tax, @ShippingCost, @Total, @Notes,
                         @IsActive, @CreatedAt, @UpdatedAt);
                 SELECT CAST(SCOPE_IDENTITY() as bigint)";
@@ -160,7 +160,7 @@ public class OrderAdoRepository : IOrderAdoRepository
             AddParameter(orderCommand, "@CreatedAt", entity.CreatedAt);
             AddParameter(orderCommand, "@UpdatedAt", entity.UpdatedAt ?? (object)DBNull.Value);
 
-            var orderId = await orderCommand.ExecuteScalarAsync(cancellationToken);
+            var orderId = await orderCommand.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
             entity.Id = Convert.ToInt64(orderId);
 
             // Insert order items
@@ -189,7 +189,7 @@ public class OrderAdoRepository : IOrderAdoRepository
                     AddParameter(itemCommand, "@CreatedAt", item.CreatedAt);
                     AddParameter(itemCommand, "@UpdatedAt", item.UpdatedAt ?? (object)DBNull.Value);
 
-                    await itemCommand.ExecuteNonQueryAsync(cancellationToken);
+                    await itemCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
 
@@ -208,7 +208,7 @@ public class OrderAdoRepository : IOrderAdoRepository
         var entityList = entities.ToList();
         foreach (var entity in entityList)
         {
-            await AddAsync(entity, cancellationToken);
+            await AddAsync(entity, cancellationToken).ConfigureAwait(false);
         }
         return entityList;
     }
@@ -216,7 +216,7 @@ public class OrderAdoRepository : IOrderAdoRepository
     public async Task UpdateAsync(Order entity, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         using var transaction = connection.BeginTransaction();
 
@@ -226,7 +226,7 @@ public class OrderAdoRepository : IOrderAdoRepository
             using var orderCommand = connection.CreateCommand();
             orderCommand.Transaction = transaction;
             orderCommand.CommandText = @"
-                UPDATE Orders 
+                UPDATE Orders
                 SET OrderNumber = @OrderNumber,
                     CustomerName = @CustomerName,
                     CustomerEmail = @CustomerEmail,
@@ -257,14 +257,14 @@ public class OrderAdoRepository : IOrderAdoRepository
             AddParameter(orderCommand, "@Notes", entity.Notes ?? (object)DBNull.Value);
             AddParameter(orderCommand, "@UpdatedAt", entity.UpdatedAt);
 
-            await orderCommand.ExecuteNonQueryAsync(cancellationToken);
+            await orderCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             // Delete existing items
             using var deleteCommand = connection.CreateCommand();
             deleteCommand.Transaction = transaction;
             deleteCommand.CommandText = "DELETE FROM OrderItems WHERE OrderId = @OrderId";
             AddParameter(deleteCommand, "@OrderId", entity.Id);
-            await deleteCommand.ExecuteNonQueryAsync(cancellationToken);
+            await deleteCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             // Re-insert items
             if (entity.Items?.Any() == true)
@@ -292,7 +292,7 @@ public class OrderAdoRepository : IOrderAdoRepository
                     AddParameter(itemCommand, "@CreatedAt", item.CreatedAt != default ? item.CreatedAt : DateTime.UtcNow);
                     AddParameter(itemCommand, "@UpdatedAt", item.UpdatedAt);
 
-                    await itemCommand.ExecuteNonQueryAsync(cancellationToken);
+                    await itemCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
 
@@ -308,7 +308,7 @@ public class OrderAdoRepository : IOrderAdoRepository
     public async Task DeleteAsync(Order entity, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         using var transaction = connection.BeginTransaction();
 
@@ -319,14 +319,14 @@ public class OrderAdoRepository : IOrderAdoRepository
             deleteItemsCommand.Transaction = transaction;
             deleteItemsCommand.CommandText = "DELETE FROM OrderItems WHERE OrderId = @OrderId";
             AddParameter(deleteItemsCommand, "@OrderId", entity.Id);
-            await deleteItemsCommand.ExecuteNonQueryAsync(cancellationToken);
+            await deleteItemsCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             // Delete order
             using var deleteOrderCommand = connection.CreateCommand();
             deleteOrderCommand.Transaction = transaction;
             deleteOrderCommand.CommandText = "DELETE FROM Orders WHERE Id = @Id";
             AddParameter(deleteOrderCommand, "@Id", entity.Id);
-            await deleteOrderCommand.ExecuteNonQueryAsync(cancellationToken);
+            await deleteOrderCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
             transaction.Commit();
         }
@@ -341,41 +341,41 @@ public class OrderAdoRepository : IOrderAdoRepository
     {
         foreach (var entity in entities)
         {
-            await DeleteAsync(entity, cancellationToken);
+            await DeleteAsync(entity, cancellationToken).ConfigureAwait(false);
         }
     }
 
     public async Task<(IEnumerable<Order> Items, int Total)> GetPagedAsync(
-        int page, 
-        int pageSize, 
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         // Get total count
         using var countCommand = connection.CreateCommand();
         countCommand.CommandText = "SELECT COUNT(*) FROM Orders";
-        var total = Convert.ToInt32(await countCommand.ExecuteScalarAsync(cancellationToken));
+        var total = Convert.ToInt32(await countCommand.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false));
 
         // Get paged orders
         var orders = new Dictionary<long, Order>();
         using var orderCommand = connection.CreateCommand();
         orderCommand.CommandText = @"
-            SELECT Id, OrderNumber, CustomerName, CustomerEmail, CustomerPhone, 
+            SELECT Id, OrderNumber, CustomerName, CustomerEmail, CustomerPhone,
                    ShippingAddress, Status, Subtotal, Tax, ShippingCost, Total, Notes,
-                   IsActive, CreatedAt, UpdatedAt 
-            FROM Orders 
-            ORDER BY Id 
-            OFFSET @Offset ROWS 
+                   IsActive, CreatedAt, UpdatedAt
+            FROM Orders
+            ORDER BY Id
+            OFFSET @Offset ROWS
             FETCH NEXT @PageSize ROWS ONLY";
 
         AddParameter(orderCommand, "@Offset", (page - 1) * pageSize);
         AddParameter(orderCommand, "@PageSize", pageSize);
 
-        using (var reader = await orderCommand.ExecuteReaderAsync(cancellationToken))
+        using (var reader = await orderCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false))
         {
-            while (await reader.ReadAsync(cancellationToken))
+            while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
             {
                 var order = MapOrder(reader);
                 order.Items = new List<OrderItem>();
@@ -391,11 +391,11 @@ public class OrderAdoRepository : IOrderAdoRepository
             itemsCommand.CommandText = $@"
                 SELECT Id, OrderId, ProductId, ProductName, Quantity, UnitPrice, Subtotal,
                        IsActive, CreatedAt, UpdatedAt
-                FROM OrderItems 
+                FROM OrderItems
                 WHERE OrderId IN ({orderIds})";
 
-            using var itemsReader = await itemsCommand.ExecuteReaderAsync(cancellationToken);
-            while (await itemsReader.ReadAsync(cancellationToken))
+            using var itemsReader = await itemsCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            while (await itemsReader.ReadAsync(cancellationToken).ConfigureAwait(false))
             {
                 var item = MapOrderItem(itemsReader);
                 if (orders.TryGetValue(item.OrderId, out var order))

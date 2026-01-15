@@ -21,12 +21,12 @@ public class ProductAdoRepository : IProductAdoRepository
     public async Task<Product?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         using var command = connection.CreateCommand();
         command.CommandText = @"
-            SELECT Id, Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt 
-            FROM Products 
+            SELECT Id, Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt
+            FROM Products
             WHERE Id = @Id";
 
         var parameter = command.CreateParameter();
@@ -34,8 +34,8 @@ public class ProductAdoRepository : IProductAdoRepository
         parameter.Value = id;
         command.Parameters.Add(parameter);
 
-        using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        if (await reader.ReadAsync(cancellationToken))
+        using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        if (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
             return MapProduct(reader);
         }
@@ -46,16 +46,16 @@ public class ProductAdoRepository : IProductAdoRepository
     public async Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         using var command = connection.CreateCommand();
         command.CommandText = @"
-            SELECT Id, Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt 
+            SELECT Id, Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt
             FROM Products";
 
         var products = new List<Product>();
-        using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        while (await reader.ReadAsync(cancellationToken))
+        using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
             products.Add(MapProduct(reader));
         }
@@ -65,14 +65,14 @@ public class ProductAdoRepository : IProductAdoRepository
 
     public async Task<IEnumerable<Product>> FindAsync(Func<Product, bool> predicate, CancellationToken cancellationToken = default)
     {
-        var all = await GetAllAsync(cancellationToken);
+        var all = await GetAllAsync(cancellationToken).ConfigureAwait(false);
         return all.Where(predicate);
     }
 
     public async Task<Product> AddAsync(Product entity, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         using var command = connection.CreateCommand();
         command.CommandText = @"
@@ -91,7 +91,7 @@ public class ProductAdoRepository : IProductAdoRepository
         AddParameter(command, "@CreatedAt", entity.CreatedAt);
         AddParameter(command, "@UpdatedAt", entity.UpdatedAt ?? (object)DBNull.Value);
 
-        var id = await command.ExecuteScalarAsync(cancellationToken);
+        var id = await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
         entity.Id = Convert.ToInt64(id);
 
         return entity;
@@ -102,7 +102,7 @@ public class ProductAdoRepository : IProductAdoRepository
         var entityList = entities.ToList();
         foreach (var entity in entityList)
         {
-            await AddAsync(entity, cancellationToken);
+            await AddAsync(entity, cancellationToken).ConfigureAwait(false);
         }
         return entityList;
     }
@@ -110,11 +110,11 @@ public class ProductAdoRepository : IProductAdoRepository
     public async Task UpdateAsync(Product entity, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         using var command = connection.CreateCommand();
         command.CommandText = @"
-            UPDATE Products 
+            UPDATE Products
             SET Name = @Name,
                 Description = @Description,
                 Price = @Price,
@@ -135,58 +135,58 @@ public class ProductAdoRepository : IProductAdoRepository
         AddParameter(command, "@IsActive", entity.IsActive);
         AddParameter(command, "@UpdatedAt", entity.UpdatedAt);
 
-        await command.ExecuteNonQueryAsync(cancellationToken);
+        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task DeleteAsync(Product entity, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         using var command = connection.CreateCommand();
         command.CommandText = "DELETE FROM Products WHERE Id = @Id";
 
         AddParameter(command, "@Id", entity.Id);
 
-        await command.ExecuteNonQueryAsync(cancellationToken);
+        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task DeleteRangeAsync(IEnumerable<Product> entities, CancellationToken cancellationToken = default)
     {
         foreach (var entity in entities)
         {
-            await DeleteAsync(entity, cancellationToken);
+            await DeleteAsync(entity, cancellationToken).ConfigureAwait(false);
         }
     }
 
     public async Task<(IEnumerable<Product> Items, int Total)> GetPagedAsync(
-        int page, 
-        int pageSize, 
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         // Get total count
         using var countCommand = connection.CreateCommand();
         countCommand.CommandText = "SELECT COUNT(*) FROM Products";
-        var total = Convert.ToInt32(await countCommand.ExecuteScalarAsync(cancellationToken));
+        var total = Convert.ToInt32(await countCommand.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false));
 
         // Get paged data
         using var dataCommand = connection.CreateCommand();
         dataCommand.CommandText = @"
-            SELECT Id, Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt 
-            FROM Products 
-            ORDER BY Id 
-            OFFSET @Offset ROWS 
+            SELECT Id, Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt
+            FROM Products
+            ORDER BY Id
+            OFFSET @Offset ROWS
             FETCH NEXT @PageSize ROWS ONLY";
 
         AddParameter(dataCommand, "@Offset", (page - 1) * pageSize);
         AddParameter(dataCommand, "@PageSize", pageSize);
 
         var products = new List<Product>();
-        using var reader = await dataCommand.ExecuteReaderAsync(cancellationToken);
-        while (await reader.ReadAsync(cancellationToken))
+        using var reader = await dataCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
             products.Add(MapProduct(reader));
         }

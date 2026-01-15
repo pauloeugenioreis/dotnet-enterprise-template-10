@@ -115,12 +115,12 @@ public class JwtTokenService : ITokenService
 
     public async Task<User?> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        var token = await _userRepository.GetRefreshTokenAsync(refreshToken, cancellationToken);
-        
+        var token = await _userRepository.GetRefreshTokenAsync(refreshToken, cancellationToken).ConfigureAwait(false);
+
         if (token == null || !token.IsActive)
             return null;
 
-        var user = await _userRepository.GetByIdAsync(token.UserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(token.UserId, cancellationToken).ConfigureAwait(false);
         return user;
     }
 }

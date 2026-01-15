@@ -50,7 +50,7 @@ public class ValidationFilter : IAsyncActionFilter
                 
                 // Create validation context and execute validation
                 var validationContext = new ValidationContext<object>(argument);
-                var result = await validator.ValidateAsync(validationContext, context.HttpContext.RequestAborted);
+                var result = await validator.ValidateAsync(validationContext, context.HttpContext.RequestAborted).ConfigureAwait(false);
 
                 // If validation fails, add errors to ModelState
                 if (!result.IsValid)
@@ -71,7 +71,7 @@ public class ValidationFilter : IAsyncActionFilter
         }
 
         // If validation passed, continue to the next step in the pipeline
-        await next();
+        await next().ConfigureAwait(false);
     }
 
     private static bool ShouldSkipValidation(Type type)

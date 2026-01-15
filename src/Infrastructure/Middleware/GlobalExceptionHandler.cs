@@ -32,11 +32,11 @@ public class GlobalExceptionHandler
     {
         try
         {
-            await _next(context);
+            await _next(context).ConfigureAwait(false);
         }
         catch (Exception exception)
         {
-            await HandleExceptionAsync(context, exception);
+            await HandleExceptionAsync(context, exception).ConfigureAwait(false);
         }
     }
 
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler
                     }
                 };
 
-                await notificationService.NotifyAsync(exceptionContext, exception);
+                await notificationService.NotifyAsync(exceptionContext, exception).ConfigureAwait(false);
             }
         }
         catch (Exception notificationEx)
@@ -125,14 +125,14 @@ public class GlobalExceptionHandler
             {
                 HttpContext = context,
                 ProblemDetails = problemDetails
-            });
+            }).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
             // Fallback if ProblemDetails service fails
             _logger.LogError(ex, "Error writing ProblemDetails for exception: {Message}", ex.Message);
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            await context.Response.WriteAsync("Internal Server Error");
+            await context.Response.WriteAsync("Internal Server Error").ConfigureAwait(false);
         }
     }
 }

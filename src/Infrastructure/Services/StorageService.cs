@@ -32,7 +32,7 @@ public class StorageService : IStorageService
                 bucket: bucketName,
                 objectName: objectName,
                 contentType: contentType,
-                source: stream);
+                source: stream).ConfigureAwait(false);
 
             var publicUrl = GetPublicUrl(bucketName, objectName);
             _logger.LogInformation("Successfully uploaded object {ObjectName}. URL: {Url}", objectName, publicUrl);
@@ -55,7 +55,7 @@ public class StorageService : IStorageService
             await _storageClient.DownloadObjectAsync(
                 bucket: bucketName,
                 objectName: objectName,
-                destination: destination);
+                destination: destination).ConfigureAwait(false);
 
             _logger.LogInformation("Successfully downloaded object {ObjectName}", objectName);
         }
@@ -72,7 +72,7 @@ public class StorageService : IStorageService
         {
             _logger.LogInformation("Deleting object {ObjectName} from bucket {BucketName}", objectName, bucketName);
 
-            await _storageClient.DeleteObjectAsync(bucket: bucketName, objectName: objectName);
+            await _storageClient.DeleteObjectAsync(bucket: bucketName, objectName: objectName).ConfigureAwait(false);
 
             _logger.LogInformation("Successfully deleted object {ObjectName}", objectName);
         }
