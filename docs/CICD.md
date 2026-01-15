@@ -6,12 +6,12 @@ Este guia explica como configurar e usar os pipelines de CI/CD incluídos no tem
 
 ## 📋 Índice
 
-- [Visão Geral](#visão-geral)
-- [GitHub Actions](#github-actions)
-- [Azure DevOps](#azure-devops)
-- [GitLab CI/CD](#gitlab-cicd)
-- [Recursos Comuns](#recursos-comuns)
-- [Personalização](#personalização)
+- [Visão Geral](#-visão-geral)
+- [GitHub Actions](#-github-actions)
+- [Azure DevOps](#-azure-devops)
+- [GitLab CI/CD](#-gitlab-cicd)
+- [Recursos Comuns](#-recursos-comuns)
+- [Personalização](#-personalização)
 
 ---
 

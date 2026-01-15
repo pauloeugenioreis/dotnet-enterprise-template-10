@@ -4,14 +4,14 @@ Esta documentação descreve o sistema de **Rate Limiting** implementado no temp
 
 ## 📋 Índice
 
-- [Visão Geral](#visão-geral)
-- [Configuração](#configuração)
-- [Estratégias de Limitação](#estratégias-de-limitação)
-- [Como Usar](#como-usar)
-- [Resposta de Rate Limit Excedido (429)](#resposta-de-rate-limit-excedido-429)
-- [Whitelist de IPs](#whitelist-de-ips)
-- [Testando Rate Limiting](#testando-rate-limiting)
-- [Melhores Práticas](#melhores-práticas)
+- [Visão Geral](#-visão-geral)
+- [Configuração](#-configuração)
+- [Estratégias de Limitação](#-estratégias-de-limitação)
+- [Como Usar](#-como-usar)
+- [Resposta de Rate Limit Excedido (429)](#-resposta-de-rate-limit-excedido-429)
+- [Whitelist de IPs](#-whitelist-de-ips)
+- [Testando Rate Limiting](#-testando-rate-limiting)
+- [Melhores Práticas](#-melhores-práticas)
 
 ---
 

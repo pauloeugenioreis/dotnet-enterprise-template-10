@@ -4,16 +4,16 @@
 
 1. [O Que É Event Sourcing?](#o-que-é-event-sourcing)
 2. [Por Que Usar Event Sourcing?](#por-que-usar-event-sourcing)
-3. [Arquitetura](#arquitetura)
-4. [Modos de Operação](#modos-de-operação)
-5. [Configuração](#configuração)
-6. [Uso Básico](#uso-básico)
-7. [API de Auditoria](#api-de-auditoria)
-8. [Eventos Disponíveis](#eventos-disponíveis)
-9. [Time Travel](#time-travel)
-10. [Melhores Práticas](#melhores-práticas)
-11. [Performance](#performance)
-12. [Troubleshooting](#troubleshooting)
+3. [Arquitetura](#-arquitetura)
+4. [Modos de Operação](#-modos-de-operação)
+5. [Configuração](#-configuração)
+6. [Uso Básico](#-uso-básico)
+7. [API de Auditoria](#-api-de-auditoria)
+8. [Eventos Disponíveis](#-eventos-disponíveis)
+9. [Time Travel](#-time-travel)
+10. [Melhores Práticas](#-melhores-práticas)
+11. [Performance](#-performance)
+12. [Troubleshooting](#-troubleshooting)
 
 ---
 

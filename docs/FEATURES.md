@@ -6,21 +6,21 @@ Este guia explica como habilitar e configurar os recursos avançados incluídos 
 
 ## 📋 Índice
 
-1. [MongoDB](#mongodb)
-2. [Quartz.NET (Background Jobs)](#quartznet-background-jobs)
-3. [RabbitMQ (Message Queue)](#rabbitmq-message-queue)
-4. [Google Cloud Storage](#google-cloud-storage)
-5. [JWT Authentication](#jwt-authentication)
-6. [API Versioning](#api-versioning)
-7. [Global Exception Handler](#global-exception-handler)
-8. [Validation Filter](#validation-filter)
-9. [Advanced Logging](#advanced-logging)
-10. [Swagger/OpenAPI](#swaggeropenapi)
-11. [Exception Notification](#exception-notification)
-12. [📊 Telemetria e Observabilidade](#telemetria-e-observabilidade)
-13. [🚦 Rate Limiting](#rate-limiting)
-14. [📝 Event Sourcing](#event-sourcing)
-15. [🚀 CI/CD](#cicd)
+1. [MongoDB](#-mongodb)
+2. [Quartz.NET (Background Jobs)](#-quartznet-background-jobs)
+3. [RabbitMQ (Message Queue)](#-rabbitmq-message-queue)
+4. [Google Cloud Storage](#-google-cloud-storage)
+5. [JWT Authentication](#-jwt-authentication)
+6. [API Versioning](#-api-versioning)
+7. [Global Exception Handler](#-global-exception-handler)
+8. [Validation Filter](#-validation-filter)
+9. [Advanced Logging](#-advanced-logging)
+10. [Swagger/OpenAPI](#-swaggeropenapi)
+11. [Exception Notification](#-exception-notification)
+12. [Telemetria e Observabilidade](#-telemetria-e-observabilidade)
+13. [Rate Limiting](#-rate-limiting)
+14. [Event Sourcing](#-event-sourcing)
+15. [CI/CD](#-cicd)
 
 ---
 
