@@ -30,7 +30,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     }
 
     public virtual async Task<IEnumerable<TEntity>> FindAsync(
-        Func<TEntity, bool> predicate, 
+        Func<TEntity, bool> predicate,
         CancellationToken cancellationToken = default)
     {
         return await Task.Run(() => _dbSet.Where(predicate).ToList(), cancellationToken).ConfigureAwait(false);
@@ -43,7 +43,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     }
 
     public virtual async Task<IEnumerable<TEntity>> AddRangeAsync(
-        IEnumerable<TEntity> entities, 
+        IEnumerable<TEntity> entities,
         CancellationToken cancellationToken = default)
     {
         var entityList = entities.ToList();
@@ -56,10 +56,10 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
         // Get the ID value from the incoming entity
         var entityEntry = _context.Entry(entity);
         var idValue = entityEntry.Property("Id").CurrentValue;
-        
+
         // Find the existing tracked entity with the same ID
         var existingEntity = await _dbSet.FindAsync(new object[] { idValue }, cancellationToken).ConfigureAwait(false);
-        
+
         if (existingEntity != null)
         {
             // Copy values from the incoming entity to the tracked entity
@@ -86,8 +86,8 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     }
 
     public virtual async Task<(IEnumerable<TEntity> Items, int Total)> GetPagedAsync(
-        int page, 
-        int pageSize, 
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default)
     {
         var total = await _dbSet.CountAsync(cancellationToken).ConfigureAwait(false);

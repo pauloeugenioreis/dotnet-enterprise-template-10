@@ -18,7 +18,7 @@ public class OrderService : Service<Order>, IOrderService
     public OrderService(
         IOrderRepository orderRepository,
         IRepository<Product> productRepository,
-        ILogger<OrderService> logger) 
+        ILogger<OrderService> logger)
         : base(orderRepository, logger)
     {
         _orderRepository = orderRepository;
@@ -53,7 +53,7 @@ public class OrderService : Service<Order>, IOrderService
         foreach (var itemDto in dto.Items)
         {
             var product = await _productRepository.GetByIdAsync(itemDto.ProductId, cancellationToken).ConfigureAwait(false);
-            
+
             if (product == null)
             {
                 throw new NotFoundException($"Product {itemDto.ProductId} not found");
@@ -107,7 +107,7 @@ public class OrderService : Service<Order>, IOrderService
     public async Task<OrderResponseDto> UpdateOrderStatusAsync(long id, UpdateOrderStatusDto dto, CancellationToken cancellationToken = default)
     {
         var order = await _orderRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
-        
+
         if (order == null)
         {
             throw new NotFoundException($"Order {id} not found");
@@ -150,7 +150,7 @@ public class OrderService : Service<Order>, IOrderService
     public async Task<decimal> CalculateOrderTotalAsync(long orderId, CancellationToken cancellationToken = default)
     {
         var order = await _orderRepository.GetByIdAsync(orderId, cancellationToken).ConfigureAwait(false);
-        
+
         if (order == null)
         {
             throw new NotFoundException($"Order {orderId} not found");

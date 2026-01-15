@@ -20,10 +20,10 @@ builder.Services.AddOutputCache(options =>
 {
     // Default policy: 10 seconds cache
     options.AddBasePolicy(builder => builder.Expire(TimeSpan.FromSeconds(10)));
-    
+
     // Policy for GET endpoints: 5 minutes cache
     options.AddPolicy("Expire300", builder => builder.Expire(TimeSpan.FromSeconds(300)));
-    
+
     // Policy for products: 10 minutes cache, vary by id
     options.AddPolicy("ProductCache", builder => builder
         .Expire(TimeSpan.FromMinutes(10))
@@ -46,10 +46,10 @@ if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    
+
     // Ensure database is created
     await context.Database.EnsureCreatedAsync();
-    
+
     // Run seeder
     var seeder = new DbSeeder(context);
     await seeder.SeedAsync();

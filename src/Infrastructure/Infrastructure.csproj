@@ -13,12 +13,12 @@
     <PackageReference Include="Scrutor" Version="7.0.0" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    
+
     <!-- Swagger/API Documentation -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
     <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.1" />
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
-    
+
     <!-- Health Checks -->
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
     <!-- Uncomment health checks as needed -->
@@ -28,36 +28,36 @@
     <!-- <PackageReference Include="AspNetCore.HealthChecks.MongoDb" Version="9.0.0" /> -->
     <!-- <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" /> -->
     <!-- <PackageReference Include="AspNetCore.HealthChecks.RabbitMQ" Version="9.0.0" /> -->
-    
+
     <!-- Caching -->
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.2" />
     <!-- Microsoft.Extensions.Caching.Memory REMOVED - Already included in Microsoft.AspNetCore.App framework -->
-    
+
     <!-- InMemory Database -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.2" />
-    
+
     <!-- ORM Support (Uncomment as needed) -->
     <!-- Linq2Db - Required when using Linq2Db ORM -->
     <!-- <PackageReference Include="linq2db.AspNet" Version="5.4.1" /> -->
-    
+
     <!-- Rate Limiting -->
     <PackageReference Include="AspNetCoreRateLimit" Version="5.0.0" />
-    
+
     <!-- Job Scheduling (Commented - uncomment to enable) -->
     <PackageReference Include="Quartz" Version="3.15.1" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.15.1" />
-    
+
     <!-- Message Queue (Commented - uncomment to enable) -->
     <PackageReference Include="RabbitMQ.Client" Version="7.2.0" />
-    
+
     <!-- Cloud Storage (Commented - uncomment to enable) -->
     <PackageReference Include="Google.Cloud.Storage.V1" Version="4.13.0" />
     <!-- <PackageReference Include="Azure.Storage.Blobs" Version="12.25.0" /> -->
     <!-- <PackageReference Include="AWSSDK.S3" Version="3.7.421.0" /> -->
-    
+
     <!-- NoSQL Databases (Commented - uncomment to enable) -->
     <PackageReference Include="MongoDB.Driver" Version="3.5.2" />
-    
+
     <!-- Observability (OpenTelemetry) -->
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.14.0" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
@@ -67,7 +67,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.14.0-beta.1" />
-    
+
     <!-- Telemetry Exporters -->
     <!-- OpenTelemetry.Exporter.Jaeger REMOVED - Deprecated/Legacy -->
     <!-- Use OpenTelemetry.Exporter.OpenTelemetryProtocol instead (already included above) -->
@@ -75,21 +75,21 @@
     <!-- Using latest available version (1.14.0-beta.1 - no stable version yet) -->
     <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.14.0-beta.1" />
     <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.5.0" />
-    
+
     <!-- Event Sourcing -->
     <PackageReference Include="Marten" Version="8.17.0" />
     <PackageReference Include="Marten.AspNetCore" Version="8.17.0" />
     <PackageReference Include="Npgsql" Version="10.0.1" />
-    
+
     <!-- Authentication -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.2" />
-    
+
     <!-- Resilience -->
     <PackageReference Include="Polly" Version="8.6.5" />
-    
+
     <!-- Security Headers -->
     <PackageReference Include="NWebsec.AspNetCore.Middleware" Version="3.0.0" />
-    
+
     <!-- Logging (Commented - uncomment to enable) -->
     <PackageReference Include="Google.Cloud.Logging.Console" Version="1.6.0" />
     <!-- <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" /> -->

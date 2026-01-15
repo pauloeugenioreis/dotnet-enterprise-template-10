@@ -100,8 +100,8 @@ public class Service<TEntity> : IService<TEntity> where TEntity : class
     }
 
     public virtual async Task<(IEnumerable<TEntity> Items, int Total)> GetPagedAsync(
-        int page, 
-        int pageSize, 
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default)
     {
         try
