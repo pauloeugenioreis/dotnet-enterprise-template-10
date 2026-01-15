@@ -23,28 +23,28 @@ public class ProductDapperRepository : IProductDapperRepository
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sql = @"
-            SELECT Id, Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt 
-            FROM Products 
+            SELECT Id, Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt
+            FROM Products
             WHERE Id = @Id";
-        
-        return await connection.QuerySingleOrDefaultAsync<Product>(sql, new { Id = id });
+
+        return await connection.QuerySingleOrDefaultAsync<Product>(sql, new { Id = id }).ConfigureAwait(false);
     }
 
     public async Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sql = @"
-            SELECT Id, Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt 
+            SELECT Id, Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt
             FROM Products";
-        
-        return await connection.QueryAsync<Product>(sql);
+
+        return await connection.QueryAsync<Product>(sql).ConfigureAwait(false);
     }
 
     public async Task<IEnumerable<Product>> FindAsync(Func<Product, bool> predicate, CancellationToken cancellationToken = default)
     {
         // Dapper doesn't support LINQ predicates directly
         // For complex queries, implement specific methods or use GetAllAsync and filter in memory
-        var all = await GetAllAsync(cancellationToken);
+        var all = await GetAllAsync(cancellationToken).ConfigureAwait(false);
         return all.Where(predicate);
     }
 
@@ -55,11 +55,11 @@ public class ProductDapperRepository : IProductDapperRepository
             INSERT INTO Products (Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt)
             VALUES (@Name, @Description, @Price, @Stock, @Category, @IsActive, @CreatedAt, @UpdatedAt);
             SELECT CAST(SCOPE_IDENTITY() as bigint)";
-        
+
         entity.CreatedAt = DateTime.UtcNow;
-        var id = await connection.QuerySingleAsync<long>(sql, entity);
+        var id = await connection.QuerySingleAsync<long>(sql, entity).ConfigureAwait(false);
         entity.Id = id;
-        
+
         return entity;
     }
 
@@ -69,14 +69,14 @@ public class ProductDapperRepository : IProductDapperRepository
         const string sql = @"
             INSERT INTO Products (Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt)
             VALUES (@Name, @Description, @Price, @Stock, @Category, @IsActive, @CreatedAt, @UpdatedAt)";
-        
+
         var entityList = entities.ToList();
         foreach (var entity in entityList)
         {
             entity.CreatedAt = DateTime.UtcNow;
         }
-        
-        await connection.ExecuteAsync(sql, entityList);
+
+        await connection.ExecuteAsync(sql, entityList).ConfigureAwait(false);
         return entityList;
     }
 
@@ -84,7 +84,7 @@ public class ProductDapperRepository : IProductDapperRepository
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sql = @"
-            UPDATE Products 
+            UPDATE Products
             SET Name = @Name,
                 Description = @Description,
                 Price = @Price,
@@ -93,48 +93,48 @@ public class ProductDapperRepository : IProductDapperRepository
                 IsActive = @IsActive,
                 UpdatedAt = @UpdatedAt
             WHERE Id = @Id";
-        
+
         entity.UpdatedAt = DateTime.UtcNow;
-        await connection.ExecuteAsync(sql, entity);
+        await connection.ExecuteAsync(sql, entity).ConfigureAwait(false);
     }
 
     public async Task DeleteAsync(Product entity, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sql = "DELETE FROM Products WHERE Id = @Id";
-        await connection.ExecuteAsync(sql, new { entity.Id });
+        await connection.ExecuteAsync(sql, new { entity.Id }).ConfigureAwait(false);
     }
 
     public async Task DeleteRangeAsync(IEnumerable<Product> entities, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sql = "DELETE FROM Products WHERE Id = @Id";
-        await connection.ExecuteAsync(sql, entities.Select(e => new { e.Id }));
+        await connection.ExecuteAsync(sql, entities.Select(e => new { e.Id })).ConfigureAwait(false);
     }
 
     public async Task<(IEnumerable<Product> Items, int Total)> GetPagedAsync(
-        int page, 
-        int pageSize, 
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        
+
         const string countSql = "SELECT COUNT(*) FROM Products";
-        var total = await connection.ExecuteScalarAsync<int>(countSql);
-        
+        var total = await connection.ExecuteScalarAsync<int>(countSql).ConfigureAwait(false);
+
         const string dataSql = @"
-            SELECT Id, Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt 
-            FROM Products 
-            ORDER BY Id 
-            OFFSET @Offset ROWS 
+            SELECT Id, Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt
+            FROM Products
+            ORDER BY Id
+            OFFSET @Offset ROWS
             FETCH NEXT @PageSize ROWS ONLY";
-        
-        var items = await connection.QueryAsync<Product>(dataSql, new 
-        { 
-            Offset = (page - 1) * pageSize, 
-            PageSize = pageSize 
-        });
-        
+
+        var items = await connection.QueryAsync<Product>(dataSql, new
+        {
+            Offset = (page - 1) * pageSize,
+            PageSize = pageSize
+        }).ConfigureAwait(false);
+
         return (items, total);
     }
 
