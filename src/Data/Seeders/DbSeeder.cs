@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace ProjectTemplate.Data.Seeders;
@@ -14,8 +15,7 @@ namespace ProjectTemplate.Data.Seeders;
 public class DbSeeder
 {
     private readonly ApplicationDbContext _context;
-    private static readonly Random _random = new Random();
-    
+
     // Lists for generating realistic fake data
     private static readonly string[] FirstNames = { "João", "Maria", "Pedro", "Ana", "Lucas", "Juliana", "Carlos", "Beatriz", "Rafael", "Camila", "Fernando", "Patricia", "Rodrigo", "Amanda", "Bruno", "Mariana", "Diego", "Larissa", "Thiago", "Gabriela" };
     private static readonly string[] LastNames = { "Silva", "Santos", "Oliveira", "Souza", "Lima", "Ferreira", "Costa", "Rodrigues", "Almeida", "Nascimento", "Araújo", "Carvalho", "Ribeiro", "Martins", "Rocha", "Monteiro", "Mendes", "Barbosa", "Freitas", "Cardoso" };
@@ -105,7 +105,7 @@ public class DbSeeder
         {
             // Password: Admin@2026!Secure
             var passwordHash = HashPassword("Admin@2026!Secure");
-            
+
             var adminUser = new User
             {
                 Username = "admin",
@@ -171,8 +171,8 @@ public class DbSeeder
             string name;
             do
             {
-                var prefix = ProductPrefixes[_random.Next(ProductPrefixes.Length)];
-                var suffix = ProductSuffixes[_random.Next(ProductSuffixes.Length)];
+                var prefix = ProductPrefixes[RandomNumberGenerator.GetInt32(ProductPrefixes.Length)];
+                var suffix = ProductSuffixes[RandomNumberGenerator.GetInt32(ProductSuffixes.Length)];
                 name = $"{prefix} {suffix}";
             } while (usedNames.Contains(name));
 
@@ -183,11 +183,11 @@ public class DbSeeder
                 Name = name,
                 Description = GenerateProductDescription(name),
                 Price = GeneratePrice(),
-                Stock = _random.Next(0, 500),
+                Stock = RandomNumberGenerator.GetInt32(0, 500),
                 Category = GenerateCategory(),
-                IsActive = _random.Next(100) > 10, // 90% active
-                CreatedAt = DateTime.UtcNow.AddDays(-_random.Next(1, 365)),
-                UpdatedAt = DateTime.UtcNow.AddDays(-_random.Next(0, 30))
+                IsActive = RandomNumberGenerator.GetInt32(100) > 10, // 90% active
+                CreatedAt = DateTime.UtcNow.AddDays(-RandomNumberGenerator.GetInt32(1, 365)),
+                UpdatedAt = DateTime.UtcNow.AddDays(-RandomNumberGenerator.GetInt32(0, 30))
             };
 
             products.Add(product);
@@ -209,11 +209,11 @@ public class DbSeeder
 
         for (int i = 0; i < count; i++)
         {
-            var customerFirstName = FirstNames[_random.Next(FirstNames.Length)];
-            var customerLastName = LastNames[_random.Next(LastNames.Length)];
+            var customerFirstName = FirstNames[RandomNumberGenerator.GetInt32(FirstNames.Length)];
+            var customerLastName = LastNames[RandomNumberGenerator.GetInt32(LastNames.Length)];
             var customerName = $"{customerFirstName} {customerLastName}";
             var customerEmail = GenerateEmail(customerFirstName, customerLastName);
-            
+
             var order = new Order
             {
                 OrderNumber = GenerateOrderNumber(),
@@ -223,18 +223,18 @@ public class DbSeeder
                 ShippingAddress = GenerateAddress(),
                 Status = GenerateOrderStatus(),
                 Notes = GenerateOrderNotes(),
-                CreatedAt = DateTime.UtcNow.AddDays(-_random.Next(1, 180)),
-                UpdatedAt = DateTime.UtcNow.AddDays(-_random.Next(0, 30)),
+                CreatedAt = DateTime.UtcNow.AddDays(-RandomNumberGenerator.GetInt32(1, 180)),
+                UpdatedAt = DateTime.UtcNow.AddDays(-RandomNumberGenerator.GetInt32(0, 30)),
                 Items = new List<OrderItem>()
             };
 
             // Add 1-5 items per order
-            var itemCount = _random.Next(1, 6);
-            var selectedProducts = activeProducts.OrderBy(x => _random.Next()).Take(itemCount).ToList();
+            var itemCount = RandomNumberGenerator.GetInt32(1, 6);
+            var selectedProducts = activeProducts.OrderBy(x => RandomNumberGenerator.GetInt32(int.MaxValue)).Take(itemCount).ToList();
 
             foreach (var product in selectedProducts)
             {
-                var quantity = _random.Next(1, 5);
+                var quantity = RandomNumberGenerator.GetInt32(1, 5);
                 var orderItem = new OrderItem
                 {
                     Order = order,
@@ -276,27 +276,27 @@ public class DbSeeder
             $"{productName} desenvolvido com materiais premium.",
             $"{productName} - líder de vendas, recomendado por especialistas."
         };
-        return descriptions[_random.Next(descriptions.Length)];
+        return descriptions[RandomNumberGenerator.GetInt32(descriptions.Length)];
     }
 
     private static decimal GeneratePrice()
     {
         var priceRanges = new[]
         {
-            (_random.Next(20, 100), 0.99m),      // $20-100
-            (_random.Next(100, 500), 0.90m),     // $100-500
-            (_random.Next(500, 1000), 0.95m),    // $500-1000
-            (_random.Next(1000, 5000), 0.00m)    // $1000-5000
+            (RandomNumberGenerator.GetInt32(20, 100), 0.99m),      // $20-100
+            (RandomNumberGenerator.GetInt32(100, 500), 0.90m),     // $100-500
+            (RandomNumberGenerator.GetInt32(500, 1000), 0.95m),    // $500-1000
+            (RandomNumberGenerator.GetInt32(1000, 5000), 0.00m)    // $1000-5000
         };
-        
-        var range = priceRanges[_random.Next(priceRanges.Length)];
+
+        var range = priceRanges[RandomNumberGenerator.GetInt32(priceRanges.Length)];
         return range.Item1 + range.Item2;
     }
 
     private static string GenerateCategory()
     {
         var categories = new[] { "Eletrônicos", "Informática", "Periféricos", "Hardware", "Acessórios", "Móveis", "Games" };
-        return categories[_random.Next(categories.Length)];
+        return categories[RandomNumberGenerator.GetInt32(categories.Length)];
     }
 
     private static string GenerateOrderNumber()
@@ -309,27 +309,27 @@ public class DbSeeder
     private static string GenerateEmail(string firstName, string lastName)
     {
         var domains = new[] { "gmail.com", "hotmail.com", "outlook.com", "yahoo.com.br", "empresa.com.br" };
-        var domain = domains[_random.Next(domains.Length)];
+        var domain = domains[RandomNumberGenerator.GetInt32(domains.Length)];
         var emailPrefix = $"{firstName.ToLower()}.{lastName.ToLower()}".Replace(" ", "");
         return $"{emailPrefix}@{domain}";
     }
 
     private static string GeneratePhone()
     {
-        var ddd = _random.Next(11, 99);
-        var prefix = _random.Next(90000, 99999);
-        var suffix = _random.Next(1000, 9999);
+        var ddd = RandomNumberGenerator.GetInt32(11, 99);
+        var prefix = RandomNumberGenerator.GetInt32(90000, 99999);
+        var suffix = RandomNumberGenerator.GetInt32(1000, 9999);
         return $"({ddd}) 9{prefix}-{suffix}";
     }
 
     private static string GenerateAddress()
     {
-        var street = Streets[_random.Next(Streets.Length)];
-        var number = _random.Next(10, 9999);
-        var city = Cities[_random.Next(Cities.Length)];
-        var state = States[_random.Next(States.Length)];
-        var zipCode = $"{_random.Next(10000, 99999)}-{_random.Next(100, 999)}";
-        
+        var street = Streets[RandomNumberGenerator.GetInt32(Streets.Length)];
+        var number = RandomNumberGenerator.GetInt32(10, 9999);
+        var city = Cities[RandomNumberGenerator.GetInt32(Cities.Length)];
+        var state = States[RandomNumberGenerator.GetInt32(States.Length)];
+        var zipCode = $"{RandomNumberGenerator.GetInt32(10000, 99999)}-{RandomNumberGenerator.GetInt32(100, 999)}";
+
         return $"{street}, {number} - {city}/{state} - CEP: {zipCode}";
     }
 
@@ -345,7 +345,7 @@ public class DbSeeder
         };
 
         var totalWeight = statusWeights.Sum(x => x.Item2);
-        var randomValue = _random.Next(totalWeight);
+        var randomValue = RandomNumberGenerator.GetInt32(totalWeight);
         var cumulative = 0;
 
         foreach (var (status, weight) in statusWeights)
@@ -358,9 +358,9 @@ public class DbSeeder
         return "Pending";
     }
 
-    private static string GenerateOrderNotes()
+    private static string? GenerateOrderNotes()
     {
-        if (_random.Next(100) > 70) // 30% of orders have notes
+        if (RandomNumberGenerator.GetInt32(100) > 70) // 30% of orders have notes
         {
             var notes = new[]
             {
@@ -369,10 +369,9 @@ public class DbSeeder
                 "Deixar com portaria",
                 "Cliente VIP",
                 "Primeira compra - oferecer desconto na próxima",
-                "Cliente preferencial",
-                null
+                "Cliente preferencial"
             };
-            return notes[_random.Next(notes.Length)];
+            return notes[RandomNumberGenerator.GetInt32(notes.Length)];
         }
         return null;
     }

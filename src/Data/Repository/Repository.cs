@@ -58,7 +58,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
         var idValue = entityEntry.Property("Id").CurrentValue;
 
         // Find the existing tracked entity with the same ID
-        var existingEntity = await _dbSet.FindAsync(new object[] { idValue }, cancellationToken).ConfigureAwait(false);
+        var existingEntity = await _dbSet.FindAsync(new object[] { idValue! }, cancellationToken).ConfigureAwait(false);
 
         if (existingEntity != null)
         {
