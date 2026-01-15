@@ -199,11 +199,11 @@ Atualize o deployment para usar secrets:
 
 ```yaml
 env:
-  - name: AppSettings__ConnectionStrings__DefaultConnection
+  - name: AppSettings__Infrastructure__Database__ConnectionString
     valueFrom:
       secretKeyRef:
         name: projecttemplate-secrets
-        key: database-password
+        key: database-connection-string
 ```
 
 ### 4. Ajustar Recursos

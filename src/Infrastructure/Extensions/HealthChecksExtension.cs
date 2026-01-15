@@ -18,17 +18,17 @@ public static class HealthChecksExtension
         healthChecksBuilder.AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "ready" });
 
         // Database health check
-        var connectionString = appSettings.Value.ConnectionStrings.DefaultConnection;
+        var connectionString = appSettings.Value.Infrastructure.Database.ConnectionString;
         if (!string.IsNullOrEmpty(connectionString))
         {
             var dbType = appSettings.Value.Infrastructure.Database.DatabaseType.ToLower();
-            
+
             // Database health checks require specific packages to be installed
             // Uncomment and install the appropriate package:
             // - AspNetCore.HealthChecks.SqlServer for SQL Server
             // - AspNetCore.HealthChecks.Oracle for Oracle
             // - AspNetCore.HealthChecks.Npgsql for PostgreSQL
-            
+
             // switch (dbType)
             // {
             //     case "sqlserver":
@@ -44,7 +44,7 @@ public static class HealthChecksExtension
         // Add Redis health check if configured
         // Requires: AspNetCore.HealthChecks.Redis package
         // var cacheSettings = appSettings?.Infrastructure?.Cache;
-        // if (cacheSettings?.Enabled == true && 
+        // if (cacheSettings?.Enabled == true &&
         //     cacheSettings.Provider.Equals("Redis", StringComparison.OrdinalIgnoreCase) &&
         //     cacheSettings.Redis != null &&
         //     !string.IsNullOrEmpty(cacheSettings.Redis.ConnectionString))

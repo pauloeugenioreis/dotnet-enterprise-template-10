@@ -38,7 +38,6 @@ Este template usa o **IOptions Pattern** do ASP.NET Core para gerenciar configur
 public class AppSettings
 {
     public string EnvironmentName { get; set; }
-    public ConnectionStringSettings ConnectionStrings { get; set; }
     public InfrastructureSettings Infrastructure { get; set; }
     public AuthenticationSettings Authentication { get; set; }
     
@@ -54,12 +53,16 @@ public class AppSettings
 {
   "AppSettings": {
     "EnvironmentName": "Development",
-    "ConnectionStrings": {
-      "DefaultConnection": "Server=localhost;Database=..."
-    },
     "Infrastructure": {
       "Cache": { ... },
-      "Database": { ... },
+      "Database": {
+        "DatabaseType": "SqlServer",
+        "ConnectionString": "Server=localhost;...",
+        "ReadOnlyConnectionString": ""
+      },
+      "MongoDB": { "ConnectionString": "" },
+      "RabbitMQ": { "ConnectionString": "" },
+      "Storage": { "ServiceAccount": "", "DefaultBucket": "" },
       "Telemetry": { ... },
       "RateLimiting": { ... },
       "EventSourcing": { ... }
@@ -548,9 +551,6 @@ AppSettings__Propriedade__SubPropriedade
 {
   "AppSettings": {
     "EnvironmentName": "Development",
-    "ConnectionStrings": {
-      "DefaultConnection": "Server=localhost;..."
-    },
     "Authentication": {
       "Jwt": {
         "Secret": "my-secret-key",
@@ -558,6 +558,20 @@ AppSettings__Propriedade__SubPropriedade
       }
     },
     "Infrastructure": {
+      "Database": {
+        "DatabaseType": "InMemory",
+        "ConnectionString": ""
+      },
+      "MongoDB": {
+        "ConnectionString": ""
+      },
+      "RabbitMQ": {
+        "ConnectionString": ""
+      },
+      "Storage": {
+        "ServiceAccount": "",
+        "DefaultBucket": ""
+      },
       "Cache": {
         "Enabled": true,
         "Provider": "Memory"
@@ -573,8 +587,9 @@ AppSettings__Propriedade__SubPropriedade
 # Ambiente
 AppSettings__EnvironmentName=Production
 
-# Connection String
-AppSettings__ConnectionStrings__DefaultConnection=Server=prod-server;Database=MyDb;...
+# Database Connection
+AppSettings__Infrastructure__Database__DatabaseType=SqlServer
+AppSettings__Infrastructure__Database__ConnectionString=Server=prod-server;Database=MyDb;...
 
 # JWT Settings
 AppSettings__Authentication__Jwt__Secret=super-secret-production-key-with-at-least-32-chars
@@ -615,8 +630,9 @@ services:
       # Ambiente
       - AppSettings__EnvironmentName=Production
       
-      # Connection String
-      - AppSettings__ConnectionStrings__DefaultConnection=Server=sqlserver;Database=MyDb;User Id=sa;Password=YourPassword123!;TrustServerCertificate=true
+      # Database
+      - AppSettings__Infrastructure__Database__DatabaseType=SqlServer
+      - AppSettings__Infrastructure__Database__ConnectionString=Server=sqlserver;Database=MyDb;User Id=sa;Password=YourPassword123!;TrustServerCertificate=true
       
       # JWT
       - AppSettings__Authentication__Jwt__Secret=my-super-secret-key-for-production-with-64-characters-minimum
@@ -679,7 +695,7 @@ services:
       - AppSettings__Authentication__Jwt__Secret=${JWT_SECRET}
       - AppSettings__Authentication__Jwt__Issuer=${JWT_ISSUER}
       - AppSettings__Infrastructure__Cache__Redis__ConnectionString=${REDIS_CONNECTION}
-      - AppSettings__ConnectionStrings__DefaultConnection=${SQL_CONNECTION}
+      - AppSettings__Infrastructure__Database__ConnectionString=${SQL_CONNECTION}
 ```
 
 ---
@@ -720,9 +736,12 @@ metadata:
 type: Opaque
 stringData:
   AppSettings__Authentication__Jwt__Secret: "my-super-secret-key-for-production-with-64-characters-minimum"
-  AppSettings__ConnectionStrings__DefaultConnection: "Server=prod-sql.database.windows.net;Database=MyDb;User Id=admin;Password=SecurePass123!"
+  AppSettings__Infrastructure__Database__ConnectionString: "Server=prod-sql.database.windows.net;Database=MyDb;User Id=admin;Password=SecurePass123!"
   AppSettings__Infrastructure__Cache__Redis__ConnectionString: "prod-redis.redis.cache.windows.net:6380,password=xxx,ssl=True"
   AppSettings__Infrastructure__Telemetry__ApplicationInsights__ConnectionString: "InstrumentationKey=xxxxx-xxxx-xxxx-xxxx-xxxxx"
+  AppSettings__Infrastructure__MongoDB__ConnectionString: "mongodb://username:password@prod-mongodb:27017/mydb"
+  AppSettings__Infrastructure__RabbitMQ__ConnectionString: "amqp://username:password@prod-rabbitmq:5672/"
+  AppSettings__Infrastructure__Storage__ServiceAccount: "base64-encoded-service-account-json"
 ```
 
 ### Deployment usando ConfigMap e Secret
@@ -771,11 +790,11 @@ spec:
               name: api-secrets
               key: AppSettings__Authentication__Jwt__Secret
         
-        - name: AppSettings__ConnectionStrings__DefaultConnection
+        - name: AppSettings__Infrastructure__Database__ConnectionString
           valueFrom:
             secretKeyRef:
               name: api-secrets
-              key: AppSettings__ConnectionStrings__DefaultConnection
+              key: AppSettings__Infrastructure__Database__ConnectionString
 ```
 
 ### Aplicar no Kubernetes
@@ -823,7 +842,7 @@ az webapp config appsettings set \
   --settings \
     "AppSettings__EnvironmentName=Production" \
     "AppSettings__Authentication__Jwt__Secret=my-super-secret-key" \
-    "AppSettings__ConnectionStrings__DefaultConnection=Server=xxx" \
+    "AppSettings__Infrastructure__Database__ConnectionString=Server=xxx" \
     "AppSettings__Infrastructure__Cache__Provider=Redis"
 
 # Listar configurações
@@ -984,14 +1003,14 @@ Antes de fazer deploy, verifique:
 // ❌ Errado
 {
   "AppSettings": {
-    "ConnectionString": { ... }  // ❌ Nome errado
+    "Infraestructure": { ... }  // ❌ Typo (Infraestructure ao invés de Infrastructure)
   }
 }
 
 // ✅ Correto
 {
   "AppSettings": {
-    "ConnectionStrings": { ... }  // ✅ Plural
+    "Infrastructure": { ... }  // ✅ Nome correto
   }
 }
 ```

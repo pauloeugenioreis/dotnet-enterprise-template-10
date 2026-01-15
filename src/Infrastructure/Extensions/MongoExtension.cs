@@ -20,7 +20,7 @@ public static class MongoExtension
     public static IServiceCollection AddMongo<TProgram>(this IServiceCollection services)
     {
         services.AddSingleton<IMongoClient>(sp => CreateMongoClient<TProgram>(
-            sp.GetRequiredService<IOptions<AppSettings>>(), 
+            sp.GetRequiredService<IOptions<AppSettings>>(),
             sp.GetRequiredService<ILogger<TProgram>>()));
 
         // Register default IMongoDatabase resolved from connection string
@@ -28,16 +28,16 @@ public static class MongoExtension
         {
             var appSettings = sp.GetRequiredService<IOptions<AppSettings>>().Value;
             var client = sp.GetRequiredService<IMongoClient>();
-            var connectionString = appSettings.ConnectionStrings?.MongoDB;
-            
-            var mongoUrl = new MongoUrl(string.IsNullOrWhiteSpace(connectionString) 
-                ? "mongodb://null-mongodb-for-development:27017" 
+            var connectionString = appSettings.Infrastructure?.MongoDB?.ConnectionString;
+
+            var mongoUrl = new MongoUrl(string.IsNullOrWhiteSpace(connectionString)
+                ? "mongodb://null-mongodb-for-development:27017"
                 : connectionString);
-                
-            var databaseName = string.IsNullOrWhiteSpace(mongoUrl.DatabaseName) 
-                ? "projecttemplate" 
+
+            var databaseName = string.IsNullOrWhiteSpace(mongoUrl.DatabaseName)
+                ? "projecttemplate"
                 : mongoUrl.DatabaseName;
-                
+
             return client.GetDatabase(databaseName);
         });
 
@@ -48,7 +48,7 @@ public static class MongoExtension
     }
 
     private static IMongoClient CreateMongoClient<TProgram>(
-        IOptions<AppSettings> settings, 
+        IOptions<AppSettings> settings,
         ILogger<TProgram> logger)
     {
         var appSettings = settings.Value;
@@ -56,7 +56,7 @@ public static class MongoExtension
 
         try
         {
-            var connectionString = appSettings.ConnectionStrings?.MongoDB;
+            var connectionString = appSettings.Infrastructure?.MongoDB?.ConnectionString;
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 logger.LogWarning("MongoDB connection string is empty.");

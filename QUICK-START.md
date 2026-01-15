@@ -54,8 +54,11 @@ Edite `src/Api/appsettings.Development.json`:
 ```json
 {
   "AppSettings": {
-    "ConnectionStrings": {
-      "DefaultConnection": "Server=localhost;Database=MeuProjeto;User Id=sa;Password=SuaSenhaForte123!;TrustServerCertificate=True;"
+    "Infrastructure": {
+      "Database": {
+        "DatabaseType": "SqlServer",
+        "ConnectionString": "Server=localhost;Database=MeuProjeto;User Id=sa;Password=SuaSenhaForte123!;TrustServerCertificate=True;"
+      }
     }
   }
 }

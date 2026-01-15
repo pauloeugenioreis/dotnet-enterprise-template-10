@@ -33,12 +33,12 @@ public static class StorageExtension
         var isProduction = appSettings.Infrastructure?.Environment == "Production";
 
         // Try to create from explicit service account JSON
-        if (!string.IsNullOrEmpty(appSettings.ConnectionStrings?.ServiceAccount))
+        if (!string.IsNullOrEmpty(appSettings.Infrastructure?.Storage?.ServiceAccount))
         {
             try
             {
                 var credential = Google.Apis.Auth.OAuth2.GoogleCredential.FromJson(
-                    appSettings.ConnectionStrings.ServiceAccount);
+                    appSettings.Infrastructure.Storage.ServiceAccount);
                 logger.LogInformation("StorageClient created using explicit Service Account credentials.");
                 return StorageClient.Create(credential);
             }

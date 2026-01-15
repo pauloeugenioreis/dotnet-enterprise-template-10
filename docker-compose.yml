@@ -11,7 +11,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:443;http://+:80
-      - AppSettings__ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ProjectTemplate;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+      - AppSettings__Infrastructure__Database__DatabaseType=SqlServer
+      - AppSettings__Infrastructure__Database__ConnectionString=Server=sqlserver;Database=ProjectTemplate;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
       - AppSettings__Infrastructure__Telemetry__Enabled=true
       - AppSettings__Infrastructure__Telemetry__Providers__0=jaeger
       - AppSettings__Infrastructure__Telemetry__Providers__1=prometheus

@@ -46,8 +46,10 @@ MongoDB é um banco de dados NoSQL orientado a documentos, ideal para dados não
 ```json
 {
   "AppSettings": {
-    "ConnectionStrings": {
-      "MongoDB": "mongodb://username:password@localhost:27017/projecttemplate"
+    "Infrastructure": {
+      "MongoDB": {
+        "ConnectionString": "mongodb://username:password@localhost:27017/projecttemplate"
+      }
     }
   }
 }
@@ -174,8 +176,10 @@ RabbitMQ é um message broker para comunicação assíncrona entre serviços.
 ```json
 {
   "AppSettings": {
-    "ConnectionStrings": {
-      "RabbitMQ": "amqp://username:password@localhost:5672/"
+    "Infrastructure": {
+      "RabbitMQ": {
+        "ConnectionString": "amqp://username:password@localhost:5672/"
+      }
     }
   }
 }
@@ -235,11 +239,9 @@ Google Cloud Storage é um serviço de armazenamento de objetos para arquivos e 
 ```json
 {
   "AppSettings": {
-    "ConnectionStrings": {
-      "ServiceAccount": "{\"type\":\"service_account\",\"project_id\":\"your-project\",...}"
-    },
     "Infrastructure": {
       "Storage": {
+        "ServiceAccount": "{\"type\":\"service_account\",\"project_id\":\"your-project\",...}",
         "DefaultBucket": "your-bucket-name"
       }
     }

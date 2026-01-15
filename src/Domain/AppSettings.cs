@@ -9,16 +9,13 @@ namespace ProjectTemplate.Domain;
 public class AppSettings
 {
     [Required(ErrorMessage = "EnvironmentName is required")]
-    [AllowedValues("Development", "Testing", "Staging", "Production", 
+    [AllowedValues("Development", "Testing", "Staging", "Production",
         ErrorMessage = "EnvironmentName must be Development, Testing, Staging, or Production")]
     public string EnvironmentName { get; set; } = string.Empty;
-    
-    [Required(ErrorMessage = "ConnectionStrings section is required")]
-    public ConnectionStringSettings ConnectionStrings { get; set; } = new();
-    
+
     [Required(ErrorMessage = "Infrastructure section is required")]
     public InfrastructureSettings Infrastructure { get; set; } = new();
-    
+
     [Required(ErrorMessage = "Authentication section is required")]
     public AuthenticationSettings Authentication { get; set; } = new();
 
@@ -28,25 +25,15 @@ public class AppSettings
     public bool IsProduction() => EnvironmentName == "Production";
 }
 
-public class ConnectionStringSettings
-{
-    [Required(ErrorMessage = "DefaultConnection is required")]
-    [MinLength(10, ErrorMessage = "DefaultConnection must be at least 10 characters")]
-    public string DefaultConnection { get; set; } = string.Empty;
-    
-    public string ReadOnlyConnection { get; set; } = string.Empty;
-    public string? MongoDB { get; set; }
-    public string? RabbitMQ { get; set; }
-    public string? ServiceAccount { get; set; } // Google Cloud Service Account JSON
-}
-
 public class InfrastructureSettings
 {
     public string Environment { get; set; } = "Development";
     public CacheSettings Cache { get; set; } = new();
     public DatabaseSettings Database { get; set; } = new();
-    public QuartzSettings Quartz { get; set; } = new();
+    public MongoDbSettings MongoDB { get; set; } = new();
+    public RabbitMqSettings RabbitMQ { get; set; } = new();
     public StorageSettings Storage { get; set; } = new();
+    public QuartzSettings Quartz { get; set; } = new();
     public TelemetrySettings Telemetry { get; set; } = new();
     public RateLimitingSettings RateLimiting { get; set; } = new();
     public EventSourcingSettings EventSourcing { get; set; } = new();
@@ -55,21 +42,21 @@ public class InfrastructureSettings
 public class CacheSettings
 {
     public bool Enabled { get; set; } = true;
-    
+
     [Required(ErrorMessage = "Cache Provider is required")]
-    [AllowedValues("Memory", "Redis", "SqlServer", 
+    [AllowedValues("Memory", "Redis", "SqlServer",
         ErrorMessage = "Provider must be Memory, Redis, or SqlServer")]
     public string Provider { get; set; } = "Memory"; // Memory, Redis, SqlServer
-    
+
     public RedisSettings? Redis { get; set; }
-    
+
     [Range(1, 1440, ErrorMessage = "DefaultExpirationMinutes must be between 1 and 1440 (24 hours)")]
     public int DefaultExpirationMinutes { get; set; } = 60;
 }
 
 public class RedisSettings
 {
-    [RequiredIf(nameof(CacheSettings.Provider), "Redis", 
+    [RequiredIf(nameof(CacheSettings.Provider), "Redis",
         ErrorMessage = "Redis ConnectionString is required when Provider is Redis")]
     [RedisConnectionString(ErrorMessage = "Invalid Redis connection string format")]
     public string ConnectionString { get; set; } = string.Empty;
@@ -78,15 +65,31 @@ public class RedisSettings
 public class DatabaseSettings
 {
     [Required(ErrorMessage = "DatabaseType is required")]
-    [AllowedValues("InMemory", "SqlServer", "Oracle", "PostgreSQL", "MySQL", 
+    [AllowedValues("InMemory", "SqlServer", "Oracle", "PostgreSQL", "MySQL",
         ErrorMessage = "DatabaseType must be InMemory, SqlServer, Oracle, PostgreSQL, or MySQL")]
     public string DatabaseType { get; set; } = "InMemory"; // InMemory, SqlServer, Oracle, PostgreSQL, MySQL
-    
+
+    [Required(ErrorMessage = "ConnectionString is required")]
+    [MinLength(10, ErrorMessage = "ConnectionString must be at least 10 characters")]
+    public string ConnectionString { get; set; } = string.Empty;
+
+    public string ReadOnlyConnectionString { get; set; } = string.Empty;
+
     [Range(1, 300, ErrorMessage = "CommandTimeoutSeconds must be between 1 and 300 seconds")]
     public int CommandTimeoutSeconds { get; set; } = 30;
-    
+
     public bool EnableSensitiveDataLogging { get; set; } = false;
     public bool EnableDetailedErrors { get; set; } = false;
+}
+
+public class MongoDbSettings
+{
+    public string? ConnectionString { get; set; }
+}
+
+public class RabbitMqSettings
+{
+    public string? ConnectionString { get; set; }
 }
 
 public class QuartzSettings
@@ -96,6 +99,7 @@ public class QuartzSettings
 
 public class StorageSettings
 {
+    public string? ServiceAccount { get; set; } // Google Cloud Service Account JSON
     public string DefaultBucket { get; set; } = string.Empty;
 }
 
@@ -105,22 +109,22 @@ public class AuthenticationSettings
     /// Enable/disable authentication globally
     /// </summary>
     public bool Enabled { get; set; } = true;
-    
+
     /// <summary>
     /// JWT Bearer token settings
     /// </summary>
     public JwtSettings Jwt { get; set; } = new();
-    
+
     /// <summary>
     /// OAuth2 external providers settings
     /// </summary>
     public OAuth2Settings OAuth2 { get; set; } = new();
-    
+
     /// <summary>
     /// Password policy settings
     /// </summary>
     public PasswordPolicySettings PasswordPolicy { get; set; } = new();
-    
+
     /// <summary>
     /// Refresh token settings
     /// </summary>
@@ -132,21 +136,21 @@ public class JwtSettings
     [Required(ErrorMessage = "JWT Secret is required")]
     [MinLength(32, ErrorMessage = "JWT Secret must be at least 32 characters for security")]
     public string Secret { get; set; } = string.Empty;
-    
+
     [Required(ErrorMessage = "JWT Issuer is required")]
     [Url(ErrorMessage = "Issuer must be a valid URL")]
     public string Issuer { get; set; } = string.Empty;
-    
+
     [Required(ErrorMessage = "JWT Audience is required")]
     [Url(ErrorMessage = "Audience must be a valid URL")]
     public string Audience { get; set; } = string.Empty;
-    
+
     [Range(1, 1440, ErrorMessage = "ExpirationMinutes must be between 1 and 1440 (24 hours)")]
     public int ExpirationMinutes { get; set; } = 60;
-    
+
     [Range(1, 90, ErrorMessage = "RefreshTokenExpirationDays must be between 1 and 90 days")]
     public int RefreshTokenExpirationDays { get; set; } = 7;
-    
+
     public bool ValidateIssuer { get; set; } = true;
     public bool ValidateAudience { get; set; } = true;
     public bool ValidateLifetime { get; set; } = true;
@@ -187,15 +191,15 @@ public class PasswordPolicySettings
 {
     [Range(6, 128, ErrorMessage = "MinimumLength must be between 6 and 128 characters")]
     public int MinimumLength { get; set; } = 8;
-    
+
     public bool RequireDigit { get; set; } = true;
     public bool RequireLowercase { get; set; } = true;
     public bool RequireUppercase { get; set; } = true;
     public bool RequireNonAlphanumeric { get; set; } = true;
-    
+
     [Range(1, 100, ErrorMessage = "MaxFailedAccessAttempts must be between 1 and 100")]
     public int MaxFailedAccessAttempts { get; set; } = 5;
-    
+
     [Range(1, 1440, ErrorMessage = "LockoutMinutes must be between 1 and 1440 (24 hours)")]
     public int LockoutMinutes { get; set; } = 15;
 }
@@ -210,13 +214,13 @@ public class TelemetrySettings
 {
     public bool Enabled { get; set; } = false;
     public string[] Providers { get; set; } = Array.Empty<string>(); // console, jaeger (via OTLP), otlp, grafana, prometheus, applicationinsights, datadog, dynatrace
-    
+
     [Range(0.0, 1.0, ErrorMessage = "SamplingRatio must be between 0.0 and 1.0")]
     public double SamplingRatio { get; set; } = 1.0; // 0.0 to 1.0 (1.0 = 100%)
-    
+
     public bool EnableSqlInstrumentation { get; set; } = true;
     public bool EnableHttpInstrumentation { get; set; } = true;
-    
+
     public JaegerSettings Jaeger { get; set; } = new();
     public ZipkinSettings Zipkin { get; set; } = new();
     public OtlpSettings Otlp { get; set; } = new();
@@ -230,7 +234,7 @@ public class JaegerSettings
     public string Host { get; set; } = "localhost";
     public int Port { get; set; } = 4317; // OTLP gRPC port (was 6831 for deprecated Jaeger native)
     public bool UseGrpc { get; set; } = true; // true = gRPC (4317), false = HTTP (4318)
-    
+
     [Obsolete("MaxPayloadSizeInBytes is no longer used with OTLP protocol")]
     public int MaxPayloadSizeInBytes { get; set; } = 4096; // Kept for backward compatibility
 }
@@ -329,42 +333,42 @@ public class EventSourcingSettings
     /// Enable/disable Event Sourcing globally
     /// </summary>
     public bool Enabled { get; set; } = false;
-    
+
     /// <summary>
     /// Event Sourcing mode: Traditional, Hybrid, or EventStore
     /// </summary>
     public EventSourcingMode Mode { get; set; } = EventSourcingMode.Hybrid;
-    
+
     /// <summary>
     /// Event Store provider: Marten, Custom, EventStoreDB
     /// </summary>
     public string Provider { get; set; } = "Marten";
-    
+
     /// <summary>
     /// PostgreSQL connection string for Event Store (required for Marten)
     /// </summary>
     public string ConnectionString { get; set; } = string.Empty;
-    
+
     /// <summary>
     /// Entities to audit via Event Sourcing (empty = all entities)
     /// </summary>
     public List<string> AuditEntities { get; set; } = new();
-    
+
     /// <summary>
     /// Enable snapshot storage for performance optimization
     /// </summary>
     public bool StoreSnapshots { get; set; } = true;
-    
+
     /// <summary>
     /// Create snapshot every N events (improves read performance)
     /// </summary>
     public int SnapshotInterval { get; set; } = 10;
-    
+
     /// <summary>
     /// Enable audit API endpoints
     /// </summary>
     public bool EnableAuditApi { get; set; } = true;
-    
+
     /// <summary>
     /// Store additional metadata (IP address, user agent, etc.)
     /// </summary>
@@ -380,13 +384,13 @@ public enum EventSourcingMode
     /// Traditional CRUD - No event sourcing (EF Core only)
     /// </summary>
     Traditional = 0,
-    
+
     /// <summary>
     /// Hybrid mode - EF Core as source of truth + Events for audit trail
     /// Best for gradual adoption and simple audit requirements
     /// </summary>
     Hybrid = 1,
-    
+
     /// <summary>
     /// Event Store as source of truth - All state derived from events
     /// Best for full event sourcing, time travel, and complex audit requirements

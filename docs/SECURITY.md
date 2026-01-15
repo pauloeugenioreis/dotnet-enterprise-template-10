@@ -151,8 +151,10 @@ Never commit real database credentials to version control.
 **Bad:**
 ```json
 {
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=prod-server;Database=MyDb;User Id=sa;Password=RealPassword123!;"
+  "Infrastructure": {
+    "Database": {
+      "ConnectionString": "Server=prod-server;Database=MyDb;User Id=sa;Password=RealPassword123!;"
+    }
   }
 }
 ```
@@ -160,8 +162,10 @@ Never commit real database credentials to version control.
 **Good (Environment Variables):**
 ```json
 {
-  "ConnectionStrings": {
-    "DefaultConnection": "${DB_CONNECTION_STRING}"
+  "Infrastructure": {
+    "Database": {
+      "ConnectionString": "${DB_CONNECTION_STRING}"
+    }
   }
 }
 ```

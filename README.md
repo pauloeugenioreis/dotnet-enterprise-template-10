@@ -211,88 +211,117 @@ Edite `src/Api/appsettings.json` e ajuste a connection string:
 ```json
 {
   "AppSettings": {
-    "ConnectionStrings": {
-      "DefaultConnection": "Server=localhost;Database=MeuBanco;Trusted_Connection=True;"
-    }
-  }
-}
-```
-
-### 3. Escolha seu Provedor de Banco de Dados
-
-Edite `src/Data/Data.csproj` e descomente o provider desejado:
-
-```xml
-<!-- Para SQL Server -->
-<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.1" />
-
-<!-- Para Oracle -->
-<!-- <PackageReference Include="Oracle.EntityFrameworkCore" Version="10.23.26000" /> -->
-
-<!-- Para PostgreSQL -->
-<!-- <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" /> -->
-
-<!-- Para MySQL -->
-<!-- <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" /> -->
-```
-
-### 4. Atualize as Configurações do Banco
-
-Edite `src/Api/appsettings.json`:
-
-```json
-{
-  "AppSettings": {
     "Infrastructure": {
       "Database": {
-        "DatabaseType": "SqlServer"
+        "DatabaseType": "InMemory",
+        "ConnectionString": ""
       }
     }
   }
 }
 ```
 
-Valores aceitos para `DatabaseType`: `SqlServer`, `Oracle`, `PostgreSQL`, `MySQL`
+### 3. Escolha seu Banco de Dados
 
-**Nota sobre ORM**: Entity Framework Core é usado por padrão. Para trocar de ORM (Dapper, ADO.NET, NHibernate, Linq2Db), veja [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md).
+Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection string:
 
-### 5. Restaure os Pacotes
+**Para SQL Server:**
+```json
+{
+  "AppSettings": {
+    "Infrastructure": {
+      "Database": {
+        "DatabaseType": "SqlServer",
+        "ConnectionString": "Server=localhost;Database=MeuBanco;Trusted_Connection=True;TrustServerCertificate=True;"
+      }
+    }
+  }
+}
+```
+
+**Para Oracle:**
+```json
+{
+  "AppSettings": {
+    "Infrastructure": {
+      "Database": {
+        "DatabaseType": "Oracle",
+        "ConnectionString": "User Id=myUsername;Password=myPassword;Data Source=localhost:1521/ORCL;"
+      }
+    }
+  }
+}
+```
+
+**Para PostgreSQL:**
+```json
+{
+  "AppSettings": {
+    "Infrastructure": {
+      "Database": {
+        "DatabaseType": "PostgreSQL",
+        "ConnectionString": "Host=localhost;Database=MeuBanco;Username=postgres;Password=myPassword;"
+      }
+    }
+  }
+}
+```
+
+**Para MySQL:**
+```json
+{
+  "AppSettings": {
+    "Infrastructure": {
+      "Database": {
+        "DatabaseType": "MySQL",
+        "ConnectionString": "Server=localhost;Database=MeuBanco;User=root;Password=myPassword;"
+      }
+    }
+  }
+}
+```
+
+> ✨ **Todos os providers já estão instalados!** Basta mudar o `DatabaseType` e a connection string.
+
+**Nota sobre ORM**: Entity Framework Core, Dapper e ADO.NET estão habilitados simultaneamente. Para mais detalhes, veja [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md).
+
+### 4. Restaure os Pacotes
 
 ```bash
 dotnet restore
 ```
 
-### 6. Compile o Projeto
+### 5. Compile o Projeto
 
 ```bash
 dotnet build
 ```
 
-### 7. Crie a Primeira Migration
+### 6. Crie a Primeira Migration
 
 ```bash
 dotnet ef migrations add InitialCreate --project src/Data --startup-project src/Api
 ```
 
-### 8. Aplique a Migration no Banco
+### 7. Aplique a Migration no Banco
 
 ```bash
 dotnet ef database update --project src/Data --startup-project src/Api
 ```
 
-### 9. Execute o Projeto
+### 8. Execute o Projeto
 
 ```bash
 dotnet run --project src/Api
 ```
 
-### 10. Acesse a API
+### 9. Acesse a API
 
 - API: `https://localhost:5001`
 - Swagger: `https://localhost:5001/swagger`
 - Health Check: `https://localhost:5001/health`
 
-### 11. Login com Credenciais Padrão 🔑
+### 10. Login com Credenciais Padrão 🔑
 
 O sistema cria automaticamente um usuário administrador na primeira execução:
 

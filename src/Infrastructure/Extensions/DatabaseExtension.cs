@@ -51,8 +51,8 @@ public static class DatabaseExtension
     public static IServiceCollection AddDatabaseConfiguration(this IServiceCollection services, IOptions<AppSettings> appSettings)
     {
         var dbSettings = appSettings.Value.Infrastructure.Database;
-        var connectionString = appSettings.Value.ConnectionStrings.DefaultConnection
-            ?? throw new InvalidOperationException("DefaultConnection string is required");
+        var connectionString = dbSettings.ConnectionString
+            ?? throw new InvalidOperationException("Database connection string is required");
 
         // ==============================================================================
         // ORM CONFIGURATION - Multiple ORMs enabled simultaneously!
@@ -111,13 +111,38 @@ public static class DatabaseExtension
                     options.UseInMemoryDatabase("ProjectTemplateDb");
                     break;
 
-                // case "sqlserver":
-                //     options.UseSqlServer(connectionString, sqlOptions =>
-                //     {
-                //         sqlOptions.CommandTimeout(settings.CommandTimeoutSeconds);
-                //         sqlOptions.EnableRetryOnFailure(3);
-                //     });
-                //     break;
+                case "sqlserver":
+                    options.UseSqlServer(connectionString, sqlOptions =>
+                    {
+                        sqlOptions.CommandTimeout(settings.CommandTimeoutSeconds);
+                        sqlOptions.EnableRetryOnFailure(3);
+                    });
+                    break;
+
+                case "oracle":
+                    options.UseOracle(connectionString, oracleOptions =>
+                    {
+                        oracleOptions.CommandTimeout(settings.CommandTimeoutSeconds);
+                        // Oracle doesn't support EnableRetryOnFailure like SQL Server/PostgreSQL
+                    });
+                    break;
+
+                case "postgresql":
+                    options.UseNpgsql(connectionString, npgsqlOptions =>
+                    {
+                        npgsqlOptions.CommandTimeout(settings.CommandTimeoutSeconds);
+                        npgsqlOptions.EnableRetryOnFailure(3);
+                    });
+                    break;
+
+                case "mysql":
+                    var serverVersion = ServerVersion.AutoDetect(connectionString);
+                    options.UseMySql(connectionString, serverVersion, mySqlOptions =>
+                    {
+                        mySqlOptions.CommandTimeout(settings.CommandTimeoutSeconds);
+                        mySqlOptions.EnableRetryOnFailure(3);
+                    });
+                    break;
 
                 default:
                     // Default to in-memory for testing/development

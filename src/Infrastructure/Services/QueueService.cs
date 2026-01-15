@@ -20,7 +20,7 @@ public class QueueService : IQueueService
 {
     private readonly IOptions<AppSettings> _appSettings;
     private readonly ILogger<QueueService> _logger;
-    private string ConnectionString => _appSettings.Value.ConnectionStrings?.RabbitMQ ?? string.Empty;
+    private string ConnectionString => _appSettings.Value.Infrastructure?.RabbitMQ?.ConnectionString ?? string.Empty;
 
     public QueueService(
         IOptions<AppSettings> appSettings,
