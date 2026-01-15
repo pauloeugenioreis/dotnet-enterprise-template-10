@@ -152,6 +152,52 @@ else
     echo ""
 fi
 
+# Validate that all database containers are running and healthy
+echo -e "${YELLOW}Validating database containers...${NC}"
+
+declare -A REQUIRED_CONTAINERS
+REQUIRED_CONTAINERS["sqlserver"]="1433:SQL Server"
+REQUIRED_CONTAINERS["oracle"]="1521:Oracle"
+REQUIRED_CONTAINERS["postgres"]="5433:PostgreSQL"
+REQUIRED_CONTAINERS["mysql"]="3306:MySQL"
+
+CONTAINER_VALIDATION=true
+
+for CONTAINER in "${!REQUIRED_CONTAINERS[@]}"; do
+    IFS=':' read -r PORT NAME <<< "${REQUIRED_CONTAINERS[$CONTAINER]}"
+
+    # Check if container is running
+    CONTAINER_STATUS=$(docker inspect -f '{{.State.Status}}' "$CONTAINER" 2>/dev/null || echo "not found")
+
+    if [ "$CONTAINER_STATUS" != "running" ]; then
+        echo -e "${RED}  ❌ $NAME container '$CONTAINER' is not running${NC}"
+        CONTAINER_VALIDATION=false
+        continue
+    fi
+
+    # Check health status if available
+    HEALTH_STATUS=$(docker inspect -f '{{.State.Health.Status}}' "$CONTAINER" 2>/dev/null || echo "none")
+    if [ "$HEALTH_STATUS" != "healthy" ] && [ "$HEALTH_STATUS" != "none" ] && [ "$HEALTH_STATUS" != "<no value>" ]; then
+        echo -e "${YELLOW}  ⚠️  $NAME container is running but not healthy (status: $HEALTH_STATUS)${NC}"
+    fi
+
+    # Check if port is accessible
+    if check_port localhost "$PORT"; then
+        echo -e "${GREEN}  ✅ $NAME is ready (port $PORT)${NC}"
+    else
+        echo -e "${RED}  ❌ $NAME port $PORT is not accessible${NC}"
+        CONTAINER_VALIDATION=false
+    fi
+done
+
+echo ""
+
+if [ "$CONTAINER_VALIDATION" = false ]; then
+    echo -e "${RED}❌ Not all database containers are ready. Please start them first:${NC}"
+    echo -e "${CYAN}   docker-compose up -d sqlserver oracle postgres mysql${NC}"
+    exit 1
+fi
+
 # Step 2: Test each database
 declare -A RESULTS_MIGRATION
 declare -A RESULTS_BUILD
@@ -180,11 +226,16 @@ for DB in "${DATABASES[@]}"; do
         dotnet ef database drop --project "$DATA_PROJECT" --startup-project "$API_PROJECT" --force --no-build 2>&1 > /dev/null || true
 
         # Apply migrations
-        if dotnet ef database update --project "$DATA_PROJECT" --startup-project "$API_PROJECT" --no-build 2>&1 > /dev/null; then
+        MIGRATION_OUTPUT=$(dotnet ef database update --project "$DATA_PROJECT" --startup-project "$API_PROJECT" --no-build 2>&1)
+
+        # Check if migration succeeded (look for "Done." in output)
+        if echo "$MIGRATION_OUTPUT" | grep -q "Done\.\|No migrations were applied"; then
             echo -e "${GREEN}  ✅ Migrations applied successfully${NC}"
             RESULTS_MIGRATION[$DB]=1
         else
             echo -e "${RED}  ❌ Migration failed${NC}"
+            echo -e "${CYAN}Full output:${NC}"
+            echo "$MIGRATION_OUTPUT"
             RESULTS_ERROR[$DB]="Migration failed"
             continue
         fi
@@ -195,11 +246,16 @@ for DB in "${DATABASES[@]}"; do
 
     # Build project
     echo -e "${YELLOW}[3/4] Building project...${NC}"
-    if dotnet build "$API_PROJECT" --no-restore 2>&1 > /dev/null; then
+    BUILD_OUTPUT=$(dotnet build "$API_PROJECT" --no-restore 2>&1)
+
+    # Check if build succeeded (look for success message or absence of errors)
+    if echo "$BUILD_OUTPUT" | grep -q "Build succeeded" || ! echo "$BUILD_OUTPUT" | grep -q "Build FAILED\|error CS\|error MSB"; then
         echo -e "${GREEN}  ✅ Build successful${NC}"
         RESULTS_BUILD[$DB]=1
     else
         echo -e "${RED}  ❌ Build failed${NC}"
+        echo -e "${CYAN}Output:${NC}"
+        echo "$BUILD_OUTPUT"
         RESULTS_ERROR[$DB]="Build failed"
         continue
     fi
@@ -209,19 +265,50 @@ for DB in "${DATABASES[@]}"; do
         echo -e "${YELLOW}[4/4] Starting API and testing...${NC}"
 
         export ASPNETCORE_ENVIRONMENT=$DB
-        dotnet run --project "$API_PROJECT" --no-build > /dev/null 2>&1 &
+
+        # Create log files for API output
+        TEMP_OUTPUT="/tmp/api-output-$DB.txt"
+        TEMP_ERROR="/tmp/api-error-$DB.txt"
+
+        # Start API process with output redirection
+        dotnet run --project "$API_PROJECT" --no-build --no-launch-profile --urls "http://localhost:5000" > "$TEMP_OUTPUT" 2> "$TEMP_ERROR" &
         API_PID=$!
+
+        echo -e "${CYAN}  Process started (PID: $API_PID)${NC}"
+        echo -e "${CYAN}  Logs: $TEMP_OUTPUT${NC}"
 
         # Wait for API to start
         API_READY=false
         for ((i=0; i<$API_STARTUP_TIMEOUT; i++)); do
             sleep 1
 
+            # Check if process is still running
+            if ! kill -0 $API_PID 2>/dev/null; then
+                echo -e "${RED}  ❌ API process exited unexpectedly${NC}"
+
+                if [ -f "$TEMP_OUTPUT" ]; then
+                    echo -e "${YELLOW}  === Standard Output ===${NC}"
+                    cat "$TEMP_OUTPUT"
+                fi
+
+                if [ -f "$TEMP_ERROR" ]; then
+                    echo -e "${YELLOW}  === Standard Error ===${NC}"
+                    cat "$TEMP_ERROR"
+                fi
+
+                RESULTS_ERROR[$DB]="API process exited"
+                break
+            fi
+
             if curl -s http://localhost:5000/health > /dev/null 2>&1; then
                 API_READY=true
                 break
             fi
+
+            echo -n "."
         done
+
+        echo ""
 
         if [ "$API_READY" = true ]; then
             echo -e "${GREEN}  ✅ API started successfully${NC}"
@@ -230,24 +317,39 @@ for DB in "${DATABASES[@]}"; do
             # Test health endpoint
             HEALTH_RESPONSE=$(curl -s http://localhost:5000/health)
             if [ $? -eq 0 ]; then
-                echo -e "${GREEN}  ✅ Health check passed${NC}"
+                # Handle both string and object responses
+                HEALTH_STATUS=$(echo "$HEALTH_RESPONSE" | jq -r '.status // .' 2>/dev/null || echo "$HEALTH_RESPONSE")
+                echo -e "${GREEN}  ✅ Health check passed: $HEALTH_STATUS${NC}"
                 RESULTS_HEALTH[$DB]=1
 
-                # Test Swagger endpoint
+                # Test Swagger endpoint (optional - don't fail if not available)
                 if curl -s http://localhost:5000/swagger/index.html > /dev/null 2>&1; then
                     echo -e "${GREEN}  ✅ Swagger UI accessible${NC}"
                 fi
             else
-                echo -e "${YELLOW}  ⚠️  Health check warning${NC}"
+                echo -e "${YELLOW}  ⚠️  Health check failed: $HEALTH_RESPONSE${NC}"
             fi
-        else
+        elif kill -0 $API_PID 2>/dev/null; then
             echo -e "${RED}  ❌ API failed to start within ${API_STARTUP_TIMEOUT}s${NC}"
+
+            if [ -f "$TEMP_OUTPUT" ]; then
+                echo -e "${YELLOW}  === Last Output ===${NC}"
+                tail -n 15 "$TEMP_OUTPUT"
+            fi
+
             RESULTS_ERROR[$DB]="API startup timeout"
         fi
 
-        # Stop API
-        kill $API_PID 2>/dev/null || true
-        sleep 2
+        # Stop API and cleanup
+        if kill -0 $API_PID 2>/dev/null; then
+            kill $API_PID 2>/dev/null || true
+            sleep 1
+        fi
+
+        # Cleanup temp files
+        rm -f "$TEMP_OUTPUT" "$TEMP_ERROR"
+
+        sleep 1
     else
         echo -e "${CYAN}[4/4] Skipping API tests (--skip-tests)${NC}"
         RESULTS_STARTUP[$DB]=1
