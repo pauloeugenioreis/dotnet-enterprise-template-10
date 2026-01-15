@@ -87,6 +87,9 @@
     <!-- Resilience -->
     <PackageReference Include="Polly" Version="8.6.5" />
     
+    <!-- Security Headers -->
+    <PackageReference Include="NWebsec.AspNetCore.Middleware" Version="3.0.0" />
+    
     <!-- Logging (Commented - uncomment to enable) -->
     <PackageReference Include="Google.Cloud.Logging.Console" Version="1.6.0" />
     <!-- <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" /> -->

@@ -22,7 +22,7 @@ public class Service<TEntity> : IService<TEntity> where TEntity : class
     {
         try
         {
-            return await _repository.GetByIdAsync(id, cancellationToken);
+            return await _repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -35,7 +35,7 @@ public class Service<TEntity> : IService<TEntity> where TEntity : class
     {
         try
         {
-            return await _repository.GetAllAsync(cancellationToken);
+            return await _repository.GetAllAsync(cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -48,8 +48,8 @@ public class Service<TEntity> : IService<TEntity> where TEntity : class
     {
         try
         {
-            var created = await _repository.AddAsync(entity, cancellationToken);
-            await _repository.SaveChangesAsync(cancellationToken);
+            var created = await _repository.AddAsync(entity, cancellationToken).ConfigureAwait(false);
+            await _repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return created;
         }
         catch (Exception ex)
@@ -63,14 +63,14 @@ public class Service<TEntity> : IService<TEntity> where TEntity : class
     {
         try
         {
-            var existing = await _repository.GetByIdAsync(id, cancellationToken);
+            var existing = await _repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
             if (existing == null)
             {
                 throw new KeyNotFoundException($"Entity with ID {id} not found");
             }
 
-            await _repository.UpdateAsync(entity, cancellationToken);
-            await _repository.SaveChangesAsync(cancellationToken);
+            await _repository.UpdateAsync(entity, cancellationToken).ConfigureAwait(false);
+            await _repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -83,14 +83,14 @@ public class Service<TEntity> : IService<TEntity> where TEntity : class
     {
         try
         {
-            var entity = await _repository.GetByIdAsync(id, cancellationToken);
+            var entity = await _repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
             if (entity == null)
             {
                 throw new KeyNotFoundException($"Entity with ID {id} not found");
             }
 
-            await _repository.DeleteAsync(entity, cancellationToken);
-            await _repository.SaveChangesAsync(cancellationToken);
+            await _repository.DeleteAsync(entity, cancellationToken).ConfigureAwait(false);
+            await _repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -106,7 +106,7 @@ public class Service<TEntity> : IService<TEntity> where TEntity : class
     {
         try
         {
-            return await _repository.GetPagedAsync(page, pageSize, cancellationToken);
+            return await _repository.GetPagedAsync(page, pageSize, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

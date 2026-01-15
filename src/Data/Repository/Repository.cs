@@ -21,24 +21,24 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
 
     public virtual async Task<TEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
-        return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+        return await _dbSet.FindAsync(new object[] { id }, cancellationToken).ConfigureAwait(false);
     }
 
     public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await _dbSet.ToListAsync(cancellationToken);
+        return await _dbSet.ToListAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public virtual async Task<IEnumerable<TEntity>> FindAsync(
         Func<TEntity, bool> predicate, 
         CancellationToken cancellationToken = default)
     {
-        return await Task.Run(() => _dbSet.Where(predicate).ToList(), cancellationToken);
+        return await Task.Run(() => _dbSet.Where(predicate).ToList(), cancellationToken).ConfigureAwait(false);
     }
 
     public virtual async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        await _dbSet.AddAsync(entity, cancellationToken);
+        await _dbSet.AddAsync(entity, cancellationToken).ConfigureAwait(false);
         return entity;
     }
 
@@ -47,7 +47,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
         CancellationToken cancellationToken = default)
     {
         var entityList = entities.ToList();
-        await _dbSet.AddRangeAsync(entityList, cancellationToken);
+        await _dbSet.AddRangeAsync(entityList, cancellationToken).ConfigureAwait(false);
         return entityList;
     }
 
@@ -58,7 +58,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
         var idValue = entityEntry.Property("Id").CurrentValue;
         
         // Find the existing tracked entity with the same ID
-        var existingEntity = await _dbSet.FindAsync(new object[] { idValue }, cancellationToken);
+        var existingEntity = await _dbSet.FindAsync(new object[] { idValue }, cancellationToken).ConfigureAwait(false);
         
         if (existingEntity != null)
         {
@@ -90,17 +90,17 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
         int pageSize, 
         CancellationToken cancellationToken = default)
     {
-        var total = await _dbSet.CountAsync(cancellationToken);
+        var total = await _dbSet.CountAsync(cancellationToken).ConfigureAwait(false);
         var items = await _dbSet
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
 
         return (items, total);
     }
 
     public virtual async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        return await _context.SaveChangesAsync(cancellationToken);
+        return await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 }
