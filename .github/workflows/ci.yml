@@ -99,12 +99,21 @@ jobs:
           --results-directory ./coverage \
           --verbosity normal
 
-    - name: 📈 Upload Coverage to Codecov
-      uses: codecov/codecov-action@v4
+    - name: � Upload Coverage Artifacts
+      uses: actions/upload-artifact@v4
       with:
-        directory: ./coverage
-        fail_ci_if_error: false
-        verbose: true
+        name: code-coverage
+        path: ./coverage
+        retention-days: 7
+
+    # Codecov upload comentado - descomente e configure CODECOV_TOKEN nos secrets quando quiser usar
+    # - name: 📈 Upload Coverage to Codecov
+    #   uses: codecov/codecov-action@v4
+    #   with:
+    #     token: ${{ secrets.CODECOV_TOKEN }}
+    #     directory: ./coverage
+    #     fail_ci_if_error: false
+    #     verbose: true
 
   docker:
     name: Docker Build
