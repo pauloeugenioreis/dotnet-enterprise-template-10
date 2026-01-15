@@ -45,9 +45,6 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 |-----------|-----------|-------------|
 | **[README.md](README.md)** | Documentação principal e overview completo | Entender o projeto como um todo |
 | **[QUICK-START.md](QUICK-START.md)** | Início rápido em 5 minutos | Primeira vez usando o template |
-| **[CHANGELOG.md](CHANGELOG.md)** | Histórico de mudanças e versões | Ver o que mudou entre versões |
-| **[CONTRIBUTING.md](CONTRIBUTING.md)** | Guia de contribuição | Contribuir com código ou documentação |
-| **[DEPRECATED-PACKAGES-REPORT.md](DEPRECATED-PACKAGES-REPORT.md)** | 📦 Relatório de pacotes deprecated | Manutenção e atualização de dependências |
 | **[LICENSE](LICENSE)** | Licença do projeto (MIT) | Entender termos de uso |
 
 ### Guias Técnicos
@@ -107,13 +104,6 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 3. Run: `docker-compose up -d`
 4. Acesse: `http://localhost:8080`
 
-### "Quero contribuir com o projeto"
-
-1. Leia: [CONTRIBUTING.md](CONTRIBUTING.md) - Guia completo
-2. Setup: Clone, crie branch, faça alterações
-3. Teste: Rode todos os testes
-4. PR: Abra Pull Request com descrição clara
-
 ### "Quero configurar cache Redis"
 
 1. Leia: [README.md](README.md) - Seção "Configuração de Cache"
@@ -164,8 +154,6 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 template/
 ├── 📄 README.md                     # Documentação principal
 ├── 📄 QUICK-START.md                # Início rápido
-├── 📄 CHANGELOG.md                  # Histórico de mudanças
-├── 📄 CONTRIBUTING.md               # Guia de contribuição
 ├── 📄 LICENSE                       # Licença MIT
 ├── 📄 INDEX.md                      # Este arquivo
 ├── 📄 .env.example                  # Exemplo de variáveis de ambiente
@@ -239,7 +227,6 @@ template/
 - **Primeira entidade**: [QUICK-START.md](QUICK-START.md#7-criar-sua-primeira-entidade)
 - **Deploy K8s**: [KUBERNETES.md](docs/KUBERNETES.md#-deploy-local-com-minikube)
 - **Rodar testes**: [QUICK-START.md](QUICK-START.md#6-executar-testes)
-- **Contribuir**: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
@@ -317,15 +304,6 @@ Depois de dominar o básico:
 - [ ] Configurei secrets (senhas, tokens)
 - [ ] Executei todos os testes
 - [ ] Revisei logs e health checks
-
-### Antes de Contribuir
-
-- [ ] Li o [CONTRIBUTING.md](CONTRIBUTING.md)
-- [ ] Pesquisei issues existentes
-- [ ] Criei branch descritiva
-- [ ] Escrevi testes
-- [ ] Segui padrões de código
-- [ ] Atualizei documentação
 
 ---
 

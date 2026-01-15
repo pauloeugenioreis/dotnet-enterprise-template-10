@@ -381,7 +381,6 @@ Para trocar de ORM, **não use appsettings.json**:
 1. **Leia a documentação completa**: [`README.md`](README.md)
 2. **Entenda os ORMs disponíveis**: [`docs/ORM-GUIDE.md`](docs/ORM-GUIDE.md)
 3. **Aprenda sobre Kubernetes**: [`docs/KUBERNETES.md`](docs/KUBERNETES.md)
-4. **Veja o histórico de mudanças**: [`CHANGELOG.md`](CHANGELOG.md)
 
 ---
 

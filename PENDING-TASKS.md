@@ -191,8 +191,6 @@ docs/
 Root:
 ├── README.md
 ├── QUICK-START.md
-├── CHANGELOG.md
-├── CONTRIBUTING.md
 └── INDEX.md
 ```
 

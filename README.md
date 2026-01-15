@@ -20,8 +20,6 @@
 - **[🔐 Guia de Authentication](docs/AUTHENTICATION.md)** - JWT & OAuth2
 - **[🔄 Guia de CI/CD](docs/CICD.md)** - GitHub Actions, Azure DevOps, GitLab CI
 - **[☸️ Guia Kubernetes](docs/KUBERNETES.md)** - Deploy em K8s
-- **[📝 Changelog](CHANGELOG.md)** - Histórico de mudanças
-- **[🤝 Contribuindo](CONTRIBUTING.md)** - Como contribuir
 
 ---
 
