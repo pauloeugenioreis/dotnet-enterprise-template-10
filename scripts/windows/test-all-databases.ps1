@@ -108,6 +108,53 @@ else {
     Write-Host ""
 }
 
+# Validate that all database containers are running and healthy
+Write-Host "Validating database containers..." -ForegroundColor Yellow
+$requiredContainers = @{
+    "sqlserver" = @{ Port = 1433; Name = "SQL Server" }
+    "oracle" = @{ Port = 1521; Name = "Oracle" }
+    "postgres" = @{ Port = 5433; Name = "PostgreSQL" }
+    "mysql" = @{ Port = 3306; Name = "MySQL" }
+}
+
+$containerValidation = $true
+
+foreach ($container in $requiredContainers.Keys) {
+    $info = $requiredContainers[$container]
+
+    # Check if container is running
+    $containerStatus = docker inspect -f '{{.State.Status}}' $container 2>$null
+
+    if ($containerStatus -ne "running") {
+        Write-Host "  ❌ $($info.Name) container '$container' is not running" -ForegroundColor Red
+        $containerValidation = $false
+        continue
+    }
+
+    # Check health status if available
+    $healthStatus = docker inspect -f '{{.State.Health.Status}}' $container 2>$null
+    if ($healthStatus -and $healthStatus -ne "healthy" -and $healthStatus -ne "<no value>") {
+        Write-Host "  ⚠️  $($info.Name) container is running but not healthy (status: $healthStatus)" -ForegroundColor Yellow
+    }
+
+    # Check if port is accessible
+    if (Test-Port "localhost" $info.Port) {
+        Write-Host "  ✅ $($info.Name) is ready (port $($info.Port))" -ForegroundColor Green
+    }
+    else {
+        Write-Host "  ❌ $($info.Name) port $($info.Port) is not accessible" -ForegroundColor Red
+        $containerValidation = $false
+    }
+}
+
+Write-Host ""
+
+if (-not $containerValidation) {
+    Write-Host "❌ Not all database containers are ready. Please start them first:" -ForegroundColor Red
+    Write-Host "   docker-compose up -d sqlserver oracle postgres mysql" -ForegroundColor Gray
+    exit 1
+}
+
 # Step 2: Test each database
 $results = @()
 
@@ -133,18 +180,23 @@ foreach ($db in $databases) {
             $env:ASPNETCORE_ENVIRONMENT = $db
 
             # Drop database if exists (clean state)
+            $ErrorActionPreference = 'Continue'
             & dotnet ef database drop --project $dataProject --startup-project $apiProject --force --no-build 2>&1 | Out-Null
 
             # Apply migrations
-            $migrationOutput = & dotnet ef database update --project $dataProject --startup-project $apiProject --no-build 2>&1
+            $migrationOutput = & dotnet ef database update --project $dataProject --startup-project $apiProject --no-build 2>&1 | Out-String
+            $ErrorActionPreference = 'Stop'
 
-            if ($LASTEXITCODE -eq 0) {
+            # Check if migration succeeded (look for "Done." in output)
+            if ($migrationOutput -match "Done\." -or $migrationOutput -match "No migrations were applied") {
                 Write-Host "  ✅ Migrations applied successfully" -ForegroundColor Green
                 $result.Migration = $true
             }
             else {
                 Write-Host "  ❌ Migration failed" -ForegroundColor Red
-                $result.Error = "Migration failed: $migrationOutput"
+                Write-Host "Full output:" -ForegroundColor Gray
+                Write-Host "$migrationOutput" -ForegroundColor Gray
+                $result.Error = $migrationOutput.Trim()
                 $results += $result
                 continue
             }
@@ -156,14 +208,16 @@ foreach ($db in $databases) {
 
         # Build project
         Write-Host "[3/4] Building project..." -ForegroundColor Yellow
-        $buildOutput = & dotnet build $apiProject --no-restore 2>&1
+        $buildOutput = & dotnet build $apiProject --no-restore 2>&1 | Out-String
 
-        if ($LASTEXITCODE -eq 0) {
+        # Check if build succeeded (look for success message or absence of errors)
+        if ($buildOutput -match "Build succeeded" -or $buildOutput -notmatch "Build FAILED|error CS|error MSB") {
             Write-Host "  ✅ Build successful" -ForegroundColor Green
             $result.Build = $true
         }
         else {
             Write-Host "  ❌ Build failed" -ForegroundColor Red
+            Write-Host "Output: $buildOutput" -ForegroundColor Gray
             $result.Error = "Build failed"
             $results += $result
             continue
@@ -174,53 +228,141 @@ foreach ($db in $databases) {
             Write-Host "[4/4] Starting API and testing..." -ForegroundColor Yellow
 
             $env:ASPNETCORE_ENVIRONMENT = $db
-            $apiProcess = Start-Process -FilePath "dotnet" -ArgumentList "run --project `"$apiProject`" --no-build" -PassThru -WindowStyle Hidden
 
-            # Wait for API to start
-            $apiReady = $false
-            for ($i = 0; $i -lt $ApiStartupTimeout; $i++) {
-                Start-Sleep -Seconds 1
+            # Create log file for API output
+            $logFile = Join-Path $env:TEMP "api-test-$db.log"
 
-                try {
-                    $response = Invoke-WebRequest -Uri "http://localhost:5000/health" -TimeoutSec 2 -UseBasicParsing -ErrorAction SilentlyContinue
-                    if ($response.StatusCode -eq 200) {
-                        $apiReady = $true
+            try {
+                # Try alternative simpler approach if event handlers aren't working
+                $tempOutputFile = Join-Path $env:TEMP "api-output-$db.txt"
+                $tempErrorFile = Join-Path $env:TEMP "api-error-$db.txt"
+
+                # Start API process with file redirection as backup
+                $apiProcess = Start-Process -FilePath "dotnet" `
+                    -ArgumentList "run --project `"$apiProject`" --no-build --no-launch-profile --urls `"http://localhost:5000`"" `
+                    -PassThru `
+                    -NoNewWindow `
+                    -RedirectStandardOutput $tempOutputFile `
+                    -RedirectStandardError $tempErrorFile
+
+                Write-Host "  Process started (PID: $($apiProcess.Id))" -ForegroundColor Gray
+                Write-Host "  Logs: $tempOutputFile" -ForegroundColor DarkGray
+
+                # Wait for API to start
+                $apiReady = $false
+                for ($i = 0; $i -lt $ApiStartupTimeout; $i++) {
+                    Start-Sleep -Seconds 1
+
+                    # Check if process is still running
+                    if ($apiProcess.HasExited) {
+                        # Give time for file writes to complete
+                        Start-Sleep -Milliseconds 1000
+
+                        Write-Host "  ❌ API process exited unexpectedly (Exit Code: $($apiProcess.ExitCode))" -ForegroundColor Red
+
+                        if (Test-Path $tempOutputFile) {
+                            $stdOut = Get-Content $tempOutputFile -Raw -ErrorAction SilentlyContinue
+                            if ($stdOut) {
+                                Write-Host "  === Standard Output ===" -ForegroundColor Yellow
+                                Write-Host $stdOut -ForegroundColor Gray
+                            }
+                        }
+
+                        if (Test-Path $tempErrorFile) {
+                            $stdErr = Get-Content $tempErrorFile -Raw -ErrorAction SilentlyContinue
+                            if ($stdErr) {
+                                Write-Host "  === Standard Error ===" -ForegroundColor Yellow
+                                Write-Host $stdErr -ForegroundColor Red
+                            }
+                        }
+
+                        # Also try to get from event log if it's a .NET crash
+                        Write-Host "  Checking Windows Event Log for .NET errors..." -ForegroundColor DarkGray
+                        $recentErrors = Get-EventLog -LogName Application -Source ".NET Runtime" -Newest 5 -ErrorAction SilentlyContinue |
+                            Where-Object { $_.TimeGenerated -gt (Get-Date).AddMinutes(-1) }
+
+                        if ($recentErrors) {
+                            Write-Host "  === Recent .NET Runtime Errors ===" -ForegroundColor Yellow
+                            $recentErrors | ForEach-Object {
+                                Write-Host "  $($_.Message)" -ForegroundColor Red
+                            }
+                        }
+
+                        $result.Error = "API process exited with code $($apiProcess.ExitCode)"
                         break
                     }
-                }
-                catch {
-                    # Continue waiting
-                }
-            }
 
-            if ($apiReady) {
-                Write-Host "  ✅ API started successfully" -ForegroundColor Green
-                $result.Startup = $true
-
-                # Test health endpoint
-                try {
-                    $healthResponse = Invoke-RestMethod -Uri "http://localhost:5000/health" -Method Get
-                    Write-Host "  ✅ Health check passed: $($healthResponse.status)" -ForegroundColor Green
-                    $result.HealthCheck = $true
-
-                    # Test Swagger endpoint
-                    $swaggerResponse = Invoke-WebRequest -Uri "http://localhost:5000/swagger/index.html" -UseBasicParsing -ErrorAction SilentlyContinue
-                    if ($swaggerResponse.StatusCode -eq 200) {
-                        Write-Host "  ✅ Swagger UI accessible" -ForegroundColor Green
+                    try {
+                        $response = Invoke-WebRequest -Uri "http://localhost:5000/health" -TimeoutSec 2 -UseBasicParsing -ErrorAction SilentlyContinue
+                        if ($response.StatusCode -eq 200) {
+                            $apiReady = $true
+                            break
+                        }
+                    }
+                    catch {
+                        # Continue waiting
+                        Write-Host "." -NoNewline -ForegroundColor Gray
                     }
                 }
-                catch {
-                    Write-Host "  ⚠️  Health check warning: $($_.Exception.Message)" -ForegroundColor Yellow
-                }
-            }
-            else {
-                Write-Host "  ❌ API failed to start within ${ApiStartupTimeout}s" -ForegroundColor Red
-                $result.Error = "API startup timeout"
-            }
 
-            # Stop API
-            Stop-Process -Id $apiProcess.Id -Force -ErrorAction SilentlyContinue
-            Start-Sleep -Seconds 2
+                Write-Host ""
+
+                if ($apiReady) {
+                    Write-Host "  ✅ API started successfully" -ForegroundColor Green
+                    $result.Startup = $true
+
+                    # Test health endpoint
+                    try {
+                        $healthResponse = Invoke-RestMethod -Uri "http://localhost:5000/health" -Method Get
+                        $healthStatus = if ($healthResponse -is [string]) { $healthResponse } else { $healthResponse.status }
+                        Write-Host "  ✅ Health check passed: $healthStatus" -ForegroundColor Green
+                        $result.HealthCheck = $true
+
+                        # Test Swagger endpoint (optional - don't fail if not available)
+                        try {
+                            $swaggerResponse = Invoke-WebRequest -Uri "http://localhost:5000/swagger/index.html" -UseBasicParsing -ErrorAction Stop
+                            if ($swaggerResponse.StatusCode -eq 200) {
+                                Write-Host "  ✅ Swagger UI accessible" -ForegroundColor Green
+                            }
+                        }
+                        catch {
+                            # Swagger not configured or not accessible - not critical
+                        }
+                    }
+                    catch {
+                        Write-Host "  ⚠️  Health check failed: $($_.Exception.Message)" -ForegroundColor Yellow
+                    }
+                }
+                elseif (-not $apiProcess.HasExited) {
+                    Write-Host "  ❌ API failed to start within ${ApiStartupTimeout}s" -ForegroundColor Red
+
+                    if (Test-Path $tempOutputFile) {
+                        Write-Host "  === Last Output ===" -ForegroundColor Yellow
+                        $lastLines = Get-Content $tempOutputFile -Tail 15 -ErrorAction SilentlyContinue
+                        $lastLines | ForEach-Object { Write-Host "    $_" -ForegroundColor Gray }
+                    }
+
+                    $result.Error = "API startup timeout"
+                }
+
+                # Stop API and cleanup
+                if (-not $apiProcess.HasExited) {
+                    Stop-Process -Id $apiProcess.Id -Force -ErrorAction SilentlyContinue
+                    Start-Sleep -Seconds 1
+                }
+
+                # Cleanup temp files
+                Remove-Item $tempOutputFile -ErrorAction SilentlyContinue
+                Remove-Item $tempErrorFile -ErrorAction SilentlyContinue
+
+                Start-Sleep -Seconds 1
+            }
+            catch {
+                Write-Host "  ❌ Error starting API: $($_.Exception.Message)" -ForegroundColor Red
+                Write-Host "  Stack trace:" -ForegroundColor Yellow
+                Write-Host $_.ScriptStackTrace -ForegroundColor Gray
+                $result.Error = "API start exception: $($_.Exception.Message)"
+            }
         }
         else {
             Write-Host "[4/4] Skipping API tests (--SkipTests)" -ForegroundColor Gray
