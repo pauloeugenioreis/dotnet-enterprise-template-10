@@ -10,6 +10,7 @@
 ## 📖 Documentação
 
 - **[🚀 Início Rápido](QUICK-START.md)** - Comece em 5 minutos
+- **[🧪 Testando Bancos de Dados](TESTING-DATABASES.md)** - Teste com SQL Server, Oracle, PostgreSQL e MySQL
 - **[📚 Guia Completo](README.md)** - Este documento
 - **[🎛️ Recursos Avançados](docs/FEATURES.md)** - MongoDB, Quartz, RabbitMQ, Storage, etc.
 - **[🔄 Guia de ORMs](docs/ORM-GUIDE.md)** - Como alternar entre ORMs (EF Core, Dapper, ADO.NET)

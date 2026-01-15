@@ -81,9 +81,13 @@ bld/
 # Azure Functions
 local.settings.json
 
-# Secrets
+# Secrets (allow database-specific appsettings for testing)
 appsettings.*.json
 !appsettings.json
 !appsettings.Development.json
 !appsettings.Production.json
+!appsettings.SqlServer.json
+!appsettings.Oracle.json
+!appsettings.PostgreSQL.json
+!appsettings.MySQL.json
 secrets.json
