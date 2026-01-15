@@ -22,11 +22,11 @@ Este documento fornece instruções detalhadas sobre como trocar o ORM padrão (
 
 ## 📋 ORMs Suportados
 
-1. **Entity Framework Core** (Padrão - Habilitado)
-2. **Dapper** (✅ Implementado - Registro Automático)
-3. **ADO.NET** (✅ Implementado - Registro Automático)
-4. **NHibernate** (Preparado - TODO)
-5. **Linq2Db** (Preparado - TODO)
+1. **Entity Framework Core** (Padrão - ✅ Habilitado)
+2. **Dapper** (✅ Implementado - Pronto para Uso)
+3. **ADO.NET** (✅ Implementado - Pronto para Uso)
+4. **NHibernate** (✅ Implementado - Pacotes Comentados)
+5. **Linq2Db** (✅ Implementado - Pacotes Comentados)
 
 ---
 
