@@ -31,8 +31,12 @@ cp -r "$TEMPLATE_DIR" "$TARGET_DIR"
 # Navigate to target directory
 cd "$TARGET_DIR"
 
-# Remove scripts directory from new project
-rm -rf scripts
+# Remove unnecessary directories and files from new project
+echo "Cleaning up..."
+rm -rf scripts .git .gitignore
+
+# Clean bin and obj directories
+find . -type d \( -name "bin" -o -name "obj" \) -exec rm -rf {} + 2>/dev/null || true
 
 # Rename solution file
 mv ProjectTemplate.sln "$PROJECT_NAME.sln"
@@ -50,10 +54,15 @@ echo ""
 echo "Next steps:"
 echo "1. cd $PROJECT_NAME"
 echo "2. Update connection strings in src/Api/appsettings.json"
-echo "3. Choose your database provider and uncomment in src/Data/Data.csproj"
+echo "3. (Optional) To change ORM: Edit src/Infrastructure/Extensions/DatabaseExtension.cs (line ~26)"
 echo "4. Run: dotnet restore"
 echo "5. Run: dotnet build"
 echo "6. Run: dotnet ef migrations add InitialCreate --project src/Data --startup-project src/Api"
 echo "7. Run: dotnet ef database update --project src/Data --startup-project src/Api"
 echo "8. Run: dotnet run --project src/Api"
+echo ""
+echo "📚 Documentation:"
+echo "   - README.md - Complete guide"
+echo "   - QUICK-START.md - Quick start in 5 minutes"
+echo "   - docs/ORM-GUIDE.md - How to switch ORMs"
 echo ""

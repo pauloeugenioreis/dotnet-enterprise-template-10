@@ -11,7 +11,7 @@ Testa a aplicação com todos os 4 bancos de dados suportados (SQL Server, Oracl
 ### Windows (PowerShell)
 
 ```powershell
-cd windows
+cd scripts\windows
 .\test-all-databases.ps1
 ```
 
@@ -33,7 +33,7 @@ cd windows
 ### Linux/macOS (Bash)
 
 ```bash
-cd linux
+cd scripts/linux
 chmod +x test-all-databases.sh
 ./test-all-databases.sh
 ```
@@ -88,16 +88,25 @@ Scripts para criar um novo projeto a partir do template.
 ### Windows (PowerShell)
 
 ```powershell
-cd windows
+cd scripts
 .\new-project.ps1 -ProjectName "MeuProjeto"
 ```
 
 ### Linux/macOS
 
 ```bash
-cd linux
+cd scripts
+chmod +x new-project.sh
 ./new-project.sh MeuProjeto
 ```
+
+**O que o script faz:**
+
+1. ✅ **Copia** - Template completo para novo diretório
+2. ✅ **Limpa** - Remove `.git`, `scripts`, `bin`, `obj`
+3. ✅ **Renomeia** - Solution e namespaces para novo nome
+4. ✅ **Substitui** - Todas referências de "ProjectTemplate" para nome escolhido
+5. ✅ **Instruções** - Mostra próximos passos
 
 ---
 
@@ -108,14 +117,14 @@ Deploy da aplicação em cluster Kubernetes local (Minikube).
 ### Windows (PowerShell)
 
 ```powershell
-cd windows
+cd scripts\windows
 .\minikube-deploy.ps1
 ```
 
 ### Linux/macOS
 
 ```bash
-cd linux
+cd scripts/linux
 chmod +x minikube-deploy.sh
 ./minikube-deploy.sh
 ```
@@ -129,14 +138,14 @@ Remove o deploy do Minikube.
 ### Windows (PowerShell)
 
 ```powershell
-cd windows
+cd scripts\windows
 .\minikube-destroy.ps1
 ```
 
 ### Linux/macOS
 
 ```bash
-cd linux
+cd scripts/linux
 ./minikube-destroy.sh
 ```
 
@@ -149,14 +158,14 @@ Executa testes de integração no Minikube.
 ### Windows (PowerShell)
 
 ```powershell
-cd windows
+cd scripts\windows
 .\run-integration-tests.ps1
 ```
 
 ### Linux/macOS
 
 ```bash
-cd linux
+cd scripts/linux
 ./run-integration-tests.sh
 ```
 
@@ -164,9 +173,10 @@ cd linux
 
 ## 📝 Convenções
 
-- **Windows**: Scripts PowerShell (`.ps1`) e Batch (`.bat`)
-- **Linux/macOS**: Scripts Bash (`.sh`)
-- **Sempre** execute scripts do diretório correto (`windows/` ou `linux/`)
+- **Windows**: Scripts PowerShell (`.ps1`) e Batch (`.bat`) em `scripts/windows/`
+- **Linux/macOS**: Scripts Bash (`.sh`) em `scripts/linux/`
+- **Multiplataforma**: Scripts na raiz de `scripts/` (new-project.*)
+- **Sempre** execute scripts do diretório correto
 - Scripts Linux precisam de permissão de execução: `chmod +x script.sh`
 
 ---

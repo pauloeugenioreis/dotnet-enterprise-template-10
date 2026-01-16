@@ -22,13 +22,28 @@ if (Test-Path $TargetDir) {
 }
 
 Write-Host "Copying template files..." -ForegroundColor Yellow
-Copy-Item -Path $TemplateDir -Destination $TargetDir -Recurse
+Copy-Item -Path $TemplateDir -Destination $TargetDir -Recurse -Exclude @('.git', 'bin', 'obj', '.vs', '.vscode')
 
 # Navigate to target directory
 Set-Location $TargetDir
 
-# Remove scripts directory from new project
-Remove-Item -Path "scripts" -Recurse -Force -ErrorAction SilentlyContinue
+# Remove unnecessary directories and files from new project
+Write-Host "Cleaning up..." -ForegroundColor Yellow
+$itemsToRemove = @(
+    "scripts",
+    ".git",
+    ".gitignore"
+)
+
+foreach ($item in $itemsToRemove) {
+    if (Test-Path $item) {
+        Remove-Item -Path $item -Recurse -Force -ErrorAction SilentlyContinue
+        Write-Host "  Removed: $item" -ForegroundColor Gray
+    }
+}
+
+# Clean bin and obj directories
+Get-ChildItem -Path . -Include bin,obj -Recurse -Directory | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
 # Rename solution file
 Rename-Item -Path "ProjectTemplate.sln" -NewName "$ProjectName.sln"
@@ -49,10 +64,15 @@ Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "1. cd $ProjectName"
 Write-Host "2. Update connection strings in src/Api/appsettings.json"
-Write-Host "3. Choose your database provider and uncomment in src/Data/Data.csproj"
+Write-Host "3. (Optional) To change ORM: Edit src/Infrastructure/Extensions/DatabaseExtension.cs (line ~26)"
 Write-Host "4. Run: dotnet restore"
 Write-Host "5. Run: dotnet build"
 Write-Host "6. Run: dotnet ef migrations add InitialCreate --project src/Data --startup-project src/Api"
 Write-Host "7. Run: dotnet ef database update --project src/Data --startup-project src/Api"
 Write-Host "8. Run: dotnet run --project src/Api"
+Write-Host ""
+Write-Host "📚 Documentation:" -ForegroundColor Cyan
+Write-Host "   - README.md - Complete guide"
+Write-Host "   - QUICK-START.md - Quick start in 5 minutes"
+Write-Host "   - docs/ORM-GUIDE.md - How to switch ORMs"
 Write-Host ""
