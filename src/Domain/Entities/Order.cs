@@ -16,7 +16,7 @@ public class Order : EntityBase
     public decimal ShippingCost { get; set; }
     public decimal Total { get; set; }
     public string? Notes { get; set; }
-    
+
     // Navigation property
     public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
 }
@@ -32,7 +32,7 @@ public class OrderItem : EntityBase
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal Subtotal { get; set; }
-    
+
     // Navigation properties
     public Order Order { get; set; } = null!;
     public Product Product { get; set; } = null!;

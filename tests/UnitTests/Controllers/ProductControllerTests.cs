@@ -26,7 +26,7 @@ public class ProductControllerTests
         _mockService = new Mock<IService<Product>>();
         _mockLogger = new Mock<ILogger<ProductController>>();
         _controller = new ProductController(_mockService.Object, _mockLogger.Object);
-        
+
         // Mock IUrlHelper for Create methods
         var mockUrlHelper = new Mock<IUrlHelper>();
         mockUrlHelper
@@ -58,14 +58,14 @@ public class ProductControllerTests
     {
         // Arrange
         var productId = 1L;
-        var product = new Product 
-        { 
-            Id = productId, 
-            Name = "Test Product", 
-            Price = 15.99m, 
-            Stock = 75, 
+        var product = new Product
+        {
+            Id = productId,
+            Name = "Test Product",
+            Price = 15.99m,
+            Stock = 75,
             Category = "Electronics",
-            IsActive = true 
+            IsActive = true
         };
         _mockService.Setup(s => s.GetByIdAsync(productId, It.IsAny<CancellationToken>())).ReturnsAsync(product);
 
@@ -94,22 +94,22 @@ public class ProductControllerTests
     public async Task CreateAsync_WithValidProduct_ReturnsCreatedAtAction()
     {
         // Arrange
-        var newProduct = new Product 
-        { 
-            Name = "New Product", 
-            Price = 25.99m, 
-            Stock = 30, 
+        var newProduct = new Product
+        {
+            Name = "New Product",
+            Price = 25.99m,
+            Stock = 30,
             Category = "Games",
-            IsActive = true 
+            IsActive = true
         };
-        var createdProduct = new Product 
-        { 
-            Id = 1, 
-            Name = newProduct.Name, 
-            Price = newProduct.Price, 
+        var createdProduct = new Product
+        {
+            Id = 1,
+            Name = newProduct.Name,
+            Price = newProduct.Price,
             Stock = newProduct.Stock,
             Category = newProduct.Category,
-            IsActive = newProduct.IsActive 
+            IsActive = newProduct.IsActive
         };
         _mockService.Setup(s => s.CreateAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>())).ReturnsAsync(createdProduct);
 
@@ -125,23 +125,23 @@ public class ProductControllerTests
     {
         // Arrange
         var productId = 1L;
-        var existingProduct = new Product 
-        { 
-            Id = productId, 
-            Name = "Old Product", 
-            Price = 10.99m, 
+        var existingProduct = new Product
+        {
+            Id = productId,
+            Name = "Old Product",
+            Price = 10.99m,
             Stock = 50,
             Category = "Electronics",
-            IsActive = true 
+            IsActive = true
         };
-        var updatedProduct = new Product 
-        { 
-            Id = productId, 
-            Name = "Updated Product", 
-            Price = 15.99m, 
+        var updatedProduct = new Product
+        {
+            Id = productId,
+            Name = "Updated Product",
+            Price = 15.99m,
             Stock = 100,
             Category = "Electronics",
-            IsActive = true 
+            IsActive = true
         };
 
         _mockService.Setup(s => s.GetByIdAsync(productId, It.IsAny<CancellationToken>())).ReturnsAsync(existingProduct);
@@ -176,7 +176,7 @@ public class ProductControllerTests
         var productId = 1L;
         var product = new Product { Id = 2L, Name = "Test", Price = 10m, Stock = 10, Category = "Test", IsActive = true };
         var existingProduct = new Product { Id = productId, Name = "Existing", Price = 5m, Stock = 5, Category = "Test", IsActive = true };
-        
+
         _mockService.Setup(s => s.GetByIdAsync(productId, It.IsAny<CancellationToken>())).ReturnsAsync(existingProduct);
         _mockService.Setup(s => s.UpdateAsync(productId, It.IsAny<Product>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 

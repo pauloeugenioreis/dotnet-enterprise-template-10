@@ -104,7 +104,7 @@ public static class AuthenticationExtension
         {
             return app;
         }
-        
+
         app.UseAuthentication();
         app.UseAuthorization();
         return app;

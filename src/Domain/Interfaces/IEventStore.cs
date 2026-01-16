@@ -11,8 +11,8 @@ public interface IEventStore
     /// Append a new event to the event stream
     /// </summary>
     Task AppendEventAsync<TEvent>(
-        string aggregateType, 
-        string aggregateId, 
+        string aggregateType,
+        string aggregateId,
         TEvent eventData,
         string? userId = null,
         Dictionary<string, string>? metadata = null,

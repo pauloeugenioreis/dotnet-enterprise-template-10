@@ -1,13 +1,13 @@
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using ProjectTemplate.Domain;
-using ProjectTemplate.Domain.Entities;
-using ProjectTemplate.Domain.Interfaces;
-using ProjectTemplate.Domain.Exceptions;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using ProjectTemplate.Domain;
+using ProjectTemplate.Domain.Entities;
+using ProjectTemplate.Domain.Exceptions;
+using ProjectTemplate.Domain.Interfaces;
 
 namespace ProjectTemplate.Infrastructure.Services;
 
@@ -75,7 +75,9 @@ public class JwtTokenService : ITokenService
     public async Task<long?> ValidateAccessTokenAsync(string token)
     {
         if (string.IsNullOrWhiteSpace(token))
+        {
             return null;
+        }
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
@@ -104,7 +106,9 @@ public class JwtTokenService : ITokenService
 
             var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (long.TryParse(userIdClaim, out var userId))
+            {
                 return userId;
+            }
 
             return null;
         }
@@ -124,12 +128,14 @@ public class JwtTokenService : ITokenService
 
     public async Task<User?> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        var token = await _userRepository.GetRefreshTokenAsync(refreshToken, cancellationToken).ConfigureAwait(false);
+        var token = await _userRepository.GetRefreshTokenAsync(refreshToken, cancellationToken);
 
         if (token == null || !token.IsActive)
+        {
             return null;
+        }
 
-        var user = await _userRepository.GetByIdAsync(token.UserId, cancellationToken).ConfigureAwait(false);
+        var user = await _userRepository.GetByIdAsync(token.UserId, cancellationToken);
         return user;
     }
 }

@@ -1,10 +1,10 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiniExcelLibs;
 using MiniExcelLibs.OpenXml;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
-using System.Diagnostics;
 
 namespace ProjectTemplate.Api.Controllers;
 
@@ -46,12 +46,16 @@ public class ProductController : ApiControllerBase
 
         // Apply filters
         var filtered = products.AsQueryable();
-        
+
         if (isActive.HasValue)
+        {
             filtered = filtered.Where(p => p.IsActive == isActive.Value);
-        
+        }
+
         if (!string.IsNullOrEmpty(category))
+        {
             filtered = filtered.Where(p => p.Category.Contains(category, StringComparison.OrdinalIgnoreCase));
+        }
 
         var results = filtered.ToList();
 
@@ -77,7 +81,7 @@ public class ProductController : ApiControllerBase
     public async Task<IActionResult> GetByIdAsync(long id, CancellationToken cancellationToken)
     {
         var product = await _service.GetByIdAsync(id, cancellationToken);
-        
+
         if (product == null)
         {
             _logger.LogWarning("Product {ProductId} not found", id);
@@ -112,13 +116,13 @@ public class ProductController : ApiControllerBase
 
         var created = await _service.CreateAsync(product, cancellationToken);
 
-        _logger.LogInformation("Product {ProductName} created with ID {ProductId}", 
+        _logger.LogInformation("Product {ProductName} created with ID {ProductId}",
             created.Name, created.Id);
 
         var location = Url.Action(
             nameof(GetByIdAsync),
             values: new { id = created.Id }) ?? $"/api/v1/product/{created.Id}";
-        
+
         return Created(location, created);
     }
 
@@ -149,7 +153,9 @@ public class ProductController : ApiControllerBase
         }
 
         if (product.Id == 0 || (id > 0 && product.Id != id))
+        {
             product.Id = id;
+        }
 
         var existing = await _service.GetByIdAsync(id, cancellationToken);
         if (existing == null)
@@ -214,12 +220,16 @@ public class ProductController : ApiControllerBase
 
         // Apply filters
         var filtered = products.AsQueryable();
-        
+
         if (isActive.HasValue)
+        {
             filtered = filtered.Where(p => p.IsActive == isActive.Value);
-        
+        }
+
         if (!string.IsNullOrEmpty(category))
+        {
             filtered = filtered.Where(p => p.Category.Contains(category, StringComparison.OrdinalIgnoreCase));
+        }
 
         var results = filtered.ToList();
 
@@ -233,9 +243,8 @@ public class ProductController : ApiControllerBase
 
         // Generate Excel file in memory
         var memoryStream = new MemoryStream();
-        await memoryStream.SaveAsAsync(results, sheetName: "Products", configuration: config)
-            .ConfigureAwait(false);
-        
+        await memoryStream.SaveAsAsync(results, sheetName: "Products", configuration: config);
+
         memoryStream.Seek(0, SeekOrigin.Begin);
 
         stopwatch.Stop();
@@ -307,7 +316,7 @@ public class ProductController : ApiControllerBase
         }
 
         var newStock = product.Stock + quantity;
-        
+
         if (newStock < 0)
         {
             return BadRequest(new

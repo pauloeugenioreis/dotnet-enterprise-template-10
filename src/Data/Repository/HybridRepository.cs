@@ -1,10 +1,10 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Events;
 using ProjectTemplate.Domain.Interfaces;
-using System.Text.Json;
 
 namespace ProjectTemplate.Data.Repository;
 
@@ -32,13 +32,13 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
     public override async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         // 1. Save to EF Core (traditional approach)
-        var result = await base.AddAsync(entity, cancellationToken).ConfigureAwait(false);
-        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        var result = await base.AddAsync(entity, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
 
         // 2. Record event if Event Sourcing is enabled and entity is in audit list
         if (ShouldAuditEntity(typeof(TEntity).Name))
         {
-            await RecordCreatedEvent(entity, cancellationToken).ConfigureAwait(false);
+            await RecordCreatedEvent(entity, cancellationToken);
         }
 
         return result;
@@ -48,14 +48,14 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         IEnumerable<TEntity> entities,
         CancellationToken cancellationToken = default)
     {
-        var result = await base.AddRangeAsync(entities, cancellationToken).ConfigureAwait(false);
-        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        var result = await base.AddRangeAsync(entities, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
 
         if (ShouldAuditEntity(typeof(TEntity).Name))
         {
             foreach (var entity in entities)
             {
-                await RecordCreatedEvent(entity, cancellationToken).ConfigureAwait(false);
+                await RecordCreatedEvent(entity, cancellationToken);
             }
         }
 
@@ -68,17 +68,17 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         Dictionary<string, object>? changes = null;
         if (ShouldAuditEntity(typeof(TEntity).Name))
         {
-            changes = await DetectChangesAsync(entity, cancellationToken).ConfigureAwait(false);
+            changes = await DetectChangesAsync(entity, cancellationToken);
         }
 
         // 1. Update in EF Core
-        await base.UpdateAsync(entity, cancellationToken).ConfigureAwait(false);
-        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await base.UpdateAsync(entity, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
 
         // 2. Record event
         if (changes != null && changes.Any())
         {
-            await RecordUpdatedEvent(entity, changes, cancellationToken).ConfigureAwait(false);
+            await RecordUpdatedEvent(entity, changes, cancellationToken);
         }
 
         return;
@@ -87,13 +87,13 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
     public override async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         // 1. Delete from EF Core
-        await base.DeleteAsync(entity, cancellationToken).ConfigureAwait(false);
-        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await base.DeleteAsync(entity, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
 
         // 2. Record event
         if (ShouldAuditEntity(typeof(TEntity).Name))
         {
-            await RecordDeletedEvent(entity, cancellationToken).ConfigureAwait(false);
+            await RecordDeletedEvent(entity, cancellationToken);
         }
 
         return;
@@ -102,11 +102,15 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
     private bool ShouldAuditEntity(string entityType)
     {
         if (!_settings.Enabled)
+        {
             return false;
+        }
 
         // If AuditEntities is empty, audit all entities
         if (!_settings.AuditEntities.Any())
+        {
             return true;
+        }
 
         // Otherwise, check if entity is in the list
         return _settings.AuditEntities.Contains(entityType);
@@ -168,7 +172,7 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
             eventData: eventData,
             userId: GetCurrentUserId(),
             metadata: metadata,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+            cancellationToken: cancellationToken);
     }
 
     private async Task RecordDeletedEvent(TEntity entity, CancellationToken cancellationToken)
@@ -191,7 +195,7 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
             eventData: eventData,
             userId: GetCurrentUserId(),
             metadata: metadata,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+            cancellationToken: cancellationToken);
     }
 
     private async Task<Dictionary<string, object>> DetectChangesAsync(
@@ -201,10 +205,12 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         var changes = new Dictionary<string, object>();
 
         var entry = _context.Entry(entity);
-        var existingEntity = await _dbSet.FindAsync(new object[] { entity.Id }, cancellationToken).ConfigureAwait(false);
+        var existingEntity = await _dbSet.FindAsync(new object[] { entity.Id }, cancellationToken);
 
         if (existingEntity == null)
+        {
             return changes;
+        }
 
         var existingEntry = _context.Entry(existingEntity);
 
@@ -229,7 +235,9 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
     private OrderCreatedEvent CreateOrderCreatedEvent(Order? order)
     {
         if (order == null)
+        {
             throw new ArgumentNullException(nameof(order));
+        }
 
         return new OrderCreatedEvent
         {
@@ -258,7 +266,9 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
     private ProductCreatedEvent CreateProductCreatedEvent(Product? product)
     {
         if (product == null)
+        {
             throw new ArgumentNullException(nameof(product));
+        }
 
         return new ProductCreatedEvent
         {
@@ -280,7 +290,9 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
     private Dictionary<string, string> GetMetadata()
     {
         if (!_settings.StoreMetadata)
+        {
             return new Dictionary<string, string>();
+        }
 
         return _executionContextService?.GetMetadata() ?? new Dictionary<string, string>
         {

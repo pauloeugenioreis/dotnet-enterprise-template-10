@@ -1,11 +1,11 @@
-using ProjectTemplate.Data.Context;
-using ProjectTemplate.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using ProjectTemplate.Data.Context;
+using ProjectTemplate.Domain.Entities;
 
 namespace ProjectTemplate.Data.Seeders;
 
@@ -36,7 +36,7 @@ public class DbSeeder
     public async Task SeedAsync()
     {
         // Check if database already has data
-        if (await _context.Products.AnyAsync().ConfigureAwait(false))
+        if (await _context.Products.AnyAsync())
         {
             Console.WriteLine("Database already seeded. Skipping seed.");
             return;
@@ -45,15 +45,15 @@ public class DbSeeder
         Console.WriteLine("Starting database seed...");
 
         // Seed Roles and Admin User
-        await SeedRolesAndAdminUserAsync().ConfigureAwait(false);
+        await SeedRolesAndAdminUserAsync();
         Console.WriteLine("✓ Seeded roles and admin user");
 
         // Seed Products (150 products)
-        var products = await SeedProductsAsync(150).ConfigureAwait(false);
+        var products = await SeedProductsAsync(150);
         Console.WriteLine($"✓ Seeded {products.Count} products");
 
         // Seed Orders (120 orders with items)
-        var orderCount = await SeedOrdersAsync(120, products).ConfigureAwait(false);
+        var orderCount = await SeedOrdersAsync(120, products);
         Console.WriteLine($"✓ Seeded {orderCount} orders with items");
 
         Console.WriteLine("Database seed completed successfully!");
@@ -66,7 +66,7 @@ public class DbSeeder
     private async Task SeedRolesAndAdminUserAsync()
     {
         // Create Roles
-        if (!await _context.Roles.AnyAsync().ConfigureAwait(false))
+        if (!await _context.Roles.AnyAsync())
         {
             var roles = new List<Role>
             {
@@ -96,12 +96,12 @@ public class DbSeeder
                 }
             };
 
-            await _context.Roles.AddRangeAsync(roles).ConfigureAwait(false);
-            await _context.SaveChangesAsync().ConfigureAwait(false);
+            await _context.Roles.AddRangeAsync(roles);
+            await _context.SaveChangesAsync();
         }
 
         // Create Default Admin User
-        if (!await _context.Users.AnyAsync().ConfigureAwait(false))
+        if (!await _context.Users.AnyAsync())
         {
             // Password: Admin@2026!Secure
             var passwordHash = HashPassword("Admin@2026!Secure");
@@ -120,11 +120,11 @@ public class DbSeeder
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _context.Users.AddAsync(adminUser).ConfigureAwait(false);
-            await _context.SaveChangesAsync().ConfigureAwait(false);
+            await _context.Users.AddAsync(adminUser);
+            await _context.SaveChangesAsync();
 
             // Assign Admin role
-            var adminRole = await _context.Roles.FirstAsync(r => r.Name == "Admin").ConfigureAwait(false);
+            var adminRole = await _context.Roles.FirstAsync(r => r.Name == "Admin");
             var userRole = new UserRole
             {
                 UserId = adminUser.Id,
@@ -132,8 +132,8 @@ public class DbSeeder
                 AssignedAt = DateTime.UtcNow
             };
 
-            await _context.UserRoles.AddAsync(userRole).ConfigureAwait(false);
-            await _context.SaveChangesAsync().ConfigureAwait(false);
+            await _context.UserRoles.AddAsync(userRole);
+            await _context.SaveChangesAsync();
 
             Console.WriteLine("═══════════════════════════════════════════════════════");
             Console.WriteLine("   DEFAULT ADMIN CREDENTIALS");
@@ -193,8 +193,8 @@ public class DbSeeder
             products.Add(product);
         }
 
-        await _context.Products.AddRangeAsync(products).ConfigureAwait(false);
-        await _context.SaveChangesAsync().ConfigureAwait(false);
+        await _context.Products.AddRangeAsync(products);
+        await _context.SaveChangesAsync();
 
         return products;
     }
@@ -258,8 +258,8 @@ public class DbSeeder
             orders.Add(order);
         }
 
-        await _context.Orders.AddRangeAsync(orders).ConfigureAwait(false);
-        await _context.SaveChangesAsync().ConfigureAwait(false);
+        await _context.Orders.AddRangeAsync(orders);
+        await _context.SaveChangesAsync();
 
         return orders.Count;
     }
@@ -352,7 +352,9 @@ public class DbSeeder
         {
             cumulative += weight;
             if (randomValue < cumulative)
+            {
                 return status;
+            }
         }
 
         return "Pending";

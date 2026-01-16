@@ -65,7 +65,7 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        
+
         var createdOrder = await response.Content.ReadFromJsonAsync<OrderResponseDto>();
         createdOrder.Should().NotBeNull();
         createdOrder!.CustomerName.Should().Be("John Doe");
@@ -141,7 +141,7 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        
+
         // Verify the update by getting the order
         var getResponse = await _client.GetAsync($"/api/v1/Order/{createdOrder.Id}");
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -171,7 +171,7 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        
+
         var content = await response.Content.ReadAsByteArrayAsync();
         content.Should().NotBeEmpty();
         content.Length.Should().BeGreaterThan(0);
@@ -186,7 +186,7 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        
+
         var content = await response.Content.ReadAsByteArrayAsync();
         content.Should().NotBeEmpty();
     }

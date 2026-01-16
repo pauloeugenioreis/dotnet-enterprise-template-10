@@ -17,25 +17,25 @@ public class EventSourcingDisabledTests
     {
         // Arrange
         var services = new ServiceCollection();
-        
+
         // Configure with Event Sourcing DISABLED
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseInMemoryDatabase("TestDb_Disabled"));
-                // Register ApplicationDbContext as DbContext for HybridRepository
+        // Register ApplicationDbContext as DbContext for HybridRepository
         services.AddScoped<DbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
-                // Register ApplicationDbContext as DbContext for HybridRepository
+        // Register ApplicationDbContext as DbContext for HybridRepository
         services.AddScoped<DbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
-        
+
         var settings = new EventSourcingSettings { Enabled = false };
         services.AddSingleton(settings);
         services.AddScoped<IEventStore, NoOpEventStore>();
         services.AddScoped(typeof(IRepository<>), typeof(HybridRepository<>));
         services.AddHttpContextAccessor();
-        
+
         var provider = services.BuildServiceProvider();
         var repository = provider.GetRequiredService<IRepository<Order>>();
         var eventStore = provider.GetRequiredService<IEventStore>();
-        
+
         // Act
         var order = new Order
         {
@@ -45,9 +45,9 @@ public class EventSourcingDisabledTests
             ShippingAddress = "Test Address",
             Total = 100m
         };
-        
+
         await repository.AddAsync(order);
-        
+
         // Assert
         var events = await eventStore.GetEventsAsync("Order", order.Id.ToString());
         Assert.Empty(events); // No events should be recorded
@@ -61,16 +61,16 @@ public class EventSourcingEnabledTests
     {
         // Arrange
         var services = new ServiceCollection();
-        
+
         // Configure with Event Sourcing ENABLED
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseInMemoryDatabase("TestDb_Enabled"));
-        
+
         // Register ApplicationDbContext as DbContext for HybridRepository
         services.AddScoped<DbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
-        
-        var settings = new EventSourcingSettings 
-        { 
+
+        var settings = new EventSourcingSettings
+        {
             Enabled = true,
             Mode = EventSourcingMode.Hybrid,
             AuditEntities = new List<string> { "Order" }
@@ -79,11 +79,11 @@ public class EventSourcingEnabledTests
         services.AddScoped<IEventStore, InMemoryEventStore>();
         services.AddScoped(typeof(IRepository<>), typeof(HybridRepository<>));
         services.AddHttpContextAccessor();
-        
+
         var provider = services.BuildServiceProvider();
         var repository = provider.GetRequiredService<IRepository<Order>>();
         var eventStore = provider.GetRequiredService<IEventStore>();
-        
+
         // Act
         var order = new Order
         {
@@ -93,19 +93,19 @@ public class EventSourcingEnabledTests
             ShippingAddress = "Test Address",
             Total = 100m
         };
-        
+
         await repository.AddAsync(order);
-        
+
         // Assert
         var events = await eventStore.GetEventsAsync("Order", order.Id.ToString());
         Assert.NotEmpty(events); // Events should be recorded
         Assert.Single(events); // One create event
-        
+
         // Verify event data contains order information
         var eventData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(
             events[0].EventData);
         Assert.NotNull(eventData);
-        
+
         // The event should contain order data (either as OrderCreatedEvent or Order entity)
         // Just verify that it was recorded
         Assert.True(eventData.Count > 0, "Event data should not be empty");
@@ -140,7 +140,7 @@ internal class InMemoryEventStore : IEventStore
             Timestamp = DateTime.UtcNow,
             Version = 1
         };
-        
+
         _events.Add(domainEvent);
         return Task.CompletedTask;
     }
@@ -162,8 +162,8 @@ internal class InMemoryEventStore : IEventStore
         CancellationToken cancellationToken = default)
     {
         return Task.FromResult(_events
-            .Where(e => e.AggregateType == aggregateType && 
-                       e.AggregateId == aggregateId && 
+            .Where(e => e.AggregateType == aggregateType &&
+                       e.AggregateId == aggregateId &&
                        e.OccurredOn <= until)
             .ToList());
     }
@@ -176,7 +176,7 @@ internal class InMemoryEventStore : IEventStore
         CancellationToken cancellationToken = default)
     {
         return Task.FromResult(_events
-            .Where(e => e.AggregateType == aggregateType && 
+            .Where(e => e.AggregateType == aggregateType &&
                        e.AggregateId == aggregateId &&
                        e.Version >= fromVersion &&
                        e.Version <= toVersion)
@@ -191,14 +191,19 @@ internal class InMemoryEventStore : IEventStore
         CancellationToken cancellationToken = default)
     {
         var query = _events.Where(e => e.AggregateType == aggregateType);
-        
+
         if (from.HasValue)
+        {
             query = query.Where(e => e.OccurredOn >= from.Value);
+        }
+
         if (to.HasValue)
+        {
             query = query.Where(e => e.OccurredOn <= to.Value);
-            
-        return Task.FromResult(limit.HasValue 
-            ? query.Take(limit.Value).ToList() 
+        }
+
+        return Task.FromResult(limit.HasValue
+            ? query.Take(limit.Value).ToList()
             : query.ToList());
     }
 
@@ -210,14 +215,19 @@ internal class InMemoryEventStore : IEventStore
         CancellationToken cancellationToken = default)
     {
         var query = _events.Where(e => e.UserId == userId);
-        
+
         if (from.HasValue)
+        {
             query = query.Where(e => e.OccurredOn >= from.Value);
+        }
+
         if (to.HasValue)
+        {
             query = query.Where(e => e.OccurredOn <= to.Value);
-            
-        return Task.FromResult(limit.HasValue 
-            ? query.Take(limit.Value).ToList() 
+        }
+
+        return Task.FromResult(limit.HasValue
+            ? query.Take(limit.Value).ToList()
             : query.ToList());
     }
 
@@ -229,7 +239,7 @@ internal class InMemoryEventStore : IEventStore
         var maxVersion = _events
             .Where(e => e.AggregateType == aggregateType && e.AggregateId == aggregateId)
             .Max(e => (int?)e.Version) ?? 0;
-        
+
         return Task.FromResult(maxVersion);
     }
 
@@ -264,7 +274,7 @@ internal class InMemoryEventStore : IEventStore
             EventsByType = _events.GroupBy(e => e.EventType).ToDictionary(g => g.Key, g => (long)g.Count()),
             EventsByAggregateType = _events.GroupBy(e => e.AggregateType).ToDictionary(g => g.Key, g => (long)g.Count())
         };
-        
+
         return Task.FromResult(stats);
     }
 }

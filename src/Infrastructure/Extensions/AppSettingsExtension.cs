@@ -22,7 +22,7 @@ public static class AppSettingsExtension
             .ValidateOnStart();
 
         // Register settings as singleton for easy injection
-        services.AddSingleton(sp => 
+        services.AddSingleton(sp =>
             sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<AppSettings>>().Value);
 
         return services;

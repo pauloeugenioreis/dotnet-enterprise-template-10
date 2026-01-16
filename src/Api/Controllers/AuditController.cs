@@ -31,7 +31,9 @@ public class AuditController : ApiControllerBase
         CancellationToken cancellationToken = default)
     {
         if (!_settings.Enabled || !_settings.EnableAuditApi)
+        {
             return BadRequest("Event Sourcing or Audit API is disabled");
+        }
 
         var events = await _eventStore.GetEventsAsync(entityType, entityId, cancellationToken);
         return Ok(events);
@@ -48,15 +50,21 @@ public class AuditController : ApiControllerBase
         CancellationToken cancellationToken = default)
     {
         if (!_settings.Enabled)
+        {
             return BadRequest("Event Sourcing is disabled");
+        }
 
         if (!_settings.EnableAuditApi)
+        {
             return StatusCode(403, "Audit API is disabled");
+        }
 
         var events = await _eventStore.GetEventsAsync(entityType, entityId, timestamp, cancellationToken);
 
         if (!events.Any())
+        {
             return NotFound($"No events found for {entityType} with ID {entityId}");
+        }
 
         return Ok(new
         {
@@ -86,7 +94,9 @@ public class AuditController : ApiControllerBase
         CancellationToken cancellationToken = default)
     {
         if (!_settings.Enabled || !_settings.EnableAuditApi)
+        {
             return BadRequest("Event Sourcing or Audit API is disabled");
+        }
 
         var events = await _eventStore.GetEventsByVersionAsync(
             entityType, entityId, fromVersion, toVersion, cancellationToken);
@@ -106,7 +116,9 @@ public class AuditController : ApiControllerBase
         CancellationToken cancellationToken = default)
     {
         if (!_settings.Enabled || !_settings.EnableAuditApi)
+        {
             return BadRequest("Event Sourcing or Audit API is disabled");
+        }
 
         var events = await _eventStore.GetEventsByTypeAsync(
             entityType, from, to, limit, cancellationToken);
@@ -126,7 +138,9 @@ public class AuditController : ApiControllerBase
         CancellationToken cancellationToken = default)
     {
         if (!_settings.Enabled || !_settings.EnableAuditApi)
+        {
             return BadRequest("Event Sourcing or Audit API is disabled");
+        }
 
         var events = await _eventStore.GetEventsByUserAsync(userId, from, to, limit, cancellationToken);
 
@@ -157,7 +171,9 @@ public class AuditController : ApiControllerBase
         CancellationToken cancellationToken = default)
     {
         if (!_settings.Enabled || !_settings.EnableAuditApi)
+        {
             return BadRequest("Event Sourcing or Audit API is disabled");
+        }
 
         var stats = await _eventStore.GetStatisticsAsync(from, to, cancellationToken);
 
@@ -174,12 +190,16 @@ public class AuditController : ApiControllerBase
         CancellationToken cancellationToken = default)
     {
         if (!_settings.Enabled || !_settings.EnableAuditApi)
+        {
             return BadRequest("Event Sourcing or Audit API is disabled");
+        }
 
         var events = await _eventStore.GetEventsAsync(entityType, entityId, cancellationToken);
 
         if (!events.Any())
+        {
             return NotFound($"No events found for {entityType} with ID {entityId}");
+        }
 
         return Ok(new
         {

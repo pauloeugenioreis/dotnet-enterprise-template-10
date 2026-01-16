@@ -1,13 +1,13 @@
+using System.Globalization;
+using System.Net;
+using System.Text.Json;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using ProjectTemplate.Domain;
-using System.Globalization;
-using System.Net;
-using System.Text.Json;
-using System.Threading.RateLimiting;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
 
@@ -31,7 +31,7 @@ public static class RateLimitingExtension
         {
             // Global rejection behavior
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-            
+
             options.OnRejected = async (context, cancellationToken) =>
             {
                 context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;

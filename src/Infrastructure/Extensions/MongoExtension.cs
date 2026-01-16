@@ -1,9 +1,9 @@
+using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using ProjectTemplate.Domain;
-using System;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
 

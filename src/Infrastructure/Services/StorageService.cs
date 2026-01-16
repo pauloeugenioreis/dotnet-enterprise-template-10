@@ -1,10 +1,10 @@
-using Google.Cloud.Storage.V1;
-using Microsoft.Extensions.Logging;
-using ProjectTemplate.Domain.Interfaces;
-using ProjectTemplate.Domain.Exceptions;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Google.Cloud.Storage.V1;
+using Microsoft.Extensions.Logging;
+using ProjectTemplate.Domain.Exceptions;
+using ProjectTemplate.Domain.Interfaces;
 
 namespace ProjectTemplate.Infrastructure.Services;
 
@@ -37,7 +37,7 @@ public class StorageService : IStorageService
                 bucket: bucketName,
                 objectName: objectName,
                 contentType: contentType,
-                source: stream).ConfigureAwait(false);
+                source: stream);
 
             var publicUrl = GetPublicUrl(bucketName, objectName);
             _logger.LogInformation("Successfully uploaded object {ObjectName}. URL: {Url}", objectName, publicUrl);
@@ -79,7 +79,7 @@ public class StorageService : IStorageService
             await _storageClient.DownloadObjectAsync(
                 bucket: bucketName,
                 objectName: objectName,
-                destination: destination).ConfigureAwait(false);
+                destination: destination);
 
             _logger.LogInformation("Successfully downloaded object {ObjectName}", objectName);
         }
@@ -114,7 +114,7 @@ public class StorageService : IStorageService
         {
             _logger.LogInformation("Deleting object {ObjectName} from bucket {BucketName}", objectName, bucketName);
 
-            await _storageClient.DeleteObjectAsync(bucket: bucketName, objectName: objectName).ConfigureAwait(false);
+            await _storageClient.DeleteObjectAsync(bucket: bucketName, objectName: objectName);
 
             _logger.LogInformation("Successfully deleted object {ObjectName}", objectName);
         }

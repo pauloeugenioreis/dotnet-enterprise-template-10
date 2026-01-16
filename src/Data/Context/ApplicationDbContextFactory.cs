@@ -14,7 +14,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
         // Create a minimal options builder just for design-time
         // The actual configuration is in appsettings.json and Program.cs
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-        
+
         // Use SQL Server with a placeholder connection string for design-time
         // This allows migrations to be generated without a real database
         optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=ProjectTemplate;Trusted_Connection=True;");

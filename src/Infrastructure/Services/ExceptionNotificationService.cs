@@ -1,8 +1,8 @@
+using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using ProjectTemplate.Domain.Dtos;
 using ProjectTemplate.Domain.Interfaces;
-using System;
-using System.Threading.Tasks;
 
 namespace ProjectTemplate.Infrastructure.Services;
 

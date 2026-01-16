@@ -32,7 +32,7 @@ public static class CacheExtension
                 {
                     throw new InvalidOperationException("Redis connection string is required when Redis provider is selected");
                 }
-                
+
                 services.AddStackExchangeRedisCache(options =>
                 {
                     options.Configuration = redisConnectionString;
@@ -45,8 +45,6 @@ public static class CacheExtension
                 // Install-Package Microsoft.Extensions.Caching.SqlServer
                 // dotnet sql-cache create "connection-string" dbo Cache
                 throw new NotImplementedException("SQL Server cache requires Microsoft.Extensions.Caching.SqlServer package");
-
-            case "memory":
             default:
                 services.AddMemoryCache();
                 services.AddDistributedMemoryCache();

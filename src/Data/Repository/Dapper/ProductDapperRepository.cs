@@ -1,7 +1,7 @@
+using System.Data;
 using Dapper;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
-using System.Data;
 
 namespace ProjectTemplate.Data.Repository.Dapper;
 
@@ -27,7 +27,7 @@ public class ProductDapperRepository : IProductDapperRepository
             FROM Products
             WHERE Id = @Id";
 
-        return await connection.QuerySingleOrDefaultAsync<Product>(sql, new { Id = id }).ConfigureAwait(false);
+        return await connection.QuerySingleOrDefaultAsync<Product>(sql, new { Id = id });
     }
 
     public async Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -37,14 +37,14 @@ public class ProductDapperRepository : IProductDapperRepository
             SELECT Id, Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt
             FROM Products";
 
-        return await connection.QueryAsync<Product>(sql).ConfigureAwait(false);
+        return await connection.QueryAsync<Product>(sql);
     }
 
     public async Task<IEnumerable<Product>> FindAsync(Func<Product, bool> predicate, CancellationToken cancellationToken = default)
     {
         // Dapper doesn't support LINQ predicates directly
         // For complex queries, implement specific methods or use GetAllAsync and filter in memory
-        var all = await GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var all = await GetAllAsync(cancellationToken);
         return all.Where(predicate);
     }
 
@@ -57,7 +57,7 @@ public class ProductDapperRepository : IProductDapperRepository
             SELECT CAST(SCOPE_IDENTITY() as bigint)";
 
         entity.CreatedAt = DateTime.UtcNow;
-        var id = await connection.QuerySingleAsync<long>(sql, entity).ConfigureAwait(false);
+        var id = await connection.QuerySingleAsync<long>(sql, entity);
         entity.Id = id;
 
         return entity;
@@ -76,7 +76,7 @@ public class ProductDapperRepository : IProductDapperRepository
             entity.CreatedAt = DateTime.UtcNow;
         }
 
-        await connection.ExecuteAsync(sql, entityList).ConfigureAwait(false);
+        await connection.ExecuteAsync(sql, entityList);
         return entityList;
     }
 
@@ -95,21 +95,21 @@ public class ProductDapperRepository : IProductDapperRepository
             WHERE Id = @Id";
 
         entity.UpdatedAt = DateTime.UtcNow;
-        await connection.ExecuteAsync(sql, entity).ConfigureAwait(false);
+        await connection.ExecuteAsync(sql, entity);
     }
 
     public async Task DeleteAsync(Product entity, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sql = "DELETE FROM Products WHERE Id = @Id";
-        await connection.ExecuteAsync(sql, new { entity.Id }).ConfigureAwait(false);
+        await connection.ExecuteAsync(sql, new { entity.Id });
     }
 
     public async Task DeleteRangeAsync(IEnumerable<Product> entities, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sql = "DELETE FROM Products WHERE Id = @Id";
-        await connection.ExecuteAsync(sql, entities.Select(e => new { e.Id })).ConfigureAwait(false);
+        await connection.ExecuteAsync(sql, entities.Select(e => new { e.Id }));
     }
 
     public async Task<(IEnumerable<Product> Items, int Total)> GetPagedAsync(
@@ -120,7 +120,7 @@ public class ProductDapperRepository : IProductDapperRepository
         using var connection = _connectionFactory.CreateConnection();
 
         const string countSql = "SELECT COUNT(*) FROM Products";
-        var total = await connection.ExecuteScalarAsync<int>(countSql).ConfigureAwait(false);
+        var total = await connection.ExecuteScalarAsync<int>(countSql);
 
         const string dataSql = @"
             SELECT Id, Name, Description, Price, Stock, Category, IsActive, CreatedAt, UpdatedAt
@@ -133,7 +133,7 @@ public class ProductDapperRepository : IProductDapperRepository
         {
             Offset = (page - 1) * pageSize,
             PageSize = pageSize
-        }).ConfigureAwait(false);
+        });
 
         return (items, total);
     }

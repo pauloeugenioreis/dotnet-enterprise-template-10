@@ -1,8 +1,8 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjectTemplate.Domain.Dtos;
 using ProjectTemplate.Domain.Interfaces;
-using System.Security.Claims;
 
 namespace ProjectTemplate.Api.Controllers;
 

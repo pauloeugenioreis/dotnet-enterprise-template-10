@@ -12,7 +12,7 @@ public interface IService<TEntity> where TEntity : class
     Task UpdateAsync(long id, TEntity entity, CancellationToken cancellationToken = default);
     Task DeleteAsync(long id, CancellationToken cancellationToken = default);
     Task<(IEnumerable<TEntity> Items, int Total)> GetPagedAsync(
-        int page, 
-        int pageSize, 
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default);
 }

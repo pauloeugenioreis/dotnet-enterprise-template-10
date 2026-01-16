@@ -1,7 +1,7 @@
-using ProjectTemplate.Infrastructure.Extensions;
+using Microsoft.EntityFrameworkCore;
 using ProjectTemplate.Data.Context;
 using ProjectTemplate.Data.Seeders;
-using Microsoft.EntityFrameworkCore;
+using ProjectTemplate.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

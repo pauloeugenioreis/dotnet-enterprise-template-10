@@ -1,6 +1,6 @@
-using ProjectTemplate.Domain.Dtos;
 using System;
 using System.Threading.Tasks;
+using ProjectTemplate.Domain.Dtos;
 
 namespace ProjectTemplate.Domain.Interfaces;
 

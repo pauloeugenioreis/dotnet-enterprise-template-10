@@ -1,11 +1,11 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Configuration;
 using ProjectTemplate.Data.Context;
-using Asp.Versioning;
 
 namespace ProjectTemplate.Integration.Tests;
 
@@ -18,7 +18,7 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
     {
         // Set environment to Testing to disable Swagger in Program.cs
         builder.UseEnvironment("Testing");
-        
+
         // Add test configuration with valid JWT secret
         builder.ConfigureAppConfiguration((context, config) =>
         {
@@ -27,28 +27,28 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
                 ["Authentication:Enabled"] = "false"
             }!);
         });
-        
+
         builder.ConfigureServices(services =>
         {
             // Remove ALL Swagger-related services to avoid OpenAPI version conflicts
             var swaggerDescriptors = services
-                .Where(d => d.ServiceType.Namespace != null && 
+                .Where(d => d.ServiceType.Namespace != null &&
                            (d.ServiceType.Namespace.StartsWith("Swashbuckle") ||
                             d.ServiceType.Namespace.StartsWith("Microsoft.OpenApi")))
                 .ToList();
-            
+
             foreach (var descriptor in swaggerDescriptors)
             {
                 services.Remove(descriptor);
             }
-            
+
             // Remove ALL Authentication services to avoid JWT configuration issues
             var authDescriptors = services
-                .Where(d => d.ServiceType.Namespace != null && 
+                .Where(d => d.ServiceType.Namespace != null &&
                            (d.ServiceType.Namespace.StartsWith("Microsoft.AspNetCore.Authentication") ||
                             d.ServiceType.FullName?.Contains("Authentication") == true))
                 .ToList();
-            
+
             foreach (var descriptor in authDescriptors)
             {
                 services.Remove(descriptor);

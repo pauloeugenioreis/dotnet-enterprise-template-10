@@ -1,14 +1,14 @@
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using ProjectTemplate.Domain;
-using ProjectTemplate.Domain.Interfaces;
-using Polly;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Exceptions;
 using System;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Polly;
+using ProjectTemplate.Domain;
+using ProjectTemplate.Domain.Interfaces;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
 
 namespace ProjectTemplate.Infrastructure.Services;
 

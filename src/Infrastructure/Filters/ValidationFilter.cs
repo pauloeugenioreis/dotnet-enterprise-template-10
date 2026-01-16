@@ -1,9 +1,9 @@
+using System;
+using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 
 namespace ProjectTemplate.Infrastructure.Filters;
 
@@ -50,7 +50,7 @@ public class ValidationFilter : IAsyncActionFilter
 
                 // Create validation context and execute validation
                 var validationContext = new ValidationContext<object>(argument);
-                var result = await validator.ValidateAsync(validationContext, context.HttpContext.RequestAborted).ConfigureAwait(false);
+                var result = await validator.ValidateAsync(validationContext, context.HttpContext.RequestAborted);
 
                 // If validation fails, add errors to ModelState
                 if (!result.IsValid)
@@ -71,14 +71,16 @@ public class ValidationFilter : IAsyncActionFilter
         }
 
         // If validation passed, continue to the next step in the pipeline
-        await next().ConfigureAwait(false);
+        await next();
     }
 
     private static bool ShouldSkipValidation(Type type)
     {
         // Primitive types (int, bool, char, etc.)
         if (type.IsPrimitive)
+        {
             return true;
+        }
 
         // Common system types
         if (type == typeof(string) ||
@@ -87,19 +89,27 @@ public class ValidationFilter : IAsyncActionFilter
             type == typeof(DateTimeOffset) ||
             type == typeof(TimeSpan) ||
             type == typeof(Guid))
+        {
             return true;
+        }
 
         // Nullable types
         if (Nullable.GetUnderlyingType(type) != null)
+        {
             return true;
+        }
 
         // Types from System namespace (except custom DTOs)
         if (type.Namespace?.StartsWith("System") == true)
+        {
             return true;
+        }
 
         // CancellationToken
         if (type == typeof(System.Threading.CancellationToken))
+        {
             return true;
+        }
 
         return false;
     }

@@ -52,7 +52,7 @@ public class OrderService : Service<Order>, IOrderService
         // Process items
         foreach (var itemDto in dto.Items)
         {
-            var product = await _productRepository.GetByIdAsync(itemDto.ProductId, cancellationToken).ConfigureAwait(false);
+            var product = await _productRepository.GetByIdAsync(itemDto.ProductId, cancellationToken);
 
             if (product == null)
             {
@@ -85,7 +85,7 @@ public class OrderService : Service<Order>, IOrderService
 
             // Update product stock
             product.Stock -= itemDto.Quantity;
-            await _productRepository.UpdateAsync(product, cancellationToken).ConfigureAwait(false);
+            await _productRepository.UpdateAsync(product, cancellationToken);
         }
 
         // Calculate totals
@@ -95,8 +95,8 @@ public class OrderService : Service<Order>, IOrderService
         order.Total = order.Subtotal + order.Tax + order.ShippingCost;
 
         // Save order
-        var createdOrder = await _orderRepository.AddAsync(order, cancellationToken).ConfigureAwait(false);
-        await _orderRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        var createdOrder = await _orderRepository.AddAsync(order, cancellationToken);
+        await _orderRepository.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Order {OrderNumber} created for {CustomerEmail}. Total: {Total:C}",
             order.OrderNumber, order.CustomerEmail, order.Total);
@@ -106,7 +106,7 @@ public class OrderService : Service<Order>, IOrderService
 
     public async Task<OrderResponseDto> UpdateOrderStatusAsync(long id, UpdateOrderStatusDto dto, CancellationToken cancellationToken = default)
     {
-        var order = await _orderRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+        var order = await _orderRepository.GetByIdAsync(id, cancellationToken);
 
         if (order == null)
         {
@@ -121,8 +121,8 @@ public class OrderService : Service<Order>, IOrderService
             order.Notes = $"{order.Notes}\n[{DateTime.UtcNow:yyyy-MM-dd HH:mm}] Status changed to {dto.Status}: {dto.Reason}";
         }
 
-        await _orderRepository.UpdateAsync(order, cancellationToken).ConfigureAwait(false);
-        await _orderRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await _orderRepository.UpdateAsync(order, cancellationToken);
+        await _orderRepository.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("Order {OrderNumber} status updated: {OldStatus} -> {NewStatus}",
             order.OrderNumber, previousStatus, dto.Status);
 
@@ -131,25 +131,25 @@ public class OrderService : Service<Order>, IOrderService
 
     public async Task<OrderResponseDto?> GetOrderDetailsAsync(long id, CancellationToken cancellationToken = default)
     {
-        var order = await _orderRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+        var order = await _orderRepository.GetByIdAsync(id, cancellationToken);
         return order != null ? MapToResponseDto(order) : null;
     }
 
     public async Task<IEnumerable<OrderResponseDto>> GetOrdersByCustomerAsync(string email, CancellationToken cancellationToken = default)
     {
-        var orders = await _orderRepository.GetByCustomerEmailAsync(email, cancellationToken).ConfigureAwait(false);
+        var orders = await _orderRepository.GetByCustomerEmailAsync(email, cancellationToken);
         return orders.Select(MapToResponseDto);
     }
 
     public async Task<IEnumerable<OrderResponseDto>> GetOrdersByStatusAsync(string status, CancellationToken cancellationToken = default)
     {
-        var orders = await _orderRepository.GetByStatusAsync(status, cancellationToken).ConfigureAwait(false);
+        var orders = await _orderRepository.GetByStatusAsync(status, cancellationToken);
         return orders.Select(MapToResponseDto);
     }
 
     public async Task<decimal> CalculateOrderTotalAsync(long orderId, CancellationToken cancellationToken = default)
     {
-        var order = await _orderRepository.GetByIdAsync(orderId, cancellationToken).ConfigureAwait(false);
+        var order = await _orderRepository.GetByIdAsync(orderId, cancellationToken);
 
         if (order == null)
         {

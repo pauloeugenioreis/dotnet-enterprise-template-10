@@ -1,6 +1,6 @@
+using System.Data;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
-using System.Data;
 
 namespace ProjectTemplate.Data.Repository.Ado;
 
@@ -21,7 +21,7 @@ public class OrderAdoRepository : IOrderAdoRepository
     public async Task<Order?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+        await connection.OpenAsync(cancellationToken);
 
         // Get order
         using var orderCommand = connection.CreateCommand();
@@ -35,9 +35,9 @@ public class OrderAdoRepository : IOrderAdoRepository
         AddParameter(orderCommand, "@Id", id);
 
         Order? order = null;
-        using (var reader = await orderCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false))
+        using (var reader = await orderCommand.ExecuteReaderAsync(cancellationToken))
         {
-            if (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+            if (await reader.ReadAsync(cancellationToken))
             {
                 order = MapOrder(reader);
             }
@@ -56,8 +56,8 @@ public class OrderAdoRepository : IOrderAdoRepository
             AddParameter(itemsCommand, "@OrderId", id);
 
             var items = new List<OrderItem>();
-            using var itemsReader = await itemsCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-            while (await itemsReader.ReadAsync(cancellationToken).ConfigureAwait(false))
+            using var itemsReader = await itemsCommand.ExecuteReaderAsync(cancellationToken);
+            while (await itemsReader.ReadAsync(cancellationToken))
             {
                 items.Add(MapOrderItem(itemsReader));
             }
@@ -71,7 +71,7 @@ public class OrderAdoRepository : IOrderAdoRepository
     public async Task<IEnumerable<Order>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+        await connection.OpenAsync(cancellationToken);
 
         // Get all orders
         var orders = new Dictionary<long, Order>();
@@ -82,9 +82,9 @@ public class OrderAdoRepository : IOrderAdoRepository
                    IsActive, CreatedAt, UpdatedAt
             FROM Orders";
 
-        using (var reader = await orderCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false))
+        using (var reader = await orderCommand.ExecuteReaderAsync(cancellationToken))
         {
-            while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+            while (await reader.ReadAsync(cancellationToken))
             {
                 var order = MapOrder(reader);
                 order.Items = new List<OrderItem>();
@@ -101,8 +101,8 @@ public class OrderAdoRepository : IOrderAdoRepository
                        IsActive, CreatedAt, UpdatedAt
                 FROM OrderItems";
 
-            using var itemsReader = await itemsCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-            while (await itemsReader.ReadAsync(cancellationToken).ConfigureAwait(false))
+            using var itemsReader = await itemsCommand.ExecuteReaderAsync(cancellationToken);
+            while (await itemsReader.ReadAsync(cancellationToken))
             {
                 var item = MapOrderItem(itemsReader);
                 if (orders.TryGetValue(item.OrderId, out var order))
@@ -117,14 +117,14 @@ public class OrderAdoRepository : IOrderAdoRepository
 
     public async Task<IEnumerable<Order>> FindAsync(Func<Order, bool> predicate, CancellationToken cancellationToken = default)
     {
-        var all = await GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var all = await GetAllAsync(cancellationToken);
         return all.Where(predicate);
     }
 
     public async Task<Order> AddAsync(Order entity, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+        await connection.OpenAsync(cancellationToken);
 
         // Begin transaction
         using var transaction = connection.BeginTransaction();
@@ -160,7 +160,7 @@ public class OrderAdoRepository : IOrderAdoRepository
             AddParameter(orderCommand, "@CreatedAt", entity.CreatedAt);
             AddParameter(orderCommand, "@UpdatedAt", entity.UpdatedAt ?? (object)DBNull.Value);
 
-            var orderId = await orderCommand.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
+            var orderId = await orderCommand.ExecuteScalarAsync(cancellationToken);
             entity.Id = Convert.ToInt64(orderId);
 
             // Insert order items
@@ -189,7 +189,7 @@ public class OrderAdoRepository : IOrderAdoRepository
                     AddParameter(itemCommand, "@CreatedAt", item.CreatedAt);
                     AddParameter(itemCommand, "@UpdatedAt", item.UpdatedAt ?? (object)DBNull.Value);
 
-                    await itemCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+                    await itemCommand.ExecuteNonQueryAsync(cancellationToken);
                 }
             }
 
@@ -208,7 +208,7 @@ public class OrderAdoRepository : IOrderAdoRepository
         var entityList = entities.ToList();
         foreach (var entity in entityList)
         {
-            await AddAsync(entity, cancellationToken).ConfigureAwait(false);
+            await AddAsync(entity, cancellationToken);
         }
         return entityList;
     }
@@ -216,7 +216,7 @@ public class OrderAdoRepository : IOrderAdoRepository
     public async Task UpdateAsync(Order entity, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+        await connection.OpenAsync(cancellationToken);
 
         using var transaction = connection.BeginTransaction();
 
@@ -257,14 +257,14 @@ public class OrderAdoRepository : IOrderAdoRepository
             AddParameter(orderCommand, "@Notes", entity.Notes ?? (object)DBNull.Value);
             AddParameter(orderCommand, "@UpdatedAt", entity.UpdatedAt);
 
-            await orderCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+            await orderCommand.ExecuteNonQueryAsync(cancellationToken);
 
             // Delete existing items
             using var deleteCommand = connection.CreateCommand();
             deleteCommand.Transaction = transaction;
             deleteCommand.CommandText = "DELETE FROM OrderItems WHERE OrderId = @OrderId";
             AddParameter(deleteCommand, "@OrderId", entity.Id);
-            await deleteCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+            await deleteCommand.ExecuteNonQueryAsync(cancellationToken);
 
             // Re-insert items
             if (entity.Items?.Any() == true)
@@ -292,7 +292,7 @@ public class OrderAdoRepository : IOrderAdoRepository
                     AddParameter(itemCommand, "@CreatedAt", item.CreatedAt != default ? item.CreatedAt : DateTime.UtcNow);
                     AddParameter(itemCommand, "@UpdatedAt", item.UpdatedAt);
 
-                    await itemCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+                    await itemCommand.ExecuteNonQueryAsync(cancellationToken);
                 }
             }
 
@@ -308,7 +308,7 @@ public class OrderAdoRepository : IOrderAdoRepository
     public async Task DeleteAsync(Order entity, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+        await connection.OpenAsync(cancellationToken);
 
         using var transaction = connection.BeginTransaction();
 
@@ -319,14 +319,14 @@ public class OrderAdoRepository : IOrderAdoRepository
             deleteItemsCommand.Transaction = transaction;
             deleteItemsCommand.CommandText = "DELETE FROM OrderItems WHERE OrderId = @OrderId";
             AddParameter(deleteItemsCommand, "@OrderId", entity.Id);
-            await deleteItemsCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+            await deleteItemsCommand.ExecuteNonQueryAsync(cancellationToken);
 
             // Delete order
             using var deleteOrderCommand = connection.CreateCommand();
             deleteOrderCommand.Transaction = transaction;
             deleteOrderCommand.CommandText = "DELETE FROM Orders WHERE Id = @Id";
             AddParameter(deleteOrderCommand, "@Id", entity.Id);
-            await deleteOrderCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+            await deleteOrderCommand.ExecuteNonQueryAsync(cancellationToken);
 
             transaction.Commit();
         }
@@ -341,7 +341,7 @@ public class OrderAdoRepository : IOrderAdoRepository
     {
         foreach (var entity in entities)
         {
-            await DeleteAsync(entity, cancellationToken).ConfigureAwait(false);
+            await DeleteAsync(entity, cancellationToken);
         }
     }
 
@@ -351,12 +351,12 @@ public class OrderAdoRepository : IOrderAdoRepository
         CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+        await connection.OpenAsync(cancellationToken);
 
         // Get total count
         using var countCommand = connection.CreateCommand();
         countCommand.CommandText = "SELECT COUNT(*) FROM Orders";
-        var total = Convert.ToInt32(await countCommand.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false));
+        var total = Convert.ToInt32(await countCommand.ExecuteScalarAsync(cancellationToken));
 
         // Get paged orders
         var orders = new Dictionary<long, Order>();
@@ -373,9 +373,9 @@ public class OrderAdoRepository : IOrderAdoRepository
         AddParameter(orderCommand, "@Offset", (page - 1) * pageSize);
         AddParameter(orderCommand, "@PageSize", pageSize);
 
-        using (var reader = await orderCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false))
+        using (var reader = await orderCommand.ExecuteReaderAsync(cancellationToken))
         {
-            while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+            while (await reader.ReadAsync(cancellationToken))
             {
                 var order = MapOrder(reader);
                 order.Items = new List<OrderItem>();
@@ -394,8 +394,8 @@ public class OrderAdoRepository : IOrderAdoRepository
                 FROM OrderItems
                 WHERE OrderId IN ({orderIds})";
 
-            using var itemsReader = await itemsCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-            while (await itemsReader.ReadAsync(cancellationToken).ConfigureAwait(false))
+            using var itemsReader = await itemsCommand.ExecuteReaderAsync(cancellationToken);
+            while (await itemsReader.ReadAsync(cancellationToken))
             {
                 var item = MapOrderItem(itemsReader);
                 if (orders.TryGetValue(item.OrderId, out var order))

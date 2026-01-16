@@ -29,7 +29,7 @@ public class OrderControllerTests
         _mockOrderService = new Mock<IOrderService>();
         _mockLogger = new Mock<ILogger<OrderController>>();
         _controller = new OrderController(_mockOrderService.Object, _mockLogger.Object);
-        
+
         // Mock IUrlHelper for Create methods
         var mockUrlHelper = new Mock<IUrlHelper>();
         mockUrlHelper
@@ -44,10 +44,10 @@ public class OrderControllerTests
         // Arrange
         var orders = new List<Order>
         {
-            new Order 
-            { 
-                Id = 1, 
-                OrderNumber = "ORD-001", 
+            new Order
+            {
+                Id = 1,
+                OrderNumber = "ORD-001",
                 CustomerName = "João Silva",
                 CustomerEmail = "joao@email.com",
                 ShippingAddress = "Rua A, 123",
@@ -250,10 +250,10 @@ public class OrderControllerTests
         var email = "joao@email.com";
         var orders = new List<OrderResponseDto>
         {
-            new OrderResponseDto 
-            { 
-                Id = 1, 
-                OrderNumber = "ORD-001", 
+            new OrderResponseDto
+            {
+                Id = 1,
+                OrderNumber = "ORD-001",
                 CustomerEmail = email,
                 CustomerName = "João Silva",
                 Status = "Delivered",

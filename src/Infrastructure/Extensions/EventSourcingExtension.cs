@@ -1,11 +1,11 @@
 using Marten;
-using Weasel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 using ProjectTemplate.Infrastructure.Services;
+using Weasel.Core;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
 

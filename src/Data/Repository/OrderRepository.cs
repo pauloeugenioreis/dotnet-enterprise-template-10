@@ -25,7 +25,7 @@ public class OrderRepository : Repository<Order>, IOrderRepository
                 .ThenInclude(i => i.Product)
             .Where(o => o.CustomerEmail == email)
             .OrderByDescending(o => o.CreatedAt)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<Order>> GetByStatusAsync(string status, CancellationToken cancellationToken = default)
@@ -35,7 +35,7 @@ public class OrderRepository : Repository<Order>, IOrderRepository
                 .ThenInclude(i => i.Product)
             .Where(o => o.Status == status)
             .OrderByDescending(o => o.CreatedAt)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<Order>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
@@ -45,7 +45,7 @@ public class OrderRepository : Repository<Order>, IOrderRepository
                 .ThenInclude(i => i.Product)
             .Where(o => o.CreatedAt >= startDate && o.CreatedAt <= endDate)
             .OrderByDescending(o => o.CreatedAt)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<Order?> GetByOrderNumberAsync(string orderNumber, CancellationToken cancellationToken = default)
@@ -53,7 +53,7 @@ public class OrderRepository : Repository<Order>, IOrderRepository
         return await _dbContext.Orders
             .Include(o => o.Items)
                 .ThenInclude(i => i.Product)
-            .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber, cancellationToken).ConfigureAwait(false);
+            .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber, cancellationToken);
     }
 
     public override async Task<Order?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
@@ -61,7 +61,7 @@ public class OrderRepository : Repository<Order>, IOrderRepository
         return await _dbContext.Orders
             .Include(o => o.Items)
                 .ThenInclude(i => i.Product)
-            .FirstOrDefaultAsync(o => o.Id == id, cancellationToken).ConfigureAwait(false);
+            .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
     }
 
     public override async Task<IEnumerable<Order>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -70,6 +70,6 @@ public class OrderRepository : Repository<Order>, IOrderRepository
             .Include(o => o.Items)
                 .ThenInclude(i => i.Product)
             .OrderByDescending(o => o.CreatedAt)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+            .ToListAsync(cancellationToken);
     }
 }

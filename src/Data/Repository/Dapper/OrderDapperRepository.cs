@@ -1,7 +1,7 @@
+using System.Data;
 using Dapper;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
-using System.Data;
 
 namespace ProjectTemplate.Data.Repository.Dapper;
 
@@ -31,7 +31,7 @@ public class OrderDapperRepository : IOrderDapperRepository
             FROM Orders
             WHERE Id = @Id";
 
-        var order = await connection.QuerySingleOrDefaultAsync<Order>(orderSql, new { Id = id }).ConfigureAwait(false);
+        var order = await connection.QuerySingleOrDefaultAsync<Order>(orderSql, new { Id = id });
 
         if (order != null)
         {
@@ -42,7 +42,7 @@ public class OrderDapperRepository : IOrderDapperRepository
                 FROM OrderItems
                 WHERE OrderId = @OrderId";
 
-            var items = await connection.QueryAsync<OrderItem>(itemsSql, new { OrderId = id }).ConfigureAwait(false);
+            var items = await connection.QueryAsync<OrderItem>(itemsSql, new { OrderId = id });
             order.Items = items.ToList();
         }
 
@@ -82,14 +82,14 @@ public class OrderDapperRepository : IOrderDapperRepository
 
                 return orderEntry;
             },
-            splitOn: "Id").ConfigureAwait(false);
+            splitOn: "Id");
 
         return orderDict.Values;
     }
 
     public async Task<IEnumerable<Order>> FindAsync(Func<Order, bool> predicate, CancellationToken cancellationToken = default)
     {
-        var all = await GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var all = await GetAllAsync(cancellationToken);
         return all.Where(predicate);
     }
 
@@ -111,7 +111,7 @@ public class OrderDapperRepository : IOrderDapperRepository
                 SELECT CAST(SCOPE_IDENTITY() as bigint)";
 
             entity.CreatedAt = DateTime.UtcNow;
-            var orderId = await connection.QuerySingleAsync<long>(orderSql, entity, transaction).ConfigureAwait(false);
+            var orderId = await connection.QuerySingleAsync<long>(orderSql, entity, transaction);
             entity.Id = orderId;
 
             // Insert order items
@@ -129,7 +129,7 @@ public class OrderDapperRepository : IOrderDapperRepository
                     item.CreatedAt = DateTime.UtcNow;
                 }
 
-                await connection.ExecuteAsync(itemSql, entity.Items, transaction).ConfigureAwait(false);
+                await connection.ExecuteAsync(itemSql, entity.Items, transaction);
             }
 
             transaction.Commit();
@@ -147,7 +147,7 @@ public class OrderDapperRepository : IOrderDapperRepository
         var entityList = entities.ToList();
         foreach (var entity in entityList)
         {
-            await AddAsync(entity, cancellationToken).ConfigureAwait(false);
+            await AddAsync(entity, cancellationToken);
         }
         return entityList;
     }
@@ -177,11 +177,11 @@ public class OrderDapperRepository : IOrderDapperRepository
                 WHERE Id = @Id";
 
             entity.UpdatedAt = DateTime.UtcNow;
-            await connection.ExecuteAsync(orderSql, entity, transaction).ConfigureAwait(false);
+            await connection.ExecuteAsync(orderSql, entity, transaction);
 
             // Delete existing items and re-insert
             const string deleteItemsSql = "DELETE FROM OrderItems WHERE OrderId = @OrderId";
-            await connection.ExecuteAsync(deleteItemsSql, new { OrderId = entity.Id }, transaction).ConfigureAwait(false);
+            await connection.ExecuteAsync(deleteItemsSql, new { OrderId = entity.Id }, transaction);
 
             if (entity.Items?.Any() == true)
             {
@@ -197,7 +197,7 @@ public class OrderDapperRepository : IOrderDapperRepository
                     item.UpdatedAt = DateTime.UtcNow;
                 }
 
-                await connection.ExecuteAsync(itemSql, entity.Items, transaction).ConfigureAwait(false);
+                await connection.ExecuteAsync(itemSql, entity.Items, transaction);
             }
 
             transaction.Commit();
@@ -218,11 +218,11 @@ public class OrderDapperRepository : IOrderDapperRepository
         {
             // Delete order items first (foreign key constraint)
             const string deleteItemsSql = "DELETE FROM OrderItems WHERE OrderId = @OrderId";
-            await connection.ExecuteAsync(deleteItemsSql, new { OrderId = entity.Id }, transaction).ConfigureAwait(false);
+            await connection.ExecuteAsync(deleteItemsSql, new { OrderId = entity.Id }, transaction);
 
             // Delete order
             const string deleteOrderSql = "DELETE FROM Orders WHERE Id = @Id";
-            await connection.ExecuteAsync(deleteOrderSql, new { entity.Id }, transaction).ConfigureAwait(false);
+            await connection.ExecuteAsync(deleteOrderSql, new { entity.Id }, transaction);
 
             transaction.Commit();
         }
@@ -237,7 +237,7 @@ public class OrderDapperRepository : IOrderDapperRepository
     {
         foreach (var entity in entities)
         {
-            await DeleteAsync(entity, cancellationToken).ConfigureAwait(false);
+            await DeleteAsync(entity, cancellationToken);
         }
     }
 
@@ -249,7 +249,7 @@ public class OrderDapperRepository : IOrderDapperRepository
         using var connection = _connectionFactory.CreateConnection();
 
         const string countSql = "SELECT COUNT(*) FROM Orders";
-        var total = await connection.ExecuteScalarAsync<int>(countSql).ConfigureAwait(false);
+        var total = await connection.ExecuteScalarAsync<int>(countSql);
 
         const string dataSql = @"
             SELECT o.Id, o.OrderNumber, o.CustomerName, o.CustomerEmail, o.CustomerPhone,
@@ -284,7 +284,7 @@ public class OrderDapperRepository : IOrderDapperRepository
                 return orderEntry;
             },
             new { Offset = (page - 1) * pageSize, PageSize = pageSize },
-            splitOn: "Id").ConfigureAwait(false);
+            splitOn: "Id");
 
         return (orderDict.Values, total);
     }

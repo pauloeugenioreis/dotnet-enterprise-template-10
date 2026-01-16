@@ -39,7 +39,7 @@ public static class SwaggerExtension
             });
 
             // TODO: AddSecurityRequirement API mudou no Microsoft.OpenApi 2.x
-            // Temporariamente comentado até ajustar para a nova API
+            // Temporariamente comentado atÃ© ajustar para a nova API
             /*
             c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {

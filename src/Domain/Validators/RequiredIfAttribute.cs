@@ -5,12 +5,13 @@ namespace ProjectTemplate.Domain.Validators;
 /// <summary>
 /// Validates that a property is required when a condition is met
 /// </summary>
-public class RequiredIfAttribute : ValidationAttribute
+public sealed class RequiredIfAttribute : ValidationAttribute
 {
     private readonly string _propertyName;
     private readonly object _propertyValue;
 
     public string PropertyName => _propertyName;
+    public object PropertyValue => _propertyValue;
 
     public RequiredIfAttribute(string propertyName, object propertyValue)
     {

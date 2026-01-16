@@ -1,9 +1,9 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using MiniExcelLibs;
 using MiniExcelLibs.OpenXml;
 using ProjectTemplate.Domain.Dtos;
 using ProjectTemplate.Domain.Interfaces;
-using System.Diagnostics;
 
 namespace ProjectTemplate.Api.Controllers;
 
@@ -69,7 +69,7 @@ public class OrderController : ApiControllerBase
     public async Task<IActionResult> GetByIdAsync(long id, CancellationToken cancellationToken)
     {
         var order = await _orderService.GetOrderDetailsAsync(id, cancellationToken);
-        
+
         if (order == null)
         {
             _logger.LogWarning("Order {OrderId} not found", id);
@@ -117,7 +117,7 @@ public class OrderController : ApiControllerBase
         var location = Url.Action(
             nameof(GetByIdAsync),
             values: new { id = order.Id }) ?? $"/api/v1/order/{order.Id}";
-        
+
         return Created(location, order);
     }
 
@@ -210,9 +210,8 @@ public class OrderController : ApiControllerBase
         };
 
         var memoryStream = new MemoryStream();
-        await memoryStream.SaveAsAsync(excelData, sheetName: "Orders", configuration: config)
-            .ConfigureAwait(false);
-        
+        await memoryStream.SaveAsAsync(excelData, sheetName: "Orders", configuration: config);
+
         memoryStream.Seek(0, SeekOrigin.Begin);
 
         stopwatch.Stop();

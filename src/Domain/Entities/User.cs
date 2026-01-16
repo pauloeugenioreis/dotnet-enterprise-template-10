@@ -16,15 +16,15 @@ public class User : EntityBase
     public bool TwoFactorEnabled { get; set; } = false;
     public DateTime? LastLoginAt { get; set; }
     public string? ProfileImageUrl { get; set; }
-    
+
     // OAuth2 properties
     public string? ExternalProvider { get; set; } // "Google", "Microsoft", "GitHub"
     public string? ExternalId { get; set; }
-    
+
     // Navigation properties
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
-    
+
     public string FullName => $"{FirstName} {LastName}".Trim();
 }
 
@@ -36,7 +36,7 @@ public class Role : EntityBase
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public bool IsSystemRole { get; set; } = false;
-    
+
     // Navigation properties
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }
@@ -48,10 +48,10 @@ public class UserRole
 {
     public long UserId { get; set; }
     public User User { get; set; } = null!;
-    
+
     public long RoleId { get; set; }
     public Role Role { get; set; } = null!;
-    
+
     public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
 }
 
@@ -62,7 +62,7 @@ public class RefreshToken : EntityBase
 {
     public long UserId { get; set; }
     public User User { get; set; } = null!;
-    
+
     public string Token { get; set; } = string.Empty;
     public DateTime ExpiresAt { get; set; }
     public bool IsRevoked { get; set; } = false;
@@ -70,7 +70,7 @@ public class RefreshToken : EntityBase
     public string? RevokedByIp { get; set; }
     public string? ReplacedByToken { get; set; }
     public string CreatedByIp { get; set; } = string.Empty;
-    
+
     public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
     public new bool IsActive => !IsRevoked && !IsExpired;  // Override EntityBase.IsActive
 }

@@ -1,3 +1,4 @@
+using System;
 using Google.Cloud.Logging.Console;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Options;
 using ProjectTemplate.Domain;
-using System;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
 
@@ -28,7 +28,7 @@ public static class LoggingExtensions
 
         // Configure structured and detailed logging
         builder.Logging.ClearProviders();
-        
+
         if (!isProduction)
         {
             // Development: use JSON console formatter

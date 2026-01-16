@@ -5,7 +5,7 @@ namespace ProjectTemplate.Domain.Validators;
 /// <summary>
 /// Custom validation attribute for Redis connection strings
 /// </summary>
-public class RedisConnectionStringAttribute : ValidationAttribute
+public sealed class RedisConnectionStringAttribute : ValidationAttribute
 {
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {

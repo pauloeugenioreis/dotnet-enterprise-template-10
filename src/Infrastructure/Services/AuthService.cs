@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ProjectTemplate.Domain;
@@ -5,8 +7,6 @@ using ProjectTemplate.Domain.Dtos;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Exceptions;
 using ProjectTemplate.Domain.Interfaces;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace ProjectTemplate.Infrastructure.Services;
 
@@ -37,7 +37,7 @@ public class AuthService : IAuthService
         ValidatePassword(dto.Password);
 
         // Check if user already exists
-        if (await _userRepository.ExistsAsync(dto.Username, dto.Email, cancellationToken).ConfigureAwait(false))
+        if (await _userRepository.ExistsAsync(dto.Username, dto.Email, cancellationToken))
         {
             throw new DomainException("Username or email already exists");
         }
@@ -55,17 +55,17 @@ public class AuthService : IAuthService
             CreatedAt = DateTime.UtcNow
         };
 
-        user = await _userRepository.CreateAsync(user, cancellationToken).ConfigureAwait(false);
+        user = await _userRepository.CreateAsync(user, cancellationToken);
 
         // Assign default role
-        await _userRepository.AddToRoleAsync(user.Id, "User", cancellationToken).ConfigureAwait(false);
+        await _userRepository.AddToRoleAsync(user.Id, "User", cancellationToken);
 
         // Generate tokens
         var accessToken = _tokenService.GenerateAccessToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken("0.0.0.0");
         refreshToken.UserId = user.Id;
 
-        await _userRepository.SaveRefreshTokenAsync(refreshToken, cancellationToken).ConfigureAwait(false);
+        await _userRepository.SaveRefreshTokenAsync(refreshToken, cancellationToken);
 
         return new AuthResponseDto
         {
@@ -78,7 +78,7 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDto> LoginAsync(LoginDto dto, string? ipAddress = null, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetByUsernameAsync(dto.Username, cancellationToken).ConfigureAwait(false);
+        var user = await _userRepository.GetByUsernameAsync(dto.Username, cancellationToken);
 
         if (user == null || !VerifyPassword(dto.Password, user.PasswordHash))
         {
@@ -92,7 +92,7 @@ public class AuthService : IAuthService
 
         // Update last login
         user.LastLoginAt = DateTime.UtcNow;
-        await _userRepository.UpdateAsync(user, cancellationToken).ConfigureAwait(false);
+        await _userRepository.UpdateAsync(user, cancellationToken);
 
         // Generate tokens
         var accessToken = _tokenService.GenerateAccessToken(user);
@@ -100,8 +100,8 @@ public class AuthService : IAuthService
         refreshToken.UserId = user.Id;
 
         // Remove old refresh tokens
-        await _userRepository.RemoveOldRefreshTokensAsync(user.Id, cancellationToken).ConfigureAwait(false);
-        await _userRepository.SaveRefreshTokenAsync(refreshToken, cancellationToken).ConfigureAwait(false);
+        await _userRepository.RemoveOldRefreshTokensAsync(user.Id, cancellationToken);
+        await _userRepository.SaveRefreshTokenAsync(refreshToken, cancellationToken);
 
         return new AuthResponseDto
         {
@@ -129,14 +129,14 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken, string? ipAddress = null, CancellationToken cancellationToken = default)
     {
-        var user = await _tokenService.GetUserByRefreshTokenAsync(refreshToken, cancellationToken).ConfigureAwait(false);
+        var user = await _tokenService.GetUserByRefreshTokenAsync(refreshToken, cancellationToken);
 
         if (user == null)
         {
             throw new UnauthorizedAccessException("Invalid refresh token");
         }
 
-        var oldToken = await _userRepository.GetRefreshTokenAsync(refreshToken, cancellationToken).ConfigureAwait(false);
+        var oldToken = await _userRepository.GetRefreshTokenAsync(refreshToken, cancellationToken);
 
         if (oldToken == null || !oldToken.IsActive)
         {
@@ -153,22 +153,22 @@ public class AuthService : IAuthService
             refreshToken,
             ipAddress,
             newRefreshToken.Token,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken);
 
-        await _userRepository.SaveRefreshTokenAsync(newRefreshToken, cancellationToken).ConfigureAwait(false);
+        await _userRepository.SaveRefreshTokenAsync(newRefreshToken, cancellationToken);
 
         return new AuthResponseDto
         {
             AccessToken = newAccessToken,
             RefreshToken = newRefreshToken.Token,
             ExpiresAt = DateTime.UtcNow.AddMinutes(_authSettings.Jwt.ExpirationMinutes),
-            User = await MapToUserDto(user, cancellationToken).ConfigureAwait(false)
+            User = await MapToUserDto(user, cancellationToken)
         };
     }
 
     public async Task RevokeTokenAsync(string refreshToken, string? ipAddress = null, CancellationToken cancellationToken = default)
     {
-        var token = await _userRepository.GetRefreshTokenAsync(refreshToken, cancellationToken).ConfigureAwait(false);
+        var token = await _userRepository.GetRefreshTokenAsync(refreshToken, cancellationToken);
 
         if (token == null)
         {
@@ -180,24 +180,24 @@ public class AuthService : IAuthService
             throw new DomainException("Token is already revoked or expired");
         }
 
-        await _userRepository.RevokeRefreshTokenAsync(refreshToken, ipAddress, null, cancellationToken).ConfigureAwait(false);
+        await _userRepository.RevokeRefreshTokenAsync(refreshToken, ipAddress, null, cancellationToken);
     }
 
     public async Task<UserDto> GetCurrentUserAsync(long userId, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetByIdAsync(userId, cancellationToken).ConfigureAwait(false);
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
 
         if (user == null)
         {
             throw new NotFoundException("User not found");
         }
 
-        return await MapToUserDto(user, cancellationToken).ConfigureAwait(false);
+        return await MapToUserDto(user, cancellationToken);
     }
 
     public async Task ChangePasswordAsync(long userId, ChangePasswordDto dto, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetByIdAsync(userId, cancellationToken).ConfigureAwait(false);
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
 
         if (user == null)
         {
@@ -217,12 +217,12 @@ public class AuthService : IAuthService
         user.PasswordHash = HashPassword(dto.NewPassword);
         user.UpdatedAt = DateTime.UtcNow;
 
-        await _userRepository.UpdateAsync(user, cancellationToken).ConfigureAwait(false);
+        await _userRepository.UpdateAsync(user, cancellationToken);
     }
 
     public async Task<UserDto> UpdateProfileAsync(long userId, UpdateProfileDto dto, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetByIdAsync(userId, cancellationToken).ConfigureAwait(false);
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
 
         if (user == null)
         {
@@ -235,9 +235,9 @@ public class AuthService : IAuthService
         user.ProfileImageUrl = dto.ProfileImageUrl ?? user.ProfileImageUrl;
         user.UpdatedAt = DateTime.UtcNow;
 
-        await _userRepository.UpdateAsync(user, cancellationToken).ConfigureAwait(false);
+        await _userRepository.UpdateAsync(user, cancellationToken);
 
-        return await MapToUserDto(user, cancellationToken).ConfigureAwait(false);
+        return await MapToUserDto(user, cancellationToken);
     }
 
     #region Private Methods
@@ -290,7 +290,7 @@ public class AuthService : IAuthService
 
     private async Task<UserDto> MapToUserDto(User user, CancellationToken cancellationToken)
     {
-        var roles = await _userRepository.GetUserRolesAsync(user.Id, cancellationToken).ConfigureAwait(false);
+        var roles = await _userRepository.GetUserRolesAsync(user.Id, cancellationToken);
 
         return new UserDto
         {

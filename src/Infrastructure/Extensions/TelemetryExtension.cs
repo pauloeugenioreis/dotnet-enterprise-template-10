@@ -116,7 +116,7 @@ public static class TelemetryExtension
                     .AddRuntimeInstrumentation();
 
                 // Configurar exportadores de métricas
-                ConfigureMetricExporters(meterProvider, settings, environment);
+                ConfigureMetricExporters(meterProvider, settings);
             });
 
         Console.WriteLine($"✅ Telemetry enabled: {string.Join(", ", settings.Providers)}");
@@ -140,15 +140,15 @@ public static class TelemetryExtension
                 case "jaeger":
                     // Jaeger now uses OTLP protocol (native exporter is deprecated)
                     // Configure OTLP exporter to send to Jaeger's OTLP endpoints
-                    var jaegerOtlpEndpoint = settings.Jaeger.UseGrpc 
-                        ? $"http://{settings.Jaeger.Host}:4317" 
+                    var jaegerOtlpEndpoint = settings.Jaeger.UseGrpc
+                        ? $"http://{settings.Jaeger.Host}:4317"
                         : $"http://{settings.Jaeger.Host}:4318";
-                    
+
                     builder.AddOtlpExporter(options =>
                     {
                         options.Endpoint = new Uri(jaegerOtlpEndpoint);
-                        options.Protocol = settings.Jaeger.UseGrpc 
-                            ? OtlpExportProtocol.Grpc 
+                        options.Protocol = settings.Jaeger.UseGrpc
+                            ? OtlpExportProtocol.Grpc
                             : OtlpExportProtocol.HttpProtobuf;
                     });
                     Console.WriteLine($"  📊 Jaeger (via OTLP) exporter enabled: {jaegerOtlpEndpoint}");
@@ -167,10 +167,10 @@ public static class TelemetryExtension
                     builder.AddOtlpExporter(options =>
                     {
                         options.Endpoint = new Uri(settings.Otlp.Endpoint);
-                        options.Protocol = settings.Otlp.Protocol == "grpc" 
-                            ? OtlpExportProtocol.Grpc 
+                        options.Protocol = settings.Otlp.Protocol == "grpc"
+                            ? OtlpExportProtocol.Grpc
                             : OtlpExportProtocol.HttpProtobuf;
-                        
+
                         if (!string.IsNullOrEmpty(settings.Otlp.Headers))
                         {
                             options.Headers = settings.Otlp.Headers;
@@ -227,8 +227,8 @@ public static class TelemetryExtension
 
     private static void ConfigureMetricExporters(
         MeterProviderBuilder builder,
-        TelemetrySettings settings,
-        IHostEnvironment environment)
+        TelemetrySettings settings
+        )
     {
         foreach (var provider in settings.Providers)
         {
@@ -250,10 +250,10 @@ public static class TelemetryExtension
                     builder.AddOtlpExporter(options =>
                     {
                         options.Endpoint = new Uri(settings.Otlp.Endpoint);
-                        options.Protocol = settings.Otlp.Protocol == "grpc" 
-                            ? OtlpExportProtocol.Grpc 
+                        options.Protocol = settings.Otlp.Protocol == "grpc"
+                            ? OtlpExportProtocol.Grpc
                             : OtlpExportProtocol.HttpProtobuf;
-                        
+
                         if (!string.IsNullOrEmpty(settings.Otlp.Headers))
                         {
                             options.Headers = settings.Otlp.Headers;

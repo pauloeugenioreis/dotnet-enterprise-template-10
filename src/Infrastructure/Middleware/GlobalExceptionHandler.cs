@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -6,8 +8,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ProjectTemplate.Domain.Exceptions;
 using ProjectTemplate.Domain.Interfaces;
-using System;
-using System.Threading.Tasks;
 
 namespace ProjectTemplate.Infrastructure.Middleware;
 
@@ -32,11 +32,11 @@ public class GlobalExceptionHandler
     {
         try
         {
-            await _next(context).ConfigureAwait(false);
+            await _next(context);
         }
         catch (Exception exception)
         {
-            await HandleExceptionAsync(context, exception).ConfigureAwait(false);
+            await HandleExceptionAsync(context, exception);
         }
     }
 
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler
                     }
                 };
 
-                await notificationService.NotifyAsync(exceptionContext, exception).ConfigureAwait(false);
+                await notificationService.NotifyAsync(exceptionContext, exception);
             }
         }
         catch (Exception notificationEx)
@@ -153,14 +153,14 @@ public class GlobalExceptionHandler
             {
                 HttpContext = context,
                 ProblemDetails = problemDetails
-            }).ConfigureAwait(false);
+            });
         }
         catch (Exception ex)
         {
             // Fallback if ProblemDetails service fails
             _logger.LogError(ex, "Error writing ProblemDetails for exception: {Message}", ex.Message);
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            await context.Response.WriteAsync("Internal Server Error").ConfigureAwait(false);
+            await context.Response.WriteAsync("Internal Server Error");
         }
     }
 }

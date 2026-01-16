@@ -1,3 +1,4 @@
+using System;
 using Google.Cloud.Storage.V1;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -5,7 +6,6 @@ using Microsoft.Extensions.Options;
 using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Interfaces;
 using ProjectTemplate.Infrastructure.Services;
-using System;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
 

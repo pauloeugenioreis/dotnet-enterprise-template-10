@@ -1,6 +1,6 @@
+using System.Data.Common;
 using Microsoft.Data.SqlClient; // Updated from System.Data.SqlClient (obsolete)
 using ProjectTemplate.Domain.Interfaces;
-using System.Data.Common;
 
 namespace ProjectTemplate.Infrastructure.Services;
 
@@ -17,8 +17,10 @@ public class SqlConnectionFactory : IDbConnectionFactory
     public SqlConnectionFactory(string connectionString)
     {
         if (string.IsNullOrWhiteSpace(connectionString))
+        {
             throw new ArgumentNullException(nameof(connectionString));
-            
+        }
+
         _connectionString = connectionString;
     }
 

@@ -1,7 +1,7 @@
+using System;
 using Microsoft.Extensions.DependencyInjection;
 using ProjectTemplate.Domain;
 using Quartz;
-using System;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
 

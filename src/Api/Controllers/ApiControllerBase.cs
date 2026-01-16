@@ -12,7 +12,7 @@ public abstract class ApiControllerBase : ControllerBase
 {
     protected IActionResult HandleResult<T>(T? result)
     {
-        if (result == null)
+        if (object.Equals(result, default(T)))
         {
             return NotFound();
         }
