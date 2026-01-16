@@ -71,7 +71,7 @@ Write-Host "6. Run: dotnet ef migrations add InitialCreate --project src/Data --
 Write-Host "7. Run: dotnet ef database update --project src/Data --startup-project src/Api"
 Write-Host "8. Run: dotnet run --project src/Api"
 Write-Host ""
-Write-Host "📚 Documentation:" -ForegroundColor Cyan
+Write-Host "Documentation:" -ForegroundColor Cyan
 Write-Host "   - README.md - Complete guide"
 Write-Host "   - QUICK-START.md - Quick start in 5 minutes"
 Write-Host "   - docs/ORM-GUIDE.md - How to switch ORMs"

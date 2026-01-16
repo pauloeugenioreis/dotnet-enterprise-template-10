@@ -12,8 +12,9 @@ if [ -z "$1" ]; then
 fi
 
 PROJECT_NAME=$1
-TEMPLATE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TARGET_DIR="../$PROJECT_NAME"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TEMPLATE_DIR="$(dirname "$SCRIPT_DIR")"
+TARGET_DIR="$(dirname "$TEMPLATE_DIR")/$PROJECT_NAME"
 
 echo "Creating new project: $PROJECT_NAME"
 echo "Template directory: $TEMPLATE_DIR"
@@ -61,7 +62,7 @@ echo "6. Run: dotnet ef migrations add InitialCreate --project src/Data --startu
 echo "7. Run: dotnet ef database update --project src/Data --startup-project src/Api"
 echo "8. Run: dotnet run --project src/Api"
 echo ""
-echo "📚 Documentation:"
+echo "Documentation:"
 echo "   - README.md - Complete guide"
 echo "   - QUICK-START.md - Quick start in 5 minutes"
 echo "   - docs/ORM-GUIDE.md - How to switch ORMs"
