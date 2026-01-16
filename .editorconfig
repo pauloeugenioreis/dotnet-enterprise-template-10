@@ -222,6 +222,9 @@ dotnet_diagnostic.CA1852.severity = none # Seal internal types (prevent sealed k
 dotnet_diagnostic.IDE0040.severity = none # Add accessibility modifiers
 dotnet_diagnostic.IDE0051.severity = suggestion # Remove unused private members
 dotnet_diagnostic.CS0108.severity = none # Member hides inherited member (disable 'new' keyword suggestion)
+dotnet_diagnostic.CA1032.severity = none # Implement standard exception constructors
+dotnet_diagnostic.CA2227.severity = none # Collection properties should be read only
+dotnet_diagnostic.CA2007.severity = none # ConfigureAwait duplication issue
 
 # Performance
 dotnet_diagnostic.CA1806.severity = warning # Do not ignore method results

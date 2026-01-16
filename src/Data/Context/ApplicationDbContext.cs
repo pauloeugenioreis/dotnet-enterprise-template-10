@@ -10,21 +10,21 @@ namespace ProjectTemplate.Data.Context;
 /// </summary>
 public class ApplicationDbContext : DbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
     }
 
     // DbSets
-    public DbSet<Product> Products { get; set; }
-    public DbSet<Order> Orders { get; set; }
-    public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<Product> Products { get; set; } = null!;
+    public DbSet<Order> Orders { get; set; } = null!;
+    public DbSet<OrderItem> OrderItems { get; set; } = null!;
 
-    // Authentication
-    public DbSet<User> Users { get; set; }
-    public DbSet<Role> Roles { get; set; }
-    public DbSet<UserRole> UserRoles { get; set; }
-    public DbSet<RefreshToken> RefreshTokens { get; set; }
+    // Authentication tables
+    public DbSet<User> Users { get; set; } = null!;
+    public DbSet<Role> Roles { get; set; } = null!;
+    public DbSet<UserRole> UserRoles { get; set; } = null!;
+    public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
 
     // Add your DbSets here
     // Example: public DbSet<YourEntity> YourEntities { get; set; }

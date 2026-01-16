@@ -10,6 +10,8 @@ public class RequiredIfAttribute : ValidationAttribute
     private readonly string _propertyName;
     private readonly object _propertyValue;
 
+    public string PropertyName => _propertyName;
+
     public RequiredIfAttribute(string propertyName, object propertyValue)
     {
         _propertyName = propertyName;

@@ -19,6 +19,13 @@ public class StorageException : Exception
         ObjectName = objectName;
         Operation = operation;
     }
+
+    public StorageException() : base()
+    {
+        BucketName = string.Empty;
+        ObjectName = string.Empty;
+        Operation = string.Empty;
+    }
 }
 
 /// <summary>
