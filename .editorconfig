@@ -153,7 +153,7 @@ csharp_style_unused_value_assignment_preference = discard_variable:suggestion
 csharp_style_unused_value_expression_statement_preference = discard_variable:silent
 
 # Async guidelines
-dotnet_diagnostic.CA2007.severity = warning # ConfigureAwait
+dotnet_diagnostic.CA2007.severity = none # ConfigureAwait - Disabled to prevent duplicate .ConfigureAwait() bug
 dotnet_diagnostic.VSTHRD111.severity = warning # async void
 dotnet_diagnostic.VSTHRD200.severity = suggestion # Use Async naming convention
 
@@ -220,6 +220,7 @@ dotnet_diagnostic.CA1515.severity = none # Consider making public types internal
 dotnet_diagnostic.CA1051.severity = none # Do not declare visible instance fields
 dotnet_diagnostic.IDE0040.severity = none # Add accessibility modifiers
 dotnet_diagnostic.IDE0051.severity = suggestion # Remove unused private members
+dotnet_diagnostic.CS0108.severity = none # Member hides inherited member (disable 'new' keyword suggestion)
 
 # Performance
 dotnet_diagnostic.CA1806.severity = warning # Do not ignore method results
