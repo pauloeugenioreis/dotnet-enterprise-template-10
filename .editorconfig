@@ -218,6 +218,7 @@ dotnet_diagnostic.CA5403.severity = error # Do not hard-code certificate
 # Accessibility modifiers - prevent automatic changes from public to internal
 dotnet_diagnostic.CA1515.severity = none # Consider making public types internal
 dotnet_diagnostic.CA1051.severity = none # Do not declare visible instance fields
+dotnet_diagnostic.CA1852.severity = none # Seal internal types (prevent sealed keyword)
 dotnet_diagnostic.IDE0040.severity = none # Add accessibility modifiers
 dotnet_diagnostic.IDE0051.severity = suggestion # Remove unused private members
 dotnet_diagnostic.CS0108.severity = none # Member hides inherited member (disable 'new' keyword suggestion)
