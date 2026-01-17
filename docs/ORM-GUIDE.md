@@ -659,13 +659,11 @@ services.AddAdo(connectionString);
 // Linhas ~82-89: NHibernate e Linq2Db (opcional, comentados)
 ### Vantagens de Usar Múltiplos ORMs
 
-| Vantagem | Descrição |
-|----------|-----------|
-| Não precisa escolher um único ORM | Use os 3 simultaneamente |
-| Testes rápidos | EF Core InMemory (sem SQL Server) |
-| Performance quando precisar | Dapper e ADO.NET disponíveis |
-| Sem conflitos | Cada ORM usa interfaces específicas |
-| Fácil de manter | Scrutor registra tudo automaticamente |
+- ✅ **Não precisa escolher um único ORM** - use os 3 simultaneamente
+- ✅ **Testes rápidos** - EF Core InMemory (sem SQL Server)
+- ✅ **Performance quando precisar** - Dapper e ADO.NET disponíveis
+- ✅ **Sem conflitos** - cada ORM usa interfaces específicas
+- ✅ **Fácil de manter** - Scrutor registra tudo automaticamente
 
 ### 🚀 Adicionar ORMs Opcionais (NHibernate, Linq2Db)
 
@@ -689,6 +687,7 @@ Se quiser habilitar NHibernate ou Linq2Db:
 | **Change Tracking** | Sim | Não | Não | Sim | Opcional |
 | **LINQ Support** | Completo | Limitado | Não | Bom | Completo |
 | **Migrations** | Sim | Não | Não | Limitado | Limitado |
+| **Vantagens** | Change tracking, migrations | Alta performance, queries customizadas | Controle total, máxima performance | Maturidade, features enterprise | LINQ completo, performance |
 
 ### Quando usar cada um?
 
