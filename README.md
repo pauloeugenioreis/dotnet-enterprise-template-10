@@ -61,6 +61,7 @@ Este template fornece uma estrutura completa e moderna para desenvolvimento de A
 
 ## 📁 Estrutura do Projeto
 
+```text
 ProjectTemplate/
 ├── src/
 │   ├── Api/                          # Camada de apresentação (Controllers, Program.cs)
@@ -170,18 +171,26 @@ ProjectTemplate/
 
 ### Opção 1: Usando Script PowerShell (Recomendado para Windows)
 
+```powershell
 cd template/scripts
 .\new-project.ps1 -ProjectName "MeuProjeto"
+```
+
 ### Opção 2: Usando Script Bash (Linux/Mac)
 
+```bash
 cd template/scripts
 chmod +x new-project.sh
 ./new-project.sh MeuProjeto
+```
+
 ### Opção 3: Usando Script Batch (Windows CMD)
 
 ```cmd
 cd template\scripts
 new-project.bat MeuProjeto
+```
+
 ---
 
 ## ⚙️ Configuração Inicial
@@ -190,11 +199,15 @@ Após criar seu projeto, siga estes passos:
 
 ### 1. Navegue até o diretório do projeto
 
+```bash
 cd MeuProjeto
+```
+
 ### 2. Configure a Connection String
 
 Edite `src/Api/appsettings.json` e ajuste a connection string:
 
+```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -205,11 +218,15 @@ Edite `src/Api/appsettings.json` e ajuste a connection string:
     }
   }
 }
+```
+
 ### 3. Escolha seu Banco de Dados
 
 Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection string:
 
 **Para SQL Server:**
+
+```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -220,7 +237,11 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
+```
+
 **Para Oracle:**
+
+```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -231,7 +252,11 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
+```
+
 **Para PostgreSQL:**
+
+```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -242,7 +267,11 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
+```
+
 **Para MySQL:**
+
+```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -253,25 +282,41 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
+```
 > ✨ **Todos os providers já estão instalados!** Basta mudar o `DatabaseType` e a connection string.
 
 **Nota sobre ORM**: Entity Framework Core, Dapper e ADO.NET estão habilitados simultaneamente. Para mais detalhes, veja [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md).
 
 ### 4. Restaure os Pacotes
 
+```bash
 dotnet restore
+```
+
 ### 5. Compile o Projeto
 
+```bash
 dotnet build
+```
+
 ### 6. Crie a Primeira Migration
 
+```bash
 dotnet ef migrations add InitialCreate --project src/Data --startup-project src/Api
+```
+
 ### 7. Aplique a Migration no Banco
 
+```bash
 dotnet ef database update --project src/Data --startup-project src/Api
+```
+
 ### 8. Execute o Projeto
 
+```bash
 dotnet run --project src/Api
+```
+
 ### 9. Acesse a API
 
 - API: `https://localhost:5001`
@@ -282,11 +327,13 @@ dotnet run --project src/Api
 
 O sistema cria automaticamente um usuário administrador na primeira execução:
 
-```
+```text
 Username: admin
 Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com
 Role:     Admin
+```
+
 **Teste no Swagger:**
 1. Vá para `/swagger`
 2. Execute `POST /api/auth/login` com as credenciais acima
