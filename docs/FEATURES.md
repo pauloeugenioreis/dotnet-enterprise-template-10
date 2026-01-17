@@ -41,11 +41,12 @@ MongoDB é um banco de dados NoSQL orientado a documentos, ideal para dados não
 
 ```xml
 <PackageReference Include="MongoDB.Driver" Version="3.5.2" />
-```json
+```
 
 **2. Configure no appsettings.json:**
 
 ```json
+{
   "AppSettings": {
     "Infrastructure": {
       "MongoDB": {
@@ -61,12 +62,11 @@ MongoDB é um banco de dados NoSQL orientado a documentos, ideal para dados não
 ```csharp
 // Add MongoDB (OPTIONAL)
 builder.Services.AddMongo<Program>();
-```csharp
+```
 
 **4. Use no código:**
 
 ```csharp
-
 public class MyService
 {
     private readonly IMongoDatabase _database;
