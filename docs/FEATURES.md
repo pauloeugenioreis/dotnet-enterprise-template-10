@@ -102,6 +102,7 @@ Quartz.NET é um scheduler de jobs para executar tarefas em segundo plano de for
 
 **2. Configure no appsettings.json:**
 
+```
 ```json
 {
   "AppSettings": {
@@ -139,10 +140,12 @@ public class CleanupJob : IJob
         _logger.LogInformation("Cleanup job completed");
     }
 }
+```
 ```json
 
 **4. Registre no Program.cs:**
 
+```
 ```csharp
 // Add Quartz with Jobs (OPTIONAL)
 builder.Services.AddCustomizedQuartz((q, settings) =>
@@ -175,6 +178,7 @@ RabbitMQ é um message broker para comunicação assíncrona entre serviços.
 
 **2. Configure no appsettings.json:**
 
+```
 ```json
 {
   "AppSettings": {
@@ -192,10 +196,12 @@ RabbitMQ é um message broker para comunicação assíncrona entre serviços.
 ```csharp
 // Add RabbitMQ (OPTIONAL)
 builder.Services.AddRabbitMq();
+```
 ```csharp
 
 **4. Use no código:**
 
+```
 ```csharp
 {
     private readonly IQueueService _queueService;
@@ -238,6 +244,7 @@ Google Cloud Storage é um serviço de armazenamento de objetos para arquivos e 
 
 **2. Configure no appsettings.json:**
 
+```
 ```json
 {
   "AppSettings": {
@@ -256,10 +263,12 @@ Google Cloud Storage é um serviço de armazenamento de objetos para arquivos e 
 ```csharp
 // Add Google Cloud Storage (OPTIONAL)
 builder.Services.AddStorage<Program>();
+```
 ```csharp
 
 **4. Use no código:**
 
+```
 ```csharp
 public class DocumentController : ApiControllerBase
 {
@@ -302,6 +311,7 @@ JSON Web Token para autenticação stateless baseada em tokens.
 
 **2. Configure no appsettings.json:**
 
+```
 ```json
 {
   "AppSettings": {
@@ -384,6 +394,7 @@ Versionamento de API para gerenciar mudanças sem quebrar clientes existentes.
 
 **2. Adicione no Program.cs:**
 
+```
 ```csharp
 // Add API Versioning (OPTIONAL)
 builder.Services.AddCustomizedApiVersioning();
@@ -416,6 +427,7 @@ public class ProductsV2Controller : ApiControllerBase
     }
 }
 **4. Acesse:**
+```
 ```bash
 GET /api/v1/products
 GET /api/v2/products
@@ -471,6 +483,7 @@ Action filter que valida automaticamente argumentos de controllers usando Fluent
 
 **2. Crie um Validator:**
 
+```
 ```csharp
 // Domain/Validators/CreateProductValidator.cs
 using FluentValidation;
@@ -723,6 +736,7 @@ public class ProductsController : ControllerBase
 ### Acessar Swagger
 
 **Development:**
+```
 ```bash
 http://localhost:5000/swagger
 **Testar com Token JWT:**
@@ -1172,6 +1186,7 @@ public class ProductController : ControllerBase
 Quando o limite é excedido:
 
 **Headers:**
+```
 ```http
 HTTP/1.1 429 Too Many Requests
 X-RateLimit-Limit: 100
@@ -1229,6 +1244,7 @@ done
 curl -i http://localhost:5000/api/v1/Product | grep -i "x-ratelimit"
 ### Logs
 
+```
 ```text
 ✅  Rate Limiting enabled: 4 policies configured
 📊  Fixed Window: 100 req/60s
@@ -1305,6 +1321,7 @@ O template inclui pipelines prontos para:
 **1. Nenhuma configuração necessária!** O arquivo já está pronto.
 
 **2. Configure secrets** (Settings → Secrets):
+```
 ```bash
 DOCKER_USERNAME=seu-usuario
 DOCKER_PASSWORD=seu-token
@@ -1341,6 +1358,7 @@ DOCKER_PASSWORD=seu-token
 
 Todos os pipelines seguem este fluxo:
 
+```
 ```bash
 1. 🏗️  Build
    ├── Restore dependencies
@@ -1466,6 +1484,7 @@ dotnet test
     }
   }
 }
+```
 ```bash
 
 docker-compose up -d postgres-events
