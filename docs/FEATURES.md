@@ -446,7 +446,11 @@ throw new BusinessException("Insufficient stock for order");
 
 // 401 Unauthorized
 throw new UnauthorizedAccessException("Invalid credentials");
+```
+
 **Respostas automáticas:**
+
+```json
 {
   "type": "https://tools.ietf.org/html/rfc7231#section-6.5.4",
   "title": "Not Found",
@@ -466,6 +470,8 @@ Action filter que valida automaticamente argumentos de controllers usando Fluent
 **1. Já está ativo por padrão!** ✅
 
 **2. Crie um Validator:**
+
+```csharp
 // Domain/Validators/CreateProductValidator.cs
 using FluentValidation;
 
@@ -495,10 +501,18 @@ public class CreateProductValidator : AbstractValidator<CreateProductDto>
             .WithMessage("Stock cannot be negative");
     }
 }
+```
+
 **3. Registre validators no Program.cs:**
+
+```csharp
 // Register FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductValidator>();
+```
+
 **4. Use no controller:**
+
+```csharp
 [HttpPost]
 public async Task<IActionResult> Create([FromBody] CreateProductDto dto)
 {
@@ -509,7 +523,11 @@ public async Task<IActionResult> Create([FromBody] CreateProductDto dto)
     var created = await _service.CreateAsync(product);
     return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
 }
+```
+
 **Resposta de validação:**
+
+```json
 {
   "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
   "title": "One or more validation errors occurred.",
