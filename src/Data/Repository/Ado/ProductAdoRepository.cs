@@ -92,7 +92,7 @@ public class ProductAdoRepository : IProductAdoRepository
         AddParameter(command, "@UpdatedAt", entity.UpdatedAt ?? (object)DBNull.Value);
 
         var id = await command.ExecuteScalarAsync(cancellationToken);
-        entity.Id = Convert.ToInt64(id);
+        entity.Id = Convert.ToInt64(id, System.Globalization.CultureInfo.InvariantCulture);
 
         return entity;
     }
@@ -170,7 +170,7 @@ public class ProductAdoRepository : IProductAdoRepository
         // Get total count
         using var countCommand = connection.CreateCommand();
         countCommand.CommandText = "SELECT COUNT(*) FROM Products";
-        var total = Convert.ToInt32(await countCommand.ExecuteScalarAsync(cancellationToken));
+        var total = Convert.ToInt32(await countCommand.ExecuteScalarAsync(cancellationToken), System.Globalization.CultureInfo.InvariantCulture);
 
         // Get paged data
         using var dataCommand = connection.CreateCommand();

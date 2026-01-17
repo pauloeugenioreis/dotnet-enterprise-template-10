@@ -161,7 +161,7 @@ public class OrderAdoRepository : IOrderAdoRepository
             AddParameter(orderCommand, "@UpdatedAt", entity.UpdatedAt ?? (object)DBNull.Value);
 
             var orderId = await orderCommand.ExecuteScalarAsync(cancellationToken);
-            entity.Id = Convert.ToInt64(orderId);
+            entity.Id = Convert.ToInt64(orderId, System.Globalization.CultureInfo.InvariantCulture);
 
             // Insert order items
             if (entity.Items?.Any() == true)
@@ -356,7 +356,7 @@ public class OrderAdoRepository : IOrderAdoRepository
         // Get total count
         using var countCommand = connection.CreateCommand();
         countCommand.CommandText = "SELECT COUNT(*) FROM Orders";
-        var total = Convert.ToInt32(await countCommand.ExecuteScalarAsync(cancellationToken));
+        var total = Convert.ToInt32(await countCommand.ExecuteScalarAsync(cancellationToken), System.Globalization.CultureInfo.InvariantCulture);
 
         // Get paged orders
         var orders = new Dictionary<long, Order>();

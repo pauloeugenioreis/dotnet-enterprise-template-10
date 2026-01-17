@@ -119,7 +119,7 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
     private async Task RecordCreatedEvent(TEntity entity, CancellationToken cancellationToken)
     {
         var entityType = typeof(TEntity).Name;
-        var entityId = entity.Id.ToString();
+        var entityId = entity.Id.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
         // Create type-specific event based on entity type
         object eventData = entityType switch
@@ -146,7 +146,7 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         CancellationToken cancellationToken)
     {
         var entityType = typeof(TEntity).Name;
-        var entityId = entity.Id.ToString();
+        var entityId = entity.Id.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
         // Create type-specific update event
         object eventData = entityType switch
@@ -178,7 +178,7 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
     private async Task RecordDeletedEvent(TEntity entity, CancellationToken cancellationToken)
     {
         var entityType = typeof(TEntity).Name;
-        var entityId = entity.Id.ToString();
+        var entityId = entity.Id.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
         object eventData = entityType switch
         {
