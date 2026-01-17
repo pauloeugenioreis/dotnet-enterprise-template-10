@@ -287,6 +287,7 @@ dotnet_diagnostic.CA1849.severity = warning # Call async methods when in an asyn
 # Suppress low-priority warnings
 dotnet_diagnostic.CA1707.severity = none # Test naming with underscores (allowed in tests)
 dotnet_diagnostic.CA1303.severity = none # Hardcoded strings (not using resource files)
+dotnet_diagnostic.S125.severity = none # Commented code (kept for examples/documentation)
 
 # Naming Conventions
 dotnet_naming_rule.interface_should_be_begins_with_i.severity = suggestion
