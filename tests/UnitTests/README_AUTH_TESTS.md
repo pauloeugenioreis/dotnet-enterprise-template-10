@@ -43,7 +43,6 @@ Os testes devem usar:
 
 ## Exemplo de Estrutura
 
-```csharp
 public class JwtTokenServiceTests
 {
     private readonly Mock<IUserRepository> _userRepositoryMock;

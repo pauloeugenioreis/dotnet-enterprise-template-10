@@ -6,7 +6,6 @@
 
 The system creates a default admin user on first run with these credentials:
 
-```text
 Username: admin
 Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com
@@ -16,7 +15,6 @@ Email:    admin@projecttemplate.com
 
 ### Option 1: Via API (Recommended)
 
-```bash
 # 1. Login with default credentials
 curl -X POST https://your-api.com/api/auth/login \
   -H "Content-Type: application/json" \
@@ -34,12 +32,10 @@ curl -X POST https://your-api.com/api/auth/change-password \
     "newPassword": "YourNewStrongPassword123!",
     "confirmPassword": "YourNewStrongPassword123!"
   }'
-```sql
 ### Option 2: Via Database
 
 Update directly in the database (requires password hashing):
 
-```sql
 -- Generate hash for new password using C#:
 -- using var sha256 = System.Security.Cryptography.SHA256.Create();
 -- var bytes = System.Text.Encoding.UTF8.GetBytes("YourNewPassword");
@@ -49,12 +45,10 @@ Update directly in the database (requires password hashing):
 UPDATE Users 
 SET PasswordHash = 'YOUR_NEW_PASSWORD_HASH_HERE'
 WHERE Username = 'admin';
-```markdown
 ### Option 3: Modify DbSeeder
 
 Edit `src/Data/Seeders/DbSeeder.cs` before first deployment:
 
-```csharp
 private async Task SeedRolesAndAdminUserAsync()
 {
     // ...
@@ -72,14 +66,12 @@ private async Task SeedRolesAndAdminUserAsync()
     
     // ...
 }
-```markdown
 ## 🛡️ JWT Secret Key
 
 ### Change JWT Secret in Production
 
 The default JWT secret in `appsettings.json` is for development only:
 
-```json
 {
   "AppSettings": {
     "Authentication": {
@@ -89,10 +81,8 @@ The default JWT secret in `appsettings.json` is for development only:
     }
   }
 }
-```text
 **Generate a secure random secret:**
 
-```bash
 # Linux/macOS
 openssl rand -base64 64
 
@@ -104,12 +94,10 @@ using System.Security.Cryptography;
 var bytes = new byte[64];
 RandomNumberGenerator.Fill(bytes);
 var secret = Convert.ToBase64String(bytes);
-```markdown
 ### Use Environment Variables (Best Practice)
 
 Instead of hardcoding secrets in `appsettings.json`, use environment variables:
 
-```json
 {
   "AppSettings": {
     "Authentication": {
@@ -119,10 +107,8 @@ Instead of hardcoding secrets in `appsettings.json`, use environment variables:
     }
   }
 }
-```text
 Set environment variable:
 
-```bash
 # Linux/macOS
 export JWT_SECRET="your-generated-secret-here"
 
@@ -134,7 +120,6 @@ docker run -e JWT_SECRET="your-generated-secret-here" your-image
 
 # Kubernetes Secret
 kubectl create secret generic jwt-secret --from-literal=JWT_SECRET='your-generated-secret-here'
-```markdown
 ## 🔒 Connection Strings
 
 ### Secure Database Credentials
@@ -142,7 +127,6 @@ kubectl create secret generic jwt-secret --from-literal=JWT_SECRET='your-generat
 Never commit real database credentials to version control.
 
 **Bad:**
-```json
 {
   "Infrastructure": {
     "Database": {
@@ -150,9 +134,7 @@ Never commit real database credentials to version control.
     }
   }
 }
-```text
 **Good (Environment Variables):**
-```json
 {
   "Infrastructure": {
     "Database": {
@@ -162,17 +144,13 @@ Never commit real database credentials to version control.
 }
 ```
 
-```bash
 export DB_CONNECTION_STRING="Server=prod-server;Database=MyDb;User Id=sa;Password=RealPassword123!;"
-```text
 **Better (Azure Key Vault / AWS Secrets Manager):**
 
-```csharp
 // Program.cs
 builder.Configuration.AddAzureKeyVault(
     new Uri(builder.Configuration["KeyVault:Endpoint"]!),
     new DefaultAzureCredential());
-```markdown
 ## 📝 Security Checklist
 
 Before deploying to production:
@@ -201,7 +179,6 @@ Before deploying to production:
 
 The system uses Event Sourcing with Marten to track all important events:
 
-```csharp
 // All authentication events are automatically logged:
 // - User login attempts (success/failure)
 // - Password changes
@@ -211,26 +188,22 @@ The system uses Event Sourcing with Marten to track all important events:
 
 // Query audit logs:
 GET /api/audit/events?userId=1&eventType=UserLoggedIn&startDate=2026-01-01
-```markdown
 ## 🚨 Security Monitoring
 
 ### Failed Login Attempts
 
 Monitor for brute force attacks:
 
-```sql
 SELECT UserId, COUNT(*) as FailedAttempts, MAX(Timestamp) as LastAttempt
 FROM DomainEvents
 WHERE EventType = 'UserLoginFailed'
   AND Timestamp > DATEADD(hour, -1, GETUTCDATE())
 GROUP BY UserId
 HAVING COUNT(*) > 5;
-```markdown
 ### Token Anomalies
 
 Monitor for unusual token usage:
 
-```sql
 -- Multiple IPs using same refresh token
 SELECT Token, COUNT(DISTINCT CreatedByIp) as IpCount
 FROM RefreshTokens

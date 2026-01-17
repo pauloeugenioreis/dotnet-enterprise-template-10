@@ -183,7 +183,6 @@
    - Default responses
 
 **Arquivos a modificar:**
-```text
 src/Infrastructure/
 ├── Extensions/PollyExtension.cs  [CRIAR]
 ├── Services/AuthService.cs       [ATUALIZAR]
@@ -261,7 +260,6 @@ src/Infrastructure/
 
 ## 📈 Progresso Geral
 
-```text
 [████████████████████████████░] 79% Concluído
 
 ✅ Concluído:     11 tarefas

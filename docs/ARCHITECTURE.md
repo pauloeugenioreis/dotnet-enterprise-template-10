@@ -6,7 +6,6 @@ Visão geral da arquitetura Clean Architecture implementada neste template.
 
 ## 📐 Diagrama de Camadas
 
-```sql
 ┌─────────────────────────────────────────────────────────────────┐
 │                         API LAYER                                │
 │  ┌──────────────────────────────────────────────────────────┐  │
@@ -71,7 +70,6 @@ Visão geral da arquitetura Clean Architecture implementada neste template.
 
 ## 🔄 Fluxo de Requisição
 
-```text
 ┌────────────┐
 │   Client   │
 └─────┬──────┘
@@ -135,7 +133,6 @@ Interfaces específicas em vez de uma interface geral.
 
 ## 📦 Dependências Entre Camadas
 
-```text
 Api
  ├── → Infrastructure (DI, Extensions)
  ├── → Application (Services)
@@ -177,7 +174,6 @@ Domain
 **Dependências:** Nenhuma ❌
 
 **Exemplo:**
-```csharp
 // Domain/Entities/Product.cs
 public class Product : EntityBase
 {
@@ -191,7 +187,6 @@ public interface IRepository<T> where T : EntityBase
     Task<T?> GetByIdAsync(long id, CancellationToken ct);
     Task<IEnumerable<T>> GetAllAsync(CancellationToken ct);
 }
-```markdown
 ---
 
 ### 2️⃣ Data Layer (Camada de Dados)
@@ -207,7 +202,6 @@ public interface IRepository<T> where T : EntityBase
 **Dependências:** Domain ✅
 
 **Exemplo:**
-```csharp
 // Data/Repository/Repository.cs
 public class Repository<T> : IRepository<T> where T : EntityBase
 {
@@ -218,7 +212,6 @@ public class Repository<T> : IRepository<T> where T : EntityBase
         return await _context.Set<T>().FindAsync(new object[] { id }, ct);
     }
 }
-```markdown
 ---
 
 ### 3️⃣ Application Layer (Camada de Aplicação)
@@ -234,7 +227,6 @@ public class Repository<T> : IRepository<T> where T : EntityBase
 **Dependências:** Domain, Data ✅
 
 **Exemplo:**
-```csharp
 // Application/Services/ProductService.cs
 public class ProductService : Service<Product>
 {
@@ -245,7 +237,6 @@ public class ProductService : Service<Product>
     
     // Custom business logic here
 }
-```markdown
 ---
 
 ### 4️⃣ Infrastructure Layer (Camada de Infraestrutura)
@@ -262,7 +253,6 @@ public class ProductService : Service<Product>
 **Dependências:** Todas as camadas ✅
 
 **Exemplo:**
-```csharp
 // Infrastructure/Extensions/DatabaseExtension.cs
 public static IServiceCollection AddDatabase(this IServiceCollection services)
 {
@@ -277,7 +267,6 @@ public static IServiceCollection AddDatabase(this IServiceCollection services)
             break;
     }
 }
-```markdown
 ---
 
 ### 5️⃣ API Layer (Camada de Apresentação)
@@ -292,7 +281,6 @@ public static IServiceCollection AddDatabase(this IServiceCollection services)
 **Dependências:** Todas as camadas ✅
 
 **Exemplo:**
-```csharp
 // Api/Controllers/ProductController.cs
 [Route("api/[controller]")]
 public class ProductController : ApiControllerBase
@@ -306,7 +294,6 @@ public class ProductController : ApiControllerBase
         return HandleResult(product);
     }
 }
-```markdown
 ---
 
 ## 🔌 Padrões Implementados
@@ -331,7 +318,6 @@ public class ProductController : ApiControllerBase
 
 #### Como funciona o registro automático:
 
-```csharp
 // Registra TODOS os repositórios automaticamente
 services.Scan(scan => scan
     .FromAssembliesOf(typeof(Repository<>))
@@ -339,7 +325,6 @@ services.Scan(scan => scan
     .AsMatchingInterface()  // ← Evita conflitos de DI!
     .WithScopedLifetime()
 );
-```markdown
 **Exemplo de mapeamento automático:**
 | Classe | Interface Registrada |
 |--------|---------------------|
@@ -397,7 +382,6 @@ Program.cs
         ├── Rate Limiting
         ├── OpenTelemetry
         └── Swagger
-```markdown
 ---
 
 ## 🚀 Deploy Architecture
@@ -439,7 +423,6 @@ Program.cs
 │  │  SQL Server  │  │    Cache     │  │   APIs   │ │
 │  └──────────────┘  └──────────────┘  └──────────┘ │
 └─────────────────────────────────────────────────────┘
-```markdown
 ---
 
 ## 📊 Fluxo de Dados
@@ -466,7 +449,6 @@ User Request
 [Controller] ← Format response
      ↓
 User Response (JSON)
-```markdown
 ---
 
 ## 🔐 Security Layers
@@ -503,7 +485,6 @@ User Response (JSON)
 │     - Security context                     │
 │     - Resource limits                      │
 └─────────────────────────────────────────────┘
-```markdown
 ---
 
 ## 📈 Escalabilidade
@@ -517,7 +498,6 @@ Load Balancer
       ├─── Pod 2 (API Instance)
       ├─── Pod 3 (API Instance)
       └─── Pod N (Auto-scaled)
-```markdown
 **Features:**
 - Horizontal Pod Autoscaler (HPA)
 - Resource-based scaling (CPU/Memory)

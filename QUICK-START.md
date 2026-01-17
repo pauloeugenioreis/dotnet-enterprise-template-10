@@ -20,26 +20,21 @@ Guia rápido para começar a usar o template em menos de 5 minutos!
 
 ### Windows (PowerShell)
 
-```powershell
 cd scripts
 .\new-project.ps1 -ProjectName "MeuProjeto"
 cd MeuProjeto
-```markdown
 ### Linux/macOS
 
-```bash
 cd scripts
 chmod +x new-project.sh
 ./new-project.sh MeuProjeto
 cd MeuProjeto
-```markdown
 ### Windows (CMD)
 
 ```cmd
 cd scripts
 new-project.bat MeuProjeto
 cd MeuProjeto
-```markdown
 ---
 
 ## ⚙️ 2. Configurar Banco de Dados
@@ -48,7 +43,6 @@ Edite `src/Api/appsettings.Development.json`:
 
 ### SQL Server (Padrão)
 
-```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -59,7 +53,6 @@ Edite `src/Api/appsettings.Development.json`:
     }
   }
 }
-```markdown
 ### Outros bancos
 
 Veja `docs/ORM-GUIDE.md` para PostgreSQL, MySQL, Oracle.
@@ -70,10 +63,8 @@ Veja `docs/ORM-GUIDE.md` para PostgreSQL, MySQL, Oracle.
 
 ### Opção A: .NET CLI (Desenvolvimento)
 
-```bash
 cd src/Api
 dotnet run
-```markdown
 Acesse: 
 - **API**: `http://localhost:5000` ou `https://localhost:5001`
 - **Swagger UI**: `http://localhost:5000/swagger`
@@ -86,12 +77,10 @@ O sistema cria automaticamente um usuário administrador:
 Username: admin
 Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com
-```text
 > ⚠️ **IMPORTANTE**: Altere esta senha em produção!
 
 **Testar autenticação:**
 
-```bash
 # Login
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
@@ -103,7 +92,6 @@ curl -X POST http://localhost:5000/api/auth/login \
 # Copie o accessToken da resposta e use:
 curl -X GET http://localhost:5000/api/auth/me \
   -H "Authorization: Bearer SEU_TOKEN_AQUI"
-```markdown
 Swagger: `http://localhost:5000/swagger`
 
 ### Opção B: Visual Studio
@@ -124,27 +112,21 @@ Swagger: `http://localhost:5000/swagger`
 
 ### Docker Run
 
-```bash
 # Build
 docker build -t meuprojeto-api:latest .
 
 # Run
 docker run -p 8080:8080 meuprojeto-api:latest
-```markdown
 Acesse: `http://localhost:8080`
 
 ### Docker Compose
 
-```bash
 docker-compose up -d
-```text
 Acesse: `http://localhost:8080`
 
 Para parar:
 
-```bash
 docker-compose down
-```markdown
 ---
 
 ## ☸️ 5. Deploy no Kubernetes (Opcional)
@@ -153,20 +135,15 @@ docker-compose down
 
 #### Windows (PowerShell)
 
-```powershell
 cd scripts/windows
 .\minikube-deploy.ps1
-```markdown
 #### Linux/macOS
 
-```bash
 cd scripts/linux
 chmod +x minikube-deploy.sh
 ./minikube-deploy.sh
-```markdown
 ### Acessar aplicação
 
-```bash
 # Port forward
 kubectl port-forward svc/meuprojeto-api 8080:80 -n meuprojeto
 
@@ -174,53 +151,40 @@ kubectl port-forward svc/meuprojeto-api 8080:80 -n meuprojeto
 start http://localhost:8080  # Windows
 open http://localhost:8080   # macOS
 xdg-open http://localhost:8080  # Linux
-```markdown
 ### Limpar deploy
 
 #### Windows
 
-```powershell
 cd scripts/windows
 .\minikube-destroy.ps1
-```markdown
 #### Linux/macOS
 
-```bash
 cd scripts/linux
 ./minikube-destroy.sh
-```markdown
 ---
 
 ## 🧪 6. Executar Testes
 
 ### Todos os testes
 
-```bash
 dotnet test
-```markdown
 ### Testes específicos
 
-```bash
 # Testes de integração
 dotnet test tests/Integration/
 
 # Testes unitários
 dotnet test tests/Infrastructure.UnitTests/
-```markdown
 ### Script automatizado (Minikube)
 
 #### Windows
 
-```powershell
 cd scripts/windows
 .\run-integration-tests.ps1
-```markdown
 #### Linux/macOS
 
-```bash
 cd scripts/linux
 ./run-integration-tests.sh
-```markdown
 ---
 
 ## 📝 7. Criar sua Primeira Entidade
@@ -229,7 +193,6 @@ cd scripts/linux
 
 `src/Domain/Entities/Product.cs`:
 
-```csharp
 namespace MeuProjeto.Domain.Entities;
 
 public class Product : EntityBase
@@ -238,26 +201,20 @@ public class Product : EntityBase
     public decimal Price { get; set; }
     public int Stock { get; set; }
 }
-```markdown
 ### 2. Adicionar ao DbContext
 
 `src/Data/Context/ApplicationDbContext.cs`:
 
-```csharp
 public DbSet<Product> Products { get; set; }
-```markdown
 ### 3. Criar migration (EF Core)
 
-```bash
 cd src/Api
 dotnet ef migrations add AddProduct --project ../Data/Data.csproj
 dotnet ef database update
-```markdown
 ### 4. Criar o Controller
 
 `src/Api/Controllers/ProductController.cs`:
 
-```csharp
 namespace MeuProjeto.Api.Controllers;
 
 [Route("api/[controller]")]
@@ -291,7 +248,6 @@ public class ProductController : ApiControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 }
-```markdown
 ### 5. Testar
 
 Execute a aplicação e acesse: `http://localhost:5000/swagger`
@@ -306,7 +262,6 @@ Teste os endpoints criados!
 
 `appsettings.Development.json`:
 
-```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -317,12 +272,10 @@ Teste os endpoints criados!
     }
   }
 }
-```markdown
 ### Cache (Production = Redis)
 
 `appsettings.Production.json`:
 
-```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -336,7 +289,6 @@ Teste os endpoints criados!
     }
   }
 }
-```sql
 ### Alternar ORM
 
 **Entity Framework Core é o padrão** e está habilitado no código.
@@ -376,10 +328,8 @@ Para trocar de ORM, **não use appsettings.json**:
 ### Erro: Porta 5000 já está em uso
 
 **Solução**: 
-```bash
 # Use outra porta
 dotnet run --urls "http://localhost:5005"
-```markdown
 ### Docker: erro de build
 
 **Solução**:
@@ -390,20 +340,17 @@ dotnet run --urls "http://localhost:5005"
 ### Minikube: erro ao carregar imagem
 
 **Solução**:
-```bash
 # Configure o Docker para usar o Minikube
 eval $(minikube docker-env)
 
 # Rebuild a imagem
 docker build -t meuprojeto-api:latest .
-```markdown
 ---
 
 ## 💡 Dicas
 
 ### Hot Reload
 
-```bash
 dotnet watch --project src/Api/Api.csproj
 ```
 

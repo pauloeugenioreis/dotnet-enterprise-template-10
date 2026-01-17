@@ -44,7 +44,6 @@ Testes unitários para `OrderController`:
 
 ### Arrange-Act-Assert (AAA)
 Todos os testes seguem o padrão AAA:
-```csharp
 [Fact]
 public async Task GetById_WithValidId_ReturnsOkResult_WithProduct()
 {
@@ -61,10 +60,8 @@ public async Task GetById_WithValidId_ReturnsOkResult_WithProduct()
     var returnedProduct = okResult.Value.Should().BeAssignableTo<Product>().Subject;
     returnedProduct.Should().BeEquivalentTo(product);
 }
-```markdown
 ### Uso de Mocks
 Os testes utilizam **Moq** para criar mocks dos serviços:
-```csharp
 // Mock do serviço
 _mockService = new Mock<IService<Product>>();
 
@@ -73,10 +70,8 @@ _mockService.Setup(s => s.GetByIdAsync(productId)).ReturnsAsync(product);
 
 // Verificar se método foi chamado
 _mockService.Verify(s => s.GetByIdAsync(productId), Times.Once);
-```markdown
 ### FluentAssertions
 Asserções mais legíveis e expressivas:
-```csharp
 // Ao invés de:
 Assert.IsType<OkObjectResult>(result);
 
@@ -87,11 +82,9 @@ result.Should().BeOfType<OkObjectResult>();
 returnedProducts.Should().HaveCount(2);
 returnedProducts.Should().BeEquivalentTo(expectedProducts);
 returnedProduct.Name.Should().Be("Test Product");
-```markdown
 ## 🚀 Executando os Testes
 
 ### Via linha de comando
-```bash
 # Executar todos os testes
 dotnet test
 
@@ -103,7 +96,6 @@ dotnet test --verbosity detailed
 
 # Executar testes com cobertura
 dotnet test --collect:"XPlat Code Coverage"
-```markdown
 ### Via Visual Studio Code
 1. Instalar extensão **.NET Core Test Explorer**
 2. Abrir painel de testes (Test Explorer)
@@ -143,23 +135,18 @@ Os testes unitários cobrem:
 ## 🎓 Exemplos de Uso
 
 ### Testar retorno de lista vazia
-```csharp
 _mockService.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<Product>());
 var result = await _controller.GetAll();
 var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
 var products = okResult.Value.Should().BeAssignableTo<IEnumerable<Product>>().Subject;
 products.Should().BeEmpty();
-```markdown
 ### Testar exceção
-```csharp
 _mockService.Setup(s => s.GetByIdAsync(It.IsAny<long>()))
     .ThrowsAsync(new Exception("Database error"));
 
 var result = await _controller.GetById(1);
 result.Should().BeOfType<ObjectResult>();
-```markdown
 ### Verificar chamadas ao serviço
-```csharp
 _mockService.Verify(s => s.AddAsync(It.IsAny<Product>()), Times.Once);
 _mockService.Verify(s => s.UpdateAsync(It.IsAny<Product>()), Times.Never);
 ```

@@ -8,7 +8,6 @@ Este exemplo demonstra como usar o template com uma entidade completa, incluindo
 
 ### 1. **Entidade Product** (`Domain/Entities/Product.cs`)
 
-```csharp
 public class Product : EntityBase
 {
     public string Name { get; set; } = string.Empty;
@@ -18,12 +17,9 @@ public class Product : EntityBase
     public string Category { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
 }
-```markdown
 ### 2. **DbSet no Context** (`Data/Context/ApplicationDbContext.cs`)
 
-```csharp
 public DbSet<Product> Products { get; set; }
-```sql
 ### 3. **Controller Completo** (`Api/Controllers/ProductController.cs`)
 
 #### Endpoints Disponíveis:
@@ -45,7 +41,6 @@ public DbSet<Product> Products { get; set; }
 
 O endpoint `GerarExcel` usa a biblioteca **MiniExcel** para gerar arquivos Excel de alta performance:
 
-```csharp
 [HttpGet("GerarExcel")]
 public async Task<ActionResult> GerarExcelAsync(
     [FromQuery] bool? isActive,
@@ -75,7 +70,6 @@ public async Task<ActionResult> GerarExcelAsync(
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         $"Products_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
 }
-```markdown
 ### Características:
 
 ✅ **Alta Performance**: MiniExcel usa FastMode para geração rápida  
@@ -91,26 +85,20 @@ public async Task<ActionResult> GerarExcelAsync(
 
 ### 1. Criar Migration
 
-```bash
 cd template
 dotnet ef migrations add AddProduct --project src/Data --startup-project src/Api
 dotnet ef database update --project src/Data --startup-project src/Api
-```markdown
 ### 2. Executar a API
 
-```bash
 dotnet run --project src/Api
-```markdown
 ### 3. Acessar Swagger
 
 ```
 https://localhost:5001/swagger
-```markdown
 ### 4. Testar Endpoints
 
 #### Criar Produto:
 
-```bash
 POST /api/v1/product
 {
   "name": "Notebook Dell",
@@ -120,31 +108,23 @@ POST /api/v1/product
   "category": "Electronics",
   "isActive": true
 }
-```markdown
 #### Listar Produtos com Filtros:
 
-```bash
 GET /api/v1/product?isActive=true&category=Electronics
-```markdown
 #### Gerar Excel:
 
-```bash
 GET /api/v1/product/GerarExcel?isActive=true&category=Electronics
-```markdown
 O navegador fará download do arquivo `Products_20260111_143022.xlsx`
 
 #### Atualizar Estoque:
 
-```bash
 PATCH /api/v1/product/1/stock?quantity=5
-```markdown
 Adiciona 5 unidades ao estoque do produto ID 1.
 
 ---
 
 ## 📊 Exemplo de Resposta com Métricas
 
-```json
 {
   "executionTime": "45ms",
   "totalCount": 3,
@@ -162,7 +142,6 @@ Adiciona 5 unidades ao estoque do produto ID 1.
     }
   ]
 }
-```markdown
 ---
 
 ## 🎨 Features Demonstradas
@@ -199,7 +178,6 @@ Adiciona 5 unidades ao estoque do produto ID 1.
 
 ## 📦 Pacote Adicionado
 
-```xml
 <PackageReference Include="MiniExcel" Version="1.37.3" />
 ```
 

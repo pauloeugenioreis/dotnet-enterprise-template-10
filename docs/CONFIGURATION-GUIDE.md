@@ -33,7 +33,6 @@ Este template usa o **IOptions Pattern** do ASP.NET Core para gerenciar configur
 
 ## 📂 AppSettings Structure
 
-```csharp
 // Domain/AppSettings.cs
 public class AppSettings
 {
@@ -45,10 +44,8 @@ public class AppSettings
     public bool IsDevelopment() => EnvironmentName == "Development";
     public bool IsProduction() => EnvironmentName == "Production";
 }
-```markdown
 ### Estrutura no appsettings.json
 
-```json
 {
   "AppSettings": {
     "EnvironmentName": "Development",
@@ -72,7 +69,6 @@ public class AppSettings
     }
   }
 }
-```markdown
 ---
 
 ## 💡 Como Usar Configurações
@@ -81,7 +77,6 @@ public class AppSettings
 
 **❌ NUNCA faça isso:**
 
-```csharp
 public class ProductService
 {
     private readonly IConfiguration _configuration;
@@ -94,10 +89,8 @@ public class ProductService
         var cacheEnabled = _configuration.GetValue<bool>("AppSettings:Infrastructure:Cache:Enabled");
     }
 }
-```text
 **✅ SEMPRE faça isso:**
 
-```csharp
 public class ProductService
 {
     private readonly AppSettings _appSettings;
@@ -110,7 +103,6 @@ public class ProductService
         var cacheEnabled = _appSettings.Infrastructure.Cache.Enabled;
     }
 }
-```markdown
 ---
 
 ## 🔧 IOptions Pattern
@@ -119,7 +111,6 @@ public class ProductService
 
 #### 1. IOptions<T> (Recomendado)
 
-```csharp
 public class MyService
 {
     private readonly AppSettings _settings;
@@ -129,7 +120,6 @@ public class MyService
         _settings = options.Value;
     }
 }
-```markdown
 ✅ **Vantagens:**
 - Lazy loading (só carrega quando acessar `.Value`)
 - Ideal para Singleton services
@@ -137,7 +127,6 @@ public class MyService
 
 #### 2. IOptionsSnapshot<T> (Para Scoped Services)
 
-```csharp
 public class MyController : ControllerBase
 {
     private readonly AppSettings _settings;
@@ -147,7 +136,6 @@ public class MyController : ControllerBase
         _settings = options.Value;
     }
 }
-```markdown
 ✅ **Vantagens:**
 - Recarrega configurações a cada request (se configurado)
 - Ideal para Scoped services
@@ -155,7 +143,6 @@ public class MyController : ControllerBase
 
 #### 3. AppSettings Diretamente (Singleton)
 
-```csharp
 public class MyService
 {
     private readonly AppSettings _settings;
@@ -165,7 +152,6 @@ public class MyService
         _settings = settings;
     }
 }
-```markdown
 ✅ **Vantagens:**
 - Mais simples
 - Registrado como Singleton em `AppSettingsExtension`
@@ -176,7 +162,6 @@ public class MyService
 
 ### ✅ DO's
 
-```csharp
 // ✅ Injete IOptions<AppSettings> em Controllers
 public class ProductController : ApiControllerBase
 {
@@ -228,10 +213,8 @@ public class CleanupBackgroundService : BackgroundService
         _settings = settings.Value;
     }
 }
-```markdown
 ### ❌ DON'Ts
 
-```csharp
 // ❌ NUNCA use IConfiguration diretamente
 public class MyService
 {
@@ -255,14 +238,12 @@ public class MyService
         var provider = services.BuildServiceProvider(); // ❌ MEMORY LEAK!
     }
 }
-```markdown
 ---
 
 ## 🎓 Exemplos Práticos
 
 ### Exemplo 1: Controller com Configurações
 
-```csharp
 [ApiController]
 [Route("api/[controller]")]
 public class ProductController : ApiControllerBase
@@ -295,10 +276,8 @@ public class ProductController : ApiControllerBase
         return Ok(products);
     }
 }
-```markdown
 ### Exemplo 2: Service com Configurações
 
-```csharp
 public class ProductService : IProductService
 {
     private readonly IRepository<Product> _repository;
@@ -335,10 +314,8 @@ public class ProductService : IProductService
         // Lógica de event sourcing
     }
 }
-```markdown
 ### Exemplo 3: Repository Customizado
 
-```csharp
 public class ProductDapperRepository : IRepository<Product>
 {
     private readonly IDbConnectionFactory _connectionFactory;
@@ -367,10 +344,8 @@ public class ProductDapperRepository : IRepository<Product>
             commandTimeout: commandTimeout);
     }
 }
-```markdown
 ### Exemplo 4: Background Service
 
-```csharp
 public class DataCleanupService : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
@@ -415,10 +390,8 @@ public class DataCleanupService : BackgroundService
         }
     }
 }
-```markdown
 ### Exemplo 5: Middleware Customizado
 
-```csharp
 public class CustomHeaderMiddleware
 {
     private readonly RequestDelegate _next;
@@ -447,7 +420,6 @@ public class CustomHeaderMiddleware
         await _next(context);
     }
 }
-```markdown
 ---
 
 ## ✅ Validação de Configurações
@@ -456,7 +428,6 @@ public class CustomHeaderMiddleware
 
 O template usa `IValidateOptions<T>` para validar configurações no startup:
 
-```csharp
 // Infrastructure/Configuration/AuthenticationSettingsValidator.cs
 public class AuthenticationSettingsValidator : IValidateOptions<AppSettings>
 {
@@ -483,16 +454,12 @@ public class AuthenticationSettingsValidator : IValidateOptions<AppSettings>
         return ValidateOptionsResult.Success;
     }
 }
-```markdown
 ### Registro do Validador
 
-```csharp
 // No seu extension method
 services.AddSingleton<IValidateOptions<AppSettings>, AuthenticationSettingsValidator>();
-```markdown
 ### Criando Seu Próprio Validador
 
-```csharp
 public class CacheSettingsValidator : IValidateOptions<AppSettings>
 {
     public ValidateOptionsResult Validate(string? name, AppSettings options)
@@ -513,7 +480,6 @@ public class CacheSettingsValidator : IValidateOptions<AppSettings>
         return ValidateOptionsResult.Success;
     }
 }
-```markdown
 ---
 
 ## 🌍 Sobrescrita de Configurações
@@ -526,10 +492,8 @@ Use **dois underscores** (`__`) para navegar na hierarquia do JSON:
 
 ```
 AppSettings__Propriedade__SubPropriedade
-```markdown
 ### Estrutura de Configuração
 
-```json
 {
   "AppSettings": {
     "EnvironmentName": "Development",
@@ -561,10 +525,8 @@ AppSettings__Propriedade__SubPropriedade
     }
   }
 }
-```markdown
 ### Exemplos de Variáveis de Ambiente
 
-```bash
 # Ambiente
 AppSettings__EnvironmentName=Production
 
@@ -591,14 +553,12 @@ AppSettings__Infrastructure__Database__CommandTimeoutSeconds=60
 AppSettings__Infrastructure__Telemetry__Enabled=true
 AppSettings__Infrastructure__Telemetry__Provider=ApplicationInsights
 AppSettings__Infrastructure__Telemetry__ApplicationInsights__ConnectionString=InstrumentationKey=xxx
-```markdown
 ---
 
 ## 🐳 Docker Compose
 
 ### docker-compose.yml
 
-```yaml
 version: '3.8'
 
 services:
@@ -645,22 +605,18 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
-```markdown
 ### Usando arquivo .env
 
 Crie um arquivo `.env` na raiz do projeto:
 
-```bash
 # .env
 ENVIRONMENT_NAME=Production
 JWT_SECRET=my-super-secret-key-for-production-with-64-characters-minimum
 JWT_ISSUER=https://api.mycompany.com
 REDIS_CONNECTION=redis:6379
 SQL_CONNECTION=Server=sqlserver;Database=MyDb;User Id=sa;Password=YourPassword123!;TrustServerCertificate=true
-```text
 No `docker-compose.yml`:
 
-```yaml
 version: '3.8'
 
 services:
@@ -674,14 +630,12 @@ services:
       - AppSettings__Authentication__Jwt__Issuer=${JWT_ISSUER}
       - AppSettings__Infrastructure__Cache__Redis__ConnectionString=${REDIS_CONNECTION}
       - AppSettings__Infrastructure__Database__ConnectionString=${SQL_CONNECTION}
-```markdown
 ---
 
 ## ☸️ Kubernetes
 
 ### ConfigMap para configurações não-sensíveis
 
-```yaml
 # configmap.yaml
 apiVersion: v1
 kind: ConfigMap
@@ -699,10 +653,8 @@ data:
   AppSettings__Infrastructure__Database__CommandTimeoutSeconds: "60"
   AppSettings__Infrastructure__Telemetry__Enabled: "true"
   AppSettings__Infrastructure__Telemetry__Provider: "ApplicationInsights"
-```markdown
 ### Secret para configurações sensíveis
 
-```yaml
 # secret.yaml
 apiVersion: v1
 kind: Secret
@@ -718,10 +670,8 @@ stringData:
   AppSettings__Infrastructure__MongoDB__ConnectionString: "mongodb://username:password@prod-mongodb:27017/mydb"
   AppSettings__Infrastructure__RabbitMQ__ConnectionString: "amqp://username:password@prod-rabbitmq:5672/"
   AppSettings__Infrastructure__Storage__ServiceAccount: "base64-encoded-service-account-json"
-```markdown
 ### Deployment usando ConfigMap e Secret
 
-```yaml
 # deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -770,10 +720,8 @@ spec:
             secretKeyRef:
               name: api-secrets
               key: AppSettings__Infrastructure__Database__ConnectionString
-```markdown
 ### Aplicar no Kubernetes
 
-```bash
 # Criar ConfigMap
 kubectl apply -f configmap.yaml
 
@@ -786,7 +734,6 @@ kubectl apply -f deployment.yaml
 # Verificar
 kubectl get pods
 kubectl logs <pod-name>
-```markdown
 ---
 
 ## ☁️ Azure App Service
@@ -800,10 +747,8 @@ kubectl logs <pod-name>
 ```
 Name: AppSettings__Authentication__Jwt__Secret
 Value: my-super-secret-key-for-production-with-64-characters-minimum
-```markdown
 ### Configurar via Azure CLI
 
-```bash
 # Login
 az login
 
@@ -821,24 +766,20 @@ az webapp config appsettings set \
 az webapp config appsettings list \
   --resource-group MyResourceGroup \
   --name MyApiApp
-```markdown
 ### Key Vault Integration
 
-```bash
 # Referenciar secret do Key Vault
 az webapp config appsettings set \
   --resource-group MyResourceGroup \
   --name MyApiApp \
   --settings \
     "AppSettings__Authentication__Jwt__Secret=@Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/JwtSecret/)"
-```markdown
 ---
 
 ## ☁️ AWS Elastic Beanstalk
 
 ### .ebextensions/environment.config
 
-```yaml
 option_settings:
   aws:elasticbeanstalk:application:environment:
     AppSettings__EnvironmentName: "Production"
@@ -846,17 +787,14 @@ option_settings:
     AppSettings__Authentication__Jwt__Issuer: "https://api.mycompany.com"
     AppSettings__Infrastructure__Cache__Provider: "Redis"
     AppSettings__Infrastructure__Cache__Redis__ConnectionString: "prod-redis.cache.amazonaws.com:6379"
-```markdown
 ### AWS CLI
 
-```bash
 # Definir variáveis
 aws elasticbeanstalk update-environment \
   --environment-name my-api-env \
   --option-settings \
     Namespace=aws:elasticbeanstalk:application:environment,OptionName=AppSettings__EnvironmentName,Value=Production \
     Namespace=aws:elasticbeanstalk:application:environment,OptionName=AppSettings__Authentication__Jwt__Secret,Value=my-secret
-```markdown
 ---
 
 ## 🔐 Ordem de Precedência
@@ -871,7 +809,6 @@ O ASP.NET Core carrega configurações na seguinte ordem (última sobrescreve pr
 
 ### Exemplo Prático
 
-```json
 // appsettings.json
 {
   "AppSettings": {
@@ -884,10 +821,8 @@ O ASP.NET Core carrega configurações na seguinte ordem (última sobrescreve pr
 }
 ```
 
-```bash
 # Variável de Ambiente sobrescreve
 AppSettings__Authentication__Jwt__Secret=production-secret
-```markdown
 **Resultado:** Aplicação usa `"production-secret"` 🎯
 
 ---
@@ -896,7 +831,6 @@ AppSettings__Authentication__Jwt__Secret=production-secret
 
 ### Windows PowerShell
 
-```powershell
 # Definir variável temporária
 $env:AppSettings__Authentication__Jwt__Secret="test-secret-key-with-at-least-32-characters"
 $env:AppSettings__EnvironmentName="Development"
@@ -906,10 +840,8 @@ dotnet run --project src/Api/Api.csproj
 
 # Limpar após teste
 Remove-Item Env:AppSettings__Authentication__Jwt__Secret
-```markdown
 ### Linux / macOS
 
-```bash
 # Definir variável temporária
 export AppSettings__Authentication__Jwt__Secret="test-secret-key-with-at-least-32-characters"
 export AppSettings__EnvironmentName="Development"
@@ -919,12 +851,10 @@ dotnet run --project src/Api/Api.csproj
 
 # Limpar após teste
 unset AppSettings__Authentication__Jwt__Secret
-```markdown
 ### Visual Studio / VS Code
 
 Crie `launchSettings.json`:
 
-```json
 {
   "profiles": {
     "Api": {
@@ -937,7 +867,6 @@ Crie `launchSettings.json`:
     }
   }
 }
-```markdown
 ---
 
 ## 📋 Checklist de Deployment
@@ -963,7 +892,6 @@ Antes de fazer deploy, verifique:
 
 **Causa:** Nome da propriedade no JSON não corresponde à classe C#
 
-```json
 // ❌ Errado
 {
   "AppSettings": {
@@ -977,25 +905,20 @@ Antes de fazer deploy, verifique:
     "Infrastructure": { ... }  // ✅ Nome correto
   }
 }
-```markdown
 ### Problema: Erro "Cannot resolve IOptions<AppSettings>"
 
 **Causa:** Esqueceu de chamar `AddAppSettingsConfiguration`
 
-```csharp
 // Program.cs ou InfrastructureExtensions.cs
 services.AddAppSettingsConfiguration(configuration, environment); // ✅ Necessário
-```markdown
 ### Problema: Validação não acontece
 
 **Causa:** Faltou registrar o validador ou chamar `.ValidateOnStart()`
 
-```csharp
 services.AddOptions<AppSettings>()
     .Bind(configuration.GetSection("AppSettings"))
     .ValidateDataAnnotations()
     .ValidateOnStart(); // ✅ Necessário para validação no startup
-```markdown
 ---
 
 ## 📚 Referências
@@ -1012,7 +935,6 @@ services.AddOptions<AppSettings>()
 
 > **Sempre que precisar de configurações em qualquer lugar do código (Controller, Service, Repository, Middleware, Background Service), injete `IOptions<AppSettings>`**
 
-```csharp
 // ✅ Sempre faça assim
 public MyClass(IOptions<AppSettings> settings)
 {

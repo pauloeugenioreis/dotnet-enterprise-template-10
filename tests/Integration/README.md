@@ -21,7 +21,6 @@ Integration tests verify that all layers of the application work together correc
 
 ## Running Tests
 
-```bash
 # Run all integration tests
 dotnet test tests/Integration
 
@@ -30,7 +29,6 @@ dotnet test tests/Integration /p:CollectCoverage=true
 
 # Run specific test
 dotnet test tests/Integration --filter "FullyQualifiedName~ProductControllerTests.GetAll_ReturnsSuccessStatusCode"
-```markdown
 ## Test Structure
 
 ```
@@ -40,12 +38,10 @@ tests/Integration/
 │   └── OrderControllerTests.cs
 ├── WebApplicationFactoryFixture.cs
 └── README.md
-```markdown
 ## Writing Integration Tests
 
 ### Example Test
 
-```csharp
 public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture>
 {
     private readonly HttpClient _client;

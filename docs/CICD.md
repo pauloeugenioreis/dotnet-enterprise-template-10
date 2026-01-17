@@ -84,10 +84,8 @@ O pipeline é executado automaticamente em:
 
 Adicione ao seu README.md:
 
-```markdown
 [![CI/CD](https://github.com/seu-usuario/seu-repo/actions/workflows/ci.yml/badge.svg)](https://github.com/seu-usuario/seu-repo/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/seu-usuario/seu-repo/branch/main/graph/badge.svg)](https://codecov.io/gh/seu-usuario/seu-repo)
-```sql
 ---
 
 ## 🔷 Azure DevOps
@@ -170,9 +168,7 @@ Configure **Approvals** em Production:
 
 Adicione ao seu README.md:
 
-```markdown
 [![Build Status](https://dev.azure.com/your-org/your-project/_apis/build/status/your-pipeline?branchName=main)](https://dev.azure.com/your-org/your-project/_build/latest?definitionId=1&branchName=main)
-```markdown
 ---
 
 ## 🦊 GitLab CI/CD
@@ -246,7 +242,6 @@ Habilite o GitLab Container Registry:
 Suas imagens ficarão em:
 ```
 registry.gitlab.com/seu-usuario/seu-projeto/projecttemplate-api
-```markdown
 ### 📊 Visualização de Resultados
 
 1. **CI/CD → Pipelines**: Ver execuções
@@ -259,10 +254,8 @@ registry.gitlab.com/seu-usuario/seu-projeto/projecttemplate-api
 
 Adicione ao seu README.md:
 
-```markdown
 [![pipeline status](https://gitlab.com/seu-usuario/seu-projeto/badges/main/pipeline.svg)](https://gitlab.com/seu-usuario/seu-projeto/-/commits/main)
 [![coverage report](https://gitlab.com/seu-usuario/seu-projeto/badges/main/coverage.svg)](https://gitlab.com/seu-usuario/seu-projeto/-/commits/main)
-```markdown
 ---
 
 ## 🔄 Recursos Comuns
@@ -315,24 +308,17 @@ Configure notificações de falhas:
 ### Alterar Versão do .NET
 
 **GitHub Actions** (`.github/workflows/ci.yml`):
-```yaml
 env:
   DOTNET_VERSION: '10.0.x'  # Altere aqui
-```text
 **Azure DevOps** (`azure-pipelines.yml`):
-```yaml
 variables:
   dotnetVersion: '10.0.x'  # Altere aqui
-```text
 **GitLab CI** (`.gitlab-ci.yml`):
-```yaml
 image: mcr.microsoft.com/dotnet/sdk:10.0  # Altere aqui
-```markdown
 ### Adicionar Stages Personalizadas
 
 #### GitHub Actions
 
-```yaml
   deploy-aws:
     name: Deploy to AWS
     runs-on: ubuntu-latest
@@ -341,10 +327,8 @@ image: mcr.microsoft.com/dotnet/sdk:10.0  # Altere aqui
       - name: Deploy to ECS
         run: |
           # Comandos de deploy AWS
-```markdown
 #### Azure DevOps
 
-```yaml
 - stage: DeployAWS
   displayName: 'Deploy to AWS'
   dependsOn: Docker
@@ -353,42 +337,33 @@ image: mcr.microsoft.com/dotnet/sdk:10.0  # Altere aqui
     steps:
     - script: |
         # Comandos de deploy AWS
-```markdown
 #### GitLab CI
 
-```yaml
 deploy:aws:
   stage: deploy
   script:
     - echo "Deploying to AWS..."
     # Comandos de deploy AWS
-```markdown
 ### Alterar Docker Registry
 
 **GitHub Actions:**
-```yaml
 - name: Login to Docker Hub
   uses: docker/login-action@v3
   with:
     registry: ghcr.io  # GitHub Container Registry
     username: ${{ github.actor }}
     password: ${{ secrets.GITHUB_TOKEN }}
-```text
 **Azure DevOps:**
-```yaml
 - task: Docker@2
   displayName: 'Login to ACR'
   inputs:
     command: login
     containerRegistry: 'AzureContainerRegistry'  # ACR connection
-```text
 **GitLab CI:**
-```yaml
 # GitLab Registry é usado por padrão
 # Para Docker Hub, altere:
 before_script:
   - echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USER --password-stdin
-```markdown
 ### Configurar Deploy Automático
 
 Por padrão, todos os deploys são **manuais** (`when: manual`).
@@ -396,20 +371,14 @@ Por padrão, todos os deploys são **manuais** (`when: manual`).
 Para deploy automático:
 
 **GitHub Actions:**
-```yaml
   deploy:
     if: github.ref == 'refs/heads/main'  # Remove when: manual
-```text
 **Azure DevOps:**
-```yaml
 - deployment: DeployToProduction
   # Remove: condition: manual
-```text
 **GitLab CI:**
-```yaml
 deploy:production:
   # Remove: when: manual
-```markdown
 ---
 
 ## 🧪 Testando Localmente
@@ -418,29 +387,24 @@ deploy:production:
 
 Use [act](https://github.com/nektos/act):
 
-```bash
 # Instalar act
 choco install act  # Windows
 brew install act   # macOS
 
 # Executar workflow
 act -j build-and-test
-```markdown
 ### Azure DevOps
 
 Não há ferramenta oficial, mas você pode:
 
-```bash
 # Executar comandos individuais
 dotnet restore
 dotnet build
 dotnet test
-```markdown
 ### GitLab CI
 
 Use [gitlab-runner](https://docs.gitlab.com/runner/):
 
-```bash
 # Instalar gitlab-runner
 curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | sudo bash
 sudo apt-get install gitlab-runner

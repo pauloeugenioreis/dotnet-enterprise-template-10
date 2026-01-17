@@ -40,7 +40,6 @@ O Rate Limiting controla quantas requisições um cliente pode fazer em um deter
 
 ### 1. Estrutura de Configuração (`appsettings.json`)
 
-```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -58,12 +57,10 @@ O Rate Limiting controla quantas requisições um cliente pode fazer em um deter
     }
   }
 }
-```markdown
 ### 2. Habilitar Rate Limiting
 
 No `appsettings.json` ou `appsettings.Production.json`:
 
-```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -103,7 +100,6 @@ No `appsettings.json` ou `appsettings.Production.json`:
     }
   }
 }
-```markdown
 ---
 
 ## 📊 Estratégias de Limitação
@@ -113,14 +109,12 @@ No `appsettings.json` ou `appsettings.Production.json`:
 Limita requisições em janelas de tempo fixas.
 
 **Configuração:**
-```json
 "FixedWindow": {
   "Enabled": true,
   "PermitLimit": 100,      // 100 requests
   "WindowSeconds": 60,     // por minuto
   "QueueLimit": 10
 }
-```text
 **Comportamento:**
 - 100 requisições permitidas a cada 60 segundos
 - Janela reseta completamente ao final do período
@@ -134,7 +128,6 @@ Limita requisições em janelas de tempo fixas.
 ```
 00:00 → 00:59 = 100 requests permitidas
 01:00 → 01:59 = Reset, 100 requests permitidas novamente
-```markdown
 ---
 
 ### 2. **Sliding Window** (Janela Deslizante)
@@ -142,14 +135,12 @@ Limita requisições em janelas de tempo fixas.
 Suaviza limites calculando média móvel de requisições.
 
 **Configuração:**
-```json
 "SlidingWindow": {
   "Enabled": true,
   "PermitLimit": 200,
   "WindowSeconds": 60,
   "SegmentsPerWindow": 6   // Divide em 6 segmentos de 10s
 }
-```text
 **Comportamento:**
 - Janela "desliza" suavemente ao longo do tempo
 - Evita picos no início de cada janela
@@ -167,7 +158,6 @@ Suaviza limites calculando média móvel de requisições.
 00:20-00:30 = 33 requests
 ...
 Janela desliza continuamente
-```markdown
 ---
 
 ### 3. **Token Bucket** (Balde de Tokens)
@@ -175,14 +165,12 @@ Janela desliza continuamente
 Usa "tokens" que são consumidos e reabastecidos ao longo do tempo.
 
 **Configuração:**
-```json
 "TokenBucket": {
   "Enabled": true,
   "TokenLimit": 50,                      // Capacidade máxima
   "ReplenishmentPeriodSeconds": 10,      // Reabastecer a cada 10s
   "TokensPerPeriod": 10                  // +10 tokens por período
 }
-```text
 **Comportamento:**
 - Cada requisição consome 1 token
 - Tokens são reabastecidos continuamente
@@ -201,11 +189,9 @@ Request 1 → 49 tokens
 Request 2 → 48 tokens
 ...
 A cada 10s, +10 tokens (até limite de 50)
-```text
 **Taxa Sustentada:**
 ```
 10 tokens / 10 segundos = 1 req/s = 60 req/min
-```markdown
 ---
 
 ### 4. **Concurrency** (Concorrência)
@@ -213,13 +199,11 @@ A cada 10s, +10 tokens (até limite de 50)
 Limita requisições **simultâneas** (não por período de tempo).
 
 **Configuração:**
-```json
 "Concurrency": {
   "Enabled": true,
   "PermitLimit": 10,      // Máximo 10 requisições simultâneas
   "QueueLimit": 20        // Fila de até 20 aguardando
 }
-```text
 **Comportamento:**
 - Controla quantas requisições podem ser processadas ao mesmo tempo
 - Quando limite é atingido, novas requisições aguardam na fila
@@ -236,7 +220,6 @@ Limita requisições **simultâneas** (não por período de tempo).
 Request 11 → aguarda na fila
 Request 31 → fila cheia, retorna 429
 Quando uma requisição termina, próxima da fila é processada
-```markdown
 ---
 
 ## 🎮 Como Usar
@@ -245,7 +228,6 @@ Quando uma requisição termina, próxima da fila é processada
 
 Use o atributo `[EnableRateLimiting]` no controller ou action:
 
-```csharp
 using Microsoft.AspNetCore.RateLimiting;
 
 [ApiController]
@@ -276,7 +258,6 @@ public class ProductController : ControllerBase
         // ...
     }
 }
-```markdown
 ### 2. Nomes de Policies Disponíveis
 
 | Nome do Policy | Descrição | Uso Recomendado |
@@ -288,7 +269,6 @@ public class ProductController : ControllerBase
 
 ### 3. Exemplo de Diferentes Endpoints
 
-```csharp
 [Route("api/v1/[controller]")]
 public class OrderController : ControllerBase
 {
@@ -312,7 +292,6 @@ public class OrderController : ControllerBase
     [HttpPatch("{id}/status")]
     public async Task<IActionResult> UpdateStatus(long id, [FromBody] UpdateStatusDto dto) { ... }
 }
-```markdown
 ---
 
 ## ⚠️ Resposta de Rate Limit Excedido (429)
@@ -328,10 +307,8 @@ X-RateLimit-Remaining: 0
 X-RateLimit-Reset: 1705330260
 Retry-After: 45
 Content-Type: application/json
-```markdown
 ### Body JSON
 
-```json
 {
   "error": "Rate limit exceeded",
   "message": "Too many requests. Limit: 100 per window.",
@@ -339,7 +316,6 @@ Content-Type: application/json
   "retryAfter": 45,
   "resetAt": "2024-01-15T10:51:00.0000000Z"
 }
-```markdown
 ### Descrição dos Headers
 
 | Header | Descrição |
@@ -357,7 +333,6 @@ Permite que IPs confiáveis façam requisições sem limitação.
 
 ### Configuração
 
-```json
 {
   "RateLimiting": {
     "Enabled": true,
@@ -370,7 +345,6 @@ Permite que IPs confiáveis façam requisições sem limitação.
     ]
   }
 }
-```markdown
 ### Quando usar Whitelist
 
 - ✅ Servidores internos (CI/CD, monitoramento)
@@ -394,18 +368,14 @@ A implementação detecta o IP real do cliente considerando:
 
 **Enviar múltiplas requisições:**
 
-```bash
 # Teste Fixed Window (100 req/min)
 for i in {1..105}; do
   curl -i http://localhost:5000/api/v1/Product
   echo "Request $i"
 done
-```text
 **Verificar headers:**
 
-```bash
 curl -i http://localhost:5000/api/v1/Product | grep -i "x-ratelimit"
-```text
 **Resultado esperado (após 100 requests):**
 
 ```http
@@ -414,16 +384,13 @@ X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 0
 X-RateLimit-Reset: 1705330260
 Retry-After: 42
-```markdown
 ### 2. Teste com PowerShell
 
-```powershell
 # Testar Fixed Window
 1..105 | ForEach-Object {
     $response = Invoke-WebRequest -Uri "http://localhost:5000/api/v1/Product" -Method Get -SkipHttpErrorCheck
     Write-Host "Request $_: $($response.StatusCode)"
 }
-```markdown
 ### 3. Teste de Carga com k6
 
 ```javascript
@@ -446,32 +413,25 @@ export default function () {
 
   console.log(`Status: ${res.status}, RateLimit-Remaining: ${res.headers['X-Ratelimit-Remaining']}`);
 }
-```text
 **Executar:**
 
-```bash
 k6 run rate-limit-test.js
-```markdown
 ### 4. Teste de Whitelist
 
 **1. Adicionar IP ao whitelist:**
 
-```json
 {
   "RateLimiting": {
     "EnableWhitelist": true,
     "WhitelistedIps": ["127.0.0.1", "::1"]
   }
 }
-```text
 **2. Executar 200 requests (acima do limite):**
 
-```bash
 for i in {1..200}; do
   curl -s http://localhost:5000/api/v1/Product > /dev/null
 done
 echo "Todas as 200 requests foram bem-sucedidas!"
-```markdown
 ---
 
 ## 📈 Monitoramento e Observabilidade
@@ -487,7 +447,6 @@ O Rate Limiting gera logs automáticos:
 📊  Sliding Window: 200 req/60s (6 segments)
 📊  Token Bucket: 50 tokens, refill 10/10s
 📊  Concurrency: 10 simultaneous requests
-```markdown
 ### 2. OpenTelemetry Spans
 
 Quando Rate Limiting é rejeitado, um span `RateLimitRejected` é criado:
@@ -498,12 +457,10 @@ Span: RateLimitRejected
   - policy: fixed
   - limit: 100
   - retry_after: 45
-```markdown
 ### 3. Métricas (com Prometheus)
 
 Você pode adicionar métricas customizadas:
 
-```csharp
 // Em RateLimitingExtension.cs
 var meter = new Meter("RateLimiting");
 var rateLimitCounter = meter.CreateCounter<long>("rate_limit_rejections");
@@ -513,7 +470,6 @@ options.OnRejected = async (context, cancellationToken) =>
     rateLimitCounter.Add(1, new KeyValuePair<string, object>("policy", "fixed"));
     // ...
 };
-```markdown
 ---
 
 ## 🎯 Melhores Práticas
@@ -531,16 +487,13 @@ options.OnRejected = async (context, cancellationToken) =>
 
 **Development** (`appsettings.Development.json`):
 
-```json
 {
   "RateLimiting": {
     "Enabled": false   // Desabilitado em dev
   }
 }
-```text
 **Production** (`appsettings.Production.json`):
 
-```json
 {
   "RateLimiting": {
     "Enabled": true,
@@ -552,7 +505,6 @@ options.OnRejected = async (context, cancellationToken) =>
     }
   }
 }
-```markdown
 ### 3. Limites Recomendados
 
 | Tipo de API | Fixed Window | Token Bucket | Concurrency |
@@ -564,7 +516,6 @@ options.OnRejected = async (context, cancellationToken) =>
 
 ### 4. Combinar com Autenticação
 
-```csharp
 [Authorize]  // Requer autenticação
 [EnableRateLimiting("token")]  // + Rate Limiting
 [HttpPost]
@@ -572,12 +523,10 @@ public async Task<IActionResult> Create([FromBody] Order order)
 {
     // Apenas usuários autenticados com rate limiting
 }
-```markdown
 ### 5. Documentar Limites na API
 
 No Swagger/OpenAPI:
 
-```csharp
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
@@ -587,12 +536,10 @@ builder.Services.AddSwaggerGen(c =>
         Description = "Rate Limits: 100 req/min (public), 1000 req/min (authenticated)"
     });
 });
-```markdown
 ### 6. Resposta Proativa
 
 Configure o cliente para respeitar `Retry-After`:
 
-```csharp
 // Cliente C#
 if (response.StatusCode == HttpStatusCode.TooManyRequests)
 {
@@ -600,7 +547,6 @@ if (response.StatusCode == HttpStatusCode.TooManyRequests)
     await Task.Delay(retryAfter);
     // Tenta novamente
 }
-```markdown
 ---
 
 ## 🔧 Troubleshooting
@@ -615,7 +561,6 @@ if (response.StatusCode == HttpStatusCode.TooManyRequests)
 
 ```
 ✅  Rate Limiting enabled: 4 policies configured
-```markdown
 ### Problema: IP sempre whitelistado
 
 **Solução:**
@@ -648,7 +593,6 @@ O Rate Limiting padrão é **global por policy**. Para limitar **por cliente/IP*
 
 ## 📝 Exemplo Completo
 
-```csharp
 // ProductController.cs
 [Route("api/v1/[controller]")]
 [ApiController]

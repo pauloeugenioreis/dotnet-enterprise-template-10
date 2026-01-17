@@ -61,7 +61,6 @@ Este template fornece uma estrutura completa e moderna para desenvolvimento de A
 
 ## 📁 Estrutura do Projeto
 
-```text
 ProjectTemplate/
 ├── src/
 │   ├── Api/                          # Camada de apresentação (Controllers, Program.cs)
@@ -171,23 +170,18 @@ ProjectTemplate/
 
 ### Opção 1: Usando Script PowerShell (Recomendado para Windows)
 
-```powershell
 cd template/scripts
 .\new-project.ps1 -ProjectName "MeuProjeto"
-```markdown
 ### Opção 2: Usando Script Bash (Linux/Mac)
 
-```bash
 cd template/scripts
 chmod +x new-project.sh
 ./new-project.sh MeuProjeto
-```markdown
 ### Opção 3: Usando Script Batch (Windows CMD)
 
 ```cmd
 cd template\scripts
 new-project.bat MeuProjeto
-```markdown
 ---
 
 ## ⚙️ Configuração Inicial
@@ -196,14 +190,11 @@ Após criar seu projeto, siga estes passos:
 
 ### 1. Navegue até o diretório do projeto
 
-```bash
 cd MeuProjeto
-```markdown
 ### 2. Configure a Connection String
 
 Edite `src/Api/appsettings.json` e ajuste a connection string:
 
-```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -214,13 +205,11 @@ Edite `src/Api/appsettings.json` e ajuste a connection string:
     }
   }
 }
-```markdown
 ### 3. Escolha seu Banco de Dados
 
 Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection string:
 
 **Para SQL Server:**
-```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -231,9 +220,7 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
-```text
 **Para Oracle:**
-```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -244,9 +231,7 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
-```text
 **Para PostgreSQL:**
-```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -257,9 +242,7 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
-```text
 **Para MySQL:**
-```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -270,36 +253,25 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
-```markdown
 > ✨ **Todos os providers já estão instalados!** Basta mudar o `DatabaseType` e a connection string.
 
 **Nota sobre ORM**: Entity Framework Core, Dapper e ADO.NET estão habilitados simultaneamente. Para mais detalhes, veja [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md).
 
 ### 4. Restaure os Pacotes
 
-```bash
 dotnet restore
-```markdown
 ### 5. Compile o Projeto
 
-```bash
 dotnet build
-```markdown
 ### 6. Crie a Primeira Migration
 
-```bash
 dotnet ef migrations add InitialCreate --project src/Data --startup-project src/Api
-```markdown
 ### 7. Aplique a Migration no Banco
 
-```bash
 dotnet ef database update --project src/Data --startup-project src/Api
-```markdown
 ### 8. Execute o Projeto
 
-```bash
 dotnet run --project src/Api
-```markdown
 ### 9. Acesse a API
 
 - API: `https://localhost:5001`
@@ -315,7 +287,6 @@ Username: admin
 Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com
 Role:     Admin
-```markdown
 **Teste no Swagger:**
 1. Vá para `/swagger`
 2. Execute `POST /api/auth/login` com as credenciais acima
@@ -364,7 +335,6 @@ Já está habilitado. Não precisa fazer nada!
 
 #### Memory Cache (Padrão para desenvolvimento)
 
-```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -376,10 +346,8 @@ Já está habilitado. Não precisa fazer nada!
     }
   }
 }
-```markdown
 #### Redis (Recomendado para produção)
 
-```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -392,10 +360,8 @@ Já está habilitado. Não precisa fazer nada!
     }
   }
 }
-```markdown
 #### SQL Server Cache
 
-```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -408,7 +374,6 @@ Já está habilitado. Não precisa fazer nada!
     }
   }
 }
-```markdown
 ---
 
 ## 📊 Health Checks
@@ -438,14 +403,12 @@ Para adicionar health checks personalizados, edite `src/Infrastructure/Extension
 Api → Infrastructure → Application → Data → Domain
                                        ↓
                                     Domain
-```markdown
 ---
 
 ## 🎨 Criando Novas Entidades
 
 ### 1. Crie a Entidade no Domain
 
-```csharp
 // src/Domain/Entities/Product.cs
 namespace MeuProjeto.Domain.Entities;
 
@@ -455,10 +418,8 @@ public class Product : EntityBase
     public decimal Price { get; set; }
     public string? Description { get; set; }
 }
-```markdown
 ### 2. Crie o Repositório (se necessário customização)
 
-```csharp
 // src/Data/Repository/ProductRepository.cs
 namespace MeuProjeto.Data.Repository;
 
@@ -470,10 +431,8 @@ public class ProductRepository : Repository<Product>, IProductRepository
     
     // Métodos customizados aqui
 }
-```markdown
 ### 3. Crie o Service (se necessário customização)
 
-```csharp
 // src/Application/Services/ProductService.cs
 namespace MeuProjeto.Application.Services;
 
@@ -486,10 +445,8 @@ public class ProductService : Service<Product>, IProductService
     
     // Lógica de negócio customizada aqui
 }
-```markdown
 ### 4. Crie o Controller
 
-```csharp
 // src/Api/Controllers/ProductController.cs
 namespace MeuProjeto.Api.Controllers;
 
@@ -537,19 +494,14 @@ public class ProductController : ApiControllerBase
         return NoContent();
     }
 }
-```markdown
 ### 5. Adicione o DbSet ao Context
 
-```csharp
 // src/Data/Context/ApplicationDbContext.cs
 public DbSet<Product> Products { get; set; }
-```markdown
 ### 6. Crie a Migration
 
-```bash
 dotnet ef migrations add AddProduct --project src/Data --startup-project src/Api
 dotnet ef database update --project src/Data --startup-project src/Api
-```markdown
 ---
 
 ## 📝 Boas Práticas
@@ -562,7 +514,6 @@ O template usa **Scrutor** com `.AsMatchingInterface()` para registro automátic
 
 Seus repositórios e services são **automaticamente registrados** sem necessidade de configuração manual:
 
-```csharp
 // src/Infrastructure/Extensions/DependencyInjectionExtensions.cs
 services.Scan(scan => scan
     .FromAssembliesOf(typeof(Repository<>))
@@ -570,7 +521,6 @@ services.Scan(scan => scan
     .AsMatchingInterface()  // ← Registra apenas interface correspondente
     .WithScopedLifetime()
 );
-```markdown
 **Como funciona:**
 - `Repository<Product>` → registrado como `IRepository<Product>`
 - `ProductDapperRepository` → registrado como `IProductDapperRepository`
@@ -580,21 +530,16 @@ services.Scan(scan => scan
 #### ✨ Adicionando Novos Repositórios
 
 **1. Crie a interface específica:**
-```csharp
 public interface IProductDapperRepository : IRepository<Product>
 {
     Task<IEnumerable<Product>> GetTopSellingProductsAsync();
 }
-```text
 **2. Implemente a classe:**
-```csharp
 public class ProductDapperRepository : IProductDapperRepository
 {
     // Implementação...
 }
-```text
 **3. Pronto!** 🎉 O Scrutor registrará automaticamente. Basta injetar:
-```csharp
 public class ProductService
 {
     private readonly IRepository<Product> _efRepository;          // EF Core
@@ -608,7 +553,6 @@ public class ProductService
         _dapperRepository = dapperRepository;
     }
 }
-```markdown
 **Convenções necessárias:**
 - Interface: `IProductDapperRepository` (prefixo `I` + nome da classe)
 - Classe: `ProductDapperRepository` (implementa a interface)
@@ -618,32 +562,26 @@ public class ProductService
 
 Sempre use operações assíncronas:
 
-```csharp
 // ✅ Correto
 var result = await _service.GetByIdAsync(id, cancellationToken);
 
 // ❌ Errado
 var result = _service.GetByIdAsync(id).Result;
-```markdown
 ### CancellationToken
 
 Sempre propague o CancellationToken em métodos assíncronos:
 
-```csharp
 public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
 {
     var items = await _service.GetAllAsync(cancellationToken);
     return Ok(items);
 }
-```markdown
 ### Logging
 
 Use ILogger para logging estruturado:
 
-```csharp
 _logger.LogInformation("Processing request for {Id}", id);
 _logger.LogError(ex, "Error processing {Id}", id);
-```markdown
 ---
 
 ## 🐳 Docker
@@ -676,7 +614,6 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "MeuProjeto.Api.dll"]
-```markdown
 ---
 
 ## 🐳 Docker e Kubernetes
@@ -685,14 +622,10 @@ ENTRYPOINT ["dotnet", "MeuProjeto.Api.dll"]
 
 #### Build da imagem
 
-```bash
 docker build -t projecttemplate-api:latest .
-```markdown
 #### Executar com docker-compose
 
-```bash
 docker-compose up -d
-```markdown
 Acesse: `http://localhost:8080`
 
 ### Kubernetes
@@ -702,16 +635,12 @@ O template inclui manifestos Kubernetes prontos para deploy em Minikube (local) 
 #### Deploy Local (Minikube)
 
 **Windows (PowerShell):**
-```powershell
 cd scripts/windows
 .\minikube-deploy.ps1
-```text
 **Linux/macOS:**
-```bash
 cd scripts/linux
 chmod +x minikube-deploy.sh
 ./minikube-deploy.sh
-```markdown
 O script automaticamente:
 1. Verifica pré-requisitos (Docker, Minikube, kubectl)
 2. Inicia o Minikube
@@ -722,26 +651,20 @@ O script automaticamente:
 
 #### Acessar a aplicação no Minikube
 
-```bash
 # Port forward
 kubectl port-forward svc/projecttemplate-api 8080:80 -n projecttemplate
 
 # Ou usar Minikube tunnel
 minikube tunnel
-```markdown
 #### Remover deploy do Minikube
 
 **Windows (PowerShell):**
-```powershell
 cd scripts/windows
 .\minikube-destroy.ps1
-```text
 **Linux/macOS:**
-```bash
 cd scripts/linux
 chmod +x minikube-destroy.sh
 ./minikube-destroy.sh
-```markdown
 #### Deploy em Produção
 
 Para deploy em clusters de produção (AKS, EKS, GKE, etc.), consulte o guia detalhado em [`docs/KUBERNETES.md`](docs/KUBERNETES.md).
@@ -754,25 +677,18 @@ O template inclui estrutura para testes:
 
 ### Testes de Integração
 
-```bash
 dotnet test tests/Integration/
-```markdown
 ### Testes Unitários
 
-```bash
 dotnet test tests/Infrastructure.UnitTests/
-```markdown
 ### Script Automatizado (Minikube)
 
 Execute testes de integração automaticamente no Minikube:
 
 **Windows (PowerShell):**
-```powershell
 cd scripts/windows
 .\run-integration-tests.ps1
-```text
 **Linux/macOS:**
-```bash
 cd scripts/linux
 chmod +x run-integration-tests.sh
 ./run-integration-tests.sh

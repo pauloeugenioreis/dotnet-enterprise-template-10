@@ -24,14 +24,11 @@
 ### Abordagem Tradicional vs Event Sourcing
 
 #### ❌ **CRUD Tradicional**
-```sql
 -- Você só tem o estado atual
 Orders: { Id: 1, Status: "Delivered", Total: 150.00, UpdatedAt: "2026-01-14" }
 
 -- Perdeu: Quem criou? Quando mudou o status? Por quê?
-```markdown
 #### ✅ **Event Sourcing**
-```sql
 Events:
 1. OrderCreated      { OrderId: 1, Total: 150.00, CreatedBy: "user@email.com" }    2026-01-10 10:00
 2. OrderApproved     { OrderId: 1, ApprovedBy: "manager@email.com" }              2026-01-10 14:30
@@ -39,7 +36,6 @@ Events:
 4. OrderDelivered    { OrderId: 1, DeliveredAt: "2026-01-14 16:00" }              2026-01-14 16:00
 
 -- Histórico completo: Auditoria total, rastreabilidade, time travel
-```markdown
 ---
 
 ## Por Que Usar Event Sourcing?
@@ -99,7 +95,6 @@ Events:
     │            │
     ▼            ▼
   [Read]     [Audit/Time Travel]
-```markdown
 ### Componentes Principais
 
 1. **Domain Events** (`Domain/Events/`)
@@ -124,13 +119,11 @@ Events:
 
 ### 1️⃣ **Traditional** (Padrão - Event Sourcing Desabilitado)
 
-```json
 {
   "EventSourcing": {
     "Enabled": false
   }
 }
-```markdown
 - ✅ CRUD normal (apenas EF Core)
 - ❌ Nenhum evento registrado
 - ✅ Performance máxima
@@ -138,7 +131,6 @@ Events:
 
 ### 2️⃣ **Hybrid** (Recomendado para Templates)
 
-```json
 {
   "EventSourcing": {
     "Enabled": true,
@@ -146,7 +138,6 @@ Events:
     "AuditEntities": ["Order", "Product"]
   }
 }
-```markdown
 - ✅ EF Core como fonte da verdade
 - ✅ Eventos para auditoria e histórico
 - ✅ Consultas rápidas (EF Core)
@@ -155,14 +146,12 @@ Events:
 
 ### 3️⃣ **EventStore** (Event Sourcing Puro)
 
-```json
 {
   "EventSourcing": {
     "Enabled": true,
     "Mode": "EventStore"
   }
 }
-```markdown
 - ✅ Eventos como fonte da verdade
 - ✅ Event Sourcing completo
 - ✅ Time travel avançado
@@ -175,7 +164,6 @@ Events:
 
 ### 1. **appsettings.json**
 
-```json
 {
   "Infrastructure": {
     "EventSourcing": {
@@ -191,7 +179,6 @@ Events:
     }
   }
 }
-```markdown
 ### 2. **Propriedades de Configuração**
 
 | Propriedade | Tipo | Padrão | Descrição |
@@ -210,9 +197,7 @@ Events:
 
 O PostgreSQL para Event Store já está configurado no `docker-compose.yml`:
 
-```bash
 docker-compose up -d postgres-events
-```markdown
 Acesso:
 - **Host**: localhost
 - **Port**: 5432
@@ -226,7 +211,6 @@ Acesso:
 
 ### 1. **Criar uma Entidade (Gera Evento Automaticamente)**
 
-```csharp
 // POST /api/order
 public async Task<ActionResult<Order>> CreateOrder(CreateOrderDto dto)
 {
@@ -244,10 +228,8 @@ public async Task<ActionResult<Order>> CreateOrder(CreateOrderDto dto)
     // Evento OrderCreatedEvent foi registrado no Event Store
     return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, order);
 }
-```markdown
 ### 2. **Atualizar uma Entidade (Registra Mudanças)**
 
-```csharp
 // PUT /api/order/{id}
 public async Task<ActionResult> UpdateOrder(long id, UpdateOrderDto dto)
 {
@@ -262,10 +244,8 @@ public async Task<ActionResult> UpdateOrder(long id, UpdateOrderDto dto)
     
     return NoContent();
 }
-```markdown
 ### 3. **O Que Acontece nos Bastidores**
 
-```csharp
 // HybridRepository.UpdateAsync()
 public override async Task UpdateAsync(TEntity entity)
 {
@@ -289,7 +269,6 @@ public override async Task UpdateAsync(TEntity entity)
         );
     }
 }
-```markdown
 ---
 
 ## API de Auditoria
@@ -300,9 +279,7 @@ public override async Task UpdateAsync(TEntity entity)
 
 ```http
 GET /api/audit/Order/123
-```text
 **Response:**
-```json
 [
   {
     "eventId": "abc-123",
@@ -324,14 +301,11 @@ GET /api/audit/Order/123
     "version": 2
   }
 ]
-```markdown
 #### 2. **Time Travel - Estado em um Momento Específico**
 
 ```http
 GET /api/audit/Order/123/at/2026-01-11T12:00:00Z
-```text
 **Response:**
-```json
 {
   "entityType": "Order",
   "entityId": "123",
@@ -350,31 +324,25 @@ GET /api/audit/Order/123/at/2026-01-11T12:00:00Z
     }
   ]
 }
-```markdown
 #### 3. **Eventos por Versão**
 
 ```http
 GET /api/audit/Order/123/versions/1/5
-```markdown
 Retorna eventos da versão 1 até a versão 5.
 
 #### 4. **Todos os Eventos de um Tipo**
 
 ```http
 GET /api/audit/type/Order?from=2026-01-01&to=2026-01-31&limit=100
-```markdown
 #### 5. **Eventos por Usuário**
 
 ```http
 GET /api/audit/user/user@email.com?limit=50
-```markdown
 #### 6. **Estatísticas**
 
 ```http
 GET /api/audit/statistics?from=2026-01-01&to=2026-01-31
-```text
 **Response:**
-```json
 {
   "totalEvents": 15420,
   "eventsByType": {
@@ -389,12 +357,10 @@ GET /api/audit/statistics?from=2026-01-01&to=2026-01-31
   "oldestEvent": "2025-01-01T00:00:00Z",
   "latestEvent": "2026-01-14T23:59:59Z"
 }
-```markdown
 #### 7. **Replay de Eventos**
 
 ```http
 POST /api/audit/Order/123/replay
-```markdown
 Reconstrói o estado atual a partir dos eventos.
 
 ---
@@ -429,7 +395,6 @@ Reconstrói o estado atual a partir dos eventos.
 
 ### Exemplo Prático: Investigar Disputa de Cliente
 
-```csharp
 // Cliente reclama que pedido nunca foi enviado
 var orderId = "order-456";
 
@@ -463,24 +428,19 @@ var allEvents = await _eventStore.GetEventsAsync("Order", orderId);
 ### ✅ **DO (Faça)**
 
 1. **Comece com Modo Hybrid**
-   ```json
    { "EventSourcing": { "Enabled": true, "Mode": "Hybrid" } }
    ```
 
 2. **Audite Apenas Entidades Críticas**
-   ```json
    { "AuditEntities": ["Order", "Payment", "Invoice"] }
    ```
 
 3. **Use Snapshots para Performance**
-   ```json
    { "StoreSnapshots": true, "SnapshotInterval": 10 }
    ```
 
 4. **Armazene Metadados**
-   ```json
    { "StoreMetadata": true }
-   ```sql
    - IP Address
    - User-Agent
    - Request Path
@@ -510,7 +470,6 @@ var allEvents = await _eventStore.GetEventsAsync("Order", orderId);
 ### Otimizações Implementadas
 
 #### 1. **Snapshots**
-```csharp
 // A cada 10 eventos, salva snapshot do estado completo
 if (eventCount % 10 == 0)
 {
@@ -520,20 +479,15 @@ if (eventCount % 10 == 0)
 // Recuperação rápida
 var (snapshot, version) = await _eventStore.GetSnapshotAsync<OrderSnapshot>("Order", orderId);
 // Aplica apenas eventos após snapshot (version 10 -> atual)
-```markdown
 #### 2. **Indexação no PostgreSQL**
-```sql
 -- Marten cria automaticamente
 CREATE INDEX idx_events_aggregate ON mt_events (stream_id);
 CREATE INDEX idx_events_timestamp ON mt_events (timestamp);
 CREATE INDEX idx_events_type ON mt_events (type);
-```markdown
 #### 3. **Batch Inserts**
-```csharp
 // Marten otimiza automaticamente
 session.Events.Append(streamId, event1, event2, event3);
 await session.SaveChangesAsync(); // Um único INSERT
-```sql
 ### Benchmarks (Aproximados)
 
 | Operação | Sem Event Sourcing | Modo Hybrid |
@@ -550,24 +504,18 @@ await session.SaveChangesAsync(); // Um único INSERT
 
 ### ❌ **Problema: Build falha com erro Marten**
 
-```bash
 error CS0246: The type or namespace name 'Marten' could not be found
-```text
 **Solução:**
-```bash
 cd src/Infrastructure
 dotnet add package Marten --version 8.3.0
 dotnet restore
-```markdown
 ---
 
 ### ❌ **Problema: PostgreSQL não conecta**
 
 ```
 Npgsql.NpgsqlException: Connection refused
-```text
 **Solução:**
-```bash
 # Verificar se PostgreSQL está rodando
 docker ps | grep postgres-events
 
@@ -576,13 +524,11 @@ docker-compose up -d postgres-events
 
 # Verificar logs
 docker logs postgres-events
-```markdown
 ---
 
 ### ❌ **Problema: Eventos não estão sendo registrados**
 
 **Diagnóstico:**
-```csharp
 // 1. Verificar se está habilitado
 GET /api/health
 // EventSourcing: Enabled = true?
@@ -593,9 +539,7 @@ GET /api/health
 
 // 3. Verificar logs
 docker logs api | grep EventStore
-```text
 **Solução:**
-```json
 {
   "EventSourcing": {
     "Enabled": true,
@@ -614,25 +558,20 @@ docker logs api | grep EventStore
 **Soluções:**
 
 1. **Audite apenas entidades críticas**
-   ```json
    { "AuditEntities": ["Order"] } // Só Order, não Product
    ```
 
 2. **Habilite snapshots**
-   ```json
    { "StoreSnapshots": true, "SnapshotInterval": 10 }
    ```
 
 3. **Desabilite metadados em dev**
-   ```json
    { "StoreMetadata": false } // Em desenvolvimento
    ```
 
 4. **Use índices no PostgreSQL**
-   ```sql
    -- Marten já cria, mas você pode adicionar customizados
    CREATE INDEX idx_events_userid ON mt_events ((data ->> 'userId'));
-   ```markdown
 ---
 
 ## Recursos Adicionais
@@ -653,7 +592,6 @@ docker logs api | grep EventStore
 
 ### Exemplos de Consultas SQL
 
-```sql
 -- Ver todos os eventos de um pedido
 SELECT * FROM mt_events 
 WHERE stream_id = 'Order-123' 

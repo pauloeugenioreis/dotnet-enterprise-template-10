@@ -13,7 +13,6 @@ O projeto atualmente utiliza `AspNetCoreRateLimit` v5.0.0 para gerenciamento de 
 
 ### Current Implementation
 
-```csharp
 // AspNetCoreRateLimit - Current
 services.AddMemoryCache();
 services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
@@ -21,7 +20,6 @@ services.AddInMemoryRateLimiting();
 services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
 app.UseIpRateLimiting();
-```markdown
 **Features in Use:**
 - ✅ IP-based rate limiting
 - ✅ Client ID rate limiting
@@ -33,7 +31,6 @@ app.UseIpRateLimiting();
 
 ### Native .NET Alternative
 
-```csharp
 // .NET Native Rate Limiting
 services.AddRateLimiter(options =>
 {
