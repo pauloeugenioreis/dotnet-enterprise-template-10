@@ -127,7 +127,7 @@ public class OrderAdoRepository : IOrderAdoRepository
         await connection.OpenAsync(cancellationToken);
 
         // Begin transaction
-        using var transaction = connection.BeginTransaction();
+        using var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -193,12 +193,12 @@ public class OrderAdoRepository : IOrderAdoRepository
                 }
             }
 
-            transaction.Commit();
+            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             return entity;
         }
         catch
         {
-            transaction.Rollback();
+            await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
             throw;
         }
     }
@@ -218,7 +218,7 @@ public class OrderAdoRepository : IOrderAdoRepository
         using var connection = _connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        using var transaction = connection.BeginTransaction();
+        using var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -296,11 +296,11 @@ public class OrderAdoRepository : IOrderAdoRepository
                 }
             }
 
-            transaction.Commit();
+            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
         }
         catch
         {
-            transaction.Rollback();
+            await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
             throw;
         }
     }
@@ -310,7 +310,7 @@ public class OrderAdoRepository : IOrderAdoRepository
         using var connection = _connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        using var transaction = connection.BeginTransaction();
+        using var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -328,11 +328,11 @@ public class OrderAdoRepository : IOrderAdoRepository
             AddParameter(deleteOrderCommand, "@Id", entity.Id);
             await deleteOrderCommand.ExecuteNonQueryAsync(cancellationToken);
 
-            transaction.Commit();
+            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
         }
         catch
         {
-            transaction.Rollback();
+            await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
             throw;
         }
     }

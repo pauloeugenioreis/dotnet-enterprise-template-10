@@ -92,7 +92,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync().ConfigureAwait(false);
 
 // Make Program class accessible for testing
 public partial class Program { }

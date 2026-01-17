@@ -96,15 +96,15 @@ public class JwtTokenService : ITokenService
                 ClockSkew = TimeSpan.Zero
             };
 
-            var principal = tokenHandler.ValidateToken(token, validationParameters, out var securityToken);
+            var result = await tokenHandler.ValidateTokenAsync(token, validationParameters).ConfigureAwait(false);
 
-            if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+            if (!result.IsValid || result.SecurityToken is not JwtSecurityToken jwtSecurityToken ||
                 !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             {
                 return null;
             }
 
-            var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = result.ClaimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (long.TryParse(userIdClaim, out var userId))
             {
                 return userId;
