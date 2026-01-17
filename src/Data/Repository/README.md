@@ -4,7 +4,7 @@ Este diretório contém **implementações completas e funcionais** de repositó
 
 ## 📁 Estrutura
 
-```
+```text
 Repository/
 ├── Repository.cs                              # Entity Framework Core (Padrão)
 ├── OrderRepository.cs                         # Entity Framework Core (Padrão)
@@ -55,19 +55,16 @@ Nada a fazer! Está funcionando out-of-the-box.
 **Passo 2**: Comente a linha 41:
 ```csharp
 // services.AddEntityFramework(connectionString, dbSettings);
-```
-
+```text
 **Passo 3**: Descomente a linha 47:
 ```csharp
 services.AddDapper(connectionString);
-```
-
+```text
 **Passo 4**: Execute o projeto!
 
 ```bash
 dotnet run --project src/Api
-```
-
+```markdown
 #### O que foi implementado:
 - ✅ `ProductDapperRepository` - CRUD completo com SQL raw
 - ✅ `OrderDapperRepository` - Com transações e relacionamentos
@@ -90,8 +87,7 @@ dotnet run --project src/Api
 ```xml
 <PackageReference Include="NHibernate" Version="5.5.2" />
 <PackageReference Include="FluentNHibernate" Version="3.4.0" />
-```
-
+```text
 **Passo 2**: No mesmo arquivo, **remova ou comente** as linhas que excluem NHibernate da compilação (~linha 46):
 ```xml
 <!-- Comente ou remova estas linhas -->
@@ -101,15 +97,13 @@ dotnet run --project src/Api
   <Compile Remove="Repository\NHibernate\**" />
 </ItemGroup>
 -->
-```
-
+```text
 **Passo 3**: Abra `src/Infrastructure/Extensions/DatabaseExtension.cs` e descomente o código do método `AddNHibernate` (linhas ~133-149)
 
 **Passo 4**: Restaure os pacotes:
 ```bash
 dotnet restore
-```
-
+```markdown
 #### Como habilitar no projeto:
 
 **Passo 5**: Abra `src/Infrastructure/Extensions/DatabaseExtension.cs`
@@ -117,20 +111,17 @@ dotnet restore
 **Passo 6**: Comente a linha 41:
 ```csharp
 // services.AddEntityFramework(connectionString, dbSettings);
-```
-
+```text
 **Passo 7**: Descomente a linha 52:
 ```csharp
 services.AddNHibernate(connectionString, dbSettings);
-```
-
+```text
 **Passo 8**: Execute o projeto!
 
 ```bash
 dotnet build
 dotnet run --project src/Api
-```
-
+```markdown
 #### O que foi implementado:
 - ✅ `ProductNHibernateRepository` - Com LINQ support
 - ✅ `OrderNHibernateRepository` - Com lazy loading
@@ -150,13 +141,11 @@ dotnet run --project src/Api
 ```xml
 <PackageReference Include="linq2db" Version="5.4.1" />
 <PackageReference Include="linq2db.EntityFrameworkCore" Version="8.1.0" />
-```
-
+```text
 **Passo 2**: Edite `src/Infrastructure/Infrastructure.csproj` e descomente (linha ~44):
 ```xml
 <PackageReference Include="linq2db.AspNet" Version="5.4.1" />
-```
-
+```text
 **Passo 3**: No arquivo `src/Data/Data.csproj`, **remova ou comente** as linhas que excluem Linq2Db da compilação (~linha 51):
 ```xml
 <!-- Comente ou remova estas linhas -->
@@ -166,8 +155,7 @@ dotnet run --project src/Api
   <Compile Remove="Repository\Linq2Db\**" />
 </ItemGroup>
 -->
-```
-
+```csharp
 **Passo 4**: Abra `src/Infrastructure/Extensions/DatabaseExtension.cs`:
 - Descomente o using na linha 8: `using LinqToDB.AspNet;`
 - Descomente o código do método `AddLinq2Db` (linhas ~169-182)
@@ -175,8 +163,7 @@ dotnet run --project src/Api
 **Passo 5**: Restaure os pacotes:
 ```bash
 dotnet restore
-```
-
+```markdown
 #### Como habilitar no projeto:
 
 **Passo 6**: Abra `src/Infrastructure/Extensions/DatabaseExtension.cs`
@@ -184,20 +171,17 @@ dotnet restore
 **Passo 7**: Comente a linha 41:
 ```csharp
 // services.AddEntityFramework(connectionString, dbSettings);
-```
-
+```text
 **Passo 8**: Descomente a linha 57:
 ```csharp
 services.AddLinq2Db(connectionString, dbSettings);
-```
-
+```text
 **Passo 9**: Execute o projeto!
 
 ```bash
 dotnet build
 dotnet run --project src/Api
-```
-
+```markdown
 #### O que foi implementado:
 - ✅ `ProductLinq2DbRepository` - Com LINQ completo
 - ✅ `OrderLinq2DbRepository` - Com transações
@@ -214,8 +198,7 @@ Após habilitar qualquer ORM, teste os endpoints:
 ### Swagger UI
 ```
 http://localhost:5000/swagger
-```
-
+```markdown
 ### Testar Products
 ```bash
 # GET - Listar produtos
@@ -228,8 +211,7 @@ curl http://localhost:5000/api/v1/product/1
 curl -X POST http://localhost:5000/api/v1/product \
   -H "Content-Type: application/json" \
   -d '{"name":"Test Product","price":99.99,"stock":10,"category":"Test"}'
-```
-
+```markdown
 ### Testar Orders
 ```bash
 # GET - Listar pedidos
@@ -237,8 +219,7 @@ curl http://localhost:5000/api/v1/order
 
 # GET - Buscar pedido por ID (com items)
 curl http://localhost:5000/api/v1/order/1
-```
-
+```markdown
 ---
 
 ## 📊 Comparação de Performance
@@ -278,8 +259,7 @@ public class ProductService
         _dapperRepo = dapperRepo; // Dapper para queries complexas
     }
 }
-```
-
+```markdown
 ---
 
 ## 🆘 Troubleshooting
@@ -291,8 +271,7 @@ public class ProductService
 **Solução**: Execute as migrations do EF Core primeiro para criar as tabelas:
 ```bash
 dotnet ef database update --project src/Data --startup-project src/Api
-```
-
+```markdown
 ### Erro de compilação com Linq2Db
 **Solução**: Instale o pacote `linq2db.AspNet` no projeto Infrastructure
 
@@ -319,13 +298,11 @@ dotnet ef database update --project src/Data --startup-project src/Api
 **Passo 2**: Comente a linha 67:
 ```csharp
 // services.AddEntityFramework(connectionString, dbSettings);
-```
-
+```text
 **Passo 3**: Descomente a linha 81:
 ```csharp
 services.AddAdo(connectionString);
-```
-
+```text
 **Passo 4**: Execute o projeto!
 
 ```bash

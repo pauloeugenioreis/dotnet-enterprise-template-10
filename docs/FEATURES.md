@@ -40,8 +40,7 @@ MongoDB é um banco de dados NoSQL orientado a documentos, ideal para dados não
 **1. Descomente no Infrastructure.csproj:**
 ```xml
 <PackageReference Include="MongoDB.Driver" Version="3.5.2" />
-```
-
+```text
 **2. Configure no appsettings.json:**
 ```json
 {
@@ -53,14 +52,12 @@ MongoDB é um banco de dados NoSQL orientado a documentos, ideal para dados não
     }
   }
 }
-```
-
+```text
 **3. Adicione no Program.cs:**
 ```csharp
 // Add MongoDB (OPTIONAL)
 builder.Services.AddMongo<Program>();
-```
-
+```text
 **4. Use no código:**
 ```csharp
 using MongoDB.Driver;
@@ -80,8 +77,7 @@ public class MyService
         return await collection.Find(_ => true).ToListAsync();
     }
 }
-```
-
+```markdown
 ---
 
 ## ⏰ Quartz.NET (Background Jobs)
@@ -111,8 +107,7 @@ Quartz.NET é um scheduler de jobs para executar tarefas em segundo plano de for
     }
   }
 }
-```
-
+```text
 **3. Crie um Job:**
 ```csharp
 // Infrastructure/Jobs/CleanupJob.cs
@@ -137,8 +132,7 @@ public class CleanupJob : IJob
         _logger.LogInformation("Cleanup job completed");
     }
 }
-```
-
+```text
 **4. Registre no Program.cs:**
 ```csharp
 // Add Quartz with Jobs (OPTIONAL)
@@ -152,8 +146,7 @@ builder.Services.AddCustomizedQuartz((q, settings) =>
         .WithIdentity("cleanup-trigger")
         .WithCronSchedule("0 0 3 * * ?"));
 });
-```
-
+```markdown
 ---
 
 ## 🐰 RabbitMQ (Message Queue)
@@ -183,14 +176,12 @@ RabbitMQ é um message broker para comunicação assíncrona entre serviços.
     }
   }
 }
-```
-
+```text
 **3. Adicione no Program.cs:**
 ```csharp
 // Add RabbitMQ (OPTIONAL)
 builder.Services.AddRabbitMq();
-```
-
+```text
 **4. Use no código:**
 ```csharp
 public class OrderService
@@ -216,8 +207,7 @@ public class OrderService
         });
     }
 }
-```
-
+```markdown
 ---
 
 ## ☁️ Google Cloud Storage
@@ -247,14 +237,12 @@ Google Cloud Storage é um serviço de armazenamento de objetos para arquivos e 
     }
   }
 }
-```
-
+```text
 **3. Adicione no Program.cs:**
 ```csharp
 // Add Google Cloud Storage (OPTIONAL)
 builder.Services.AddStorage<Program>();
-```
-
+```text
 **4. Use no código:**
 ```csharp
 public class DocumentController : ApiControllerBase
@@ -279,8 +267,7 @@ public class DocumentController : ApiControllerBase
         return Ok(new { Url = url });
     }
 }
-```
-
+```markdown
 ---
 
 ## 🔐 JWT Authentication
@@ -312,8 +299,7 @@ JSON Web Token para autenticação stateless baseada em tokens.
     }
   }
 }
-```
-
+```text
 **3. Adicione no Program.cs:**
 ```csharp
 // Add Authentication (OPTIONAL)
@@ -324,8 +310,7 @@ builder.Services.AddAuthenticationExtension();
 // Use Authentication
 app.UseAuthentication();
 app.UseAuthorization();
-```
-
+```text
 **4. Proteja endpoints:**
 ```csharp
 [Authorize] // Requires authentication
@@ -335,8 +320,7 @@ public IActionResult GetSecureData()
     var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     return Ok(new { UserId = userId });
 }
-```
-
+```text
 **5. Gere tokens:**
 ```csharp
 // Services/TokenService.cs
@@ -363,8 +347,7 @@ public string GenerateToken(string userId, string username)
     var token = tokenHandler.CreateToken(tokenDescriptor);
     return tokenHandler.WriteToken(token);
 }
-```
-
+```markdown
 ---
 
 ## 📌 API Versioning
@@ -386,8 +369,7 @@ Versionamento de API para gerenciar mudanças sem quebrar clientes existentes.
 ```csharp
 // Add API Versioning (OPTIONAL)
 builder.Services.AddCustomizedApiVersioning();
-```
-
+```text
 **3. Use em controllers:**
 ```csharp
 [ApiController]
@@ -413,16 +395,14 @@ public class ProductsV2Controller : ApiControllerBase
         return Ok(new { Version = "2.0", Message = "New version" });
     }
 }
-```
-
+```text
 **4. Acesse:**
 ```
 GET /api/v1/products
 GET /api/v2/products
 GET /api/products?api-version=2.0
 GET /api/products (Header: X-Api-Version: 2.0)
-```
-
+```markdown
 ---
 
 ## 🚨 Global Exception Handler
@@ -449,8 +429,7 @@ throw new BusinessException("Insufficient stock for order");
 
 // 401 Unauthorized
 throw new UnauthorizedAccessException("Invalid credentials");
-```
-
+```text
 **Respostas automáticas:**
 ```json
 {
@@ -460,8 +439,7 @@ throw new UnauthorizedAccessException("Invalid credentials");
   "detail": "Product with key '123' was not found.",
   "instance": "/api/products/123"
 }
-```
-
+```markdown
 ---
 
 ## ✅ Validation Filter
@@ -504,14 +482,12 @@ public class CreateProductValidator : AbstractValidator<CreateProductDto>
             .WithMessage("Stock cannot be negative");
     }
 }
-```
-
+```text
 **3. Registre validators no Program.cs:**
 ```csharp
 // Register FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductValidator>();
-```
-
+```text
 **4. Use no controller:**
 ```csharp
 [HttpPost]
@@ -524,8 +500,7 @@ public async Task<IActionResult> Create([FromBody] CreateProductDto dto)
     var created = await _service.CreateAsync(product);
     return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
 }
-```
-
+```text
 **Resposta de validação:**
 ```json
 {
@@ -537,8 +512,7 @@ public async Task<IActionResult> Create([FromBody] CreateProductDto dto)
     "Price": ["Price must be greater than zero"]
   }
 }
-```
-
+```markdown
 ---
 
 ## 📊 Advanced Logging
@@ -556,8 +530,7 @@ Logging estruturado com suporte a Console JSON e Google Cloud Logging.
 // Production sem GCP: Simple Console
 // Production com GCP: Google Cloud Logging
 builder.AddCustomLogging();
-```
-
+```text
 **Use nos serviços:**
 ```csharp
 public class ProductService
@@ -586,8 +559,7 @@ public class ProductService
         }
     }
 }
-```
-
+```text
 **Logs estruturados:**
 ```json
 {
@@ -600,8 +572,7 @@ public class ProductService
     "RequestPath": "/api/products"
   }
 }
-```
-
+```markdown
 ---
 
 ## 🎯 Recomendações
@@ -652,8 +623,7 @@ services:
     image: redis:alpine
     ports:
       - "6379:6379"
-```
-
+```markdown
 ---
 
 ## 📚 Swagger/OpenAPI
@@ -690,8 +660,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseCustomizedSwagger();
 }
-```
-
+```markdown
 ### Personalizar
 
 **Para customizar, edite `SwaggerExtension.cs`:**
@@ -709,8 +678,7 @@ options.SwaggerDoc("v1", new OpenApiInfo
         Url = new Uri("https://meudominio.com")
     }
 });
-```
-
+```markdown
 ### Habilitar Comentários XML
 
 **1. Adicione no Api.csproj:**
@@ -719,8 +687,7 @@ options.SwaggerDoc("v1", new OpenApiInfo
   <GenerateDocumentationFile>true</GenerateDocumentationFile>
   <NoWarn>$(NoWarn);1591</NoWarn>
 </PropertyGroup>
-```
-
+```text
 **2. Documente seus controllers:**
 ```csharp
 /// <summary>
@@ -744,15 +711,13 @@ public class ProductsController : ControllerBase
         // ...
     }
 }
-```
-
+```markdown
 ### Acessar Swagger
 
 **Development:**
 ```
 http://localhost:5000/swagger
-```
-
+```markdown
 **Testar com Token JWT:**
 1. Faça login e copie o token
 2. Clique no botão "Authorize" 🔒
@@ -784,13 +749,11 @@ public class AddCustomHeaderParameter : IOperationFilter
         });
     }
 }
-```
-
+```text
 **Registrar:**
 ```csharp
 options.OperationFilter<AddCustomHeaderParameter>();
-```
-
+```markdown
 ### Múltiplas Versões
 
 **Para suportar v1 e v2:**
@@ -804,8 +767,7 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
     options.SwaggerEndpoint("/swagger/v2/swagger.json", "API v2");
 });
-```
-
+```markdown
 ### Desabilitar em Produção
 
 **Por segurança, Swagger já está desabilitado em produção:**
@@ -814,14 +776,12 @@ if (app.Environment.IsDevelopment())
 {
     app.UseCustomizedSwagger(); // Apenas em dev
 }
-```
-
+```text
 **Para habilitar em produção (não recomendado):**
 ```csharp
 // Sem verificação de ambiente
 app.UseCustomizedSwagger();
-```
-
+```markdown
 ### Recomendações
 
 - ✅ Use Swagger em **Development e Staging**
@@ -853,8 +813,7 @@ if (notificationService != null)
 {
     await notificationService.NotifyAsync(context, exception);
 }
-```
-
+```markdown
 ### Implementação Padrão
 
 **O template inclui implementação básica que loga no console:**
@@ -871,8 +830,7 @@ public class ExceptionNotificationService : IExceptionNotificationService
             user, path);
     }
 }
-```
-
+```markdown
 ### Customizar para Email
 
 **Criar implementação customizada:**
@@ -922,14 +880,12 @@ public class EmailExceptionNotificationService : IExceptionNotificationService
         }
     }
 }
-```
-
+```text
 **Registrar no DependencyInjectionExtension.cs:**
 ```csharp
 // Substituir implementação padrão
 services.AddScoped<IExceptionNotificationService, EmailExceptionNotificationService>();
-```
-
+```markdown
 ### Customizar para Slack
 
 ```csharp
@@ -968,8 +924,7 @@ public class SlackExceptionNotificationService : IExceptionNotificationService
         await _httpClient.PostAsJsonAsync(_webhookUrl, message);
     }
 }
-```
-
+```markdown
 ### Filtrar Exceções
 
 **Notificar apenas erros críticos:**
@@ -988,8 +943,7 @@ public async Task NotifyAsync(HttpContext context, Exception exception)
         await SendNotificationAsync(context, exception);
     }
 }
-```
-
+```markdown
 ### Throttling (Limitar Notificações)
 
 **Evitar spam com muitas notificações:**
@@ -1013,8 +967,7 @@ public async Task NotifyAsync(HttpContext context, Exception exception)
     _lastNotification[key] = now;
     await SendNotificationAsync(context, exception);
 }
-```
-
+```markdown
 ### Recomendações
 
 - ✅ **Development**: Apenas logs no console
@@ -1065,15 +1018,13 @@ Sistema completo de **observabilidade** com **OpenTelemetry** incluindo:
     }
   }
 }
-```
-
+```text
 **2. Iniciar Stack de Observabilidade:**
 
 ```bash
 # Jaeger + Prometheus + Grafana
 docker-compose up -d
-```
-
+```markdown
 **3. Acessar UIs:**
 
 - **Jaeger**: http://localhost:16686 (traces)
@@ -1110,8 +1061,7 @@ public class ProductService : Service<Product>
         return result;
     }
 }
-```
-
+```markdown
 ### Configurações de Produção
 
 ```json
@@ -1125,8 +1075,7 @@ public class ProductService : Service<Product>
     }
   }
 }
-```
-
+```markdown
 ### Mais Informações
 
 📖 **Documentação completa**: [docs/TELEMETRY.md](TELEMETRY.md)
@@ -1217,8 +1166,7 @@ Rate Limiting controla a taxa de requisições que clientes podem fazer à API, 
     }
   }
 }
-```
-
+```text
 **2. Aplique nos endpoints:**
 
 ```csharp
@@ -1247,8 +1195,7 @@ public class ProductController : ControllerBase
     [HttpGet("health")]
     public IActionResult Health() => Ok();
 }
-```
-
+```markdown
 ### Resposta de Limite Excedido (429)
 
 Quando o limite é excedido:
@@ -1260,8 +1207,7 @@ X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 0
 X-RateLimit-Reset: 1705330260
 Retry-After: 45
-```
-
+```text
 **Body:**
 ```json
 {
@@ -1271,8 +1217,7 @@ Retry-After: 45
   "retryAfter": 45,
   "resetAt": "2024-01-15T10:51:00Z"
 }
-```
-
+```markdown
 ### Limites Recomendados
 
 | Tipo de API | Fixed Window | Token Bucket | Concurrency |
@@ -1297,8 +1242,7 @@ IPs whitelistados não sofrem limitação:
     ]
   }
 }
-```
-
+```markdown
 **Usa casos:**
 - Servidores internos (CI/CD, monitoramento)
 - IPs de parceiros
@@ -1312,20 +1256,17 @@ IPs whitelistados não sofrem limitação:
     $response = Invoke-WebRequest -Uri "http://localhost:5000/api/v1/Product" -SkipHttpErrorCheck
     Write-Host "Request $_: $($response.StatusCode)"
 }
-```
-
+```text
 **curl:**
 ```bash
 for i in {1..105}; do
   curl -i http://localhost:5000/api/v1/Product
 done
-```
-
+```text
 **Verificar headers:**
 ```bash
 curl -i http://localhost:5000/api/v1/Product | grep -i "x-ratelimit"
-```
-
+```markdown
 ### Logs
 
 ```
@@ -1334,8 +1275,7 @@ curl -i http://localhost:5000/api/v1/Product | grep -i "x-ratelimit"
 📊  Sliding Window: 200 req/60s (6 segments)
 📊  Token Bucket: 50 tokens, refill 10/10s
 📊  Concurrency: 10 simultaneous requests
-```
-
+```markdown
 ### Mais Informações
 
 📖 **Documentação completa**: [docs/RATE-LIMITING.md](RATE-LIMITING.md)
@@ -1409,8 +1349,7 @@ O template inclui pipelines prontos para:
 ```
 DOCKER_USERNAME=seu-usuario
 DOCKER_PASSWORD=seu-token
-```
-
+```markdown
 **3. Push para `main` ou `develop`** - Pipeline executa automaticamente!
 
 **4. Ver resultados** na aba **Actions**.
@@ -1468,8 +1407,7 @@ Todos os pipelines seguem este fluxo:
 5. 🚀 Deploy (Manual)
    ├── Deploy to Staging
    └── Deploy to Production (with approval)
-```
-
+```markdown
 ### Badges
 
 Adicione ao seu README.md:
@@ -1477,19 +1415,16 @@ Adicione ao seu README.md:
 **GitHub Actions:**
 ```markdown
 ![CI/CD](https://github.com/usuario/repo/actions/workflows/ci.yml/badge.svg)
-```
-
+```text
 **Azure DevOps:**
 ```markdown
 [![Build Status](https://dev.azure.com/org/project/_apis/build/status/pipeline)](https://dev.azure.com/org/project/_build)
-```
-
+```text
 **GitLab CI:**
 ```markdown
 [![pipeline status](https://gitlab.com/usuario/repo/badges/main/pipeline.svg)](https://gitlab.com/usuario/repo/-/commits/main)
 [![coverage report](https://gitlab.com/usuario/repo/badges/main/coverage.svg)](https://gitlab.com/usuario/repo/-/commits/main)
-```
-
+```markdown
 ### Personalização
 
 **Alterar versão do .NET:**
@@ -1505,8 +1440,7 @@ variables:
 
 # GitLab CI
 image: mcr.microsoft.com/dotnet/sdk:10.0
-```
-
+```text
 **Deploy automático** (remover aprovação manual):
 
 ```yaml
@@ -1518,8 +1452,7 @@ if: github.ref == 'refs/heads/main'
 
 # GitLab CI - remover when
 # when: manual
-```
-
+```markdown
 ### Logs e Resultados
 
 Todos os pipelines geram:
@@ -1538,8 +1471,7 @@ Todos os pipelines geram:
 dotnet restore
 dotnet build --configuration Release
 dotnet test
-```
-
+```markdown
 **Docker build falha:**
 - Verifique se Dockerfile está na raiz
 - Verifique se serviços Docker estão ativos
@@ -1594,8 +1526,7 @@ dotnet test
 
 ```bash
 docker-compose up -d postgres-events
-```
-
+```markdown
 **API de Auditoria:**
 - `GET /api/audit/Order/123` - Histórico completo
 - `GET /api/audit/Order/123/at/2026-01-11T12:00:00Z` - Time travel
@@ -1646,14 +1577,12 @@ Sistema completo de **autenticação e autorização** com JWT (JSON Web Tokens)
     }
   }
 }
-```
-
+```text
 **2. Criar migration:**
 ```bash
 dotnet ef migrations add AddAuthentication --project src/Data --startup-project src/Api
 dotnet ef database update --project src/Data --startup-project src/Api
-```
-
+```text
 **3. Testar no Swagger:**
 ```bash
 dotnet run --project src/Api
@@ -1661,8 +1590,7 @@ dotnet run --project src/Api
 # POST /api/auth/register - Registrar usuário
 # POST /api/auth/login - Fazer login
 # Use o botão "Authorize" no Swagger com: Bearer {token}
-```
-
+```markdown
 ### Endpoints Disponíveis
 
 | Método | Endpoint | Descrição |
@@ -1705,8 +1633,7 @@ var authResponse = await authService.LoginAsync(loginDto, "127.0.0.1");
 // Use token in API calls
 httpClient.DefaultRequestHeaders.Authorization = 
     new AuthenticationHeaderValue("Bearer", authResponse.AccessToken);
-```
-
+```markdown
 ### OAuth2 Providers
 
 **Google:**
@@ -1720,8 +1647,7 @@ httpClient.DefaultRequestHeaders.Authorization =
     }
   }
 }
-```
-
+```text
 **Microsoft:**
 ```json
 {
@@ -1732,8 +1658,7 @@ httpClient.DefaultRequestHeaders.Authorization =
     "TenantId": "common"
   }
 }
-```
-
+```text
 **GitHub:**
 ```json
 {
@@ -1743,8 +1668,7 @@ httpClient.DefaultRequestHeaders.Authorization =
     "ClientSecret": "your-github-client-secret"
   }
 }
-```
-
+```markdown
 ### Password Policy
 
 Configure requisitos de senha:

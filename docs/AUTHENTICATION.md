@@ -31,7 +31,7 @@ This template provides a comprehensive authentication system with JWT (JSON Web 
 
 For development and testing, a default admin user is automatically created when seeding the database:
 
-```
+```text
 Username: admin
 Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com
@@ -43,8 +43,7 @@ Role:     Admin
 To seed the database with the default admin user, run:
 ```bash
 dotnet run --project src/Api
-```
-
+```sql
 The seeder will automatically create:
 - **Roles**: Admin, User, Manager
 - **Default Admin User** with the credentials above
@@ -82,8 +81,7 @@ The seeder will automatically create:
     ┌────▼──────────────┐
     │ ApplicationDbContext │  ← EF Core
     └───────────────────┘
-```
-
+```markdown
 ## Configuration
 
 ### appsettings.json
@@ -139,8 +137,7 @@ The seeder will automatically create:
     }
   }
 }
-```
-
+```markdown
 ### Configuration Options
 
 #### JwtSettings
@@ -174,8 +171,7 @@ dotnet run --project src/Api
 
 # API will be available at http://localhost:5000
 # Swagger UI at http://localhost:5000/swagger
-```
-
+```markdown
 ### 2. Login with Admin Credentials
 
 Use the default admin credentials to get a JWT token:
@@ -187,8 +183,7 @@ curl -X POST http://localhost:5000/api/auth/login \
     "usernameOrEmail": "admin",
     "password": "Admin@2026!Secure"
   }'
-```
-
+```text
 **Response:**
 ```json
 {
@@ -204,8 +199,7 @@ curl -X POST http://localhost:5000/api/auth/login \
     "roles": ["Admin"]
   }
 }
-```
-
+```markdown
 ### 3. Use the Access Token
 
 Add the token to the `Authorization` header:
@@ -213,8 +207,7 @@ Add the token to the `Authorization` header:
 ```bash
 curl -X GET http://localhost:5000/api/auth/me \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-```
-
+```sql
 ### 4. Test in Swagger
 
 1. Open http://localhost:5000/swagger
@@ -240,8 +233,7 @@ Create a new user account.
   "firstName": "John",
   "lastName": "Doe"
 }
-```
-
+```text
 **Response:**
 ```json
 {
@@ -257,8 +249,7 @@ Create a new user account.
     "roles": ["User"]
   }
 }
-```
-
+```markdown
 ### 2. Login
 
 Authenticate with username/email and password.
@@ -271,8 +262,7 @@ Authenticate with username/email and password.
   "usernameOrEmail": "john.doe",
   "password": "P@ssw0rd123"
 }
-```
-
+```text
 **Response:**
 ```json
 {
@@ -288,8 +278,7 @@ Authenticate with username/email and password.
     "roles": ["User"]
   }
 }
-```
-
+```csharp
 ### 3. Refresh Token
 
 Get a new access token using a refresh token.
@@ -301,8 +290,7 @@ Get a new access token using a refresh token.
 {
   "refreshToken": "a1b2c3d4e5f6..."
 }
-```
-
+```text
 **Response:**
 ```json
 {
@@ -318,8 +306,7 @@ Get a new access token using a refresh token.
     "roles": ["User"]
   }
 }
-```
-
+```markdown
 ### 4. Revoke Token (Logout)
 
 Invalidate a refresh token.
@@ -331,8 +318,7 @@ Invalidate a refresh token.
 {
   "refreshToken": "a1b2c3d4e5f6..."
 }
-```
-
+```markdown
 **Response:** `204 No Content`
 
 ### 5. Get Current User
@@ -344,8 +330,7 @@ Get authenticated user information.
 **Headers:**
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
+```text
 **Response:**
 ```json
 {
@@ -356,8 +341,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   "lastName": "Doe",
   "roles": ["User"]
 }
-```
-
+```markdown
 ### 6. Change Password
 
 Change the current user's password.
@@ -367,16 +351,14 @@ Change the current user's password.
 **Headers:**
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
+```text
 **Request:**
 ```json
 {
   "currentPassword": "P@ssw0rd123",
   "newPassword": "NewP@ssw0rd456"
 }
-```
-
+```sql
 **Response:** `204 No Content`
 
 ### 7. Update Profile
@@ -388,8 +370,7 @@ Update user profile information.
 **Headers:**
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
+```text
 **Request:**
 ```json
 {
@@ -398,8 +379,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   "phoneNumber": "+1234567890",
   "profileImageUrl": "https://example.com/avatar.jpg"
 }
-```
-
+```text
 **Response:**
 ```json
 {
@@ -412,8 +392,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   "profileImageUrl": "https://example.com/avatar.jpg",
   "roles": ["User"]
 }
-```
-
+```markdown
 ### 8. OAuth2 Login (Coming Soon)
 
 Login with external OAuth2 providers.
@@ -426,8 +405,7 @@ Login with external OAuth2 providers.
   "provider": "Google",
   "accessToken": "ya29.a0AfH6SMBx..."
 }
-```
-
+```text
 **Response:**
 ```json
 {
@@ -443,8 +421,7 @@ Login with external OAuth2 providers.
     "roles": ["User"]
   }
 }
-```
-
+```markdown
 ## Usage Examples
 
 ### C# Client
@@ -489,8 +466,7 @@ var user = await meResponse.Content.ReadFromJsonAsync<UserDto>();
 var refreshDto = new { RefreshToken = authResponse.RefreshToken };
 var refreshResponse = await client.PostAsJsonAsync("/api/auth/refresh-token", refreshDto);
 authResponse = await refreshResponse.Content.ReadFromJsonAsync<AuthResponse>();
-```
-
+```markdown
 ### JavaScript/TypeScript
 
 ```typescript
@@ -572,8 +548,7 @@ async function logout() {
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
 }
-```
-
+```markdown
 ### cURL
 
 ```bash
@@ -613,8 +588,7 @@ curl -X POST http://localhost:5000/api/auth/revoke-token \
   -d '{
     "refreshToken": "YOUR_REFRESH_TOKEN"
   }'
-```
-
+```markdown
 ## Security Best Practices
 
 ### 1. JWT Secret Key
@@ -625,8 +599,7 @@ curl -X POST http://localhost:5000/api/auth/revoke-token \
 ```bash
 # Generate a secure random key
 openssl rand -base64 32
-```
-
+```markdown
 ### 2. HTTPS Only
 - Always use HTTPS in production
 - Set `RequireHttpsMetadata = true` in production
@@ -655,8 +628,7 @@ var hashedPassword = BCrypt.HashPassword(password, workFactor: 12);
 
 // Verify password
 bool isValid = BCrypt.Verify(password, hashedPassword);
-```
-
+```markdown
 ### 6. Rate Limiting
 - Enable rate limiting to prevent brute force attacks
 - Limit login attempts per IP
@@ -692,8 +664,7 @@ CREATE TABLE Users (
     CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
     UpdatedAt DATETIME2
 );
-```
-
+```markdown
 ### Roles Table
 ```sql
 CREATE TABLE Roles (
@@ -703,8 +674,7 @@ CREATE TABLE Roles (
     IsSystemRole BIT NOT NULL DEFAULT 0,
     CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE()
 );
-```
-
+```markdown
 ### UserRoles Table (Many-to-Many)
 ```sql
 CREATE TABLE UserRoles (
@@ -715,8 +685,7 @@ CREATE TABLE UserRoles (
     FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
     FOREIGN KEY (RoleId) REFERENCES Roles(Id) ON DELETE CASCADE
 );
-```
-
+```markdown
 ### RefreshTokens Table
 ```sql
 CREATE TABLE RefreshTokens (
@@ -732,8 +701,7 @@ CREATE TABLE RefreshTokens (
     ReplacedByToken NVARCHAR(200),
     FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
 );
-```
-
+```sql
 ## OAuth2 Setup
 
 ### Google OAuth2
@@ -759,8 +727,7 @@ CREATE TABLE RefreshTokens (
     }
   }
 }
-```
-
+```markdown
 ### Microsoft OAuth2
 
 1. **Register application:**
@@ -784,8 +751,7 @@ CREATE TABLE RefreshTokens (
     }
   }
 }
-```
-
+```sql
 ### GitHub OAuth2
 
 1. **Create OAuth App:**
@@ -807,20 +773,17 @@ CREATE TABLE RefreshTokens (
     }
   }
 }
-```
-
+```markdown
 ## Testing with Swagger
 
 1. **Start the application:**
 ```bash
 dotnet run --project src/Api/Api.csproj
-```
-
+```text
 2. **Open Swagger UI:**
 ```
 http://localhost:5000
-```
-
+```sql
 3. **Register a new user:**
    - POST `/api/auth/register`
    - Copy the `accessToken` from response
@@ -862,13 +825,11 @@ If you're migrating from basic authentication:
 1. **Create migration:**
 ```bash
 dotnet ef migrations add AddAuthentication --project src/Data --startup-project src/Api
-```
-
+```sql
 2. **Update database:**
 ```bash
 dotnet ef database update --project src/Data --startup-project src/Api
-```
-
+```text
 3. **Seed default roles:**
 ```csharp
 // In DbSeeder.cs
@@ -880,8 +841,7 @@ if (!context.Roles.Any())
     );
     await context.SaveChangesAsync();
 }
-```
-
+```markdown
 ## Performance Considerations
 
 ### Token Validation

@@ -24,8 +24,7 @@ Guia rápido para começar a usar o template em menos de 5 minutos!
 cd scripts
 .\new-project.ps1 -ProjectName "MeuProjeto"
 cd MeuProjeto
-```
-
+```markdown
 ### Linux/macOS
 
 ```bash
@@ -33,16 +32,14 @@ cd scripts
 chmod +x new-project.sh
 ./new-project.sh MeuProjeto
 cd MeuProjeto
-```
-
+```markdown
 ### Windows (CMD)
 
 ```cmd
 cd scripts
 new-project.bat MeuProjeto
 cd MeuProjeto
-```
-
+```markdown
 ---
 
 ## ⚙️ 2. Configurar Banco de Dados
@@ -62,8 +59,7 @@ Edite `src/Api/appsettings.Development.json`:
     }
   }
 }
-```
-
+```markdown
 ### Outros bancos
 
 Veja `docs/ORM-GUIDE.md` para PostgreSQL, MySQL, Oracle.
@@ -77,8 +73,7 @@ Veja `docs/ORM-GUIDE.md` para PostgreSQL, MySQL, Oracle.
 ```bash
 cd src/Api
 dotnet run
-```
-
+```markdown
 Acesse: 
 - **API**: `http://localhost:5000` ou `https://localhost:5001`
 - **Swagger UI**: `http://localhost:5000/swagger`
@@ -91,8 +86,7 @@ O sistema cria automaticamente um usuário administrador:
 Username: admin
 Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com
-```
-
+```text
 > ⚠️ **IMPORTANTE**: Altere esta senha em produção!
 
 **Testar autenticação:**
@@ -109,8 +103,7 @@ curl -X POST http://localhost:5000/api/auth/login \
 # Copie o accessToken da resposta e use:
 curl -X GET http://localhost:5000/api/auth/me \
   -H "Authorization: Bearer SEU_TOKEN_AQUI"
-```
-
+```markdown
 Swagger: `http://localhost:5000/swagger`
 
 ### Opção B: Visual Studio
@@ -137,24 +130,21 @@ docker build -t meuprojeto-api:latest .
 
 # Run
 docker run -p 8080:8080 meuprojeto-api:latest
-```
-
+```markdown
 Acesse: `http://localhost:8080`
 
 ### Docker Compose
 
 ```bash
 docker-compose up -d
-```
-
+```text
 Acesse: `http://localhost:8080`
 
 Para parar:
 
 ```bash
 docker-compose down
-```
-
+```markdown
 ---
 
 ## ☸️ 5. Deploy no Kubernetes (Opcional)
@@ -166,16 +156,14 @@ docker-compose down
 ```powershell
 cd scripts/windows
 .\minikube-deploy.ps1
-```
-
+```markdown
 #### Linux/macOS
 
 ```bash
 cd scripts/linux
 chmod +x minikube-deploy.sh
 ./minikube-deploy.sh
-```
-
+```markdown
 ### Acessar aplicação
 
 ```bash
@@ -186,8 +174,7 @@ kubectl port-forward svc/meuprojeto-api 8080:80 -n meuprojeto
 start http://localhost:8080  # Windows
 open http://localhost:8080   # macOS
 xdg-open http://localhost:8080  # Linux
-```
-
+```markdown
 ### Limpar deploy
 
 #### Windows
@@ -195,15 +182,13 @@ xdg-open http://localhost:8080  # Linux
 ```powershell
 cd scripts/windows
 .\minikube-destroy.ps1
-```
-
+```markdown
 #### Linux/macOS
 
 ```bash
 cd scripts/linux
 ./minikube-destroy.sh
-```
-
+```markdown
 ---
 
 ## 🧪 6. Executar Testes
@@ -212,8 +197,7 @@ cd scripts/linux
 
 ```bash
 dotnet test
-```
-
+```markdown
 ### Testes específicos
 
 ```bash
@@ -222,8 +206,7 @@ dotnet test tests/Integration/
 
 # Testes unitários
 dotnet test tests/Infrastructure.UnitTests/
-```
-
+```markdown
 ### Script automatizado (Minikube)
 
 #### Windows
@@ -231,15 +214,13 @@ dotnet test tests/Infrastructure.UnitTests/
 ```powershell
 cd scripts/windows
 .\run-integration-tests.ps1
-```
-
+```markdown
 #### Linux/macOS
 
 ```bash
 cd scripts/linux
 ./run-integration-tests.sh
-```
-
+```markdown
 ---
 
 ## 📝 7. Criar sua Primeira Entidade
@@ -257,24 +238,21 @@ public class Product : EntityBase
     public decimal Price { get; set; }
     public int Stock { get; set; }
 }
-```
-
+```markdown
 ### 2. Adicionar ao DbContext
 
 `src/Data/Context/ApplicationDbContext.cs`:
 
 ```csharp
 public DbSet<Product> Products { get; set; }
-```
-
+```markdown
 ### 3. Criar migration (EF Core)
 
 ```bash
 cd src/Api
 dotnet ef migrations add AddProduct --project ../Data/Data.csproj
 dotnet ef database update
-```
-
+```markdown
 ### 4. Criar o Controller
 
 `src/Api/Controllers/ProductController.cs`:
@@ -313,8 +291,7 @@ public class ProductController : ApiControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 }
-```
-
+```markdown
 ### 5. Testar
 
 Execute a aplicação e acesse: `http://localhost:5000/swagger`
@@ -340,8 +317,7 @@ Teste os endpoints criados!
     }
   }
 }
-```
-
+```markdown
 ### Cache (Production = Redis)
 
 `appsettings.Production.json`:
@@ -360,8 +336,7 @@ Teste os endpoints criados!
     }
   }
 }
-```
-
+```sql
 ### Alternar ORM
 
 **Entity Framework Core é o padrão** e está habilitado no código.
@@ -404,8 +379,7 @@ Para trocar de ORM, **não use appsettings.json**:
 ```bash
 # Use outra porta
 dotnet run --urls "http://localhost:5005"
-```
-
+```markdown
 ### Docker: erro de build
 
 **Solução**:
@@ -422,8 +396,7 @@ eval $(minikube docker-env)
 
 # Rebuild a imagem
 docker build -t meuprojeto-api:latest .
-```
-
+```markdown
 ---
 
 ## 💡 Dicas

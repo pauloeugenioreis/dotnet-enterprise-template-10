@@ -57,14 +57,12 @@ O template suporta **múltiplos backends de telemetria** através do **OpenTelem
     }
   }
 }
-```
-
+```markdown
 ### 2️⃣ Iniciar Stack Completa com Docker
 
 ```bash
 docker-compose up -d
-```
-
+```markdown
 ### 3️⃣ Acessar as UIs
 
 - **Jaeger UI**: http://localhost:16686 (Distributed Tracing)
@@ -94,8 +92,7 @@ docker-compose up -d
     }
   }
 }
-```
-
+```text
 **⚠️ Mudança Importante:**
 - **Antes (Deprecated):** Porta 6831 (protocolo nativo Jaeger)
 - **Agora (Recomendado):** Porta 4317 (OTLP gRPC) ou 4318 (OTLP HTTP)
@@ -110,8 +107,7 @@ docker run -d --name jaeger \
   -p 4317:4317 \
   -p 4318:4318 \
   jaegertracing/all-in-one:latest
-```
-
+```markdown
 **Portas do Jaeger:**
 - `16686` - Jaeger UI (Web interface)
 - `4317` - OTLP gRPC receiver ✅ **RECOMENDADO**
@@ -139,8 +135,7 @@ docker run -d --name jaeger \
     "Providers": ["prometheus"]
   }
 }
-```
-
+```markdown
 **Métricas disponíveis:**
 - `http_server_request_duration_seconds` - Latência HTTP
 - `http_server_active_requests` - Requests ativas
@@ -174,8 +169,7 @@ docker run -d --name jaeger \
     }
   }
 }
-```
-
+```markdown
 **Como obter a Connection String:**
 1. Portal Azure → Application Insights
 2. Overview → Connection String
@@ -211,8 +205,7 @@ docker run -d --name datadog-agent \
   -e DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_GRPC_ENDPOINT="0.0.0.0:4317" \
   -p 4317:4317 \
   gcr.io/datadoghq/agent:latest
-```
-
+```text
 **Passo 2: Configurar appsettings.json**
 ```json
 {
@@ -227,8 +220,7 @@ docker run -d --name datadog-agent \
     }
   }
 }
-```
-
+```markdown
 **Obter API Key:**
 https://app.datadoghq.com/organization-settings/api-keys
 
@@ -250,8 +242,7 @@ https://app.datadoghq.com/organization-settings/api-keys
     }
   }
 }
-```
-
+```markdown
 **Como obter credenciais:**
 1. Dynatrace UI → Settings → Integration → OpenTelemetry
 2. Copy OTLP endpoint
@@ -275,8 +266,7 @@ https://app.datadoghq.com/organization-settings/api-keys
     }
   }
 }
-```
-
+```markdown
 **Como obter credenciais:**
 1. Grafana Cloud → Connections → Add new connection → OpenTelemetry
 2. Copy endpoint e token
@@ -297,8 +287,7 @@ Em produção, use sampling para reduzir custos:
     "SamplingRatio": 0.1  // 10% das requests
   }
 }
-```
-
+```markdown
 **Recomendações:**
 - **Development**: 1.0 (100%)
 - **Staging**: 0.5 (50%)
@@ -314,8 +303,7 @@ Em produção, use sampling para reduzir custos:
     "EnableHttpInstrumentation": false  // Não rastrear HTTP calls
   }
 }
-```
-
+```markdown
 ### Múltiplos Backends
 
 Você pode usar múltiplos backends simultaneamente:
@@ -327,8 +315,7 @@ Você pode usar múltiplos backends simultaneamente:
     "Providers": ["jaeger", "prometheus", "applicationinsights"]
   }
 }
-```
-
+```markdown
 **Exemplo:** Jaeger local para debug + Application Insights para produção
 
 ---
@@ -358,8 +345,7 @@ public class ProductService : Service<Product>
         return result;
     }
 }
-```
-
+```markdown
 ### Criar Histograma (Latência)
 
 ```csharp
@@ -375,8 +361,7 @@ var stopwatch = Stopwatch.StartNew();
 // ... operação ...
 stopwatch.Stop();
 _requestDuration.Record(stopwatch.ElapsedMilliseconds);
-```
-
+```markdown
 ---
 
 ## 🔍 O que é Rastreado Automaticamente
@@ -404,32 +389,27 @@ _requestDuration.Record(stopwatch.ElapsedMilliseconds);
 **1. Verificar se está habilitado:**
 ```json
 "Enabled": true
-```
-
+```text
 **2. Verificar logs de startup:**
 ```
 ✅ Telemetry enabled: jaeger, prometheus
   📊 Jaeger exporter enabled: localhost:6831
   📈 Prometheus exporter enabled (endpoint: /metrics)
-```
-
+```text
 **3. Testar endpoint Prometheus:**
 ```bash
 curl http://localhost:5000/metrics
-```
-
+```markdown
 ### Jaeger não recebe traces
 
 **Verificar se Jaeger está rodando:**
 ```bash
 docker ps | grep jaeger
-```
-
+```text
 **Testar conectividade:**
 ```bash
 telnet localhost 6831
-```
-
+```text
 **Verificar logs:**
 ```bash
 docker logs jaeger

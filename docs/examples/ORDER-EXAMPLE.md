@@ -36,8 +36,7 @@ public class Order : EntityBase
     
     public ICollection<OrderItem> Items { get; set; }
 }
-```
-
+```text
 **OrderItem.cs** - Order line items
 ```csharp
 public class OrderItem : EntityBase
@@ -49,8 +48,7 @@ public class OrderItem : EntityBase
     public decimal UnitPrice { get; set; }
     public decimal Subtotal { get; set; }
 }
-```
-
+```markdown
 ### DTOs Layer (Domain/Dtos)
 
 **Records** for immutability and conciseness:
@@ -81,8 +79,7 @@ public record OrderResponseDto
     public decimal Total { get; init; }
     // ... more properties
 }
-```
-
+```markdown
 ### Repository Layer (Data/Repository)
 
 **IOrderRepository** extends generic repository with custom methods:
@@ -95,8 +92,7 @@ public interface IOrderRepository : IRepository<Order>
     Task<IEnumerable<Order>> GetByDateRangeAsync(DateTime start, DateTime end, CancellationToken ct);
     Task<Order?> GetByOrderNumberAsync(string orderNumber, CancellationToken ct);
 }
-```
-
+```text
 **OrderRepository** implements with EF Core:
 
 ```csharp
@@ -113,8 +109,7 @@ public class OrderRepository : Repository<Order>, IOrderRepository
     }
     // ... more custom methods
 }
-```
-
+```markdown
 ### Service Layer (Application/Services)
 
 **IOrderService** extends generic service with business methods:
@@ -129,8 +124,7 @@ public interface IOrderService : IService<Order>
     Task<IEnumerable<OrderResponseDto>> GetOrdersByStatusAsync(string status, CancellationToken ct);
     Task<decimal> CalculateOrderTotalAsync(long orderId, CancellationToken ct);
 }
-```
-
+```text
 **OrderService** implements with business logic:
 
 ```csharp
@@ -173,8 +167,7 @@ public class OrderService : Service<Order>, IOrderService
         return MapToResponseDto(createdOrder);
     }
 }
-```
-
+```markdown
 ### Validation Layer (Domain/Validators)
 
 **FluentValidation** for automatic validation:
@@ -203,8 +196,7 @@ public class CreateOrderValidator : AbstractValidator<CreateOrderDto>
         });
     }
 }
-```
-
+```markdown
 ### Controller Layer (Api/Controllers)
 
 **OrderController** with comprehensive endpoints:
@@ -250,8 +242,7 @@ public class OrderController : ApiControllerBase
             $"Orders_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
     }
 }
-```
-
+```markdown
 ## 🎯 Key Features
 
 ### 1. **Custom Repository Pattern**
@@ -263,8 +254,7 @@ var orders = await _repository.GetAllAsync();
 // Use custom methods:
 var orders = await _orderRepository.GetByCustomerEmailAsync("customer@email.com");
 var pendingOrders = await _orderRepository.GetByStatusAsync("Pending");
-```
-
+```csharp
 ### 2. **Business Logic in Service**
 
 - ✅ Stock validation before order creation
@@ -308,8 +298,7 @@ Response: 400 Bad Request
     "Order must have at least one item"
   ]
 }
-```
-
+```markdown
 ### 5. **Excel Export with MiniExcel**
 
 ```csharp
@@ -317,8 +306,7 @@ GET /api/v1/Order/ExportToExcel?status=Delivered
 
 // Returns Excel file with:
 // OrderId | OrderNumber | CustomerName | ProductName | Quantity | UnitPrice | OrderTotal
-```
-
+```markdown
 ### 6. **Statistics and Reporting**
 
 ```csharp
@@ -336,8 +324,7 @@ GET /api/v1/Order/statistics
     { "productId": 5, "productName": "Product A", "quantitySold": 500, "revenue": 15000 }
   ]
 }
-```
-
+```sql
 ## 📊 API Endpoints
 
 | Method | Endpoint | Description |
@@ -357,8 +344,7 @@ GET /api/v1/Order/statistics
 Pending → Processing → Shipped → Delivered
    ↓
 Cancelled (at any stage)
-```
-
+```csharp
 ## 💡 Best Practices Demonstrated
 
 ### 1. **Separation of Concerns**
@@ -380,8 +366,7 @@ IRepository<Product> _productRepository;
 
 // Custom for complex queries
 IOrderRepository _orderRepository;
-```
-
+```markdown
 ### 4. **Service Layer Pattern**
 ```csharp
 // Don't put business logic in controller:
@@ -397,8 +382,7 @@ IOrderRepository _orderRepository;
     var order = await _orderService.CreateOrderAsync(dto);
     return CreatedAtAction(nameof(GetById), new { id = order.Id }, order);
 }
-```
-
+```markdown
 ### 5. **DTO Pattern**
 ```csharp
 // Don't expose entities directly:
@@ -406,15 +390,13 @@ IOrderRepository _orderRepository;
 
 // Use DTOs for API contracts:
 ✅ public async Task<IActionResult> Get() => Ok(await _service.GetOrdersAsync());
-```
-
+```markdown
 ### 6. **Validation**
 ```csharp
 // Automatic validation with FluentValidation
 // Validators registered in DI container
 // Validation happens before controller action
-```
-
+```markdown
 ### 7. **Error Handling**
 ```csharp
 // Custom exceptions for domain errors
@@ -426,29 +408,25 @@ throw new BusinessException($"Insufficient stock for {productName}");
 // 400 for ValidationException
 // 404 for NotFoundException
 // 422 for BusinessException
-```
-
+```markdown
 ### 8. **Async/Await**
 ```csharp
 // All methods support CancellationToken
 // Proper async implementation throughout
 Task<OrderResponseDto> CreateOrderAsync(CreateOrderDto dto, CancellationToken ct);
-```
-
+```markdown
 ### 9. **Logging**
 ```csharp
 _logger.LogInformation("Order {OrderNumber} created for {CustomerEmail}. Total: {Total:C}",
     order.OrderNumber, order.CustomerEmail, order.Total);
-```
-
+```markdown
 ### 10. **Performance Monitoring**
 ```csharp
 var stopwatch = Stopwatch.StartNew();
 // ... operation
 stopwatch.Stop();
 return Ok(new { executionTime = $"{stopwatch.ElapsedMilliseconds}ms", data });
-```
-
+```sql
 ## 🆚 Comparison: Product vs Order
 
 | Feature | Product (Basic) | Order (Advanced) |
@@ -488,8 +466,7 @@ Content-Type: application/json
   ],
   "notes": "Please deliver after 6 PM"
 }
-```
-
+```markdown
 ### Response
 
 ```json

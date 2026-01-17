@@ -21,8 +21,7 @@ services.AddInMemoryRateLimiting();
 services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
 app.UseIpRateLimiting();
-```
-
+```markdown
 **Features in Use:**
 - ✅ IP-based rate limiting
 - ✅ Client ID rate limiting

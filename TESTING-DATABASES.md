@@ -19,16 +19,14 @@ Este guia explica como testar o projeto com todos os 4 bancos de dados suportado
 ```powershell
 cd scripts\windows
 .\test-all-databases.ps1
-```
-
+```markdown
 ### Linux/macOS
 
 ```bash
 cd scripts/linux
 chmod +x test-all-databases.sh
 ./test-all-databases.sh
-```
-
+```markdown
 O script irá:
 1. ✅ Subir os 4 bancos de dados no Docker
 2. ✅ Aplicar migrations em cada banco
@@ -48,8 +46,7 @@ O script irá:
 ```bash
 # Na raiz do projeto
 docker-compose up -d sqlserver oracle postgres mysql
-```
-
+```text
 **Aguarde os bancos ficarem prontos (30-60 segundos):**
 
 ```bash
@@ -64,8 +61,7 @@ docker exec postgres pg_isready -U postgres
 
 # MySQL
 docker exec mysql mysqladmin ping -h localhost -u root -pMySqlPass123
-```
-
+```markdown
 ### 2. Testar SQL Server
 
 ```bash
@@ -79,13 +75,11 @@ dotnet run --project src/Api --environment SqlServer
 # Testar (em outro terminal)
 curl http://localhost:5000/health
 curl http://localhost:5000/swagger/index.html
-```
-
+```text
 **Connection String:**
 ```
 Server=localhost,1433;Database=ProjectTemplate;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
-```
-
+```markdown
 ### 3. Testar Oracle
 
 ```bash
@@ -98,13 +92,11 @@ dotnet run --project src/Api --environment Oracle
 
 # Testar
 curl http://localhost:5000/health
-```
-
+```text
 **Connection String:**
 ```
 User Id=appuser;Password=AppPass123;Data Source=localhost:1521/FREEPDB1;
-```
-
+```markdown
 **⚠️ Nota:** Oracle pode levar 1-2 minutos para ficar pronto na primeira execução.
 
 ### 4. Testar PostgreSQL
@@ -119,13 +111,11 @@ dotnet run --project src/Api --environment PostgreSQL
 
 # Testar
 curl http://localhost:5000/health
-```
-
+```text
 **Connection String:**
 ```
 Host=localhost;Port=5433;Database=ProjectTemplate;Username=postgres;Password=PostgresPass123;
-```
-
+```markdown
 **⚠️ Nota:** PostgreSQL principal roda na porta **5433** (5432 é usada pelo Event Store).
 
 ### 5. Testar MySQL
@@ -140,13 +130,11 @@ dotnet run --project src/Api --environment MySQL
 
 # Testar
 curl http://localhost:5000/health
-```
-
+```text
 **Connection String:**
 ```
 Server=localhost;Port=3306;Database=ProjectTemplate;User=appuser;Password=AppPass123;
-```
-
+```markdown
 ---
 
 ## 📝 Arquivos de Configuração
@@ -161,8 +149,7 @@ src/Api/
 ├── appsettings.Oracle.json       # Oracle config
 ├── appsettings.PostgreSQL.json   # PostgreSQL config
 └── appsettings.MySQL.json        # MySQL config
-```
-
+```markdown
 **Como funciona:**
 
 Quando você roda `dotnet run --environment SqlServer`, o .NET carrega:
@@ -204,8 +191,7 @@ Quando você roda `dotnet run --environment SqlServer`, o .NET carrega:
 
 # Aumentar timeout de startup da API (padrão: 30s)
 .\test-all-databases.ps1 -ApiStartupTimeout 60
-```
-
+```markdown
 ### Linux/macOS
 
 ```bash
@@ -226,8 +212,7 @@ Quando você roda `dotnet run --environment SqlServer`, o .NET carrega:
 
 # Aumentar timeout
 ./test-all-databases.sh --timeout 60
-```
-
+```markdown
 ---
 
 ## 🧹 Limpeza
@@ -236,22 +221,19 @@ Quando você roda `dotnet run --environment SqlServer`, o .NET carrega:
 
 ```bash
 docker-compose down
-```
-
+```markdown
 ### Parar e remover volumes (limpar dados)
 
 ```bash
 docker-compose down -v
-```
-
+```markdown
 ### Remover apenas um banco específico
 
 ```bash
 docker-compose stop sqlserver
 docker-compose rm -f sqlserver
 docker volume rm template_sqlserver-data
-```
-
+```markdown
 ---
 
 ## 🐛 Troubleshooting
@@ -265,8 +247,7 @@ Oracle Free Edition pode levar 1-2 minutos para inicializar na primeira vez.
 docker logs oracle -f
 
 # Aguardar até ver: "DATABASE IS READY TO USE!"
-```
-
+```markdown
 ### Erro de conexão "Network unreachable"
 
 Aguarde mais tempo. Os health checks do Docker podem levar até 30-60 segundos.
@@ -277,8 +258,7 @@ docker-compose ps
 
 # Verificar health status
 docker inspect sqlserver --format='{{.State.Health.Status}}'
-```
-
+```markdown
 ### Migrations falham com "database already exists"
 
 Limpe o banco antes de rodar migrations:
@@ -286,8 +266,7 @@ Limpe o banco antes de rodar migrations:
 ```bash
 dotnet ef database drop --project src/Data --startup-project src/Api --force
 dotnet ef database update --project src/Data --startup-project src/Api
-```
-
+```markdown
 ### Porta já em uso
 
 Verifique se há outro serviço usando a porta:
@@ -298,8 +277,7 @@ netstat -ano | findstr :1433
 
 # Linux/macOS
 lsof -i :1433
-```
-
+```markdown
 Pare o serviço conflitante ou altere a porta no `docker-compose.yml`.
 
 ---

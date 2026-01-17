@@ -30,8 +30,7 @@ dotnet test tests/Integration /p:CollectCoverage=true
 
 # Run specific test
 dotnet test tests/Integration --filter "FullyQualifiedName~ProductControllerTests.GetAll_ReturnsSuccessStatusCode"
-```
-
+```markdown
 ## Test Structure
 
 ```
@@ -41,8 +40,7 @@ tests/Integration/
 │   └── OrderControllerTests.cs
 ├── WebApplicationFactoryFixture.cs
 └── README.md
-```
-
+```markdown
 ## Writing Integration Tests
 
 ### Example Test

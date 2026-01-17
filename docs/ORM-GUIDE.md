@@ -82,8 +82,7 @@ public class ProductService
         return await _adoRepository.BulkUpdatePricesAsync(prices);
     }
 }
-```
-
+```markdown
 ### 📝 Escolha o ORM Certo para Cada Situação
 
 | Operação | ORM Recomendado | Motivo |
@@ -109,8 +108,7 @@ services.Scan(scan => scan
     .AsMatchingInterface()  // ← Mágica aqui!
     .WithScopedLifetime()
 );
-```
-
+```markdown
 **O que `.AsMatchingInterface()` faz:**
 - `Repository<Product>` → registrado como `IRepository<Product>` ✅
 - `ProductDapperRepository` → registrado como `IProductDapperRepository` ✅
@@ -148,8 +146,7 @@ Entity Framework Core está sempre habilitado como **ORM primário** do projeto.
 ```csharp
 // PRIMARY: Entity Framework Core (Change Tracking, Migrations, CRUD)
 services.AddEntityFramework(connectionString, dbSettings);
-```
-
+```markdown
 ### Configuração no appsettings.json
 
 Apenas configure o tipo de banco de dados:
@@ -165,8 +162,7 @@ Apenas configure o tipo de banco de dados:
     }
   }
 }
-```
-
+```markdown
 ### Implementação de Repositório
 
 ```csharp
@@ -183,8 +179,7 @@ public class ProductRepository : Repository<Product>, IProductRepository
             .ToListAsync();
     }
 }
-```
-
+```markdown
 ---
 
 ## ⚡ Dapper (Alta Performance)
@@ -219,8 +214,7 @@ public class ProductService
         return await _dapperRepo.GetAllAsync();
     }
 }
-```
-
+```markdown
 ### Localização no Código
 
 **Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`  
@@ -229,8 +223,7 @@ public class ProductService
 ```csharp
 // ENABLED: Dapper (High Performance Queries, Complex Reports)
 services.AddDapper(connectionString);
-```
-
+```markdown
 ### Interfaces Disponíveis
 
 - **`IProductDapperRepository`** - Repositório de produtos com Dapper
@@ -309,8 +302,7 @@ public class ProductDapperRepository : IRepository<Product>
 
     // Implemente os demais métodos da interface...
 }
-```
-
+```text
 **Passo 4**: Registre seus repositórios Dapper no método `AddDapper`:
 
 Edite `src/Infrastructure/Extensions/DatabaseExtension.cs`:
@@ -326,8 +318,7 @@ private static IServiceCollection AddDapper(
     
     return services;
 }
-```
-
+```markdown
 ### ⚠️ Importante: Microsoft.Data.SqlClient
 
 **Desde .NET 10**, o projeto utiliza **Microsoft.Data.SqlClient** (versão moderna e ativa) ao invés do obsoleto `System.Data.SqlClient`.
@@ -338,8 +329,7 @@ using Microsoft.Data.SqlClient;
 
 // ❌ NÃO use System.Data.SqlClient (obsoleto)
 // using System.Data.SqlClient;
-```
-
+```markdown
 **Compatibilidade**: O `Microsoft.Data.SqlClient` implementa `IDbConnection`, funcionando perfeitamente com **Dapper** e **ADO.NET**!
 
 **Pacotes Necessários**: Dapper já está incluído no `src/Data/Data.csproj` ✅
@@ -378,8 +368,7 @@ public class ProductService
         return await _adoRepo.GetAllAsync();
     }
 }
-```
-
+```markdown
 ### Localização no Código
 
 **Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`  
@@ -388,8 +377,7 @@ public class ProductService
 ```csharp
 // ENABLED: ADO.NET (Maximum Control, Legacy Integration)
 services.AddAdo(connectionString);
-```
-
+```markdown
 ### Interfaces Disponíveis
 
 - **`IProductAdoRepository`** - Repositório de produtos com ADO.NET
@@ -450,8 +438,7 @@ public class ProductAdoRepository : IRepository<Product>
         return null;
     }
 }
-```
-
+```markdown
 ### Quando Usar ADO.NET
 
 - ✅ Queries com requisitos de **performance extrema**
@@ -470,8 +457,7 @@ using Microsoft.Data.SqlClient;
 
 // ❌ NÃO use System.Data.SqlClient (obsoleto)
 // using System.Data.SqlClient;
-```
-
+```markdown
 **Pacotes Necessários**: `Microsoft.Data.SqlClient >= 6.1.1` já está incluído no projeto ✅
 
 **Benefícios**:
@@ -494,14 +480,12 @@ using Microsoft.Data.SqlClient;
 ```csharp
 // DEFAULT: Entity Framework Core
 // services.AddEntityFramework(connectionString, dbSettings);
-```
-
+```text
 **Passo 3**: Descomente a linha do NHibernate (~linha 34):
 ```csharp
 // ALTERNATIVE 2: NHibernate (Enterprise Features)
 services.AddNHibernate(connectionString, dbSettings);
-```
-
+```markdown
 ### Implementação Completa
 
 **Passo 4**: Instale os pacotes NuGet necessários:
@@ -511,8 +495,7 @@ Adicione ao `src/Data/Data.csproj`:
 ```xml
 <PackageReference Include="NHibernate" Version="5.5.2" />
 <PackageReference Include="FluentNHibernate" Version="3.4.0" />
-```
-
+```text
 **Passo 5**: Configure o SessionFactory no método `AddNHibernate`:
 
 Edite o método em `src/Infrastructure/Extensions/DatabaseExtension.cs`:
@@ -536,8 +519,7 @@ private static IServiceCollection AddNHibernate(
 
     return services;
 }
-```
-
+```markdown
 **Passo 6**: Crie os mappings e repositórios conforme mostrado abaixo.
 
 ### Criar Mappings
@@ -560,8 +542,7 @@ public class ProductMap : ClassMap<Product>
         Map(x => x.IsActive).Not.Nullable();
     }
 }
-```
-
+```markdown
 ### Implementar Repositório
 
 ```csharp
@@ -586,8 +567,7 @@ public class ProductNHibernateRepository : IRepository<Product>
 
     // Implemente os demais métodos...
 }
-```
-
+```markdown
 ---
 
 ## 🚀 Linq2Db
@@ -602,14 +582,12 @@ public class ProductNHibernateRepository : IRepository<Product>
 ```csharp
 // DEFAULT: Entity Framework Core
 // services.AddEntityFramework(connectionString, dbSettings);
-```
-
+```text
 **Passo 3**: Descomente a linha do Linq2Db (~linha 39):
 ```csharp
 // ALTERNATIVE 3: Linq2Db (LINQ + Performance)
 services.AddLinq2Db(connectionString, dbSettings);
-```
-
+```markdown
 ### Implementação Completa
 
 **Passo 4**: Instale os pacotes NuGet necessários:
@@ -619,8 +597,7 @@ Adicione ao `src/Data/Data.csproj`:
 ```xml
 <PackageReference Include="linq2db" Version="5.4.1" />
 <PackageReference Include="linq2db.EntityFrameworkCore" Version="8.1.0" />
-```
-
+```text
 **Passo 5**: Configure o DataConnection no método `AddLinq2Db`:
 
 Edite o método em `src/Infrastructure/Extensions/DatabaseExtension.cs`:
@@ -638,8 +615,7 @@ private static IServiceCollection AddLinq2Db(
 
     return services;
 }
-```
-
+```markdown
 **Passo 6**: Crie o DataConnection e repositórios conforme mostrado abaixo.
 
 ### Criar DataConnection
@@ -659,8 +635,7 @@ public class ApplicationDataConnection : DataConnection
 
     public ITable<Product> Products => this.GetTable<Product>();
 }
-```
-
+```markdown
 ### Implementar Repositório
 
 ```csharp
@@ -692,8 +667,7 @@ public class ProductLinq2DbRepository : IRepository<Product>
 
     // Implemente os demais métodos...
 }
-```
-
+```markdown
 ---
 
 ## 📍 Resumo Rápido
@@ -715,8 +689,7 @@ private readonly IProductDapperRepository _dapperRepo;
 
 // ADO.NET (controle total)
 private readonly IProductAdoRepository _adoRepo;
-```
-
+```markdown
 ### 📂 Onde estão configurados?
 
 **Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`
@@ -732,8 +705,7 @@ services.AddDapper(connectionString);
 services.AddAdo(connectionString);
 
 // Linhas ~82-89: NHibernate e Linq2Db (opcional, comentados)
-```
-
+```markdown
 ### 🔥 Vantagens desta Arquitetura
 
 - ✅ **Não precisa escolher um único ORM** - use os 3 simultaneamente
@@ -827,8 +799,7 @@ public class ProductService
         return await _adoRepository.GetByIdAsync(id);
     }
 }
-```
-
+```markdown
 ### Vantagens de Usar Múltiplos ORMs
 
 | Cenário | ORM Recomendado | Por quê? |
@@ -868,8 +839,7 @@ public class OrderService
         return await _dapperRepo.GetOrdersByDateRangeAsync(start, end);
     }
 }
-```
-
+```markdown
 ### 🔑 Interfaces Específicas Previnem Conflitos
 
 Cada ORM usa interfaces específicas para evitar conflitos de injeção de dependências:
@@ -883,8 +853,7 @@ IProductDapperRepository dapperRepo;  // Sempre usa SQL Server
 
 // ADO.NET
 IProductAdoRepository adoRepo;  // Sempre usa SQL Server
-```
-
+```text
 > **💡 IMPORTANTE**: Se você tentar injetar `IRepository<Product>`, sempre receberá a implementação do EF Core (InMemory em testes). Para usar Dapper ou ADO.NET, injete a interface específica!
 ```
 
@@ -900,7 +869,7 @@ IProductAdoRepository adoRepo;  // Sempre usa SQL Server
 
 ### 🎯 Guia Rápido de Decisão
 
-```
+```text
 CRUD simples, tracking necessário?
     → Use IRepository<T> (EF Core)
 
@@ -936,8 +905,7 @@ public class ProductServiceTests
         // Funciona com qualquer implementação!
     }
 }
-```
-
+```markdown
 ### Por que os testes funcionam?
 
 - ✅ `IRepository<Product>` sempre resolve para EF Core InMemory em testes
@@ -960,8 +928,7 @@ public interface IProductDapperRepository : IRepository<Product>
 {
     Task<IEnumerable<Product>> GetProductsWithHighPerformanceAsync();
 }
-```
-
+```markdown
 ### Passo 2: Implementar o Repositório
 
 ```csharp
@@ -986,8 +953,7 @@ public class ProductDapperRepository : IProductDapperRepository
     
     // Implemente os demais métodos...
 }
-```
-
+```markdown
 ### Passo 3: **Pronto! Não precisa fazer mais nada!** 🎉
 
 O Scrutor detectará automaticamente sua classe e registrará:

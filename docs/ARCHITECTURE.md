@@ -6,7 +6,7 @@ Visão geral da arquitetura Clean Architecture implementada neste template.
 
 ## 📐 Diagrama de Camadas
 
-```
+```sql
 ┌─────────────────────────────────────────────────────────────────┐
 │                         API LAYER                                │
 │  ┌──────────────────────────────────────────────────────────┐  │
@@ -71,7 +71,7 @@ Visão geral da arquitetura Clean Architecture implementada neste template.
 
 ## 🔄 Fluxo de Requisição
 
-```
+```text
 ┌────────────┐
 │   Client   │
 └─────┬──────┘
@@ -135,7 +135,7 @@ Interfaces específicas em vez de uma interface geral.
 
 ## 📦 Dependências Entre Camadas
 
-```
+```text
 Api
  ├── → Infrastructure (DI, Extensions)
  ├── → Application (Services)
@@ -191,8 +191,7 @@ public interface IRepository<T> where T : EntityBase
     Task<T?> GetByIdAsync(long id, CancellationToken ct);
     Task<IEnumerable<T>> GetAllAsync(CancellationToken ct);
 }
-```
-
+```markdown
 ---
 
 ### 2️⃣ Data Layer (Camada de Dados)
@@ -219,8 +218,7 @@ public class Repository<T> : IRepository<T> where T : EntityBase
         return await _context.Set<T>().FindAsync(new object[] { id }, ct);
     }
 }
-```
-
+```markdown
 ---
 
 ### 3️⃣ Application Layer (Camada de Aplicação)
@@ -247,8 +245,7 @@ public class ProductService : Service<Product>
     
     // Custom business logic here
 }
-```
-
+```markdown
 ---
 
 ### 4️⃣ Infrastructure Layer (Camada de Infraestrutura)
@@ -280,8 +277,7 @@ public static IServiceCollection AddDatabase(this IServiceCollection services)
             break;
     }
 }
-```
-
+```markdown
 ---
 
 ### 5️⃣ API Layer (Camada de Apresentação)
@@ -310,8 +306,7 @@ public class ProductController : ApiControllerBase
         return HandleResult(product);
     }
 }
-```
-
+```markdown
 ---
 
 ## 🔌 Padrões Implementados
@@ -344,8 +339,7 @@ services.Scan(scan => scan
     .AsMatchingInterface()  // ← Evita conflitos de DI!
     .WithScopedLifetime()
 );
-```
-
+```markdown
 **Exemplo de mapeamento automático:**
 | Classe | Interface Registrada |
 |--------|---------------------|
@@ -403,8 +397,7 @@ Program.cs
         ├── Rate Limiting
         ├── OpenTelemetry
         └── Swagger
-```
-
+```markdown
 ---
 
 ## 🚀 Deploy Architecture
@@ -446,8 +439,7 @@ Program.cs
 │  │  SQL Server  │  │    Cache     │  │   APIs   │ │
 │  └──────────────┘  └──────────────┘  └──────────┘ │
 └─────────────────────────────────────────────────────┘
-```
-
+```markdown
 ---
 
 ## 📊 Fluxo de Dados
@@ -474,8 +466,7 @@ User Request
 [Controller] ← Format response
      ↓
 User Response (JSON)
-```
-
+```markdown
 ---
 
 ## 🔐 Security Layers
@@ -512,8 +503,7 @@ User Response (JSON)
 │     - Security context                     │
 │     - Resource limits                      │
 └─────────────────────────────────────────────┘
-```
-
+```markdown
 ---
 
 ## 📈 Escalabilidade
@@ -527,8 +517,7 @@ Load Balancer
       ├─── Pod 2 (API Instance)
       ├─── Pod 3 (API Instance)
       └─── Pod N (Auto-scaled)
-```
-
+```markdown
 **Features:**
 - Horizontal Pod Autoscaler (HPA)
 - Resource-based scaling (CPU/Memory)

@@ -128,7 +128,7 @@
    - Default responses
 
 **Arquivos a modificar:**
-```
+```text
 src/Infrastructure/
 ├── Extensions/PollyExtension.cs  [CRIAR]
 ├── Services/AuthService.cs       [ATUALIZAR]
@@ -174,7 +174,7 @@ src/Infrastructure/
 ### 5. 📄 Markdown Linting Issues (366 total)
 
 #### Arquivos afetados:
-```
+```text
 docs/
 ├── ADR-RATE-LIMITING.md
 ├── ARCHITECTURE.md
@@ -208,7 +208,7 @@ Root:
 
 ## 📈 Progresso Geral
 
-```
+```text
 [████████████████████████░] 71% Concluído
 
 ✅ Concluído:     10 tarefas

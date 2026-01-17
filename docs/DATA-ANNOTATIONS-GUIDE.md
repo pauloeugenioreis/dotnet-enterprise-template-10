@@ -43,8 +43,7 @@ services.AddOptions<AppSettings>()
     .Bind(configuration.GetSection("AppSettings"))
     .ValidateDataAnnotations()  // ✅ Valida Data Annotations
     .ValidateOnStart();         // ✅ Valida no startup
-```
-
+```markdown
 ---
 
 ## 🏷️ Data Annotations Disponíveis
@@ -56,8 +55,7 @@ Campo obrigatório - não pode ser null ou vazio.
 ```csharp
 [Required(ErrorMessage = "EnvironmentName is required")]
 public string EnvironmentName { get; set; } = string.Empty;
-```
-
+```markdown
 ### MinLength / MaxLength
 
 Tamanho mínimo/máximo de strings.
@@ -68,8 +66,7 @@ public string Secret { get; set; } = string.Empty;
 
 [MaxLength(100, ErrorMessage = "Issuer URL cannot exceed 100 characters")]
 public string Issuer { get; set; } = string.Empty;
-```
-
+```markdown
 ### Range
 
 Valores numéricos dentro de um intervalo.
@@ -80,8 +77,7 @@ public int ExpirationMinutes { get; set; } = 60;
 
 [Range(0.0, 1.0, ErrorMessage = "SamplingRatio must be between 0.0 and 1.0")]
 public double SamplingRatio { get; set; } = 1.0;
-```
-
+```markdown
 ### AllowedValues (.NET 8+)
 
 Valores permitidos de um enum ou lista.
@@ -94,8 +90,7 @@ public string EnvironmentName { get; set; } = string.Empty;
 [AllowedValues("Memory", "Redis", "SqlServer",
     ErrorMessage = "Provider must be Memory, Redis, or SqlServer")]
 public string Provider { get; set; } = "Memory";
-```
-
+```markdown
 ### Url
 
 Valida se string é uma URL válida.
@@ -104,8 +99,7 @@ Valida se string é uma URL válida.
 [Required]
 [Url(ErrorMessage = "Issuer must be a valid URL")]
 public string Issuer { get; set; } = string.Empty;
-```
-
+```markdown
 ### EmailAddress
 
 Valida formato de email.
@@ -113,8 +107,7 @@ Valida formato de email.
 ```csharp
 [EmailAddress(ErrorMessage = "Invalid email format")]
 public string AdminEmail { get; set; } = string.Empty;
-```
-
+```markdown
 ### RegularExpression
 
 Validação customizada com regex.
@@ -123,8 +116,7 @@ Validação customizada com regex.
 [RegularExpression(@"^[a-zA-Z0-9-_.]+$", 
     ErrorMessage = "Only alphanumeric characters, hyphens, underscores and dots are allowed")]
 public string BucketName { get; set; } = string.Empty;
-```
-
+```markdown
 ---
 
 ## 🔧 Validadores Customizados
@@ -168,8 +160,7 @@ public class RequiredIfAttribute : ValidationAttribute
         return ValidationResult.Success;
     }
 }
-```
-
+```text
 **Uso:**
 
 ```csharp
@@ -185,8 +176,7 @@ public class RedisSettings
         ErrorMessage = "Redis ConnectionString is required when Provider is Redis")]
     public string ConnectionString { get; set; } = string.Empty;
 }
-```
-
+```markdown
 ### RedisConnectionString - Valida formato de connection string Redis
 
 ```csharp
@@ -211,8 +201,7 @@ public class RedisConnectionStringAttribute : ValidationAttribute
         return ValidationResult.Success;
     }
 }
-```
-
+```text
 **Uso:**
 
 ```csharp
@@ -221,8 +210,7 @@ public class RedisSettings
     [RedisConnectionString(ErrorMessage = "Invalid Redis connection string format")]
     public string ConnectionString { get; set; } = string.Empty;
 }
-```
-
+```markdown
 ---
 
 ## 🎓 Exemplos Práticos
@@ -258,8 +246,7 @@ public class JwtSettings
     [Range(1, 90, ErrorMessage = "RefreshTokenExpirationDays must be between 1 and 90 days")]
     public int RefreshTokenExpirationDays { get; set; } = 7;
 }
-```
-
+```markdown
 ### Exemplo 2: Configurações de Cache
 
 ```csharp
@@ -285,8 +272,7 @@ public class RedisSettings
     [RedisConnectionString(ErrorMessage = "Invalid Redis connection string format")]
     public string ConnectionString { get; set; } = string.Empty;
 }
-```
-
+```markdown
 ### Exemplo 3: Configurações de Banco de Dados
 
 ```csharp
@@ -303,8 +289,7 @@ public class DatabaseSettings
     public bool EnableSensitiveDataLogging { get; set; } = false;
     public bool EnableDetailedErrors { get; set; } = false;
 }
-```
-
+```markdown
 ### Exemplo 4: Configurações de Password Policy
 
 ```csharp
@@ -324,8 +309,7 @@ public class PasswordPolicySettings
     [Range(1, 1440, ErrorMessage = "LockoutMinutes must be between 1 and 1440 (24 hours)")]
     public int LockoutMinutes { get; set; } = 15;
 }
-```
-
+```markdown
 ### Exemplo 5: Configurações de Telemetry
 
 ```csharp
@@ -341,8 +325,7 @@ public class TelemetrySettings
     public bool EnableSqlInstrumentation { get; set; } = true;
     public bool EnableHttpInstrumentation { get; set; } = true;
 }
-```
-
+```markdown
 ---
 
 ## ⚙️ Habilitando Validação
@@ -371,8 +354,7 @@ public static class AppSettingsExtension
         return services;
     }
 }
-```
-
+```markdown
 ### Ordem de Validação
 
 1. **Data Annotations** - Validação declarativa (atributos)
@@ -388,8 +370,7 @@ services.AddOptions<AppSettings>()
 // 3º - Validação programática adicional
 services.AddSingleton<IValidateOptions<AppSettings>, 
     AuthenticationSettingsValidator>();
-```
-
+```markdown
 ---
 
 ## 💬 Mensagens de Erro
@@ -402,8 +383,7 @@ public string Secret { get; set; } = string.Empty;
 
 [Range(1, 100)]  // Mensagem: "The field {PropertyName} must be between 1 and 100."
 public int MaxRetries { get; set; }
-```
-
+```markdown
 ### Mensagens Customizadas
 
 ```csharp
@@ -415,8 +395,7 @@ public int MaxRetries { get; set; }
 
 [MinLength(32, ErrorMessage = "JWT Secret must be at least 32 characters for security")]
 public string Secret { get; set; } = string.Empty;
-```
-
+```markdown
 ### Mensagens com Placeholders
 
 ```csharp
@@ -428,8 +407,7 @@ public int MaxRetries { get; set; }
     ErrorMessage = "{0} must be between {2} and {1} characters")]
 public string Name { get; set; } = string.Empty;
 // Resultado: "Name must be between 3 and 50 characters"
-```
-
+```markdown
 ---
 
 ## 🔍 Testando Validação
@@ -462,8 +440,7 @@ public void AppSettings_Should_Fail_With_Invalid_JWT_Secret()
     
     Assert.Contains("JWT Secret must be at least 32 characters", exception.Message);
 }
-```
-
+```markdown
 ### Teste Manual
 
 Execute a aplicação com configuração inválida:
@@ -472,16 +449,14 @@ Execute a aplicação com configuração inválida:
 # Windows PowerShell
 $env:AppSettings__Authentication__Jwt__Secret="short"
 dotnet run --project src/Api/Api.csproj
-```
-
+```text
 **Resultado esperado:**
 
 ```
 Unhandled exception. Microsoft.Extensions.Options.OptionsValidationException: 
 DataAnnotation validation failed for 'AppSettings' members: 
 'Authentication.Jwt.Secret' with the error: 'JWT Secret must be at least 32 characters for security'.
-```
-
+```markdown
 ---
 
 ## 🎯 Boas Práticas
@@ -506,8 +481,7 @@ public string Secret { get; set; } = string.Empty;
 // ✅ Use AllowedValues para enums
 [AllowedValues("Memory", "Redis", "SqlServer")]
 public string Provider { get; set; } = "Memory";
-```
-
+```markdown
 ### ❌ DON'Ts
 
 ```csharp

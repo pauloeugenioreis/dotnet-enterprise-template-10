@@ -87,7 +87,7 @@ Se você está começando, **não comece por aqui!** Primeiro:
 
 ## 📂 Organização
 
-```
+```text
 docs/
 ├── README.md                # Este arquivo
 ├── CONFIGURATION-GUIDE.md   # Guia de Configuração (IOptions<T>)
@@ -205,8 +205,7 @@ Conteúdo da seção com exemplos:
 
 ```bash
 comando exemplo
-```
-
+```markdown
 ### Subseção 1.1
 
 Detalhes específicos.
