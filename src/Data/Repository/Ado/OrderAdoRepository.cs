@@ -267,7 +267,7 @@ public class OrderAdoRepository : IOrderAdoRepository
             await deleteCommand.ExecuteNonQueryAsync(cancellationToken);
 
             // Re-insert items
-            if (entity.Items?.Any() == true)
+            if (entity.Items?.Count > 0)
             {
                 foreach (var item in entity.Items)
                 {

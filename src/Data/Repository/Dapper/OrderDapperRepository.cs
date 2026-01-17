@@ -115,7 +115,7 @@ public class OrderDapperRepository : IOrderDapperRepository
             entity.Id = orderId;
 
             // Insert order items
-            if (entity.Items?.Any() == true)
+            if (entity.Items?.Count > 0)
             {
                 const string itemSql = @"
                     INSERT INTO OrderItems (OrderId, ProductId, ProductName, Quantity, UnitPrice, Subtotal,
@@ -183,7 +183,7 @@ public class OrderDapperRepository : IOrderDapperRepository
             const string deleteItemsSql = "DELETE FROM OrderItems WHERE OrderId = @OrderId";
             await connection.ExecuteAsync(deleteItemsSql, new { OrderId = entity.Id }, transaction);
 
-            if (entity.Items?.Any() == true)
+            if (entity.Items?.Count > 0)
             {
                 const string itemSql = @"
                     INSERT INTO OrderItems (OrderId, ProductId, ProductName, Quantity, UnitPrice, Subtotal,

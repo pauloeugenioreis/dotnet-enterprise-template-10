@@ -61,7 +61,7 @@ public class AuditController : ApiControllerBase
 
         var events = await _eventStore.GetEventsAsync(entityType, entityId, timestamp, cancellationToken);
 
-        if (!events.Any())
+        if (events.Count == 0)
         {
             return NotFound($"No events found for {entityType} with ID {entityId}");
         }

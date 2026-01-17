@@ -76,7 +76,7 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         await _context.SaveChangesAsync(cancellationToken);
 
         // 2. Record event
-        if (changes != null && changes.Any())
+        if (changes != null && changes.Count > 0)
         {
             await RecordUpdatedEvent(entity, changes, cancellationToken);
         }
@@ -107,7 +107,7 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         }
 
         // If AuditEntities is empty, audit all entities
-        if (!_settings.AuditEntities.Any())
+        if (_settings.AuditEntities.Count == 0)
         {
             return true;
         }
