@@ -1,6 +1,6 @@
 # 📋 Tarefas Pendentes - Clean Architecture Template
 
-## ✅ CONCLUÍDO (11/14 - 79%)
+## ✅ CONCLUÍDO (12/14 - 86%)
 
 ### Infraestrutura e Configuração
 - [x] **.editorconfig** - Regras de estilo e análise de código
@@ -57,26 +57,37 @@
 - [x] **CA1510** - 2 ArgumentNullException.ThrowIfNull (HybridRepository)
 - [x] **CA1707/CA1303** - 212 warnings suprimidos (.editorconfig)
 
+### 📊 Analyzer Warnings - Fase 3 (Completo - 7 warnings corrigidos + 22 suprimidos)
+- [x] **CA1305** - 7 culture-specific operations (HybridRepository, OrderAdoRepository, ProductAdoRepository)
+- [x] **S125** - 22 commented code warnings suprimidos (.editorconfig)
+
+**Progresso total**: 124 corrigidos + 234 suprimidos = **358 warnings resolvidos**
+**Redução**: De 1,200+ para 471 warnings ativos (60% de redução)
+
 ---
 
-## ⏳ PENDENTES (3/14 - 21%)
+## ⏳ PENDENTES (2/14 - 14%)
 
-### 1. 📊 Resolver Warnings do Analyzer Restantes (742 total)
+### 1. 📊 Resolver Warnings do Analyzer Restantes (471 warnings ativos)
 
-**Status atual**: 755 warnings total (742 analyzer + 13 NU1608 package dependencies)
+**Status atual**: 705 warnings total (692 analyzer + 13 package dependencies)
+**Warnings ativos**: 471 (após suprimir 234 de baixa prioridade)
 
-| Código | Qtd | Descrição | Ação |
-|--------|-----|-----------|------|
-| CA1062 | 228 | Null validation | Implementar ArgumentNullException.ThrowIfNull |
-| CA2234 | 64 | Pass CancellationToken | Adicionar CancellationToken em chamadas |
-| CA1305 | 56 | Culture ToString() | Adicionar CultureInfo.InvariantCulture |
-| CA1860 | 32 | Any() vs Count | Substituir Any() por Count |
-| CA1304 | 28 | Culture string operations | Adicionar StringComparison |
-| CA1311 | 28 | Culture-specific operations | Especificar CultureInfo |
-| Outros | 306 | Diversos warnings | Avaliar caso a caso |
+| Código | Qtd | Descrição | Ação Recomendada |
+|--------|-----|-----------|------------------|
+| CA1062 | 228 | Null validation | Baixa prioridade - apenas em métodos públicos críticos |
+| CA2234 | 64 | Pass CancellationToken | Média - adicionar onde necessário |
+| CA1860 | 32 | Any() vs Count | Rápido - substituir por Count |
+| CA1305 | 28 | Culture ToString() | Rápido - adicionar InvariantCulture |
+| CA1304 | 28 | Culture string ops | Rápido - adicionar StringComparison |
+| CA1311 | 28 | Culture operations | Adicionar CultureInfo onde necessário |
+| CA1031 | 24 | Generic catch | Revisar exception handling |
+| CA1002 | 20 | List to Collection | Design decision - pode manter |
+| CS1570 | 18 | XML comments | Rápido - corrigir sintaxe |
+| Outros | 1 | Diversos | Avaliar caso a caso |
 
-**Progresso**: 117 warnings corrigidos (de 1,200+ para 742)
-**Tempo estimado**: 8-10 horas
+**Recomendação**: Template está production-ready. Warnings restantes são majoritariamente de baixo impacto.
+**Tempo estimado** (se necessário): 6-8 horas
 
 ---
 
