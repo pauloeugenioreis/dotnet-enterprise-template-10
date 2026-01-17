@@ -8,6 +8,7 @@ Este exemplo demonstra como usar o template com uma entidade completa, incluindo
 
 ### 1. **Entidade Product** (`Domain/Entities/Product.cs`)
 
+```csharp
 public class Product : EntityBase
 {
     public string Name { get; set; } = string.Empty;
@@ -17,9 +18,13 @@ public class Product : EntityBase
     public string Category { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
 }
+```xml
+
 ### 2. **DbSet no Context** (`Data/Context/ApplicationDbContext.cs`)
 
+```csharp
 public DbSet<Product> Products { get; set; }
+```csharp
 ### 3. **Controller Completo** (`Api/Controllers/ProductController.cs`)
 
 #### Endpoints Disponíveis:

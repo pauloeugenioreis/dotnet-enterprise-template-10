@@ -19,6 +19,8 @@ The Order example showcases:
 ### Entity Layer (Domain)
 
 **Order.cs** - Main entity with business properties
+
+```csharp
 public class Order : EntityBase
 {
     public string OrderNumber { get; set; }
@@ -35,7 +37,11 @@ public class Order : EntityBase
     
     public ICollection<OrderItem> Items { get; set; }
 }
+```csharp
+
 **OrderItem.cs** - Order line items
+
+```csharp
 public class OrderItem : EntityBase
 {
     public long OrderId { get; set; }
