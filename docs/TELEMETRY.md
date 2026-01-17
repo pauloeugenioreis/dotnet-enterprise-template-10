@@ -359,7 +359,7 @@ _requestDuration.Record(stopwatch.ElapsedMilliseconds);
 **1. Verificar se está habilitado:**
 "Enabled": true
 **2. Verificar logs de startup:**
-```
+```text
 ✅ Telemetry enabled: jaeger, prometheus
   📊 Jaeger exporter enabled: localhost:6831
   📈 Prometheus exporter enabled (endpoint: /metrics)

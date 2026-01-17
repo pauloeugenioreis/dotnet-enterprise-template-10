@@ -70,7 +70,7 @@ Events:
 
 ## Arquitetura
 
-```
+```json
 ┌─────────────────┐
 │   Controller    │  HTTP Request (POST /orders)
 └────────┬────────┘
@@ -419,7 +419,7 @@ var allEvents = await _eventStore.GetEventsAsync("Order", orderId);
 */
 
 // 4. Conclusão: Pagamento falhou, pedido foi cancelado
-```
+```text
 
 ---
 
@@ -429,15 +429,15 @@ var allEvents = await _eventStore.GetEventsAsync("Order", orderId);
 
 1. **Comece com Modo Hybrid**
    { "EventSourcing": { "Enabled": true, "Mode": "Hybrid" } }
-   ```
+```text
 
 2. **Audite Apenas Entidades Críticas**
    { "AuditEntities": ["Order", "Payment", "Invoice"] }
-   ```
+```
 
 3. **Use Snapshots para Performance**
    { "StoreSnapshots": true, "SnapshotInterval": 10 }
-   ```
+```bash
 
 4. **Armazene Metadados**
    { "StoreMetadata": true }
@@ -513,7 +513,7 @@ dotnet restore
 
 ### ❌ **Problema: PostgreSQL não conecta**
 
-```
+```bash
 Npgsql.NpgsqlException: Connection refused
 **Solução:**
 # Verificar se PostgreSQL está rodando
@@ -546,7 +546,7 @@ docker logs api | grep EventStore
     "AuditEntities": [] // Vazio = audita TODAS as entidades
   }
 }
-```
+```text
 
 ---
 
@@ -559,15 +559,15 @@ docker logs api | grep EventStore
 
 1. **Audite apenas entidades críticas**
    { "AuditEntities": ["Order"] } // Só Order, não Product
-   ```
+```
 
 2. **Habilite snapshots**
    { "StoreSnapshots": true, "SnapshotInterval": 10 }
-   ```
+```text
 
 3. **Desabilite metadados em dev**
    { "StoreMetadata": false } // Em desenvolvimento
-   ```
+```text
 
 4. **Use índices no PostgreSQL**
    -- Marten já cria, mas você pode adicionar customizados

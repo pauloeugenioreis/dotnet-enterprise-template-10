@@ -298,7 +298,7 @@ spec:
 
 Estrutura:
 
-```
+```yaml
 .k8s/
 ├── base/
 │   ├── deployment.yaml

@@ -125,7 +125,7 @@ Limita requisições em janelas de tempo fixas.
 - Quando simplicidade é mais importante que precisão
 
 **Exemplo:**
-```
+```text
 00:00 → 00:59 = 100 requests permitidas
 01:00 → 01:59 = Reset, 100 requests permitidas novamente
 ---
@@ -152,7 +152,7 @@ Suaviza limites calculando média móvel de requisições.
 - Para evitar "burst" no reset da janela
 
 **Exemplo:**
-```
+```text
 00:00-00:10 = 33 requests
 00:10-00:20 = 33 requests
 00:20-00:30 = 33 requests
@@ -183,7 +183,7 @@ Usa "tokens" que são consumidos e reabastecidos ao longo do tempo.
 - Algoritmo mais flexível e realista
 
 **Exemplo:**
-```
+```text
 Balde começa com 50 tokens
 Request 1 → 49 tokens
 Request 2 → 48 tokens
@@ -215,7 +215,7 @@ Limita requisições **simultâneas** (não por período de tempo).
 - Controle de concorrência global
 
 **Exemplo:**
-```
+```csharp
 10 requisições processando simultaneamente
 Request 11 → aguarda na fila
 Request 31 → fila cheia, retorna 429
@@ -440,7 +440,7 @@ echo "Todas as 200 requests foram bem-sucedidas!"
 
 O Rate Limiting gera logs automáticos:
 
-```
+```csharp
 ⚠️  Rate Limiting is disabled
 ✅  Rate Limiting enabled: 4 policies configured
 📊  Fixed Window: 100 req/60s
@@ -451,7 +451,7 @@ O Rate Limiting gera logs automáticos:
 
 Quando Rate Limiting é rejeitado, um span `RateLimitRejected` é criado:
 
-```
+```csharp
 Span: RateLimitRejected
   - client_ip: 192.168.1.100
   - policy: fixed

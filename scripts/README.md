@@ -53,7 +53,7 @@ chmod +x test-all-databases.sh
 8. ✅ **Relatório** - Mostra resumo com resultados
 
 **Saída esperada:**
-```
+```bash
 ================================================
   Test Summary
 ================================================

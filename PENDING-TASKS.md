@@ -188,7 +188,7 @@ src/Infrastructure/
 ├── Services/AuthService.cs       [ATUALIZAR]
 ├── Services/StorageService.cs    [ATUALIZAR]
 └── Services/MartenEventStore.cs  [ATUALIZAR]
-```
+```text
 
 **Pacotes necessários:**
 - Polly 8.x

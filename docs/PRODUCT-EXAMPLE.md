@@ -93,7 +93,7 @@ dotnet ef database update --project src/Data --startup-project src/Api
 dotnet run --project src/Api
 ### 3. Acessar Swagger
 
-```
+```xml
 https://localhost:5001/swagger
 ### 4. Testar Endpoints
 

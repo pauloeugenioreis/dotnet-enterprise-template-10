@@ -92,7 +92,7 @@ docs/
 ├── CONFIGURATION-GUIDE.md   # Guia de Configuração (IOptions<T>)
 ├── ORM-GUIDE.md             # Guia de ORMs
 └── KUBERNETES.md            # Guia de Kubernetes
-```
+```xml
 
 ### Documentos Futuros
 

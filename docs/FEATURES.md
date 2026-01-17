@@ -359,7 +359,7 @@ public class ProductsV2Controller : ApiControllerBase
     }
 }
 **4. Acesse:**
-```
+```bash
 GET /api/v1/products
 GET /api/v2/products
 GET /api/products?api-version=2.0
@@ -648,7 +648,7 @@ public class ProductsController : ControllerBase
 ### Acessar Swagger
 
 **Development:**
-```
+```bash
 http://localhost:5000/swagger
 **Testar com Token JWT:**
 1. Faça login e copie o token
@@ -1154,7 +1154,7 @@ done
 curl -i http://localhost:5000/api/v1/Product | grep -i "x-ratelimit"
 ### Logs
 
-```
+```text
 ✅  Rate Limiting enabled: 4 policies configured
 📊  Fixed Window: 100 req/60s
 📊  Sliding Window: 200 req/60s (6 segments)
@@ -1266,7 +1266,7 @@ DOCKER_PASSWORD=seu-token
 
 Todos os pipelines seguem este fluxo:
 
-```
+```bash
 1. 🏗️  Build
    ├── Restore dependencies
    ├── Build solution
@@ -1391,7 +1391,7 @@ dotnet test
     }
   }
 }
-```
+```bash
 
 docker-compose up -d postgres-events
 **API de Auditoria:**

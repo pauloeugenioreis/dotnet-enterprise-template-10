@@ -240,7 +240,7 @@ Habilite o GitLab Container Registry:
 1. **Settings → General → Visibility → Container Registry**: ✅ Enabled
 
 Suas imagens ficarão em:
-```
+```bash
 registry.gitlab.com/seu-usuario/seu-projeto/projecttemplate-api
 ### 📊 Visualização de Resultados
 

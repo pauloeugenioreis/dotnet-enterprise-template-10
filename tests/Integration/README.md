@@ -31,7 +31,7 @@ dotnet test tests/Integration /p:CollectCoverage=true
 dotnet test tests/Integration --filter "FullyQualifiedName~ProductControllerTests.GetAll_ReturnsSuccessStatusCode"
 ## Test Structure
 
-```
+```csharp
 tests/Integration/
 ├── Controllers/
 │   ├── ProductControllerTests.cs

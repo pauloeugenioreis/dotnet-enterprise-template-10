@@ -404,7 +404,7 @@ $env:AppSettings__Authentication__Jwt__Secret="short"
 dotnet run --project src/Api/Api.csproj
 **Resultado esperado:**
 
-```
+```text
 Unhandled exception. Microsoft.Extensions.Options.OptionsValidationException: 
 DataAnnotation validation failed for 'AppSettings' members: 
 'Authentication.Jwt.Secret' with the error: 'JWT Secret must be at least 32 characters for security'.

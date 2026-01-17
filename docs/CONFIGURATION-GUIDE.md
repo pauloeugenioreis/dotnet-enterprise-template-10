@@ -490,7 +490,7 @@ O ASP.NET Core permite sobrescrever configurações do `appsettings.json` usando
 
 Use **dois underscores** (`__`) para navegar na hierarquia do JSON:
 
-```
+```json
 AppSettings__Propriedade__SubPropriedade
 ### Estrutura de Configuração
 
@@ -744,7 +744,7 @@ kubectl logs <pod-name>
 2. **Configuration** → **Application settings**
 3. **+ New application setting**
 
-```
+```powershell
 Name: AppSettings__Authentication__Jwt__Secret
 Value: my-super-secret-key-for-production-with-64-characters-minimum
 ### Configurar via Azure CLI
@@ -819,7 +819,7 @@ O ASP.NET Core carrega configurações na seguinte ordem (última sobrescreve pr
     }
   }
 }
-```
+```bash
 
 # Variável de Ambiente sobrescreve
 AppSettings__Authentication__Jwt__Secret=production-secret

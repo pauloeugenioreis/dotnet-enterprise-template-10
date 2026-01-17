@@ -19,7 +19,7 @@ Repository/
 └── Ado/                                       # ADO.NET implementations
     ├── ProductAdoRepository.cs               # ✅ Completo
     └── OrderAdoRepository.cs                 # ✅ Completo
-```
+```bash
 
 ## 🎯 Como Testar Cada ORM
 
@@ -163,7 +163,7 @@ dotnet run --project src/Api
 Após habilitar qualquer ORM, teste os endpoints:
 
 ### Swagger UI
-```
+```bash
 http://localhost:5000/swagger
 ### Testar Products
 # GET - Listar produtos

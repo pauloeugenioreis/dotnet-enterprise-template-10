@@ -64,7 +64,7 @@ Visão geral da arquitetura Clean Architecture implementada neste template.
 │                      DATABASE                                    │
 │  SQL Server | PostgreSQL | MySQL | Oracle                       │
 └─────────────────────────────────────────────────────────────────┘
-```
+```xml
 
 ---
 
@@ -107,7 +107,7 @@ Visão geral da arquitetura Clean Architecture implementada neste template.
 │  Database             │
 │  SQL Server / Others  │
 └───────────────────────┘
-```
+```csharp
 
 ---
 
@@ -153,7 +153,7 @@ Data
 
 Domain
  └── (No dependencies - Pure business logic)
-```
+```csharp
 
 ---
 
@@ -386,7 +386,7 @@ Program.cs
 
 ## 🚀 Deploy Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │                  Kubernetes Cluster                  │
 │                                                      │
@@ -427,7 +427,7 @@ Program.cs
 
 ## 📊 Fluxo de Dados
 
-```
+```text
 User Request
      ↓
 [Controller] → Validate input
@@ -453,7 +453,7 @@ User Response (JSON)
 
 ## 🔐 Security Layers
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │  1. Network Security                        │
 │     - HTTPS/TLS                            │
@@ -505,7 +505,7 @@ Load Balancer
 
 ### Vertical Scaling
 
-```
+```text
 Initial: 256Mi memory, 100m CPU
     ↓
 Scaled: 512Mi memory, 500m CPU

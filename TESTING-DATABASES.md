@@ -63,14 +63,17 @@ dotnet ef database update --project src/Data --startup-project src/Api
 # Rodar aplicação
 dotnet run --project src/Api --environment SqlServer
 
+```bash
 # Testar (em outro terminal)
 curl http://localhost:5000/health
 curl http://localhost:5000/swagger/index.html
-**Connection String:**
 ```
+**Connection String:**
+```bash
 Server=localhost,1433;Database=ProjectTemplate;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
 ### 3. Testar Oracle
 
+```powershell
 # Aplicar migrations
 $env:ASPNETCORE_ENVIRONMENT="Oracle"
 dotnet ef database update --project src/Data --startup-project src/Api
@@ -80,13 +83,15 @@ dotnet run --project src/Api --environment Oracle
 
 # Testar
 curl http://localhost:5000/health
-**Connection String:**
 ```
+**Connection String:**
+```powershell
 User Id=appuser;Password=AppPass123;Data Source=localhost:1521/FREEPDB1;
 **⚠️ Nota:** Oracle pode levar 1-2 minutos para ficar pronto na primeira execução.
 
 ### 4. Testar PostgreSQL
 
+```powershell
 # Aplicar migrations
 $env:ASPNETCORE_ENVIRONMENT="PostgreSQL"
 dotnet ef database update --project src/Data --startup-project src/Api
@@ -96,13 +101,15 @@ dotnet run --project src/Api --environment PostgreSQL
 
 # Testar
 curl http://localhost:5000/health
-**Connection String:**
 ```
+**Connection String:**
+```bash
 Host=localhost;Port=5433;Database=ProjectTemplate;Username=postgres;Password=PostgresPass123;
 **⚠️ Nota:** PostgreSQL principal roda na porta **5433** (5432 é usada pelo Event Store).
 
 ### 5. Testar MySQL
 
+```powershell
 # Aplicar migrations
 $env:ASPNETCORE_ENVIRONMENT="MySQL"
 dotnet ef database update --project src/Data --startup-project src/Api
@@ -112,16 +119,18 @@ dotnet run --project src/Api --environment MySQL
 
 # Testar
 curl http://localhost:5000/health
-**Connection String:**
 ```
+**Connection String:**
+```text
 Server=localhost;Port=3306;Database=ProjectTemplate;User=appuser;Password=AppPass123;
+```
 ---
 
 ## 📝 Arquivos de Configuração
 
 Cada banco tem seu próprio arquivo `appsettings.{Database}.json`:
 
-```
+```bash
 src/Api/
 ├── appsettings.json              # Base (InMemory)
 ├── appsettings.Development.json  # Overrides de desenvolvimento
@@ -259,7 +268,7 @@ Para cada banco de dados:
 
 ## 📊 Exemplo de Saída do Script
 
-```
+```text
 ================================================
   Testing All Database Providers
 ================================================

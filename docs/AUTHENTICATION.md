@@ -35,7 +35,7 @@ Username: admin
 Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com
 Role:     Admin
-```
+```bash
 
 > ⚠️ **IMPORTANT**: Change this password immediately in production environments!
 
@@ -58,7 +58,7 @@ The seeder will automatically create:
 
 ## Architecture
 
-```
+```bash
 ┌─────────────────┐
 │  AuthController │  ← REST API endpoints
 └────────┬────────┘
@@ -300,7 +300,7 @@ Get authenticated user information.
 **Endpoint:** `GET /api/auth/me`
 
 **Headers:**
-```
+```text
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Response:**
 {
@@ -334,7 +334,7 @@ Update user profile information.
 **Endpoint:** `PUT /api/auth/profile`
 
 **Headers:**
-```
+```bash
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Request:**
 {
@@ -713,7 +713,7 @@ CREATE TABLE RefreshTokens (
 1. **Start the application:**
 dotnet run --project src/Api/Api.csproj
 2. **Open Swagger UI:**
-```
+```bash
 http://localhost:5000
 3. **Register a new user:**
    - POST `/api/auth/register`

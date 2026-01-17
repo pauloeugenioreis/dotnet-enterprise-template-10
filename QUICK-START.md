@@ -73,7 +73,7 @@ Acesse:
 
 O sistema cria automaticamente um usuário administrador:
 
-```
+```bash
 Username: admin
 Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com

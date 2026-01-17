@@ -793,7 +793,7 @@ IProductDapperRepository dapperRepo;  // Sempre usa SQL Server
 // ADO.NET
 IProductAdoRepository adoRepo;  // Sempre usa SQL Server
 > **💡 IMPORTANTE**: Se você tentar injetar `IRepository<Product>`, sempre receberá a implementação do EF Core (InMemory em testes). Para usar Dapper ou ADO.NET, injete a interface específica!
-```
+```xml
 
 ---
 
@@ -818,7 +818,7 @@ Controle total, bulk operations, stored procedures?
 
 Precisa de múltiplos ao mesmo tempo?
     → Injete todas as interfaces que precisar!
-```
+```csharp
 
 ---
 
@@ -847,7 +847,7 @@ public class ProductServiceTests
 - ✅ Dapper e ADO.NET só são usados quando você injeta as interfaces específicas
 - ✅ Nenhuma conexão com SQL Server é necessária para rodar os testes
 - ✅ Todos os 33 testes passam (7 unit + 26 integration)
-```
+```csharp
 
 ---
 
@@ -930,11 +930,11 @@ Para o registro automático funcionar corretamente:
 
 2. **Interface** deve herdar de `IRepository<T>`:
    public interface IProductDapperRepository : IRepository<Product> { }
-   ```
+```csharp
 
 3. **Classe** deve estar no namespace `*.Repository.*`:
    namespace ProjectTemplate.Data.Repository.Dapper { }
-   ```
+```
 
 ---
 

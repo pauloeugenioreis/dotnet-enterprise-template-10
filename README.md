@@ -163,7 +163,7 @@ ProjectTemplate/
 ├── global.json                       # Versão do .NET SDK
 ├── ProjectTemplate.sln               # Solution file
 └── .gitignore                        # Git ignore configurado
-```
+```bash
 
 ---
 
@@ -174,7 +174,7 @@ ProjectTemplate/
 ```powershell
 cd template/scripts
 .\new-project.ps1 -ProjectName "MeuProjeto"
-```
+```bash
 
 ### Opção 2: Usando Script Bash (Linux/Mac)
 
@@ -182,7 +182,7 @@ cd template/scripts
 cd template/scripts
 chmod +x new-project.sh
 ./new-project.sh MeuProjeto
-```
+```bash
 
 ### Opção 3: Usando Script Batch (Windows CMD)
 
@@ -201,7 +201,7 @@ Após criar seu projeto, siga estes passos:
 
 ```bash
 cd MeuProjeto
-```
+```json
 
 ### 2. Configure a Connection String
 
@@ -218,7 +218,7 @@ Edite `src/Api/appsettings.json` e ajuste a connection string:
     }
   }
 }
-```
+```json
 
 ### 3. Escolha seu Banco de Dados
 
@@ -237,7 +237,7 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
-```
+```json
 
 **Para Oracle:**
 
@@ -267,7 +267,7 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
-```
+```json
 
 **Para MySQL:**
 
@@ -282,7 +282,7 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
-```
+```bash
 > ✨ **Todos os providers já estão instalados!** Basta mudar o `DatabaseType` e a connection string.
 
 **Nota sobre ORM**: Entity Framework Core, Dapper e ADO.NET estão habilitados simultaneamente. Para mais detalhes, veja [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md).
@@ -291,7 +291,7 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
 
 ```bash
 dotnet restore
-```
+```bash
 
 ### 5. Compile o Projeto
 
@@ -303,19 +303,19 @@ dotnet build
 
 ```bash
 dotnet ef migrations add InitialCreate --project src/Data --startup-project src/Api
-```
+```bash
 
 ### 7. Aplique a Migration no Banco
 
 ```bash
 dotnet ef database update --project src/Data --startup-project src/Api
-```
+```bash
 
 ### 8. Execute o Projeto
 
 ```bash
 dotnet run --project src/Api
-```
+```text
 
 ### 9. Acesse a API
 
@@ -446,7 +446,7 @@ Para adicionar health checks personalizados, edite `src/Infrastructure/Extension
 
 ### Fluxo de Dependências
 
-```
+```bash
 Api → Infrastructure → Application → Data → Domain
                                        ↓
                                     Domain
