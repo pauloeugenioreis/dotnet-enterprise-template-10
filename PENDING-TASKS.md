@@ -50,11 +50,37 @@
 - [x] **CS1570** - 4 XML comment errors (IOrderAdoRepository, IProductAdoRepository, IOrderDapperRepository, IProductDapperRepository)
 - [x] **S3993** - 2 AttributeUsage adicionados (RedisConnectionStringAttribute, RequiredIfAttribute)
 
+### 📊 Analyzer Warnings - Fase 2 (Completo - 117 warnings corrigidos)
+- [x] **CA1849** - 80 sync over async corrigidos (OrderDapperRepository, OrderAdoRepository, JwtTokenService, Program.cs)
+- [x] **CA1860** - 32 Any() → Count corrigidos (HybridRepository, OrderAdoRepository, OrderDapperRepository, AuditController)
+- [x] **CA1805** - 1 explicit default value removido (RefreshToken.IsRevoked)
+- [x] **CA1510** - 2 ArgumentNullException.ThrowIfNull (HybridRepository)
+- [x] **CA1707/CA1303** - 212 warnings suprimidos (.editorconfig)
+
 ---
 
 ## ⏳ PENDENTES (3/14 - 21%)
 
-### 1. 🔍 Resolver TODOs no Codebase (6 ocorrências)
+### 1. 📊 Resolver Warnings do Analyzer Restantes (742 total)
+
+**Status atual**: 755 warnings total (742 analyzer + 13 NU1608 package dependencies)
+
+| Código | Qtd | Descrição | Ação |
+|--------|-----|-----------|------|
+| CA1062 | 228 | Null validation | Implementar ArgumentNullException.ThrowIfNull |
+| CA2234 | 64 | Pass CancellationToken | Adicionar CancellationToken em chamadas |
+| CA1305 | 56 | Culture ToString() | Adicionar CultureInfo.InvariantCulture |
+| CA1860 | 32 | Any() vs Count | Substituir Any() por Count |
+| CA1304 | 28 | Culture string operations | Adicionar StringComparison |
+| CA1311 | 28 | Culture-specific operations | Especificar CultureInfo |
+| Outros | 306 | Diversos warnings | Avaliar caso a caso |
+
+**Progresso**: 117 warnings corrigidos (de 1,200+ para 742)
+**Tempo estimado**: 8-10 horas
+
+---
+
+### 2. 🔍 Resolver TODOs no Codebase (6 ocorrências)
 
 | Arquivo | Linha | TODO | Prioridade |
 |---------|-------|------|------------|
@@ -62,6 +88,13 @@
 | `TelemetryExtension.cs` | 184 | Configurar Application Insights | MÉDIA |
 | `TelemetryExtension.cs` | 266 | Configurar métricas customizadas | MÉDIA |
 | `AuthService.cs` | 117 | Implementar refresh token rotation | ALTA |
+| `ExceptionNotificationService.cs` | 43 | Adicionar integração com serviço de notificação | BAIXA |
+
+**Tempo estimado**: 2-3 horas
+
+---
+
+### 3. 🎨 Implementar Polly para Resiliência
 | `ExceptionNotificationService.cs` | 43 | Adicionar integração com serviço de notificação | BAIXA |
 | Outros | - | Revisar código comentado | BAIXA |
 
