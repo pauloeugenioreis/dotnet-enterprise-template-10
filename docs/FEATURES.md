@@ -1230,7 +1230,7 @@ O template inclui pipelines prontos para:
 **1. Nenhuma configuração necessária!** O arquivo já está pronto.
 
 **2. Configure secrets** (Settings → Secrets):
-```
+```bash
 DOCKER_USERNAME=seu-usuario
 DOCKER_PASSWORD=seu-token
 **3. Push para `main` ou `develop`** - Pipeline executa automaticamente!

@@ -353,7 +353,7 @@ services.Scan(scan => scan
 
 ## 🎛️ Configuração Modular
 
-```
+```text
 Program.cs
     │
     ├── AddAppSettings()          // Configurações validadas
@@ -491,7 +491,7 @@ User Response (JSON)
 
 ### Horizontal Scaling
 
-```
+```text
 Load Balancer
       │
       ├─── Pod 1 (API Instance)

@@ -190,7 +190,7 @@ Request 2 → 48 tokens
 ...
 A cada 10s, +10 tokens (até limite de 50)
 **Taxa Sustentada:**
-```
+```bash
 10 tokens / 10 segundos = 1 req/s = 60 req/min
 ---
 
@@ -559,7 +559,7 @@ if (response.StatusCode == HttpStatusCode.TooManyRequests)
 2. Verificar se policy está aplicada no endpoint com `[EnableRateLimiting("policy-name")]`
 3. Verificar logs de inicialização:
 
-```
+```csharp
 ✅  Rate Limiting enabled: 4 policies configured
 ### Problema: IP sempre whitelistado
 

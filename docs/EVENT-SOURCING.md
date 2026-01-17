@@ -433,7 +433,7 @@ var allEvents = await _eventStore.GetEventsAsync("Order", orderId);
 
 2. **Audite Apenas Entidades Críticas**
    { "AuditEntities": ["Order", "Payment", "Invoice"] }
-```
+```bash
 
 3. **Use Snapshots para Performance**
    { "StoreSnapshots": true, "SnapshotInterval": 10 }
@@ -559,7 +559,7 @@ docker logs api | grep EventStore
 
 1. **Audite apenas entidades críticas**
    { "AuditEntities": ["Order"] } // Só Order, não Product
-```
+```text
 
 2. **Habilite snapshots**
    { "StoreSnapshots": true, "SnapshotInterval": 10 }

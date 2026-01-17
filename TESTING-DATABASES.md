@@ -67,7 +67,7 @@ dotnet run --project src/Api --environment SqlServer
 # Testar (em outro terminal)
 curl http://localhost:5000/health
 curl http://localhost:5000/swagger/index.html
-```
+```powershell
 **Connection String:**
 ```bash
 Server=localhost,1433;Database=ProjectTemplate;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
@@ -83,7 +83,7 @@ dotnet run --project src/Api --environment Oracle
 
 # Testar
 curl http://localhost:5000/health
-```
+```powershell
 **Connection String:**
 ```powershell
 User Id=appuser;Password=AppPass123;Data Source=localhost:1521/FREEPDB1;
@@ -101,7 +101,7 @@ dotnet run --project src/Api --environment PostgreSQL
 
 # Testar
 curl http://localhost:5000/health
-```
+```powershell
 **Connection String:**
 ```bash
 Host=localhost;Port=5433;Database=ProjectTemplate;Username=postgres;Password=PostgresPass123;
@@ -119,11 +119,11 @@ dotnet run --project src/Api --environment MySQL
 
 # Testar
 curl http://localhost:5000/health
-```
+```bash
 **Connection String:**
 ```text
 Server=localhost;Port=3306;Database=ProjectTemplate;User=appuser;Password=AppPass123;
-```
+```bash
 ---
 
 ## 📝 Arquivos de Configuração

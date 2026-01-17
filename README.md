@@ -189,7 +189,7 @@ chmod +x new-project.sh
 ```cmd
 cd template\scripts
 new-project.bat MeuProjeto
-```
+```bash
 
 ---
 
@@ -252,7 +252,7 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
-```
+```bash
 
 **Para PostgreSQL:**
 
@@ -297,7 +297,7 @@ dotnet restore
 
 ```bash
 dotnet build
-```
+```bash
 
 ### 6. Crie a Primeira Migration
 
@@ -332,7 +332,7 @@ Username: admin
 Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com
 Role:     Admin
-```
+```bash
 
 **Teste no Swagger:**
 1. Vá para `/swagger`

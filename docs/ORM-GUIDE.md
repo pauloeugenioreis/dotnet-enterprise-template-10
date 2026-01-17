@@ -918,7 +918,7 @@ public class ProductService
         return await _repository.AddAsync(product);
     }
 }
-```
+```csharp
 
 ### 📝 Convenções de Nomenclatura
 

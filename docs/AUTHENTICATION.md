@@ -318,7 +318,7 @@ Change the current user's password.
 **Endpoint:** `POST /api/auth/change-password`
 
 **Headers:**
-```
+```bash
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Request:**
 {
