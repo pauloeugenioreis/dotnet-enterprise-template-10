@@ -78,8 +78,8 @@ public class DatabaseSettings
     [Range(1, 300, ErrorMessage = "CommandTimeoutSeconds must be between 1 and 300 seconds")]
     public int CommandTimeoutSeconds { get; set; } = 30;
 
-    public bool EnableSensitiveDataLogging { get; set; } = false;
-    public bool EnableDetailedErrors { get; set; } = false;
+    public bool EnableSensitiveDataLogging { get; set; }
+    public bool EnableDetailedErrors { get; set; }
 }
 
 public class MongoDbSettings
@@ -159,7 +159,7 @@ public class JwtSettings
 
 public class OAuth2Settings
 {
-    public bool Enabled { get; set; } = false;
+    public bool Enabled { get; set; }
     public GoogleOAuthSettings Google { get; set; } = new();
     public MicrosoftOAuthSettings Microsoft { get; set; } = new();
     public GitHubOAuthSettings GitHub { get; set; } = new();
@@ -167,14 +167,14 @@ public class OAuth2Settings
 
 public class GoogleOAuthSettings
 {
-    public bool Enabled { get; set; } = false;
+    public bool Enabled { get; set; }
     public string ClientId { get; set; } = string.Empty;
     public string ClientSecret { get; set; } = string.Empty;
 }
 
 public class MicrosoftOAuthSettings
 {
-    public bool Enabled { get; set; } = false;
+    public bool Enabled { get; set; }
     public string ClientId { get; set; } = string.Empty;
     public string ClientSecret { get; set; } = string.Empty;
     public string TenantId { get; set; } = "common";
@@ -182,7 +182,7 @@ public class MicrosoftOAuthSettings
 
 public class GitHubOAuthSettings
 {
-    public bool Enabled { get; set; } = false;
+    public bool Enabled { get; set; }
     public string ClientId { get; set; } = string.Empty;
     public string ClientSecret { get; set; } = string.Empty;
 }
@@ -207,12 +207,12 @@ public class PasswordPolicySettings
 public class RefreshTokenSettings
 {
     public int ExpirationDays { get; set; } = 7;
-    public bool ReuseTokens { get; set; } = false;
+    public bool ReuseTokens { get; set; }
 }
 
 public class TelemetrySettings
 {
-    public bool Enabled { get; set; } = false;
+    public bool Enabled { get; set; }
     public string[] Providers { get; set; } = Array.Empty<string>(); // console, jaeger (via OTLP), otlp, grafana, prometheus, applicationinsights, datadog, dynatrace
 
     [Range(0.0, 1.0, ErrorMessage = "SamplingRatio must be between 0.0 and 1.0")]
@@ -275,7 +275,7 @@ public class DynatraceSettings
 
 public class RateLimitingSettings
 {
-    public bool Enabled { get; set; } = false;
+    public bool Enabled { get; set; }
     public string DefaultPolicy { get; set; } = "fixed"; // fixed, sliding, token, concurrent, none
     public TimeSpan DefaultWindow { get; set; } = TimeSpan.FromMinutes(1);
     public string[] WhitelistedIps { get; set; } = Array.Empty<string>(); // IPs que não sofrem rate limiting
@@ -332,7 +332,7 @@ public class EventSourcingSettings
     /// <summary>
     /// Enable/disable Event Sourcing globally
     /// </summary>
-    public bool Enabled { get; set; } = false;
+    public bool Enabled { get; set; }
 
     /// <summary>
     /// Event Sourcing mode: Traditional, Hybrid, or EventStore

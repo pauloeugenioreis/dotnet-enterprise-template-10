@@ -5,6 +5,7 @@ namespace ProjectTemplate.Domain.Validators;
 /// <summary>
 /// Validates that a property is required when a condition is met
 /// </summary>
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
 public sealed class RequiredIfAttribute : ValidationAttribute
 {
     private readonly string _propertyName;

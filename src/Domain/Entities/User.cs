@@ -12,8 +12,8 @@ public class User : EntityBase
     public string? LastName { get; set; }
     public string? PhoneNumber { get; set; }
     public new bool IsActive { get; set; } = true;  // Override EntityBase.IsActive
-    public bool EmailConfirmed { get; set; } = false;
-    public bool TwoFactorEnabled { get; set; } = false;
+    public bool EmailConfirmed { get; set; }
+    public bool TwoFactorEnabled { get; set; }
     public DateTime? LastLoginAt { get; set; }
     public string? ProfileImageUrl { get; set; }
 
@@ -35,7 +35,7 @@ public class Role : EntityBase
 {
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public bool IsSystemRole { get; set; } = false;
+    public bool IsSystemRole { get; set; }
 
     // Navigation properties
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
