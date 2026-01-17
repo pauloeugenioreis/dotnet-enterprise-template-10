@@ -58,6 +58,7 @@ The seeder will automatically create:
 
 ## Architecture
 
+```
 ```bash
 ┌─────────────────┐
 │  AuthController │  ← REST API endpoints
@@ -300,6 +301,7 @@ Get authenticated user information.
 **Endpoint:** `GET /api/auth/me`
 
 **Headers:**
+```
 ```text
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Response:**
@@ -318,6 +320,7 @@ Change the current user's password.
 **Endpoint:** `POST /api/auth/change-password`
 
 **Headers:**
+```
 ```bash
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Request:**
@@ -334,6 +337,7 @@ Update user profile information.
 **Endpoint:** `PUT /api/auth/profile`
 
 **Headers:**
+```
 ```bash
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Request:**
@@ -424,6 +428,7 @@ var refreshResponse = await client.PostAsJsonAsync("/api/auth/refresh-token", re
 authResponse = await refreshResponse.Content.ReadFromJsonAsync<AuthResponse>();
 ### JavaScript/TypeScript
 
+```
 ```typescript
 const API_URL = 'http://localhost:5000/api/auth';
 
@@ -713,6 +718,7 @@ CREATE TABLE RefreshTokens (
 1. **Start the application:**
 dotnet run --project src/Api/Api.csproj
 2. **Open Swagger UI:**
+```
 ```bash
 http://localhost:5000
 3. **Register a new user:**

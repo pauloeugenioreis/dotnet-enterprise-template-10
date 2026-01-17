@@ -150,6 +150,7 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 
 ## 📂 Estrutura de Arquivos
 
+```text
 template/
 ├── 📄 README.md                     # Documentação principal
 ├── 📄 QUICK-START.md                # Início rápido

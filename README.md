@@ -163,6 +163,7 @@ ProjectTemplate/
 ├── global.json                       # Versão do .NET SDK
 ├── ProjectTemplate.sln               # Solution file
 └── .gitignore                        # Git ignore configurado
+```
 ```bash
 
 ---
@@ -171,24 +172,30 @@ ProjectTemplate/
 
 ### Opção 1: Usando Script PowerShell (Recomendado para Windows)
 
+```
 ```powershell
 cd template/scripts
 .\new-project.ps1 -ProjectName "MeuProjeto"
+```
 ```bash
 
 ### Opção 2: Usando Script Bash (Linux/Mac)
 
+```
 ```bash
 cd template/scripts
 chmod +x new-project.sh
 ./new-project.sh MeuProjeto
+```
 ```bash
 
 ### Opção 3: Usando Script Batch (Windows CMD)
 
+```
 ```cmd
 cd template\scripts
 new-project.bat MeuProjeto
+```
 ```bash
 
 ---
@@ -199,14 +206,17 @@ Após criar seu projeto, siga estes passos:
 
 ### 1. Navegue até o diretório do projeto
 
+```
 ```bash
 cd MeuProjeto
+```
 ```json
 
 ### 2. Configure a Connection String
 
 Edite `src/Api/appsettings.json` e ajuste a connection string:
 
+```
 ```json
 {
   "AppSettings": {
@@ -218,6 +228,7 @@ Edite `src/Api/appsettings.json` e ajuste a connection string:
     }
   }
 }
+```
 ```json
 
 ### 3. Escolha seu Banco de Dados
@@ -226,6 +237,7 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
 
 **Para SQL Server:**
 
+```
 ```json
 {
   "AppSettings": {
@@ -237,10 +249,12 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
+```
 ```json
 
 **Para Oracle:**
 
+```
 ```json
 {
   "AppSettings": {
@@ -252,10 +266,12 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
+```
 ```bash
 
 **Para PostgreSQL:**
 
+```
 ```json
 {
   "AppSettings": {
@@ -267,10 +283,12 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
+```
 ```json
 
 **Para MySQL:**
 
+```
 ```json
 {
   "AppSettings": {
@@ -282,6 +300,7 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
     }
   }
 }
+```
 ```bash
 > ✨ **Todos os providers já estão instalados!** Basta mudar o `DatabaseType` e a connection string.
 
@@ -289,32 +308,42 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
 
 ### 4. Restaure os Pacotes
 
+```
 ```bash
 dotnet restore
+```
 ```bash
 
 ### 5. Compile o Projeto
 
+```
 ```bash
 dotnet build
+```
 ```bash
 
 ### 6. Crie a Primeira Migration
 
+```
 ```bash
 dotnet ef migrations add InitialCreate --project src/Data --startup-project src/Api
+```
 ```bash
 
 ### 7. Aplique a Migration no Banco
 
+```
 ```bash
 dotnet ef database update --project src/Data --startup-project src/Api
+```
 ```bash
 
 ### 8. Execute o Projeto
 
+```
 ```bash
 dotnet run --project src/Api
+```
 ```text
 
 ### 9. Acesse a API
@@ -327,11 +356,13 @@ dotnet run --project src/Api
 
 O sistema cria automaticamente um usuário administrador na primeira execução:
 
+```
 ```text
 Username: admin
 Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com
 Role:     Admin
+```
 ```bash
 
 **Teste no Swagger:**
@@ -446,6 +477,7 @@ Para adicionar health checks personalizados, edite `src/Infrastructure/Extension
 
 ### Fluxo de Dependências
 
+```
 ```bash
 Api → Infrastructure → Application → Data → Domain
                                        ↓
@@ -456,6 +488,7 @@ Api → Infrastructure → Application → Data → Domain
 
 ### 1. Crie a Entidade no Domain
 
+```
 ```csharp
 // src/Domain/Entities/Product.cs
 namespace MeuProjeto.Domain.Entities;
@@ -468,6 +501,7 @@ public class Product : EntityBase
 }
 ### 2. Crie o Repositório (se necessário customização)
 
+```
 ```csharp
 // src/Data/Repository/ProductRepository.cs
 namespace MeuProjeto.Data.Repository;
@@ -483,6 +517,7 @@ public class ProductRepository : Repository<Product>, IProductRepository
 
 ### 3. Crie o Service (se necessário customização)
 
+```
 ```csharp
 // src/Application/Services/ProductService.cs
 namespace MeuProjeto.Application.Services;
@@ -498,6 +533,7 @@ public class ProductService : Service<Product>, IProductService
 }
 ### 4. Crie o Controller
 
+```
 ```csharp
 // src/Api/Controllers/ProductController.cs
 namespace MeuProjeto.Api.Controllers;
@@ -583,24 +619,29 @@ services.Scan(scan => scan
 
 **1. Crie a interface específica:**
 
+```
 ```csharp
 public interface IProductDapperRepository : IRepository<Product>
 {
     Task<IEnumerable<Product>> GetTopSellingProductsAsync();
 }
+```
 ```csharp
 
 **2. Implemente a classe:**
 
+```
 ```csharp
 public class ProductDapperRepository : IProductDapperRepository
 {
     // Implementação...
 }
+```
 ```csharp
 
 **3. Pronto!** 🎉 O Scrutor registrará automaticamente. Basta injetar:
 
+```
 ```csharp
 public class ProductService
 {
@@ -650,6 +691,7 @@ _logger.LogError(ex, "Error processing {Id}", id);
 
 Para criar uma imagem Docker do seu projeto:
 
+```
 ```dockerfile
 # Dockerfile
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base

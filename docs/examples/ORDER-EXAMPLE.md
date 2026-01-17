@@ -37,10 +37,12 @@ public class Order : EntityBase
     
     public ICollection<OrderItem> Items { get; set; }
 }
+```
 ```csharp
 
 **OrderItem.cs** - Order line items
 
+```
 ```csharp
 public class OrderItem : EntityBase
 {
@@ -320,6 +322,7 @@ GET /api/v1/Order/statistics
 
 ## 🔄 Order Lifecycle
 
+```
 ```csharp
 Pending → Processing → Shipped → Delivered
    ↓
@@ -406,6 +409,7 @@ return Ok(new { executionTime = $"{stopwatch.ElapsedMilliseconds}ms", data });
 
 ### Create Order Request
 
+```
 ```http
 POST /api/v1/Order
 Content-Type: application/json

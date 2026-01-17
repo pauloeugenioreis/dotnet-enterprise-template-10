@@ -163,6 +163,7 @@ dotnet run --project src/Api
 Após habilitar qualquer ORM, teste os endpoints:
 
 ### Swagger UI
+```
 ```bash
 http://localhost:5000/swagger
 ### Testar Products
@@ -206,6 +207,7 @@ curl http://localhost:5000/api/v1/order/1
 
 ### Para usar múltiplos ORMs simultaneamente:
 
+```
 ```csharp
 // No seu service, injete repositórios específicos
 public class ProductService

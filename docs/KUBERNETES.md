@@ -298,6 +298,7 @@ spec:
 
 Estrutura:
 
+```
 ```yaml
 .k8s/
 ├── base/

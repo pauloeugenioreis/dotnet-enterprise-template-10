@@ -18,12 +18,15 @@ public class Product : EntityBase
     public string Category { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
 }
+```
 ```xml
 
 ### 2. **DbSet no Context** (`Data/Context/ApplicationDbContext.cs`)
 
+```
 ```csharp
 public DbSet<Product> Products { get; set; }
+```
 ```csharp
 ### 3. **Controller Completo** (`Api/Controllers/ProductController.cs`)
 
@@ -98,6 +101,7 @@ dotnet ef database update --project src/Data --startup-project src/Api
 dotnet run --project src/Api
 ### 3. Acessar Swagger
 
+```
 ```xml
 https://localhost:5001/swagger
 ### 4. Testar Endpoints

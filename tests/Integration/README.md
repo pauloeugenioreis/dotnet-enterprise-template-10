@@ -42,6 +42,7 @@ tests/Integration/
 
 ### Example Test
 
+```
 ```csharp
 public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture>
 {

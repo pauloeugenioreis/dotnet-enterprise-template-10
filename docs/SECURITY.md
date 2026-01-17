@@ -142,6 +142,7 @@ Never commit real database credentials to version control.
     }
   }
 }
+```
 ```text
 
 export DB_CONNECTION_STRING="Server=prod-server;Database=MyDb;User Id=sa;Password=RealPassword123!;"

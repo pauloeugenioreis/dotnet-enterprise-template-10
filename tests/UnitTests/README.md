@@ -135,18 +135,25 @@ Os testes unitários cobrem:
 ## 🎓 Exemplos de Uso
 
 ### Testar retorno de lista vazia
+```csharp
 _mockService.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<Product>());
 var result = await _controller.GetAll();
 var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
 var products = okResult.Value.Should().BeAssignableTo<IEnumerable<Product>>().Subject;
 products.Should().BeEmpty();
+```
+
 ### Testar exceção
+```csharp
 _mockService.Setup(s => s.GetByIdAsync(It.IsAny<long>()))
     .ThrowsAsync(new Exception("Database error"));
 
 var result = await _controller.GetById(1);
 result.Should().BeOfType<ObjectResult>();
+```
+
 ### Verificar chamadas ao serviço
+```csharp
 _mockService.Verify(s => s.AddAsync(It.IsAny<Product>()), Times.Once);
 _mockService.Verify(s => s.UpdateAsync(It.IsAny<Product>()), Times.Never);
 ```

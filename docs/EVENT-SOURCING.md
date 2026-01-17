@@ -277,6 +277,7 @@ public override async Task UpdateAsync(TEntity entity)
 
 #### 1. **Histórico Completo de uma Entidade**
 
+```
 ```http
 GET /api/audit/Order/123
 **Response:**
@@ -303,6 +304,7 @@ GET /api/audit/Order/123
 ]
 #### 2. **Time Travel - Estado em um Momento Específico**
 
+```
 ```http
 GET /api/audit/Order/123/at/2026-01-11T12:00:00Z
 **Response:**
@@ -326,20 +328,24 @@ GET /api/audit/Order/123/at/2026-01-11T12:00:00Z
 }
 #### 3. **Eventos por Versão**
 
+```
 ```http
 GET /api/audit/Order/123/versions/1/5
 Retorna eventos da versão 1 até a versão 5.
 
 #### 4. **Todos os Eventos de um Tipo**
 
+```
 ```http
 GET /api/audit/type/Order?from=2026-01-01&to=2026-01-31&limit=100
 #### 5. **Eventos por Usuário**
 
+```
 ```http
 GET /api/audit/user/user@email.com?limit=50
 #### 6. **Estatísticas**
 
+```
 ```http
 GET /api/audit/statistics?from=2026-01-01&to=2026-01-31
 **Response:**
@@ -359,6 +365,7 @@ GET /api/audit/statistics?from=2026-01-01&to=2026-01-31
 }
 #### 7. **Replay de Eventos**
 
+```
 ```http
 POST /api/audit/Order/123/replay
 Reconstrói o estado atual a partir dos eventos.
@@ -419,6 +426,7 @@ var allEvents = await _eventStore.GetEventsAsync("Order", orderId);
 */
 
 // 4. Conclusão: Pagamento falhou, pedido foi cancelado
+```
 ```text
 
 ---
@@ -429,14 +437,17 @@ var allEvents = await _eventStore.GetEventsAsync("Order", orderId);
 
 1. **Comece com Modo Hybrid**
    { "EventSourcing": { "Enabled": true, "Mode": "Hybrid" } }
+```
 ```text
 
 2. **Audite Apenas Entidades Críticas**
    { "AuditEntities": ["Order", "Payment", "Invoice"] }
+```
 ```bash
 
 3. **Use Snapshots para Performance**
    { "StoreSnapshots": true, "SnapshotInterval": 10 }
+```
 ```bash
 
 4. **Armazene Metadados**
@@ -513,6 +524,7 @@ dotnet restore
 
 ### ❌ **Problema: PostgreSQL não conecta**
 
+```
 ```bash
 Npgsql.NpgsqlException: Connection refused
 **Solução:**
@@ -546,6 +558,7 @@ docker logs api | grep EventStore
     "AuditEntities": [] // Vazio = audita TODAS as entidades
   }
 }
+```
 ```text
 
 ---
@@ -559,14 +572,17 @@ docker logs api | grep EventStore
 
 1. **Audite apenas entidades críticas**
    { "AuditEntities": ["Order"] } // Só Order, não Product
+```
 ```text
 
 2. **Habilite snapshots**
    { "StoreSnapshots": true, "SnapshotInterval": 10 }
+```
 ```text
 
 3. **Desabilite metadados em dev**
    { "StoreMetadata": false } // Em desenvolvimento
+```
 ```text
 
 4. **Use índices no PostgreSQL**

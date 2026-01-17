@@ -152,6 +152,7 @@ Suaviza limites calculando média móvel de requisições.
 - Para evitar "burst" no reset da janela
 
 **Exemplo:**
+```
 ```text
 00:00-00:10 = 33 requests
 00:10-00:20 = 33 requests
@@ -183,6 +184,7 @@ Usa "tokens" que são consumidos e reabastecidos ao longo do tempo.
 - Algoritmo mais flexível e realista
 
 **Exemplo:**
+```
 ```text
 Balde começa com 50 tokens
 Request 1 → 49 tokens
@@ -190,6 +192,7 @@ Request 2 → 48 tokens
 ...
 A cada 10s, +10 tokens (até limite de 50)
 **Taxa Sustentada:**
+```
 ```bash
 10 tokens / 10 segundos = 1 req/s = 60 req/min
 ---
@@ -215,6 +218,7 @@ Limita requisições **simultâneas** (não por período de tempo).
 - Controle de concorrência global
 
 **Exemplo:**
+```
 ```csharp
 10 requisições processando simultaneamente
 Request 11 → aguarda na fila
@@ -300,6 +304,7 @@ Quando o limite é excedido, a API retorna **HTTP 429 Too Many Requests** com:
 
 ### Headers de Resposta
 
+```
 ```http
 HTTP/1.1 429 Too Many Requests
 X-RateLimit-Limit: 100
@@ -378,6 +383,7 @@ done
 curl -i http://localhost:5000/api/v1/Product | grep -i "x-ratelimit"
 **Resultado esperado (após 100 requests):**
 
+```
 ```http
 HTTP/1.1 429 Too Many Requests
 X-RateLimit-Limit: 100
@@ -393,6 +399,7 @@ Retry-After: 42
 }
 ### 3. Teste de Carga com k6
 
+```
 ```javascript
 // rate-limit-test.js
 import http from 'k6/http';
@@ -440,6 +447,7 @@ echo "Todas as 200 requests foram bem-sucedidas!"
 
 O Rate Limiting gera logs automáticos:
 
+```
 ```csharp
 ⚠️  Rate Limiting is disabled
 ✅  Rate Limiting enabled: 4 policies configured
@@ -451,6 +459,7 @@ O Rate Limiting gera logs automáticos:
 
 Quando Rate Limiting é rejeitado, um span `RateLimitRejected` é criado:
 
+```
 ```csharp
 Span: RateLimitRejected
   - client_ip: 192.168.1.100
@@ -559,6 +568,7 @@ if (response.StatusCode == HttpStatusCode.TooManyRequests)
 2. Verificar se policy está aplicada no endpoint com `[EnableRateLimiting("policy-name")]`
 3. Verificar logs de inicialização:
 
+```
 ```csharp
 ✅  Rate Limiting enabled: 4 policies configured
 ### Problema: IP sempre whitelistado

@@ -107,6 +107,7 @@ Visão geral da arquitetura Clean Architecture implementada neste template.
 │  Database             │
 │  SQL Server / Others  │
 └───────────────────────┘
+```
 ```csharp
 
 ---
@@ -153,6 +154,7 @@ Data
 
 Domain
  └── (No dependencies - Pure business logic)
+```
 ```csharp
 
 ---
@@ -353,6 +355,7 @@ services.Scan(scan => scan
 
 ## 🎛️ Configuração Modular
 
+```
 ```text
 Program.cs
     │
@@ -386,6 +389,7 @@ Program.cs
 
 ## 🚀 Deploy Architecture
 
+```
 ```text
 ┌─────────────────────────────────────────────────────┐
 │                  Kubernetes Cluster                  │
@@ -427,6 +431,7 @@ Program.cs
 
 ## 📊 Fluxo de Dados
 
+```
 ```text
 User Request
      ↓
@@ -453,6 +458,7 @@ User Response (JSON)
 
 ## 🔐 Security Layers
 
+```
 ```text
 ┌─────────────────────────────────────────────┐
 │  1. Network Security                        │
@@ -491,6 +497,7 @@ User Response (JSON)
 
 ### Horizontal Scaling
 
+```
 ```text
 Load Balancer
       │
@@ -505,6 +512,7 @@ Load Balancer
 
 ### Vertical Scaling
 
+```
 ```text
 Initial: 256Mi memory, 100m CPU
     ↓

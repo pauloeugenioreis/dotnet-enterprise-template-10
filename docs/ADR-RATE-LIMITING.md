@@ -31,6 +31,7 @@ app.UseIpRateLimiting();
 
 ### Native .NET Alternative
 
+```csharp
 // .NET Native Rate Limiting
 services.AddRateLimiter(options =>
 {

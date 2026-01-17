@@ -73,6 +73,7 @@ Acesse:
 
 O sistema cria automaticamente um usuário administrador:
 
+```
 ```bash
 Username: admin
 Password: Admin@2026!Secure
@@ -193,6 +194,7 @@ cd scripts/linux
 
 `src/Domain/Entities/Product.cs`:
 
+```
 ```csharp
 namespace MeuProjeto.Domain.Entities;
 
@@ -206,8 +208,10 @@ public class Product : EntityBase
 
 `src/Data/Context/ApplicationDbContext.cs`:
 
+```
 ```csharp
 public DbSet<Product> Products { get; set; }
+```
 ```csharp
 ### 3. Criar migration (EF Core)
 
@@ -218,6 +222,7 @@ dotnet ef database update
 
 `src/Api/Controllers/ProductController.cs`:
 
+```
 ```csharp
 namespace MeuProjeto.Api.Controllers;
 
