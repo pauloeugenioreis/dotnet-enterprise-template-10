@@ -38,9 +38,14 @@ MongoDB é um banco de dados NoSQL orientado a documentos, ideal para dados não
 ### Como Habilitar
 
 **1. Descomente no Infrastructure.csproj:**
+
+```xml
 <PackageReference Include="MongoDB.Driver" Version="3.5.2" />
+```json
+
 **2. Configure no appsettings.json:**
-{
+
+```json
   "AppSettings": {
     "Infrastructure": {
       "MongoDB": {
@@ -49,11 +54,18 @@ MongoDB é um banco de dados NoSQL orientado a documentos, ideal para dados não
     }
   }
 }
+```
+
 **3. Adicione no Program.cs:**
+
+```csharp
 // Add MongoDB (OPTIONAL)
 builder.Services.AddMongo<Program>();
+```csharp
+
 **4. Use no código:**
-using MongoDB.Driver;
+
+```csharp
 
 public class MyService
 {
@@ -89,6 +101,8 @@ Quartz.NET é um scheduler de jobs para executar tarefas em segundo plano de for
 **1. Já está habilitado no Infrastructure.csproj** ✅
 
 **2. Configure no appsettings.json:**
+
+```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -98,7 +112,11 @@ Quartz.NET é um scheduler de jobs para executar tarefas em segundo plano de for
     }
   }
 }
+```
+
 **3. Crie um Job:**
+
+```csharp
 // Infrastructure/Jobs/CleanupJob.cs
 using Quartz;
 
@@ -121,7 +139,11 @@ public class CleanupJob : IJob
         _logger.LogInformation("Cleanup job completed");
     }
 }
+```json
+
 **4. Registre no Program.cs:**
+
+```csharp
 // Add Quartz with Jobs (OPTIONAL)
 builder.Services.AddCustomizedQuartz((q, settings) =>
 {
@@ -152,6 +174,8 @@ RabbitMQ é um message broker para comunicação assíncrona entre serviços.
 **1. Já está habilitado no Infrastructure.csproj** ✅
 
 **2. Configure no appsettings.json:**
+
+```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -161,11 +185,18 @@ RabbitMQ é um message broker para comunicação assíncrona entre serviços.
     }
   }
 }
+```
+
 **3. Adicione no Program.cs:**
+
+```csharp
 // Add RabbitMQ (OPTIONAL)
 builder.Services.AddRabbitMq();
+```csharp
+
 **4. Use no código:**
-public class OrderService
+
+```csharp
 {
     private readonly IQueueService _queueService;
     
@@ -206,6 +237,8 @@ Google Cloud Storage é um serviço de armazenamento de objetos para arquivos e 
 **1. Já está habilitado no Infrastructure.csproj** ✅
 
 **2. Configure no appsettings.json:**
+
+```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -216,10 +249,18 @@ Google Cloud Storage é um serviço de armazenamento de objetos para arquivos e 
     }
   }
 }
+```
+
 **3. Adicione no Program.cs:**
+
+```csharp
 // Add Google Cloud Storage (OPTIONAL)
 builder.Services.AddStorage<Program>();
+```csharp
+
 **4. Use no código:**
+
+```csharp
 public class DocumentController : ApiControllerBase
 {
     private readonly IStorageService _storageService;
@@ -260,6 +301,8 @@ JSON Web Token para autenticação stateless baseada em tokens.
 **1. Já está pronto no Infrastructure.csproj** ✅
 
 **2. Configure no appsettings.json:**
+
+```json
 {
   "AppSettings": {
     "Authentication": {
@@ -272,7 +315,11 @@ JSON Web Token para autenticação stateless baseada em tokens.
     }
   }
 }
+```
+
 **3. Adicione no Program.cs:**
+
+```csharp
 // Add Authentication (OPTIONAL)
 builder.Services.AddAuthenticationExtension();
 
@@ -281,7 +328,11 @@ builder.Services.AddAuthenticationExtension();
 // Use Authentication
 app.UseAuthentication();
 app.UseAuthorization();
+```
+
 **4. Proteja endpoints:**
+
+```csharp
 [Authorize] // Requires authentication
 [HttpGet]
 public IActionResult GetSecureData()
@@ -332,9 +383,15 @@ Versionamento de API para gerenciar mudanças sem quebrar clientes existentes.
 **1. Já está pronto no Infrastructure.csproj** ✅
 
 **2. Adicione no Program.cs:**
+
+```csharp
 // Add API Versioning (OPTIONAL)
 builder.Services.AddCustomizedApiVersioning();
+```
+
 **3. Use em controllers:**
+
+```csharp
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
