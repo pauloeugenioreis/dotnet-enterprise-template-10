@@ -206,6 +206,7 @@ curl http://localhost:5000/api/v1/order/1
 
 ### Para usar múltiplos ORMs simultaneamente:
 
+```csharp
 // No seu service, injete repositórios específicos
 public class ProductService
 {

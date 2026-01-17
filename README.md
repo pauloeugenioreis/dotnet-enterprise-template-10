@@ -456,6 +456,7 @@ Api → Infrastructure → Application → Data → Domain
 
 ### 1. Crie a Entidade no Domain
 
+```csharp
 // src/Domain/Entities/Product.cs
 namespace MeuProjeto.Domain.Entities;
 
@@ -467,6 +468,7 @@ public class Product : EntityBase
 }
 ### 2. Crie o Repositório (se necessário customização)
 
+```csharp
 // src/Data/Repository/ProductRepository.cs
 namespace MeuProjeto.Data.Repository;
 
@@ -478,8 +480,10 @@ public class ProductRepository : Repository<Product>, IProductRepository
     
     // Métodos customizados aqui
 }
+
 ### 3. Crie o Service (se necessário customização)
 
+```csharp
 // src/Application/Services/ProductService.cs
 namespace MeuProjeto.Application.Services;
 
@@ -494,6 +498,7 @@ public class ProductService : Service<Product>, IProductService
 }
 ### 4. Crie o Controller
 
+```csharp
 // src/Api/Controllers/ProductController.cs
 namespace MeuProjeto.Api.Controllers;
 
@@ -577,16 +582,26 @@ services.Scan(scan => scan
 #### ✨ Adicionando Novos Repositórios
 
 **1. Crie a interface específica:**
+
+```csharp
 public interface IProductDapperRepository : IRepository<Product>
 {
     Task<IEnumerable<Product>> GetTopSellingProductsAsync();
 }
+```csharp
+
 **2. Implemente a classe:**
+
+```csharp
 public class ProductDapperRepository : IProductDapperRepository
 {
     // Implementação...
 }
+```csharp
+
 **3. Pronto!** 🎉 O Scrutor registrará automaticamente. Basta injetar:
+
+```csharp
 public class ProductService
 {
     private readonly IRepository<Product> _efRepository;          // EF Core

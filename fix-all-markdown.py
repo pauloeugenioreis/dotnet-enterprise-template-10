@@ -7,18 +7,31 @@ Intelligently detects the language based on content.
 import re
 from pathlib import Path
 
-def detect_language(code_content):
-    """Detect programming language from code content."""
+def detect_language(code_content, previous_line=''):
+    """Detect programming language from code content and context."""
     code_lower = code_content.lower().strip()
     lines = code_content.strip().split('\n')
-    
+
+    # Check previous line for context (like file path comments)
+    if previous_line and '//' in previous_line:
+        if '.cs' in previous_line or 'namespace' in previous_line:
+            return 'csharp'
+        if '.json' in previous_line:
+            return 'json'
+        if '.yaml' in previous_line or '.yml' in previous_line:
+            return 'yaml'
+
+    # Check for C# specific patterns first
+    if re.search(r'(namespace |public class|public interface|private readonly|using System|using Microsoft|async Task)', code_content):
+        return 'csharp'
+
     # Check for shell comments
     if any(line.strip().startswith('#') and not line.strip().startswith('##') for line in lines):
         # Could be bash/powershell, check for specific commands
         if re.search(r'\$env:|Get-|Set-|New-|Remove-', code_content):
             return 'powershell'
         return 'bash'
-    
+
     # Check for specific patterns
     if re.search(r'^\s*(dotnet|cd|chmod|ls|cat|grep|mkdir|rm|cp|mv|curl|docker)', code_content, re.MULTILINE):
         return 'bash'
@@ -28,8 +41,6 @@ def detect_language(code_content):
         return 'json'
     if re.search(r'^\s*(apiVersion|kind:|metadata:|spec:)', code_content, re.MULTILINE):
         return 'yaml'
-    if re.search(r'^\s*(using |namespace |public class|private |protected |var |async |await )', code_content, re.MULTILINE):
-        return 'csharp'
     if re.search(r'^\s*(SELECT|INSERT|UPDATE|DELETE|CREATE TABLE|ALTER TABLE)', code_content, re.IGNORECASE):
         return 'sql'
     if re.search(r'^\s*<\?xml|<[a-zA-Z]', code_content):
@@ -40,7 +51,7 @@ def detect_language(code_content):
         return 'bash'
     if re.search(r'Server=|Database=|User Id=|Password=', code_content):
         return 'text'
-    
+
     # Default to text if can't determine
     return 'text'
 
@@ -48,37 +59,40 @@ def fix_markdown_file(file_path):
     """Add language tags to code blocks missing them."""
     with open(file_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
-    
+
     fixed_lines = []
     i = 0
     fixes = []
-    
+
     while i < len(lines):
         line = lines[i]
-        
+
         # Check if this is a code block start without language tag
         if line.strip() == '```':
+            # Get previous line for context
+            prev_line = lines[i-1] if i > 0 else ''
+
             # Collect the code content
             code_content = []
             j = i + 1
             while j < len(lines) and lines[j].strip() != '```':
                 code_content.append(lines[j])
                 j += 1
-            
+
             # Only fix if there's content and a closing tag
             if code_content and j < len(lines):
                 content_str = ''.join(code_content)
-                lang = detect_language(content_str)
+                lang = detect_language(content_str, prev_line)
                 fixes.append(f"Line {i+1}: Added '{lang}' tag")
                 fixed_lines.append(f'```{lang}\n')
                 fixed_lines.extend(code_content)
                 fixed_lines.append('```\n')
                 i = j + 1
                 continue
-        
+
         fixed_lines.append(line)
         i += 1
-    
+
     if fixes:
         with open(file_path, 'w', encoding='utf-8') as f:
             f.writelines(fixed_lines)
@@ -89,16 +103,16 @@ def main():
     """Process all markdown files."""
     root_dir = Path('.')
     md_files = list(root_dir.rglob('*.md'))
-    
+
     print(f"Found {len(md_files)} markdown files\n")
-    
+
     total_fixed = 0
     total_blocks = 0
-    
+
     for md_file in md_files:
         if 'node_modules' in str(md_file) or '.git' in str(md_file):
             continue
-        
+
         try:
             was_fixed, fixes = fix_markdown_file(md_file)
             if was_fixed:
@@ -107,7 +121,7 @@ def main():
                 print(f"✓ {md_file} - Fixed {len(fixes)} code blocks")
         except Exception as e:
             print(f"✗ Error: {md_file}: {e}")
-    
+
     print(f"\n{'='*60}")
     print(f"Files fixed: {total_fixed}")
     print(f"Code blocks fixed: {total_blocks}")
