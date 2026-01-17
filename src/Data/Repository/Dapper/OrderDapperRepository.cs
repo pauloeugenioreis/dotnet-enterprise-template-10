@@ -96,7 +96,7 @@ public class OrderDapperRepository : IOrderDapperRepository
     public async Task<Order> AddAsync(Order entity, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        using var transaction = connection.BeginTransaction();
+        using var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -132,12 +132,12 @@ public class OrderDapperRepository : IOrderDapperRepository
                 await connection.ExecuteAsync(itemSql, entity.Items, transaction);
             }
 
-            transaction.Commit();
+            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             return entity;
         }
         catch
         {
-            transaction.Rollback();
+            await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
             throw;
         }
     }
@@ -155,7 +155,7 @@ public class OrderDapperRepository : IOrderDapperRepository
     public async Task UpdateAsync(Order entity, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        using var transaction = connection.BeginTransaction();
+        using var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -200,11 +200,11 @@ public class OrderDapperRepository : IOrderDapperRepository
                 await connection.ExecuteAsync(itemSql, entity.Items, transaction);
             }
 
-            transaction.Commit();
+            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
         }
         catch
         {
-            transaction.Rollback();
+            await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
             throw;
         }
     }
@@ -212,7 +212,7 @@ public class OrderDapperRepository : IOrderDapperRepository
     public async Task DeleteAsync(Order entity, CancellationToken cancellationToken = default)
     {
         using var connection = _connectionFactory.CreateConnection();
-        using var transaction = connection.BeginTransaction();
+        using var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -224,11 +224,11 @@ public class OrderDapperRepository : IOrderDapperRepository
             const string deleteOrderSql = "DELETE FROM Orders WHERE Id = @Id";
             await connection.ExecuteAsync(deleteOrderSql, new { entity.Id }, transaction);
 
-            transaction.Commit();
+            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
         }
         catch
         {
-            transaction.Rollback();
+            await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
             throw;
         }
     }

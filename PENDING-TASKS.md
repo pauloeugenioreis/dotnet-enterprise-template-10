@@ -1,6 +1,6 @@
 # 📋 Tarefas Pendentes - Clean Architecture Template
 
-## ✅ CONCLUÍDO (9/14 - 64%)
+## ✅ CONCLUÍDO (11/14 - 79%)
 
 ### Infraestrutura e Configuração
 - [x] **.editorconfig** - Regras de estilo e análise de código
@@ -38,6 +38,17 @@
 - [x] **StorageService.cs** - 3 awaits
 - [x] **GlobalExceptionHandler.cs** - 5 awaits
 - [x] **ValidationFilter.cs** - 2 awaits
+
+### 📄 Markdown Linting (Completo - 564 code blocks corrigidos)
+- [x] **.markdownlint.json** - Configuração criada
+- [x] **fix-codeblocks.py** - Script Python para automação
+- [x] **564 code blocks** corrigidos com tags de linguagem (csharp, json, bash, powershell, yaml, xml, sql, text, markdown)
+- [x] **25 arquivos** atualizados: README.md (44), QUICK-START.md (27), TESTING-DATABASES.md (22), e mais 22 arquivos
+
+### 📊 Analyzer Warnings - Fase 1 (Completo - 19 warnings corrigidos)
+- [x] **CA1805** - 13 explicit default values removidos (AppSettings.cs, User.cs)
+- [x] **CS1570** - 4 XML comment errors (IOrderAdoRepository, IProductAdoRepository, IOrderDapperRepository, IProductDapperRepository)
+- [x] **S3993** - 2 AttributeUsage adicionados (RedisConnectionStringAttribute, RequiredIfAttribute)
 
 ---
 
