@@ -678,16 +678,13 @@ Se quiser habilitar NHibernate ou Linq2Db:
 
 ## 📊 Comparação de ORMs
 
-| Característica | EF Core | Dapper | ADO.NET | NHibernate | Linq2Db |
-|---------------|---------|---------|---------|------------|---------|
-| **Status** | ✅ Habilitado | ✅ Habilitado | ✅ Habilitado | 💤 Opcional | 💤 Opcional |
-| **Performance** | Boa | Excelente | Excelente | Boa | Excelente |
-| **Facilidade** | Fácil | Moderado | Complexo | Complexo | Moderado |
-| **Maturidade** | Alta | Alta | Muito Alta | Muito Alta | Alta |
-| **Change Tracking** | Sim | Não | Não | Sim | Opcional |
-| **LINQ Support** | Completo | Limitado | Não | Bom | Completo |
-| **Migrations** | Sim | Não | Não | Limitado | Limitado |
-| **Vantagens** | Change tracking, migrations | Alta performance, queries customizadas | Controle total, máxima performance | Maturidade, features enterprise | LINQ completo, performance |
+| ORM | Status | Performance | Facilidade | Maturidade | Change Tracking | LINQ Support | Migrations | Vantagens |
+|-----|--------|-------------|------------|------------|----------------|--------------|------------|-----------|
+| **EF Core** | ✅ Habilitado | Boa | Fácil | Alta | Sim | Completo | Sim | Change tracking, migrations |
+| **Dapper** | ✅ Habilitado | Excelente | Moderado | Alta | Não | Limitado | Não | Alta performance, queries customizadas |
+| **ADO.NET** | ✅ Habilitado | Excelente | Complexo | Muito Alta | Não | Não | Não | Controle total, máxima performance |
+| **NHibernate** | 💤 Opcional | Boa | Complexo | Muito Alta | Sim | Bom | Limitado | Maturidade, features enterprise |
+| **Linq2Db** | 💤 Opcional | Excelente | Moderado | Alta | Opcional | Completo | Limitado | LINQ completo, performance |
 
 ### Quando usar cada um?
 
