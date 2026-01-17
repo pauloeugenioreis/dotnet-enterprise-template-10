@@ -47,6 +47,7 @@ Cada ORM usa sua **interface específica** para evitar conflitos:
 
 ### 🎨 Como Usar Múltiplos ORMs
 
+```csharp
 public class ProductService
 {
     private readonly IRepository<Product> _efRepository;          // EF Core (padrão)
@@ -188,6 +189,7 @@ Dapper está habilitado simultaneamente com EF Core! Use **`IProductDapperReposi
 
 ### Como Usar
 
+```csharp
 public class ProductService
 {
     private readonly IProductDapperRepository _dapperRepo;
@@ -332,6 +334,7 @@ ADO.NET está habilitado simultaneamente com EF Core e Dapper! Use **`IProductAd
 
 ### Como Usar
 
+```csharp
 public class ProductService
 {
     private readonly IProductAdoRepository _adoRepo;
