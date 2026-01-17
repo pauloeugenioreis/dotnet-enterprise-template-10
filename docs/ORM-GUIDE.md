@@ -90,6 +90,8 @@ public class ProductService
 | Relatórios complexos | **Dapper** | Alta performance, queries otimizadas |
 | Bulk operations | **ADO.NET** | Controle total, máxima performance |
 | Testes unitários | **EF Core InMemory** | Rápido, sem banco real |
+| Projetos enterprise complexos | **NHibernate** | Maturidade, features avançadas |
+| Performance com LINQ completo | **Linq2Db** | LINQ support, alta performance |
 
 ### 🚀 **Registro Automático com Scrutor**
 
@@ -655,13 +657,15 @@ services.AddDapper(connectionString);
 services.AddAdo(connectionString);
 
 // Linhas ~82-89: NHibernate e Linq2Db (opcional, comentados)
-### 🔥 Vantagens desta Arquitetura
+### Vantagens de Usar Múltiplos ORMs
 
-- ✅ **Não precisa escolher um único ORM** - use os 3 simultaneamente
-- ✅ **Testes rápidos** - EF Core InMemory (sem SQL Server)
-- ✅ **Performance quando precisar** - Dapper e ADO.NET disponíveis
-- ✅ **Sem conflitos** - cada ORM usa interfaces específicas
-- ✅ **Fácil de manter** - Scrutor registra tudo automaticamente
+| Vantagem | Descrição |
+|----------|-----------|
+| Não precisa escolher um único ORM | Use os 3 simultaneamente |
+| Testes rápidos | EF Core InMemory (sem SQL Server) |
+| Performance quando precisar | Dapper e ADO.NET disponíveis |
+| Sem conflitos | Cada ORM usa interfaces específicas |
+| Fácil de manter | Scrutor registra tudo automaticamente |
 
 ### 🚀 Adicionar ORMs Opcionais (NHibernate, Linq2Db)
 
