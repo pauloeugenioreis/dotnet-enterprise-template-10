@@ -70,12 +70,12 @@ builder.Services.AddMongo<Program>();
 public class MyService
 {
     private readonly IMongoDatabase _database;
-    
+
     public MyService(IMongoDatabase database)
     {
         _database = database;
     }
-    
+
     public async Task<List<MyDocument>> GetAllAsync()
     {
         var collection = _database.GetCollection<MyDocument>("mycollection");
@@ -124,19 +124,19 @@ using Quartz;
 public class CleanupJob : IJob
 {
     private readonly ILogger<CleanupJob> _logger;
-    
+
     public CleanupJob(ILogger<CleanupJob> logger)
     {
         _logger = logger;
     }
-    
+
     public async Task Execute(IJobExecutionContext context)
     {
         _logger.LogInformation("Cleanup job started");
-        
+
         // Your cleanup logic here
         await Task.Delay(1000);
-        
+
         _logger.LogInformation("Cleanup job completed");
     }
 }
@@ -205,19 +205,19 @@ builder.Services.AddRabbitMq();
 ```csharp
 {
     private readonly IQueueService _queueService;
-    
+
     public OrderService(IQueueService queueService)
     {
         _queueService = queueService;
     }
-    
+
     public async Task CreateOrderAsync(Order order)
     {
         // Save to database
         await _repository.CreateAsync(order);
-        
+
         // Publish event to queue
-        await _queueService.PublishAsync("orders-queue", new 
+        await _queueService.PublishAsync("orders-queue", new
         {
             OrderId = order.Id,
             CustomerId = order.CustomerId,
@@ -273,12 +273,12 @@ builder.Services.AddStorage<Program>();
 public class DocumentController : ApiControllerBase
 {
     private readonly IStorageService _storageService;
-    
+
     public DocumentController(IStorageService storageService)
     {
         _storageService = storageService;
     }
-    
+
     [HttpPost("upload")]
     public async Task<IActionResult> Upload(IFormFile file)
     {
@@ -288,7 +288,7 @@ public class DocumentController : ApiControllerBase
             objectName: file.FileName,
             contentType: file.ContentType,
             stream: stream);
-        
+
         return Ok(new { Url = url });
     }
 }
@@ -356,7 +356,7 @@ public string GenerateToken(string userId, string username)
 {
     var tokenHandler = new JwtSecurityTokenHandler();
     var key = Encoding.UTF8.GetBytes(_appSettings.Authentication.Jwt.Secret);
-    
+
     var tokenDescriptor = new SecurityTokenDescriptor
     {
         Subject = new ClaimsIdentity(new[]
@@ -368,10 +368,10 @@ public string GenerateToken(string userId, string username)
         Issuer = _appSettings.Authentication.Jwt.Issuer,
         Audience = _appSettings.Authentication.Jwt.Audience,
         SigningCredentials = new SigningCredentials(
-            new SymmetricSecurityKey(key), 
+            new SymmetricSecurityKey(key),
             SecurityAlgorithms.HmacSha256Signature)
     };
-    
+
     var token = tokenHandler.CreateToken(tokenDescriptor);
     return tokenHandler.WriteToken(token);
 }
@@ -504,11 +504,11 @@ public class CreateProductValidator : AbstractValidator<CreateProductDto>
             .WithMessage("Product name is required")
             .MaximumLength(200)
             .WithMessage("Product name cannot exceed 200 characters");
-        
+
         RuleFor(x => x.Price)
             .GreaterThan(0)
             .WithMessage("Price must be greater than zero");
-        
+
         RuleFor(x => x.Stock)
             .GreaterThanOrEqualTo(0)
             .WithMessage("Stock cannot be negative");
@@ -531,7 +531,7 @@ public async Task<IActionResult> Create([FromBody] CreateProductDto dto)
 {
     // ValidationFilter valida automaticamente!
     // Se houver erros, retorna BadRequest antes de chegar aqui
-    
+
     var product = _mapper.Map<Product>(dto);
     var created = await _service.CreateAsync(product);
     return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
@@ -570,16 +570,16 @@ builder.AddCustomLogging();
 public class ProductService
 {
     private readonly ILogger<ProductService> _logger;
-    
+
     public ProductService(ILogger<ProductService> logger)
     {
         _logger = logger;
     }
-    
+
     public async Task<Product> CreateAsync(Product product)
     {
         _logger.LogInformation("Creating product {ProductName}", product.Name);
-        
+
         try
         {
             var result = await _repository.CreateAsync(product);
@@ -642,13 +642,13 @@ services:
     image: mongo:latest
     ports:
       - "27017:27017"
-  
+
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
-  
+
   redis:
     image: redis:alpine
     ports:
@@ -832,7 +832,7 @@ public class ExceptionNotificationService : IExceptionNotificationService
     {
         var user = context.User.Identity?.Name ?? "Anonymous";
         var path = context.Request.Path;
-        
+
         _logger.LogError(exception,
             "Exception for user {User} on {Path}",
             user, path);
@@ -987,13 +987,13 @@ Sistema completo de **observabilidade** com **OpenTelemetry** incluindo:
 
 ### Provedores Suportados
 
-✅ **Jaeger** - Distributed tracing (open source)  
-✅ **Grafana Cloud** - Stack completa gerenciada  
-✅ **Prometheus** - Metrics collection (open source)  
-✅ **Application Insights** - APM Azure  
-✅ **Datadog** - APM enterprise completo  
-✅ **Dynatrace** - APM enterprise avançado  
-✅ **Console** - Debug local  
+✅ **Jaeger** - Distributed tracing (open source)
+✅ **Grafana Cloud** - Stack completa gerenciada
+✅ **Prometheus** - Metrics collection (open source)
+✅ **Application Insights** - APM Azure
+✅ **Datadog** - APM enterprise completo
+✅ **Dynatrace** - APM enterprise avançado
+✅ **Console** - Debug local
 
 ### Como Habilitar
 
@@ -1026,26 +1026,26 @@ docker-compose up -d
 
 ### Métricas Automáticas
 
-✅ HTTP request duration  
-✅ HTTP active requests  
-✅ SQL query duration  
-✅ Entity Framework operations  
-✅ GC collections  
-✅ Memory usage  
-✅ Thread pool  
+✅ HTTP request duration
+✅ HTTP active requests
+✅ SQL query duration
+✅ Entity Framework operations
+✅ GC collections
+✅ Memory usage
+✅ Thread pool
 
 ### Exemplo: Métrica Customizada
 
 public class ProductService : Service<Product>
 {
     private readonly Counter<long> _productCreatedCounter;
-    
+
     public ProductService(IRepository<Product> repository, IMeterFactory meterFactory)
     {
         var meter = meterFactory.Create("ProjectTemplate.Api");
         _productCreatedCounter = meter.CreateCounter<long>("products.created");
     }
-    
+
     public override async Task<Product> AddAsync(Product entity, CancellationToken ct = default)
     {
         var result = await base.AddAsync(entity, ct);
@@ -1585,7 +1585,7 @@ var loginDto = new LoginDto
 var authResponse = await authService.LoginAsync(loginDto, "127.0.0.1");
 
 // Use token in API calls
-httpClient.DefaultRequestHeaders.Authorization = 
+httpClient.DefaultRequestHeaders.Authorization =
     new AuthenticationHeaderValue("Bearer", authResponse.AccessToken);
 ### OAuth2 Providers
 

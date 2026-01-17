@@ -511,7 +511,7 @@ public class ProductRepository : Repository<Product>, IProductRepository
     public ProductRepository(ApplicationDbContext context) : base(context)
     {
     }
-    
+
     // Métodos customizados aqui
 }
 
@@ -524,11 +524,11 @@ namespace MeuProjeto.Application.Services;
 
 public class ProductService : Service<Product>, IProductService
 {
-    public ProductService(IRepository<Product> repository, ILogger<ProductService> logger) 
+    public ProductService(IRepository<Product> repository, ILogger<ProductService> logger)
         : base(repository, logger)
     {
     }
-    
+
     // Lógica de negócio customizada aqui
 }
 ### 4. Crie o Controller
@@ -596,7 +596,7 @@ dotnet ef database update --project src/Data --startup-project src/Api
 
 ### Dependency Injection
 
-O template usa **Scrutor** com `.AsMatchingInterface()` para registro automático inteligente. 
+O template usa **Scrutor** com `.AsMatchingInterface()` para registro automático inteligente.
 
 #### 🚀 Registro Automático
 
@@ -647,7 +647,7 @@ public class ProductService
 {
     private readonly IRepository<Product> _efRepository;          // EF Core
     private readonly IProductDapperRepository _dapperRepository;  // Dapper
-    
+
     public ProductService(
         IRepository<Product> efRepository,
         IProductDapperRepository dapperRepository)

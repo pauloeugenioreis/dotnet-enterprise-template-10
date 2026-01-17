@@ -34,7 +34,7 @@ public class Order : EntityBase
     public decimal ShippingCost { get; set; }
     public decimal Total { get; set; }
     public string? Notes { get; set; }
-    
+
     public ICollection<OrderItem> Items { get; set; }
 }
 ```
@@ -135,13 +135,13 @@ public class OrderService : Service<Order>, IOrderService
         foreach (var itemDto in dto.Items)
         {
             var product = await _productRepository.GetByIdAsync(itemDto.ProductId, ct);
-            
+
             if (product == null)
                 throw new NotFoundException($"Product {itemDto.ProductId} not found");
-            
+
             if (!product.IsActive)
                 throw new BusinessException($"Product {product.Name} is not available");
-            
+
             if (product.Stock < itemDto.Quantity)
                 throw new BusinessException($"Insufficient stock for {product.Name}");
         }
@@ -214,7 +214,7 @@ public class OrderController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var orders = await GetFilteredOrdersAsync(status, cancellationToken);
-        
+
         var excelData = orders.SelectMany(o => o.Items.Select(i => new
         {
             OrderId = o.Id,
@@ -228,7 +228,7 @@ public class OrderController : ApiControllerBase
 
         var memoryStream = new MemoryStream();
         await memoryStream.SaveAsAsync(excelData, configuration: config);
-        
+
         return File(memoryStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             $"Orders_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
     }

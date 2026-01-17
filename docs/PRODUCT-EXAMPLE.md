@@ -69,23 +69,23 @@ public async Task<ActionResult> GerarExcelAsync(
 
     // Gera Excel em memória
     var memoryStream = new MemoryStream();
-    await memoryStream.SaveAsAsync(filtered, 
-        sheetName: "Products", 
+    await memoryStream.SaveAsAsync(filtered,
+        sheetName: "Products",
         configuration: config);
-    
+
     // Retorna arquivo
-    return File(memoryStream, 
+    return File(memoryStream,
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         $"Products_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
 }
 ### Características:
 
-✅ **Alta Performance**: MiniExcel usa FastMode para geração rápida  
-✅ **Filtros**: Suporta filtrar por status ativo e categoria  
-✅ **Auto-width**: Colunas ajustadas automaticamente  
-✅ **AutoFilter**: Excel gerado com filtros habilitados  
-✅ **Timestamp**: Nome do arquivo inclui data/hora  
-✅ **Memory Stream**: Não cria arquivos temporários no disco  
+✅ **Alta Performance**: MiniExcel usa FastMode para geração rápida
+✅ **Filtros**: Suporta filtrar por status ativo e categoria
+✅ **Auto-width**: Colunas ajustadas automaticamente
+✅ **AutoFilter**: Excel gerado com filtros habilitados
+✅ **Timestamp**: Nome do arquivo inclui data/hora
+✅ **Memory Stream**: Não cria arquivos temporários no disco
 
 ---
 

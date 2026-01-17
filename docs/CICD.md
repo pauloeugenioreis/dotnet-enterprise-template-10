@@ -473,6 +473,6 @@ gitlab-runner exec docker test:unit
 
 ---
 
-**Template Version:** 1.0.0  
-**Last Updated:** Janeiro 2026  
+**Template Version:** 1.0.0
+**Last Updated:** Janeiro 2026
 **Supported Platforms:** GitHub Actions, Azure DevOps, GitLab CI/CD

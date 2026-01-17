@@ -28,7 +28,7 @@ Este documento fornece instruções detalhadas sobre como trocar o ORM padrão (
 4. **NHibernate** (✅ Implementado - Pacotes Comentados)
 5. **Linq2Db** (✅ Implementado - Pacotes Comentados)
 
-> **🎉 NOVIDADE:** Entity Framework Core, Dapper e ADO.NET estão **todos habilitados simultaneamente**!  
+> **🎉 NOVIDADE:** Entity Framework Core, Dapper e ADO.NET estão **todos habilitados simultaneamente**!
 > Você pode usar os três no mesmo serviço, escolhendo o melhor ORM para cada operação.
 
 ---
@@ -53,7 +53,7 @@ public class ProductService
     private readonly IRepository<Product> _efRepository;          // EF Core (padrão)
     private readonly IProductDapperRepository _dapperRepository;  // Dapper (alta performance)
     private readonly IProductAdoRepository _adoRepository;        // ADO.NET (controle total)
-    
+
     public ProductService(
         IRepository<Product> efRepository,
         IProductDapperRepository dapperRepository,
@@ -63,19 +63,19 @@ public class ProductService
         _dapperRepository = dapperRepository;
         _adoRepository = adoRepository;
     }
-    
+
     // Use EF Core para CRUD normal com change tracking
     public async Task<Product> CreateAsync(Product product)
     {
         return await _efRepository.AddAsync(product);
     }
-    
+
     // Use Dapper para queries de leitura complexas (melhor performance)
     public async Task<IEnumerable<Product>> GetAllAsync()
     {
         return await _dapperRepository.GetAllAsync();
     }
-    
+
     // Use ADO.NET para operações em lote ou controle total
     public async Task BulkUpdatePricesAsync(Dictionary<long, decimal> prices)
     {
@@ -137,7 +137,7 @@ Entity Framework Core está sempre habilitado como **ORM primário** do projeto.
 
 ### Localização no Código
 
-**Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`  
+**Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`
 **Linha**: ~73 (procure por "PRIMARY: Entity Framework Core")
 
 // PRIMARY: Entity Framework Core (Change Tracking, Migrations, CRUD)
@@ -163,7 +163,7 @@ public class ProductRepository : Repository<Product>, IProductRepository
     public ProductRepository(ApplicationDbContext context) : base(context)
     {
     }
-    
+
     public async Task<IEnumerable<Product>> GetActiveProductsAsync()
     {
         return await _dbSet
@@ -194,12 +194,12 @@ Dapper está habilitado simultaneamente com EF Core! Use **`IProductDapperReposi
 public class ProductService
 {
     private readonly IProductDapperRepository _dapperRepo;
-    
+
     public ProductService(IProductDapperRepository dapperRepo)
     {
         _dapperRepo = dapperRepo;
     }
-    
+
     public async Task<IEnumerable<Product>> GetAllAsync()
     {
         // Dapper: alta performance para leitura
@@ -208,7 +208,7 @@ public class ProductService
 }
 ### Localização no Código
 
-**Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`  
+**Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`
 **Linha**: ~76 (procure por "ENABLED: Dapper")
 
 // ENABLED: Dapper (High Performance Queries, Complex Reports)
@@ -245,7 +245,7 @@ public class ProductDapperRepository : IRepository<Product>
     {
         using var connection = CreateConnection();
         return await connection.QuerySingleOrDefaultAsync<Product>(
-            "SELECT * FROM Products WHERE Id = @Id", 
+            "SELECT * FROM Products WHERE Id = @Id",
             new { Id = id });
     }
 
@@ -259,10 +259,10 @@ public class ProductDapperRepository : IRepository<Product>
     {
         using var connection = CreateConnection();
         var sql = @"
-            INSERT INTO Products (Name, Price, Description, CreatedAt, IsActive) 
+            INSERT INTO Products (Name, Price, Description, CreatedAt, IsActive)
             VALUES (@Name, @Price, @Description, @CreatedAt, @IsActive);
             SELECT CAST(SCOPE_IDENTITY() as bigint)";
-        
+
         var id = await connection.QuerySingleAsync<long>(sql, entity);
         entity.Id = id;
         return entity;
@@ -272,13 +272,13 @@ public class ProductDapperRepository : IRepository<Product>
     {
         using var connection = CreateConnection();
         var sql = @"
-            UPDATE Products 
-            SET Name = @Name, 
-                Price = @Price, 
+            UPDATE Products
+            SET Name = @Name,
+                Price = @Price,
                 Description = @Description,
                 UpdatedAt = @UpdatedAt
             WHERE Id = @Id";
-        
+
         await connection.ExecuteAsync(sql, entity);
     }
 
@@ -298,10 +298,10 @@ private static IServiceCollection AddDapper(
     string connectionString)
 {
     services.AddSingleton(connectionString);
-    
+
     // Registre seus repositórios Dapper aqui
     services.AddScoped<IRepository<Product>, ProductDapperRepository>();
-    
+
     return services;
 }
 ### ⚠️ Importante: Microsoft.Data.SqlClient
@@ -340,12 +340,12 @@ ADO.NET está habilitado simultaneamente com EF Core e Dapper! Use **`IProductAd
 public class ProductService
 {
     private readonly IProductAdoRepository _adoRepo;
-    
+
     public ProductService(IProductAdoRepository adoRepo)
     {
         _adoRepo = adoRepo;
     }
-    
+
     public async Task<IEnumerable<Product>> GetAllAsync()
     {
         // ADO.NET: controle total sobre execução
@@ -354,7 +354,7 @@ public class ProductService
 }
 ### Localização no Código
 
-**Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`  
+**Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`
 **Linha**: ~79 (procure por "ENABLED: ADO.NET")
 
 // ENABLED: ADO.NET (Maximum Control, Legacy Integration)
@@ -397,7 +397,7 @@ public class ProductAdoRepository : IRepository<Product>
 
         using var command = connection.CreateCommand();
         command.CommandText = "SELECT * FROM Products WHERE Id = @Id";
-        
+
         var parameter = command.CreateParameter();
         parameter.ParameterName = "@Id";
         parameter.Value = id;
@@ -764,7 +764,7 @@ public class OrderService
 {
     private readonly IRepository<Order> _efRepo;          // EF Core
     private readonly IOrderDapperRepository _dapperRepo;  // Dapper
-    
+
     public OrderService(
         IRepository<Order> efRepo,
         IOrderDapperRepository dapperRepo)
@@ -772,13 +772,13 @@ public class OrderService
         _efRepo = efRepo;
         _dapperRepo = dapperRepo;
     }
-    
+
     // Use EF Core para criar pedidos (usa change tracking)
     public async Task<Order> CreateOrderAsync(Order order)
     {
         return await _efRepo.AddAsync(order);
     }
-    
+
     // Use Dapper para relatórios de vendas (queries otimizadas)
     public async Task<IEnumerable<Order>> GetSalesReportAsync(DateTime start, DateTime end)
     {
@@ -836,14 +836,14 @@ Os testes usam **EF Core InMemory** por padrão, independentemente de quantos OR
 public class ProductServiceTests
 {
     private readonly Mock<IRepository<Product>> _mockRepo;  // EF Core (InMemory)
-    
+
     [Fact]
     public async Task GetByIdAsync_ReturnsProduct()
     {
         // Arrange
         _mockRepo.Setup(r => r.GetByIdAsync(1, default))
             .ReturnsAsync(new Product { Id = 1, Name = "Test" });
-        
+
         // Act & Assert
         // Funciona com qualquer implementação!
     }
@@ -876,21 +876,21 @@ public interface IProductDapperRepository : IRepository<Product>
 public class ProductDapperRepository : IProductDapperRepository
 {
     private readonly IDbConnectionFactory _connectionFactory;
-    
+
     public ProductDapperRepository(IDbConnectionFactory connectionFactory)
     {
         _connectionFactory = connectionFactory;
     }
-    
+
     public async Task<Product?> GetByIdAsync(long id, CancellationToken ct = default)
     {
         using var connection = _connectionFactory.CreateConnection();
         return await connection.QueryFirstOrDefaultAsync<Product>(
-            "SELECT * FROM Products WHERE Id = @Id", 
+            "SELECT * FROM Products WHERE Id = @Id",
             new { Id = id }
         );
     }
-    
+
     // Implemente os demais métodos...
 }
 ### Passo 3: **Pronto! Não precisa fazer mais nada!** 🎉
@@ -905,7 +905,7 @@ public class ProductService
 {
     private readonly IRepository<Product> _repository;              // EF Core
     private readonly IProductDapperRepository _dapperRepository;    // Dapper
-    
+
     public ProductService(
         IRepository<Product> repository,
         IProductDapperRepository dapperRepository)
@@ -913,13 +913,13 @@ public class ProductService
         _repository = repository;
         _dapperRepository = dapperRepository;
     }
-    
+
     public async Task<IEnumerable<Product>> GetProductsForReportAsync()
     {
         // Use Dapper para queries de leitura complexas (melhor performance)
         return await _dapperRepository.GetProductsWithHighPerformanceAsync();
     }
-    
+
     public async Task<Product> CreateAsync(Product product)
     {
         // Use EF Core para operações CRUD (change tracking, validação)

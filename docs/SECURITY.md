@@ -42,7 +42,7 @@ Update directly in the database (requires password hashing):
 -- var hash = sha256.ComputeHash(bytes);
 -- var hashString = Convert.ToBase64String(hash);
 
-UPDATE Users 
+UPDATE Users
 SET PasswordHash = 'YOUR_NEW_PASSWORD_HASH_HERE'
 WHERE Username = 'admin';
 ### Option 3: Modify DbSeeder
@@ -52,10 +52,10 @@ Edit `src/Data/Seeders/DbSeeder.cs` before first deployment:
 private async Task SeedRolesAndAdminUserAsync()
 {
     // ...
-    
+
     // Change this password before deploying to production
     var passwordHash = HashPassword("YourProductionPassword123!");
-    
+
     var adminUser = new User
     {
         Username = "admin",
@@ -63,7 +63,7 @@ private async Task SeedRolesAndAdminUserAsync()
         PasswordHash = passwordHash,
         // ...
     };
-    
+
     // ...
 }
 ## 🛡️ JWT Secret Key

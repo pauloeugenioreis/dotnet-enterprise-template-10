@@ -415,7 +415,7 @@ var loginResponse = await client.PostAsJsonAsync("/api/auth/login", loginDto);
 authResponse = await loginResponse.Content.ReadFromJsonAsync<AuthResponse>();
 
 // Use access token
-client.DefaultRequestHeaders.Authorization = 
+client.DefaultRequestHeaders.Authorization =
     new AuthenticationHeaderValue("Bearer", authResponse.AccessToken);
 
 // Get current user
@@ -445,7 +445,7 @@ async function register(username: string, email: string, password: string) {
       lastName: 'Doe'
     })
   });
-  
+
   return await response.json();
 }
 
@@ -456,7 +456,7 @@ async function login(usernameOrEmail: string, password: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ usernameOrEmail, password })
   });
-  
+
   const data = await response.json();
   localStorage.setItem('accessToken', data.accessToken);
   localStorage.setItem('refreshToken', data.refreshToken);
@@ -466,30 +466,30 @@ async function login(usernameOrEmail: string, password: string) {
 // API call with authentication
 async function getCurrentUser() {
   const token = localStorage.getItem('accessToken');
-  
+
   const response = await fetch(`${API_URL}/me`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
-  
+
   if (response.status === 401) {
     // Token expired, refresh it
     await refreshToken();
     return getCurrentUser(); // Retry
   }
-  
+
   return await response.json();
 }
 
 // Refresh token
 async function refreshToken() {
   const refreshToken = localStorage.getItem('refreshToken');
-  
+
   const response = await fetch(`${API_URL}/refresh-token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken })
   });
-  
+
   const data = await response.json();
   localStorage.setItem('accessToken', data.accessToken);
   localStorage.setItem('refreshToken', data.refreshToken);
@@ -498,13 +498,13 @@ async function refreshToken() {
 // Logout
 async function logout() {
   const refreshToken = localStorage.getItem('refreshToken');
-  
+
   await fetch(`${API_URL}/revoke-token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken })
   });
-  
+
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
 }
@@ -564,7 +564,7 @@ openssl rand -base64 32
   - Store access tokens in memory (variables)
   - Store refresh tokens in HttpOnly cookies (preferred) or secure storage
   - **Never store tokens in localStorage** (XSS vulnerable)
-  
+
 ### 4. Token Expiration
 - Keep access tokens short-lived (15-60 minutes)
 - Use longer-lived refresh tokens (7-30 days)
@@ -573,7 +573,7 @@ openssl rand -base64 32
 ### 5. Password Hashing
 - Current implementation uses SHA256 (simplified)
 - **Production recommendation:** Use BCrypt, Argon2, or PBKDF2
-  
+
 // Example with BCrypt.Net
 using BCrypt.Net;
 

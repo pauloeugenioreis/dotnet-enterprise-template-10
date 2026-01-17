@@ -412,7 +412,7 @@ export let options = {
 
 export default function () {
   let res = http.get('http://localhost:5000/api/v1/Product');
-  
+
   check(res, {
     'status is 200': (r) => r.status === 200,
     'status is 429': (r) => r.status === 429,
@@ -650,6 +650,6 @@ public class ProductController : ControllerBase
 
 ---
 
-**Template Version:** 1.0.0  
-**Last Updated:** 2024-01-15  
+**Template Version:** 1.0.0
+**Last Updated:** 2024-01-15
 **Author:** Enterprise Template Team

@@ -39,7 +39,7 @@ public class AppSettings
     public string EnvironmentName { get; set; }
     public InfrastructureSettings Infrastructure { get; set; }
     public AuthenticationSettings Authentication { get; set; }
-    
+
     // Helper methods
     public bool IsDevelopment() => EnvironmentName == "Development";
     public bool IsProduction() => EnvironmentName == "Production";
@@ -80,11 +80,11 @@ public class AppSettings
 public class ProductService
 {
     private readonly IConfiguration _configuration;
-    
+
     public ProductService(IConfiguration configuration)
     {
         _configuration = configuration;
-        
+
         // ❌ MAU: Leitura manual de configuração
         var cacheEnabled = _configuration.GetValue<bool>("AppSettings:Infrastructure:Cache:Enabled");
     }
@@ -94,11 +94,11 @@ public class ProductService
 public class ProductService
 {
     private readonly AppSettings _appSettings;
-    
+
     public ProductService(IOptions<AppSettings> appSettings)
     {
         _appSettings = appSettings.Value;
-        
+
         // ✅ BOM: Acesso tipado e validado
         var cacheEnabled = _appSettings.Infrastructure.Cache.Enabled;
     }
@@ -114,7 +114,7 @@ public class ProductService
 public class MyService
 {
     private readonly AppSettings _settings;
-    
+
     public MyService(IOptions<AppSettings> options)
     {
         _settings = options.Value;
@@ -130,7 +130,7 @@ public class MyService
 public class MyController : ControllerBase
 {
     private readonly AppSettings _settings;
-    
+
     public MyController(IOptionsSnapshot<AppSettings> options)
     {
         _settings = options.Value;
@@ -146,7 +146,7 @@ public class MyController : ControllerBase
 public class MyService
 {
     private readonly AppSettings _settings;
-    
+
     public MyService(AppSettings settings)
     {
         _settings = settings;
@@ -166,7 +166,7 @@ public class MyService
 public class ProductController : ApiControllerBase
 {
     private readonly AppSettings _settings;
-    
+
     public ProductController(IOptions<AppSettings> settings)
     {
         _settings = settings.Value;
@@ -177,12 +177,12 @@ public class ProductController : ApiControllerBase
 public class EmailService : IEmailService
 {
     private readonly AppSettings _settings;
-    
+
     public EmailService(IOptions<AppSettings> settings)
     {
         _settings = settings.Value;
     }
-    
+
     public async Task SendEmail(string to, string subject)
     {
         var smtpServer = _settings.Infrastructure.Email.SmtpServer;
@@ -194,9 +194,9 @@ public class EmailService : IEmailService
 public class ProductRepository : Repository<Product>
 {
     private readonly AppSettings _settings;
-    
+
     public ProductRepository(
-        DbContext context, 
+        DbContext context,
         IOptions<AppSettings> settings) : base(context)
     {
         _settings = settings.Value;
@@ -207,7 +207,7 @@ public class ProductRepository : Repository<Product>
 public class CleanupBackgroundService : BackgroundService
 {
     private readonly AppSettings _settings;
-    
+
     public CleanupBackgroundService(IOptions<AppSettings> settings)
     {
         _settings = settings.Value;
@@ -310,7 +310,7 @@ public class ProductService : IProductService
     {
         var eventProvider = _settings.Infrastructure.EventSourcing.Provider;
         _logger.LogInformation("Saving event to {Provider}", eventProvider);
-        
+
         // Lógica de event sourcing
     }
 }
@@ -335,10 +335,10 @@ public class ProductDapperRepository : IRepository<Product>
     public async Task<IEnumerable<Product>> GetAllAsync()
     {
         using var connection = _connectionFactory.CreateConnection();
-        
+
         // Usar timeout da configuração
         var commandTimeout = _settings.Infrastructure.Database.CommandTimeoutSeconds;
-        
+
         return await connection.QueryAsync<Product>(
             "SELECT * FROM Products",
             commandTimeout: commandTimeout);
@@ -369,17 +369,17 @@ public class DataCleanupService : BackgroundService
             try
             {
                 _logger.LogInformation("Running cleanup job...");
-                
+
                 // Verificar se está em produção
                 if (_settings.IsProduction())
                 {
                     using var scope = _serviceProvider.CreateScope();
                     var repository = scope.ServiceProvider.GetRequiredService<IRepository<Product>>();
-                    
+
                     // Limpeza de dados
                     await CleanupOldData(repository);
                 }
-                
+
                 // Aguardar intervalo configurado
                 await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
             }
@@ -470,7 +470,7 @@ public class CacheSettingsValidator : IValidateOptions<AppSettings>
             return ValidateOptionsResult.Success;
 
         // Validar Redis
-        if (cacheSettings.Provider == "Redis" && 
+        if (cacheSettings.Provider == "Redis" &&
             string.IsNullOrWhiteSpace(cacheSettings.Redis?.ConnectionString))
         {
             return ValidateOptionsResult.Fail(
@@ -569,30 +569,30 @@ services:
     environment:
       # Ambiente
       - AppSettings__EnvironmentName=Production
-      
+
       # Database
       - AppSettings__Infrastructure__Database__DatabaseType=SqlServer
       - AppSettings__Infrastructure__Database__ConnectionString=Server=sqlserver;Database=MyDb;User Id=sa;Password=YourPassword123!;TrustServerCertificate=true
-      
+
       # JWT
       - AppSettings__Authentication__Jwt__Secret=my-super-secret-key-for-production-with-64-characters-minimum
       - AppSettings__Authentication__Jwt__Issuer=https://api.mycompany.com
       - AppSettings__Authentication__Jwt__Audience=https://app.mycompany.com
       - AppSettings__Authentication__Jwt__ExpirationMinutes=120
-      
+
       # Cache Redis
       - AppSettings__Infrastructure__Cache__Enabled=true
       - AppSettings__Infrastructure__Cache__Provider=Redis
       - AppSettings__Infrastructure__Cache__Redis__ConnectionString=redis:6379
-      
+
       # Telemetry
       - AppSettings__Infrastructure__Telemetry__Enabled=true
       - AppSettings__Infrastructure__Telemetry__Provider=Console
-    
+
     depends_on:
       - sqlserver
       - redis
-  
+
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
@@ -600,7 +600,7 @@ services:
       - SA_PASSWORD=YourPassword123!
     ports:
       - "1433:1433"
-  
+
   redis:
     image: redis:7-alpine
     ports:
@@ -693,14 +693,14 @@ spec:
         image: myregistry.azurecr.io/myapi:latest
         ports:
         - containerPort: 8080
-        
+
         # Injetar variáveis do ConfigMap
         envFrom:
         - configMapRef:
             name: api-config
         - secretRef:
             name: api-secrets
-        
+
         # OU variáveis individuais
         env:
         - name: AppSettings__EnvironmentName
@@ -708,13 +708,13 @@ spec:
             configMapKeyRef:
               name: api-config
               key: AppSettings__EnvironmentName
-        
+
         - name: AppSettings__Authentication__Jwt__Secret
           valueFrom:
             secretKeyRef:
               name: api-secrets
               key: AppSettings__Authentication__Jwt__Secret
-        
+
         - name: AppSettings__Infrastructure__Database__ConnectionString
           valueFrom:
             secretKeyRef:

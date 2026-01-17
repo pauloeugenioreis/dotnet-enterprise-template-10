@@ -2,10 +2,10 @@
 
 Este guia explica como configurar e usar telemetria (tracing, metrics, logs) no ProjectTemplate usando OpenTelemetry.
 
-> ⚠️ **IMPORTANTE - Atualização Jaeger (Janeiro 2026):**  
-> O pacote `OpenTelemetry.Exporter.Jaeger` foi descontinuado (deprecated/legacy).  
-> Este template agora usa **OTLP (OpenTelemetry Protocol)** para enviar dados ao Jaeger.  
-> Jaeger suporta nativamente OTLP desde a versão 1.35+.  
+> ⚠️ **IMPORTANTE - Atualização Jaeger (Janeiro 2026):**
+> O pacote `OpenTelemetry.Exporter.Jaeger` foi descontinuado (deprecated/legacy).
+> Este template agora usa **OTLP (OpenTelemetry Protocol)** para enviar dados ao Jaeger.
+> Jaeger suporta nativamente OTLP desde a versão 1.35+.
 > Todas as configurações foram atualizadas para usar OTLP (portas 4317/4318).
 
 ## 📋 Índice
@@ -301,7 +301,7 @@ Você pode usar múltiplos backends simultaneamente:
 public class ProductService : Service<Product>
 {
     private readonly Counter<long> _productCreatedCounter;
-    
+
     public ProductService(IRepository<Product> repository, IMeterFactory meterFactory)
     {
         var meter = meterFactory.Create("ProjectTemplate.Api");
@@ -310,7 +310,7 @@ public class ProductService : Service<Product>
             description: "Total number of products created"
         );
     }
-    
+
     public override async Task<Product> AddAsync(Product entity, CancellationToken ct = default)
     {
         var result = await base.AddAsync(entity, ct);

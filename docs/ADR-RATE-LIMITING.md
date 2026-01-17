@@ -1,8 +1,8 @@
 # ADR: Rate Limiting Strategy - AspNetCoreRateLimit vs .NET Native
 
-**Status:** DEFERRED  
-**Date:** January 14, 2026  
-**Decision Makers:** Architecture Team  
+**Status:** DEFERRED
+**Date:** January 14, 2026
+**Decision Makers:** Architecture Team
 **Next Review:** Q2 2026
 
 ---
@@ -40,7 +40,7 @@ services.AddRateLimiter(options =>
         opt.PermitLimit = 100;
         opt.Window = TimeSpan.FromMinutes(1);
     });
-    
+
     options.AddSlidingWindowLimiter("sliding", opt =>
     {
         opt.PermitLimit = 100;
@@ -105,7 +105,7 @@ app.UseRateLimiter();
   - AspNetCoreRateLimit não receber atualizações por 12+ meses
   - .NET native adicionar features equivalentes
   - Surgir incompatibilidade crítica com futuras versões do .NET
-  
+
 - 🎯 **Criar guia de migração** quando decisão for tomada
 - 🎯 **Implementar features faltantes** (whitelist, custom messages, etc)
 

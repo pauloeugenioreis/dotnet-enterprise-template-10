@@ -98,7 +98,7 @@ public string AdminEmail { get; set; } = string.Empty;
 
 Validação customizada com regex.
 
-[RegularExpression(@"^[a-zA-Z0-9-_.]+$", 
+[RegularExpression(@"^[a-zA-Z0-9-_.]+$",
     ErrorMessage = "Only alphanumeric characters, hyphens, underscores and dots are allowed")]
 public string BucketName { get; set; } = string.Empty;
 ---
@@ -135,7 +135,7 @@ public class RequiredIfAttribute : ValidationAttribute
             if (value == null || (value is string str && string.IsNullOrWhiteSpace(str)))
             {
                 return new ValidationResult(
-                    ErrorMessage ?? 
+                    ErrorMessage ??
                     $"{validationContext.DisplayName} is required when {_propertyName} is {_propertyValue}");
             }
         }
@@ -196,7 +196,7 @@ public class RedisSettings
 public class AuthenticationSettings
 {
     public bool Enabled { get; set; } = true;
-    
+
     [Required]
     public JwtSettings Jwt { get; set; } = new();
 }
@@ -206,18 +206,18 @@ public class JwtSettings
     [Required(ErrorMessage = "JWT Secret is required")]
     [MinLength(32, ErrorMessage = "JWT Secret must be at least 32 characters for security")]
     public string Secret { get; set; } = string.Empty;
-    
+
     [Required(ErrorMessage = "JWT Issuer is required")]
     [Url(ErrorMessage = "Issuer must be a valid URL")]
     public string Issuer { get; set; } = string.Empty;
-    
+
     [Required(ErrorMessage = "JWT Audience is required")]
     [Url(ErrorMessage = "Audience must be a valid URL")]
     public string Audience { get; set; } = string.Empty;
-    
+
     [Range(1, 1440, ErrorMessage = "ExpirationMinutes must be between 1 and 1440 (24 hours)")]
     public int ExpirationMinutes { get; set; } = 60;
-    
+
     [Range(1, 90, ErrorMessage = "RefreshTokenExpirationDays must be between 1 and 90 days")]
     public int RefreshTokenExpirationDays { get; set; } = 7;
 }
@@ -226,14 +226,14 @@ public class JwtSettings
 public class CacheSettings
 {
     public bool Enabled { get; set; } = true;
-    
+
     [Required(ErrorMessage = "Cache Provider is required")]
     [AllowedValues("Memory", "Redis", "SqlServer",
         ErrorMessage = "Provider must be Memory, Redis, or SqlServer")]
     public string Provider { get; set; } = "Memory";
-    
+
     public RedisSettings? Redis { get; set; }
-    
+
     [Range(1, 1440, ErrorMessage = "DefaultExpirationMinutes must be between 1 and 1440")]
     public int DefaultExpirationMinutes { get; set; } = 60;
 }
@@ -253,10 +253,10 @@ public class DatabaseSettings
     [AllowedValues("InMemory", "SqlServer", "Oracle", "PostgreSQL", "MySQL",
         ErrorMessage = "DatabaseType must be InMemory, SqlServer, Oracle, PostgreSQL, or MySQL")]
     public string DatabaseType { get; set; } = "InMemory";
-    
+
     [Range(1, 300, ErrorMessage = "CommandTimeoutSeconds must be between 1 and 300 seconds")]
     public int CommandTimeoutSeconds { get; set; } = 30;
-    
+
     public bool EnableSensitiveDataLogging { get; set; } = false;
     public bool EnableDetailedErrors { get; set; } = false;
 }
@@ -266,15 +266,15 @@ public class PasswordPolicySettings
 {
     [Range(6, 128, ErrorMessage = "MinimumLength must be between 6 and 128 characters")]
     public int MinimumLength { get; set; } = 8;
-    
+
     public bool RequireDigit { get; set; } = true;
     public bool RequireLowercase { get; set; } = true;
     public bool RequireUppercase { get; set; } = true;
     public bool RequireNonAlphanumeric { get; set; } = true;
-    
+
     [Range(1, 100, ErrorMessage = "MaxFailedAccessAttempts must be between 1 and 100")]
     public int MaxFailedAccessAttempts { get; set; } = 5;
-    
+
     [Range(1, 1440, ErrorMessage = "LockoutMinutes must be between 1 and 1440 (24 hours)")]
     public int LockoutMinutes { get; set; } = 15;
 }
@@ -283,12 +283,12 @@ public class PasswordPolicySettings
 public class TelemetrySettings
 {
     public bool Enabled { get; set; } = false;
-    
+
     public string[] Providers { get; set; } = Array.Empty<string>();
-    
+
     [Range(0.0, 1.0, ErrorMessage = "SamplingRatio must be between 0.0 and 1.0")]
     public double SamplingRatio { get; set; } = 1.0;
-    
+
     public bool EnableSqlInstrumentation { get; set; } = true;
     public bool EnableHttpInstrumentation { get; set; } = true;
 }
@@ -313,7 +313,7 @@ public static class AppSettingsExtension
             .ValidateOnStart();         // ✅ Valida no startup (falha rápido)
 
         // Registrar como singleton
-        services.AddSingleton(sp => 
+        services.AddSingleton(sp =>
             sp.GetRequiredService<IOptions<AppSettings>>().Value);
 
         return services;
@@ -331,7 +331,7 @@ services.AddOptions<AppSettings>()
     .ValidateOnStart();                                  // 2º - Executa no startup
 
 // 3º - Validação programática adicional
-services.AddSingleton<IValidateOptions<AppSettings>, 
+services.AddSingleton<IValidateOptions<AppSettings>,
     AuthenticationSettingsValidator>();
 ---
 
@@ -360,7 +360,7 @@ public string Secret { get; set; } = string.Empty;
 public int MaxRetries { get; set; }
 // Resultado: "MaxRetries must be between 1 and 100"
 
-[StringLength(50, MinimumLength = 3, 
+[StringLength(50, MinimumLength = 3,
     ErrorMessage = "{0} must be between {2} and {1} characters")]
 public string Name { get; set; } = string.Empty;
 // Resultado: "Name must be between 3 and 50 characters"
@@ -389,10 +389,10 @@ public void AppSettings_Should_Fail_With_Invalid_JWT_Secret()
 
     // Act & Assert
     var serviceProvider = services.BuildServiceProvider();
-    
+
     var exception = Assert.Throws<OptionsValidationException>(() =>
         serviceProvider.GetRequiredService<IOptions<AppSettings>>().Value);
-    
+
     Assert.Contains("JWT Secret must be at least 32 characters", exception.Message);
 }
 ### Teste Manual
@@ -405,8 +405,8 @@ dotnet run --project src/Api/Api.csproj
 **Resultado esperado:**
 
 ```text
-Unhandled exception. Microsoft.Extensions.Options.OptionsValidationException: 
-DataAnnotation validation failed for 'AppSettings' members: 
+Unhandled exception. Microsoft.Extensions.Options.OptionsValidationException:
+DataAnnotation validation failed for 'AppSettings' members:
 'Authentication.Jwt.Secret' with the error: 'JWT Secret must be at least 32 characters for security'.
 ---
 

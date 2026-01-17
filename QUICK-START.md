@@ -65,7 +65,7 @@ Veja `docs/ORM-GUIDE.md` para PostgreSQL, MySQL, Oracle.
 
 cd src/Api
 dotnet run
-Acesse: 
+Acesse:
 - **API**: `http://localhost:5000` ou `https://localhost:5001`
 - **Swagger UI**: `http://localhost:5000/swagger`
 
@@ -329,14 +329,14 @@ Para trocar de ORM, **não use appsettings.json**:
 
 ### Erro: Não é possível conectar ao banco de dados
 
-**Solução**: 
+**Solução**:
 1. Verifique se o SQL Server está rodando
 2. Confirme a connection string em `appsettings.Development.json`
 3. Teste a conexão: `dotnet ef database update`
 
 ### Erro: Porta 5000 já está em uso
 
-**Solução**: 
+**Solução**:
 # Use outra porta
 dotnet run --urls "http://localhost:5005"
 ### Docker: erro de build

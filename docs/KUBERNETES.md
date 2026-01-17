@@ -391,12 +391,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.REGISTRY }}/projecttemplate-api:${{ github.sha }} .
           docker push ${{ secrets.REGISTRY }}/projecttemplate-api:${{ github.sha }}
-      
+
       - name: Deploy to Kubernetes
         uses: azure/k8s-deploy@v1
         with:

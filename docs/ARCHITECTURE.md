@@ -208,7 +208,7 @@ public interface IRepository<T> where T : EntityBase
 public class Repository<T> : IRepository<T> where T : EntityBase
 {
     private readonly ApplicationDbContext _context;
-    
+
     public async Task<T?> GetByIdAsync(long id, CancellationToken ct)
     {
         return await _context.Set<T>().FindAsync(new object[] { id }, ct);
@@ -236,7 +236,7 @@ public class ProductService : Service<Product>
         : base(repo, logger)
     {
     }
-    
+
     // Custom business logic here
 }
 ---
@@ -288,7 +288,7 @@ public static IServiceCollection AddDatabase(this IServiceCollection services)
 public class ProductController : ApiControllerBase
 {
     private readonly IService<Product> _service;
-    
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(long id, CancellationToken ct)
     {
@@ -529,19 +529,19 @@ Max:    1Gi memory, 2000m CPU
 
 ## 🎓 Melhores Práticas Implementadas
 
-✅ **Clean Architecture** - Separação clara de responsabilidades  
-✅ **SOLID Principles** - Código maintainable e extensível  
-✅ **Dependency Injection** - Loose coupling, testability  
-✅ **Repository Pattern** - Abstração de dados  
-✅ **Service Pattern** - Lógica de negócio centralizada  
-✅ **Options Pattern** - Configuração fortemente tipada  
-✅ **Async/Await** - Operações assíncronas  
-✅ **CancellationToken** - Cancelamento de operações  
-✅ **Logging** - Structured logging  
-✅ **Health Checks** - Monitoring e readiness  
-✅ **Multi-ORM** - Flexibilidade de escolha  
-✅ **Docker** - Containerização  
-✅ **Kubernetes** - Orquestração  
+✅ **Clean Architecture** - Separação clara de responsabilidades
+✅ **SOLID Principles** - Código maintainable e extensível
+✅ **Dependency Injection** - Loose coupling, testability
+✅ **Repository Pattern** - Abstração de dados
+✅ **Service Pattern** - Lógica de negócio centralizada
+✅ **Options Pattern** - Configuração fortemente tipada
+✅ **Async/Await** - Operações assíncronas
+✅ **CancellationToken** - Cancelamento de operações
+✅ **Logging** - Structured logging
+✅ **Health Checks** - Monitoring e readiness
+✅ **Multi-ORM** - Flexibilidade de escolha
+✅ **Docker** - Containerização
+✅ **Kubernetes** - Orquestração
 
 ---
 

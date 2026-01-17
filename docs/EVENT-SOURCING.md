@@ -221,10 +221,10 @@ public async Task<ActionResult<Order>> CreateOrder(CreateOrderDto dto)
         CustomerEmail = dto.CustomerEmail,
         Total = dto.Total
     };
-    
+
     // HybridRepository salva no EF Core E registra evento automaticamente
     await _repository.AddAsync(order);
-    
+
     // Evento OrderCreatedEvent foi registrado no Event Store
     return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, order);
 }
@@ -235,13 +235,13 @@ public async Task<ActionResult> UpdateOrder(long id, UpdateOrderDto dto)
 {
     var order = await _repository.GetByIdAsync(id);
     if (order == null) return NotFound();
-    
+
     order.Status = dto.Status;
     order.ShippingAddress = dto.ShippingAddress;
-    
+
     // HybridRepository detecta mudanças e registra OrderUpdatedEvent
     await _repository.UpdateAsync(order);
-    
+
     return NoContent();
 }
 ### 3. **O Que Acontece nos Bastidores**
@@ -252,16 +252,16 @@ public override async Task UpdateAsync(TEntity entity)
     // 1. Detecta mudanças
     var changes = await DetectChangesAsync(entity);
     // changes = { "Status": { Old: "Pending", New: "Shipped" } }
-    
+
     // 2. Salva no EF Core
     await base.UpdateAsync(entity);
     await _context.SaveChangesAsync();
-    
+
     // 3. Registra evento (se habilitado)
     if (ShouldAuditEntity("Order"))
     {
         await _eventStore.AppendEventAsync(
-            "Order", 
+            "Order",
             entity.Id.ToString(),
             new OrderUpdatedEvent { OrderId = entity.Id, Changes = changes },
             userId: GetCurrentUserId(),
@@ -411,8 +411,8 @@ Console.WriteLine(currentOrder.Status); // "Cancelled"
 
 // 2. Ver estado quando cliente fez pedido (dia 10)
 var eventsAt10Jan = await _eventStore.GetEventsAsync(
-    "Order", 
-    orderId, 
+    "Order",
+    orderId,
     until: new DateTime(2026, 1, 10)
 );
 // Status era "Pending"
@@ -609,18 +609,18 @@ docker logs api | grep EventStore
 ### Exemplos de Consultas SQL
 
 -- Ver todos os eventos de um pedido
-SELECT * FROM mt_events 
-WHERE stream_id = 'Order-123' 
+SELECT * FROM mt_events
+WHERE stream_id = 'Order-123'
 ORDER BY version;
 
 -- Contar eventos por tipo
-SELECT type, COUNT(*) as total 
-FROM mt_events 
-GROUP BY type 
+SELECT type, COUNT(*) as total
+FROM mt_events
+GROUP BY type
 ORDER BY total DESC;
 
 -- Eventos de hoje
-SELECT * FROM mt_events 
+SELECT * FROM mt_events
 WHERE timestamp::date = CURRENT_DATE;
 
 -- Top 10 usuários mais ativos

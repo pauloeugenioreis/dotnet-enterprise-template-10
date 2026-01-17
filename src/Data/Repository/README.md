@@ -81,7 +81,7 @@ dotnet run --project src/Api
 <PackageReference Include="FluentNHibernate" Version="3.4.0" />
 **Passo 2**: No mesmo arquivo, **remova ou comente** as linhas que excluem NHibernate da compilação (~linha 46):
 <!-- Comente ou remova estas linhas -->
-<!-- 
+<!--
 <ItemGroup>
   <Compile Remove="Mappings\NHibernate\**" />
   <Compile Remove="Repository\NHibernate\**" />
