@@ -234,10 +234,7 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
 
     private OrderCreatedEvent CreateOrderCreatedEvent(Order? order)
     {
-        if (order == null)
-        {
-            throw new ArgumentNullException(nameof(order));
-        }
+        ArgumentNullException.ThrowIfNull(order);
 
         return new OrderCreatedEvent
         {
@@ -265,10 +262,7 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
 
     private ProductCreatedEvent CreateProductCreatedEvent(Product? product)
     {
-        if (product == null)
-        {
-            throw new ArgumentNullException(nameof(product));
-        }
+        ArgumentNullException.ThrowIfNull(product);
 
         return new ProductCreatedEvent
         {

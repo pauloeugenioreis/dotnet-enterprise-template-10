@@ -284,6 +284,10 @@ dotnet_diagnostic.CA1847.severity = warning # Use String.Contains(char) instead 
 dotnet_diagnostic.CA1848.severity = suggestion # Use the LoggerMessage delegates
 dotnet_diagnostic.CA1849.severity = warning # Call async methods when in an async method
 
+# Suppress low-priority warnings
+dotnet_diagnostic.CA1707.severity = none # Test naming with underscores (allowed in tests)
+dotnet_diagnostic.CA1303.severity = none # Hardcoded strings (not using resource files)
+
 # Naming Conventions
 dotnet_naming_rule.interface_should_be_begins_with_i.severity = suggestion
 dotnet_naming_rule.interface_should_be_begins_with_i.symbols = interface
