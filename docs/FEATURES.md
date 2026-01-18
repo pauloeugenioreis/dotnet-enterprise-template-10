@@ -260,62 +260,62 @@ Integração de armazenamento de objetos com suporte transparente a **Google Clo
 1. Os pacotes necessários já estão referenciados no `Infrastructure.csproj` (Google, Azure e AWS).
 2. Configure o provedor no `appsettings.json`:
 
-```json
-{
-    "AppSettings": {
-        "Infrastructure": {
-            "Storage": {
-                "Provider": "Google", // ou Azure, Aws
-                "DefaultBucket": "your-container-or-bucket",
-                "Google": {
-                    "ServiceAccount": "{\"type\":\"service_account\",...}"
-                },
-                "Azure": {
-                    "ConnectionString": "DefaultEndpointsProtocol=https;AccountName=..."
-                },
-                "Aws": {
-                    "Region": "us-east-1",
-                    "AccessKeyId": "AKIAXXXXX",
-                    "SecretAccessKey": "YOURSECRET"
+    ```json
+    {
+        "AppSettings": {
+            "Infrastructure": {
+                "Storage": {
+                    "Provider": "Google", // ou Azure, Aws
+                    "DefaultBucket": "your-container-or-bucket",
+                    "Google": {
+                        "ServiceAccount": "{\"type\":\"service_account\",...}"
+                    },
+                    "Azure": {
+                        "ConnectionString": "DefaultEndpointsProtocol=https;AccountName=..."
+                    },
+                    "Aws": {
+                        "Region": "us-east-1",
+                        "AccessKeyId": "AKIAXXXXX",
+                        "SecretAccessKey": "YOURSECRET"
+                    }
                 }
             }
         }
     }
-}
-```
+    ```
 
 3. No `Program.cs`, mantenha a extensão:
 
-```csharp
-builder.Services.AddStorage<Program>();
-```
+    ```csharp
+    builder.Services.AddStorage<Program>();
+    ```
 
 4. Use normalmente no código (a implementação muda de acordo com o provedor, mas a interface permanece):
 
-```csharp
-public class DocumentController : ApiControllerBase
-{
-        private readonly IStorageService _storageService;
+    ```csharp
+    public class DocumentController : ApiControllerBase
+    {
+            private readonly IStorageService _storageService;
 
-        public DocumentController(IStorageService storageService)
-        {
-                _storageService = storageService;
-        }
+            public DocumentController(IStorageService storageService)
+            {
+                    _storageService = storageService;
+            }
 
-        [HttpPost("upload")]
-        public async Task<IActionResult> Upload(IFormFile file)
-        {
-                using var stream = file.OpenReadStream();
-                var url = await _storageService.UploadAsync(
-                        bucketName: "my-bucket",
-                        objectName: file.FileName,
-                        contentType: file.ContentType,
-                        stream: stream);
+            [HttpPost("upload")]
+            public async Task<IActionResult> Upload(IFormFile file)
+            {
+                    using var stream = file.OpenReadStream();
+                    var url = await _storageService.UploadAsync(
+                            bucketName: "my-bucket",
+                            objectName: file.FileName,
+                            contentType: file.ContentType,
+                            stream: stream);
 
-                return Ok(new { Url = url });
-        }
-}
-```
+                    return Ok(new { Url = url });
+            }
+    }
+    ```
 
 ### Dicas por provedor
 
