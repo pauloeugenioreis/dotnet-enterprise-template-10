@@ -32,15 +32,18 @@ before_script:
 build:
   stage: build
   script:
+    - echo "📝 Running markdownlint..."
+    - apt-get update && apt-get install -y nodejs npm
+    - npx --yes markdownlint-cli@0.41.0 "**/*.md" --ignore "**/node_modules/**" --ignore "**/bin/**" --ignore "**/obj/**"
     - echo "🔧 Restoring dependencies..."
     - dotnet restore $SOLUTION_FILE --packages $NUGET_PACKAGES_DIRECTORY
-    
+
     - echo "🏗️ Building solution..."
     - dotnet build $SOLUTION_FILE --configuration $BUILD_CONFIGURATION --no-restore
-    
+
     - echo "📦 Publishing API..."
     - dotnet publish src/Api/Api.csproj --configuration $BUILD_CONFIGURATION --output ./publish --no-build
-  
+
   artifacts:
     name: "build-$CI_COMMIT_REF_SLUG"
     paths:
@@ -48,7 +51,7 @@ build:
       - "**/*.dll"
       - "**/*.pdb"
     expire_in: 1 week
-  
+
   only:
     - main
     - develop
@@ -63,13 +66,13 @@ test:unit:
     - build
   script:
     - echo "🧪 Running Unit Tests..."
-    - dotnet test tests/UnitTests/UnitTests.csproj 
-        --configuration $BUILD_CONFIGURATION 
-        --no-build 
-        --logger "junit;LogFilePath=./test-results/unit-tests.xml" 
+    - dotnet test tests/UnitTests/UnitTests.csproj
+        --configuration $BUILD_CONFIGURATION
+        --no-build
+        --logger "junit;LogFilePath=./test-results/unit-tests.xml"
         --collect:"XPlat Code Coverage"
         -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
-  
+
   artifacts:
     when: always
     paths:
@@ -81,9 +84,9 @@ test:unit:
         coverage_format: cobertura
         path: "**/coverage.cobertura.xml"
     expire_in: 30 days
-  
+
   coverage: '/Total\s+\|\s+(\d+\.?\d*)%/'
-  
+
   only:
     - main
     - develop
@@ -95,11 +98,11 @@ test:integration:
     - build
   script:
     - echo "🧪 Running Integration Tests..."
-    - dotnet test tests/Integration/Integration.csproj 
-        --configuration $BUILD_CONFIGURATION 
-        --no-build 
+    - dotnet test tests/Integration/Integration.csproj
+        --configuration $BUILD_CONFIGURATION
+        --no-build
         --logger "junit;LogFilePath=./test-results/integration-tests.xml"
-  
+
   artifacts:
     when: always
     paths:
@@ -107,7 +110,7 @@ test:integration:
     reports:
       junit: test-results/integration-tests.xml
     expire_in: 30 days
-  
+
   only:
     - main
     - develop
@@ -127,13 +130,13 @@ code_quality:security:
         echo "⚠️ Vulnerable packages found!"
         exit 1
       fi
-  
+
   artifacts:
     paths:
       - security-scan.log
     expire_in: 30 days
     when: always
-  
+
   allow_failure: true
   only:
     - main
@@ -148,13 +151,13 @@ code_quality:outdated:
     - dotnet tool install --global dotnet-outdated-tool
     - export PATH="$PATH:$HOME/.dotnet/tools"
     - dotnet outdated --output outdated-packages.json --format json || true
-  
+
   artifacts:
     paths:
       - outdated-packages.json
     expire_in: 30 days
     when: always
-  
+
   allow_failure: true
   only:
     - main
@@ -184,15 +187,15 @@ docker:build:
         --tag $DOCKER_IMAGE:latest \
         --file Dockerfile \
         .
-    
+
     - echo "📤 Pushing Docker image..."
     - docker push $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA
     - docker push $DOCKER_IMAGE:$CI_COMMIT_REF_SLUG
     - docker push $DOCKER_IMAGE:latest
-  
+
   dependencies:
     - build
-  
+
   only:
     - main
     - develop
@@ -210,23 +213,23 @@ deploy:staging:
     - echo "Docker image: $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA"
     - echo "Commit: $CI_COMMIT_SHORT_SHA"
     - echo "Branch: $CI_COMMIT_REF_NAME"
-    
+
     # Add your deployment commands here
     # Example: kubectl, helm, docker-compose, etc.
-    
+
     - echo "✅ Deployment to Staging complete!"
-  
+
   environment:
     name: staging
     url: https://staging.example.com
     on_stop: stop:staging
-  
+
   dependencies:
     - docker:build
-  
+
   only:
     - develop
-  
+
   when: manual
 
 deploy:production:
@@ -239,23 +242,23 @@ deploy:production:
     - echo "Docker image: $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA"
     - echo "Commit: $CI_COMMIT_SHORT_SHA"
     - echo "Branch: $CI_COMMIT_REF_NAME"
-    
+
     # Add your deployment commands here
     # Example: kubectl, helm, docker-compose, etc.
-    
+
     - echo "✅ Deployment to Production complete!"
-  
+
   environment:
     name: production
     url: https://api.example.com
     on_stop: stop:production
-  
+
   dependencies:
     - docker:build
-  
+
   only:
     - main
-  
+
   when: manual
 
 # Stop environments

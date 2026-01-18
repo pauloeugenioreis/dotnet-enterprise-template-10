@@ -47,6 +47,7 @@ Todos os pipelines incluem as seguintes etapas:
 - ✅ Security scan de vulnerabilidades
 - ✅ Docker build e push
 - ✅ Artifacts upload
+- ✅ Markdownlint com o mesmo comando usado localmente
 
 ### 🔧 Configuração
 
@@ -73,6 +74,14 @@ O pipeline é executado automaticamente em:
 - ✅ Push para `main` ou `develop`
 - ✅ Pull Requests para `main` ou `develop`
 - ✅ Manualmente via **Actions → CI/CD Pipeline → Run workflow**
+
+#### 4. Markdownlint
+
+Antes de restaurar/buildar, o job **Build and Test** instala Node.js 20.x e roda o comando abaixo. Utilize o mesmo comando localmente para evitar falhas:
+
+```bash
+npx --yes markdownlint-cli@0.41.0 "**/*.md" --ignore "**/node_modules/**" --ignore "**/bin/**" --ignore "**/obj/**"
+```
 
 ### 📊 Visualização de Resultados
 
@@ -202,6 +211,7 @@ Adicione ao seu README.md:
 - ✅ Security e outdated packages scan
 - ✅ Docker build e push para GitLab Registry
 - ✅ Deploy manual para Staging e Production
+- ✅ Markdownlint com o mesmo comando usado localmente
 
 ### 🔧 Configuração
 
@@ -227,7 +237,15 @@ Configure as seguintes variáveis (**Settings → CI/CD → Variables**):
 | `KUBECONFIG` | Conteúdo do kubeconfig | Deploy Kubernetes |
 | `DEPLOY_KEY` | SSH key | Deploy em servidores |
 
-#### 3. Docker Runner
+#### 3. Markdownlint
+
+Durante o stage **build** é realizada a instalação do Node.js (via `apt-get install nodejs npm`) seguida do comando abaixo. Execute-o localmente antes dos commits:
+
+```bash
+npx --yes markdownlint-cli@0.41.0 "**/*.md" --ignore "**/node_modules/**" --ignore "**/bin/**" --ignore "**/obj/**"
+```
+
+#### 4. Docker Runner
 
 Para executar jobs Docker, configure um Runner:
 
@@ -236,7 +254,7 @@ Para executar jobs Docker, configure um Runner:
 3. Siga as instruções de instalação
 4. Selecione **docker** como executor
 
-#### 4. Environments
+#### 5. Environments
 
 Os environments são criados automaticamente:
 
@@ -250,7 +268,7 @@ Configure **Protected Environments** (**Settings → CI/CD → Environments**):
 3. **Protected**: ✅
 4. **Allowed to deploy**: Maintainers only
 
-#### 5. Container Registry
+#### 6. Container Registry
 
 Habilite o GitLab Container Registry:
 
