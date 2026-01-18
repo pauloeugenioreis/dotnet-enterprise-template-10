@@ -1,5 +1,7 @@
 version: "0.2"
-language: en
+language: en,pt
+import:
+  - "./node_modules/@cspell/dict-pt-br/cspell-ext.json"
 ignorePaths:
   - .git
   - node_modules
@@ -16,31 +18,79 @@ words:
   - AppInsights
   - appsettings
   - Auth
+  - CICD
+  - Containerização
+  - Descomente
+  - Dtos
   - autoscaling
   - bootstrapper
+  - buildx
   - chocolatey
   - cronjob
+  - Dynatrace
+  - datadoghq
+  - devbox
+  - dind
+  - dynatrace
   - DTOs
+  - ebextensions
   - EFCore
+  - GETUTCDATE
   - githubactions
+  - grafana
+  - HSTS
+  - Hmac
   - hpa
+  - kubeconfig
+  - KUBECONFIG
+  - kubernetes
+  - kustomization
+  - Liskov
+  - LINQ
+  - linux
+  - linq
+  - LGPD
+  - msiexec
   - Jaeger
   - kustomize
   - Linq2Db
   - markdownlint
   - minikube
+  - myapi
+  - myapp
+  - mydb
+  - myregistry
+  - nameof
   - multiarch
+  - Npgsql
+  - NVARCHAR
   - namespace
+  - nginx
+  - openxmlformats
+  - otlp
+  - Otlp
+  - Passw0rd
+  - postgres
   - nodejs
   - postdeploy
   - Postgres
+  - prometheus
   - Prometheus
+  - rabbitmq
   - roadmap
+  - Scrutor
+  - serilog
   - ssh
+  - descomentado
+  - spreadsheetml
   - telemetry
   - Terraform
+  - FREEPDB
+  - isready
+  - usuario
   - todo
   - troubleshooting
+  - XVCJ
   - webhook
 allowCompoundWords: true
 caseSensitive: false

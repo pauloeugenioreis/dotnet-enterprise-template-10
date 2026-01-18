@@ -1002,7 +1002,7 @@ Antes de fazer deploy, verifique:
 // ❌ Errado
 {
   "AppSettings": {
-    "Infraestructure": { ... }
+    "Infrastructure": { ... }
   }
 }
 

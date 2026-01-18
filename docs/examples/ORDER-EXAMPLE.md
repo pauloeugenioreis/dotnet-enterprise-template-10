@@ -373,11 +373,11 @@ Pending → Processing → Shipped → Delivered
 
 ### 2. SOLID Principles
 
-- **S**ingle Responsibility – each class has one job
-- **O**pen/Closed – generic services extended via composition
-- **L**iskov – interfaces implement substitutable behavior
-- **I**nterface Segregation – specialized repository/service interfaces
-- **D**ependency Inversion – depend on abstractions
+- **Single Responsibility Principle** – cada classe tem um único propósito
+- **Open/Closed Principle** – serviços genéricos são estendidos por composição
+- **Liskov Substitution Principle** – interfaces implementam comportamentos substituíveis
+- **Interface Segregation Principle** – contratos especializados para repositórios/serviços
+- **Dependency Inversion Principle** – depender sempre de abstrações
 
 ### 3. Repository Pattern
 

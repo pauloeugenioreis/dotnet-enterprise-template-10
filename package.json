@@ -1,0 +1,39 @@
+{
+  "name": "dotnet-enterprise-template-10",
+  "version": "1.0.0",
+  "description": "> Template moderno e completo para criação de APIs .NET 10 seguindo Clean Architecture e melhores práticas de mercado.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "dependencies": {
+    "argparse": "^2.0.1",
+    "entities": "^4.5.0",
+    "linkify-it": "^5.0.0",
+    "markdown-it": "^14.1.0",
+    "markdown-it-anchor": "^9.2.0",
+    "mdurl": "^2.0.0",
+    "punycode.js": "^2.3.1",
+    "uc.micro": "^2.1.0"
+  },
+  "devDependencies": {
+    "@cspell/dict-pt-br": "^2.4.2",
+    "cspell": "^9.6.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pauloeugenioreis/dotnet-enterprise-template-10.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/pauloeugenioreis/dotnet-enterprise-template-10/issues"
+  },
+  "homepage": "https://github.com/pauloeugenioreis/dotnet-enterprise-template-10#readme"
+}
