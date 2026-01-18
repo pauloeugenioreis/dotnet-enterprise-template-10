@@ -25,6 +25,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install npm dependencies
+        run: npm ci
+
       - name: Install linters
         run: npm install --global markdownlint-cli@0.42.0 cspell@7
 
