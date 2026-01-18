@@ -1,77 +1,86 @@
 # Guia de Deploy no Kubernetes
 
-Este guia detalha como fazer deploy da aplicação em ambientes Kubernetes, incluindo Minikube (local) e clusters em produção.
+## Índice
+
+- [Pré-requisitos](#pré-requisitos)
+- [Deploy Local com Minikube](#deploy-local-com-minikube)
+- [Remover Deploy do Minikube](#remover-deploy-do-minikube)
+- [Deploy em Produção](#deploy-em-produção)
+- [Monitoramento e Troubleshooting](#monitoramento-e-troubleshooting)
+- [Configurações Avançadas](#configurações-avançadas)
+- [Ambientes (Dev, Staging, Prod)](#ambientes-dev-staging-prod)
+- [Segurança](#segurança)
+- [CI/CD Integration](#cicd-integration)
+- [Recursos Úteis](#recursos-úteis)
+- [Problemas Comuns](#problemas-comuns)
 
 ---
 
-## 📋 Índice
-
-- [Pré-requisitos](#-pré-requisitos)
-- [Deploy Local com Minikube](#-deploy-local-com-minikube)
-- [Remover Deploy do Minikube](#-remover-deploy-do-minikube)
-- [Deploy em Produção](#-deploy-em-produção)
-- [Monitoramento e Troubleshooting](#-monitoramento-e-troubleshooting)
-- [Configurações Avançadas](#-configurações-avançadas)
-- [Ambientes (Dev, Staging, Prod)](#-ambientes-dev-staging-prod)
-- [Segurança](#-segurança)
-- [CI/CD Integration](#-cicd-integration)
-- [Recursos Úteis](#-recursos-úteis)
-- [Problemas Comuns](#-problemas-comuns)
-
----
-
-## 📋 Pré-requisitos
-
-### Para Deploy Local (Minikube)
-
-- [Docker](https://docs.docker.com/get-docker/) instalado
-- [Minikube](https://minikube.sigs.k8s.io/docs/start/) instalado
-- [kubectl](https://kubernetes.io/docs/tasks/tools/) instalado
-- Sistema operacional: Linux, macOS ou Windows
-
-### Para Deploy em Produção
+## Pré-requisitos
 
 - Cluster Kubernetes configurado (GKE, AKS, EKS, etc.)
-- `kubectl` configurado para acessar o cluster
-- Acesso de administrador ao namespace
-- Container registry configurado
+- `kubectl` configurado e apontando para o cluster correto
+- Permissões de administrador no namespace alvo
+- Container registry configurado e acessível
+- Docker instalado e autenticado no registry
 
 ---
 
-## 🚀 Deploy Local com Minikube
+## Deploy Local com Minikube
 
 ### Opção 1: Script Automatizado (Recomendado)
 
 #### Windows (PowerShell)
 
+```powershell
 cd scripts/windows
-.\minikube-deploy.ps1
+./minikube-deploy.ps1
+```
+
 #### Linux/macOS
 
+```bash
 cd scripts/linux
 chmod +x minikube-deploy.sh
 ./minikube-deploy.sh
+```
+
 #### Windows (CMD)
 
 ```cmd
 cd scripts\windows
 minikube-deploy.bat
+```
+
 ### Opção 2: Passo a Passo Manual
 
 #### 1. Iniciar Minikube
 
+```bash
 minikube start
+```
+
 #### 2. Construir a Imagem Docker
 
+```bash
 docker build -t projecttemplate-api:latest -f Dockerfile .
+```
+
 #### 3. Carregar Imagem no Minikube
 
+```bash
 minikube image load projecttemplate-api:latest
+```
+
 #### 4. Aplicar Manifestos Kubernetes
 
+```bash
 kubectl apply -k .k8s/
+```
+
 #### 5. Verificar Status
 
+```bash
 # Ver pods
 kubectl get pods -n projecttemplate
 
@@ -80,56 +89,84 @@ kubectl logs -f deployment/projecttemplate-api -n projecttemplate
 
 # Ver services
 kubectl get svc -n projecttemplate
+```
+
 #### 6. Acessar a Aplicação
 
 **Opção A: Port Forward**
 
+```bash
 kubectl port-forward svc/projecttemplate-api 8080:80 -n projecttemplate
-Acesse: `http://localhost:8080`
+```
+
+Acesse: http://localhost:8080
 
 **Opção B: Minikube Tunnel**
 
+```bash
 minikube tunnel
+```
+
 Em outro terminal:
 
+```bash
 kubectl get svc -n projecttemplate
+```
+
 Use o EXTERNAL-IP fornecido.
 
 ---
 
-## 🗑️ Remover Deploy do Minikube
+## Remover Deploy do Minikube
 
 ### Script Automatizado
 
 #### Windows (PowerShell)
 
+```powershell
 cd scripts/windows
-.\minikube-destroy.ps1
+./minikube-destroy.ps1
+```
+
 #### Linux/macOS
 
+```bash
 cd scripts/linux
 chmod +x minikube-destroy.sh
 ./minikube-destroy.sh
+```
+
 ### Manual
 
+```bash
 kubectl delete -k .k8s/
+```
+
 ---
 
-## 🏭 Deploy em Produção
+## Deploy em Produção
 
 ### 1. Preparar Imagem Docker
 
 #### Build e Push para Registry
 
-# Build da imagem
-docker build -t your-registry.com/projecttemplate-api:v1.0.0 -f Dockerfile .
+**Build:**
 
-# Push para registry
+```bash
+docker build -t your-registry.com/projecttemplate-api:v1.0.0 -f Dockerfile .
+```
+
+**Push:**
+
+```bash
 docker push your-registry.com/projecttemplate-api:v1.0.0
+```
+
 ### 2. Atualizar Manifestos
 
-Edite `.k8s/deployment.yaml` e atualize a imagem:
+Atualize `.k8s/deployment.yaml` com a nova imagem:
 
+```yaml
 spec:
   template:
     spec:
@@ -137,26 +174,35 @@ spec:
         - name: api
           image: your-registry.com/projecttemplate-api:v1.0.0
           imagePullPolicy: Always
+```
+
 ### 3. Configurar Secrets (Recomendado)
 
-Em vez de usar ConfigMap para dados sensíveis, crie Secrets:
+Crie um Secret para dados sensíveis:
 
+```bash
 kubectl create secret generic projecttemplate-secrets \
   --from-literal=database-password=YourSecurePassword \
   --from-literal=jwt-secret=YourJwtSecret \
   -n projecttemplate
-Atualize o deployment para usar secrets:
+```
 
+Atualize o deployment para usar o Secret:
+
+```yaml
 env:
   - name: AppSettings__Infrastructure__Database__ConnectionString
     valueFrom:
       secretKeyRef:
         name: projecttemplate-secrets
         key: database-connection-string
+```
+
 ### 4. Ajustar Recursos
 
-Para produção, ajuste os recursos em `deployment.yaml`:
+Configure requests/limits em `deployment.yaml`:
 
+```yaml
 resources:
   requests:
     cpu: 500m
@@ -164,69 +210,113 @@ resources:
   limits:
     cpu: 2000m
     memory: 1Gi
+```
+
 ### 5. Configurar Réplicas
 
-Para alta disponibilidade:
-
+```yaml
 spec:
   replicas: 3
+```
+
 ### 6. Aplicar no Cluster
 
-# Criar namespace
-kubectl create namespace projecttemplate
+#### Criar namespace (primeira vez)
 
-# Aplicar manifestos
+```bash
+kubectl create namespace projecttemplate
+```
+
+#### Aplicar manifestos
+
+```bash
 kubectl apply -k .k8s/
+```
+
 ---
 
-## 📊 Monitoramento e Troubleshooting
+## Monitoramento e Troubleshooting
 
 ### Ver Logs
 
-# Logs em tempo real
+**Logs em tempo real**
+
+```bash
 kubectl logs -f deployment/projecttemplate-api -n projecttemplate
+```
 
-# Logs de um pod específico
+**Logs de um pod específico**
+
+```bash
 kubectl logs <pod-name> -n projecttemplate
+```
 
-# Logs anteriores (se o pod reiniciou)
+**Logs anteriores (pod reiniciado)**
+
+```bash
 kubectl logs <pod-name> -n projecttemplate --previous
+```
+
 ### Verificar Status dos Pods
 
-# Listar pods
+**Listar pods**
+
+```bash
 kubectl get pods -n projecttemplate
+```
 
-# Detalhes de um pod
+**Detalhes de um pod**
+
+```bash
 kubectl describe pod <pod-name> -n projecttemplate
+```
 
-# Ver eventos
+**Ver eventos**
+
+```bash
 kubectl get events -n projecttemplate --sort-by='.lastTimestamp'
+```
+
 ### Executar Comandos no Container
 
+```bash
 kubectl exec -it <pod-name> -n projecttemplate -- /bin/bash
+```
+
 ### Health Checks
 
-# Port forward
-kubectl port-forward svc/projecttemplate-api 8080:80 -n projecttemplate
+**Port forward**
 
-# Testar health checks
+```bash
+kubectl port-forward svc/projecttemplate-api 8080:80 -n projecttemplate
+```
+
+**Testar health checks**
+
+```bash
 curl http://localhost:8080/health
 curl http://localhost:8080/health/ready
+```
+
 ---
 
-## 🔧 Configurações Avançadas
+## Configurações Avançadas
 
 ### Horizontal Pod Autoscaler (HPA)
 
-Criar autoscaling baseado em CPU:
+#### Linha de comando
 
+```bash
 kubectl autoscale deployment projecttemplate-api \
   --cpu-percent=70 \
   --min=2 \
   --max=10 \
   -n projecttemplate
-Ou criar arquivo `hpa.yaml`:
+```
 
+#### Manifesto
+
+```yaml
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -252,10 +342,11 @@ spec:
         target:
           type: Utilization
           averageUtilization: 80
-### Persistent Volume (Para banco de dados)
+```
 
-Criar PVC:
+### Persistent Volume (para banco de dados)
 
+```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -267,10 +358,13 @@ spec:
   resources:
     requests:
       storage: 10Gi
+```
+
 ### TLS/HTTPS no Ingress
 
-1. Criar certificado (cert-manager):
+#### 1. Criar certificado (cert-manager)
 
+```yaml
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -283,23 +377,27 @@ spec:
     kind: ClusterIssuer
   dnsNames:
     - api.projecttemplate.com
-2. Atualizar ingress:
+```
 
+#### 2. Atualizar ingress
+
+```yaml
 spec:
   tls:
     - hosts:
         - api.projecttemplate.com
       secretName: projecttemplate-tls
+```
+
 ---
 
-## 🌍 Ambientes (Dev, Staging, Prod)
+## Ambientes (Dev, Staging, Prod)
 
 ### Usando Kustomize Overlays
 
-Estrutura:
+**Estrutura:**
 
-```
-```yaml
+```text
 .k8s/
 ├── base/
 │   ├── deployment.yaml
@@ -316,8 +414,11 @@ Estrutura:
     └── production/
         ├── kustomization.yaml
         └── patches/
-Deploy por ambiente:
+```
 
+**Deploy por ambiente:**
+
+```bash
 # Development
 kubectl apply -k .k8s/overlays/dev/
 
@@ -326,14 +427,15 @@ kubectl apply -k .k8s/overlays/staging/
 
 # Production
 kubectl apply -k .k8s/overlays/production/
+```
+
 ---
 
-## 🔐 Segurança
+## Segurança
 
 ### Network Policies
 
-Restringir tráfego entre pods:
-
+```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -362,10 +464,11 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
+```
+
 ### Pod Security Standards
 
-Aplicar no namespace:
-
+```yaml
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -374,12 +477,15 @@ metadata:
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/warn: restricted
+```
+
 ---
 
-## 📈 CI/CD Integration
+## CI/CD Integration
 
 ### GitHub Actions Example
 
+```yaml
 name: Deploy to Kubernetes
 
 on:
@@ -405,9 +511,11 @@ jobs:
             .k8s/service.yaml
           images: |
             ${{ secrets.REGISTRY }}/projecttemplate-api:${{ github.sha }}
+```
+
 ---
 
-## 📚 Recursos Úteis
+## Recursos Úteis
 
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
 - [kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
@@ -416,23 +524,31 @@ jobs:
 
 ---
 
-## 🆘 Problemas Comuns
+## Problemas Comuns
 
 ### Pod não inicia (ImagePullBackOff)
 
+```bash
 # Verificar eventos
 kubectl describe pod <pod-name> -n projecttemplate
 
-# Solução: Verificar se a imagem existe e está acessível
+# Conferir imagens disponíveis
 minikube image ls | grep projecttemplate
+```
+
+**Solução:** verifique se a imagem existe, está com a tag correta e se o cluster possui acesso ao registry.
+
 ### Pod reiniciando constantemente (CrashLoopBackOff)
 
-# Ver logs do pod
+```bash
 kubectl logs <pod-name> -n projecttemplate
+```
 
-# Solução: Verificar erros de configuração, dependências ou health checks
+**Solução:** valide configurações, dependências externas e health checks.
+
 ### Não consegue acessar a aplicação
 
+```bash
 # Verificar service
 kubectl get svc -n projecttemplate
 

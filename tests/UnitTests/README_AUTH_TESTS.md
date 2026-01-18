@@ -7,6 +7,7 @@ Os testes unitários para autenticação precisam ser implementados.
 ## Testes Necessários
 
 ### 1. JwtTokenServiceTests
+
 - [ ] GenerateAccessToken_WithValidUser_ShouldReturnValidToken
 - [ ] GenerateRefreshToken_WithIpAddress_ShouldReturnToken
 - [ ] ValidateToken_WithValidToken_ShouldReturnPrincipal
@@ -14,6 +15,7 @@ Os testes unitários para autenticação precisam ser implementados.
 - [ ] ValidateToken_WithExpiredToken_ShouldReturnNull
 
 ### 2. AuthServiceTests
+
 - [ ] RegisterAsync_WithValidData_ShouldCreateUser
 - [ ] RegisterAsync_WithExistingUsername_ShouldThrowException
 - [ ] RegisterAsync_WithWeakPassword_ShouldThrowException
@@ -24,6 +26,7 @@ Os testes unitários para autenticação precisam ser implementados.
 - [ ] RevokeTokenAsync_ShouldRevokeToken
 
 ### 3. UserRepositoryTests (Integration Tests)
+
 - [ ] CreateAsync_ShouldAddUserToDatabase
 - [ ] GetByIdAsync_WithExistingId_ShouldReturnUser
 - [ ] GetByUsernameAsync_ShouldReturnUser
@@ -36,6 +39,7 @@ Os testes unitários para autenticação precisam ser implementados.
 ## Como Implementar
 
 Os testes devem usar:
+
 - **xUnit** como framework de testes
 - **FluentAssertions** para assertions
 - **Moq** para mocking de dependências

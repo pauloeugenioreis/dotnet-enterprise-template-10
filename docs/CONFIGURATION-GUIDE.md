@@ -8,9 +8,9 @@ Guia completo sobre como trabalhar com configurações no template.
 
 - [Visão Geral](#-visão-geral)
 - [AppSettings Structure](#-appsettings-structure)
-- [Como Usar Configurações](#-como-usar-configurações)
+- [Como Usar Configurações](#como-usar-configuracoes)
 - [IOptions Pattern](#-ioptions-pattern)
-- [Best Practices](#-best-practices)
+- [Best Practices](#best-practices)
 - [Exemplos Práticos](#-exemplos-práticos)
 - [Validação de Configurações](#-validação-de-configurações)
 - [Sobrescrita de Configurações](#-sobrescrita-de-configurações)
@@ -33,6 +33,7 @@ Este template usa o **IOptions Pattern** do ASP.NET Core para gerenciar configur
 
 ## 📂 AppSettings Structure
 
+```csharp
 // Domain/AppSettings.cs
 public class AppSettings
 {
@@ -40,77 +41,117 @@ public class AppSettings
     public InfrastructureSettings Infrastructure { get; set; }
     public AuthenticationSettings Authentication { get; set; }
 
-    // Helper methods
     public bool IsDevelopment() => EnvironmentName == "Development";
     public bool IsProduction() => EnvironmentName == "Production";
 }
+```
+
 ### Estrutura no appsettings.json
 
+```json
 {
   "AppSettings": {
     "EnvironmentName": "Development",
-    "Infrastructure": {
-      "Cache": { ... },
-      "Database": {
-        "DatabaseType": "SqlServer",
-        "ConnectionString": "Server=localhost;...",
-        "ReadOnlyConnectionString": ""
-      },
-      "MongoDB": { "ConnectionString": "" },
-      "RabbitMQ": { "ConnectionString": "" },
-      "Storage": { "ServiceAccount": "", "DefaultBucket": "" },
-      "Telemetry": { ... },
-      "RateLimiting": { ... },
-      "EventSourcing": { ... }
-    },
     "Authentication": {
-      "Enabled": true,
-      "Jwt": { ... }
+      "Jwt": {
+        "Secret": "my-secret-key",
+        "Issuer": "my-issuer"
+      }
+    },
+    "Infrastructure": {
+      "Database": {
+        "DatabaseType": "InMemory",
+        "ConnectionString": ""
+      },
+      "Cache": {
+        "Enabled": true,
+        "Provider": "Memory"
+      }
     }
   }
 }
+```
+
 ---
 
-## 💡 Como Usar Configurações
+<a id="como-usar-configuracoes"></a>
 
-### ⚠️ IMPORTANTE: Use IOptions<AppSettings>
+## ⚙️ Como Usar Configurações
 
-**❌ NUNCA faça isso:**
+Sempre injete `IOptions<AppSettings>` nas camadas da aplicação para obter acesso tipado às configurações.
 
-public class ProductService
+### Controllers
+
+```csharp
+public class ProductController : ApiControllerBase
 {
-    private readonly IConfiguration _configuration;
+  private readonly AppSettings _settings;
 
-    public ProductService(IConfiguration configuration)
-    {
-        _configuration = configuration;
-
-        // ❌ MAU: Leitura manual de configuração
-        var cacheEnabled = _configuration.GetValue<bool>("AppSettings:Infrastructure:Cache:Enabled");
-    }
+  public ProductController(IOptions<AppSettings> settings)
+  {
+    _settings = settings.Value;
+  }
 }
-**✅ SEMPRE faça isso:**
+```
 
-public class ProductService
+### Services
+
+```csharp
+public class EmailService : IEmailService
 {
-    private readonly AppSettings _appSettings;
+  private readonly AppSettings _settings;
 
-    public ProductService(IOptions<AppSettings> appSettings)
-    {
-        _appSettings = appSettings.Value;
+  public EmailService(IOptions<AppSettings> settings)
+  {
+    _settings = settings.Value;
+  }
 
-        // ✅ BOM: Acesso tipado e validado
-        var cacheEnabled = _appSettings.Infrastructure.Cache.Enabled;
-    }
+  public async Task SendEmail(string to, string subject)
+  {
+    var smtpServer = _settings.Infrastructure.Email.SmtpServer;
+  }
 }
+```
+
+### Repositories
+
+```csharp
+public class ProductRepository : Repository<Product>
+{
+  private readonly AppSettings _settings;
+
+  public ProductRepository(
+    DbContext context,
+    IOptions<AppSettings> settings) : base(context)
+  {
+    _settings = settings.Value;
+  }
+}
+```
+
+### Background Services
+
+```csharp
+public class CleanupBackgroundService : BackgroundService
+{
+  private readonly AppSettings _settings;
+
+  public CleanupBackgroundService(IOptions<AppSettings> settings)
+  {
+    _settings = settings.Value;
+  }
+}
+```
+
 ---
 
 ## 🔧 IOptions Pattern
 
-### Três formas de injetar configurações
+Escolha a implementação adequada conforme o ciclo de vida da dependência.
 
-#### 1. IOptions<T> (Recomendado)
+### 1. IOptions<AppSettings>
 
+```csharp
 public class MyService
 {
     private readonly AppSettings _settings;
@@ -120,13 +161,16 @@ public class MyService
         _settings = options.Value;
     }
 }
-✅ **Vantagens:**
-- Lazy loading (só carrega quando acessar `.Value`)
-- Ideal para Singleton services
-- Melhor performance
+```
 
-#### 2. IOptionsSnapshot<T> (Para Scoped Services)
+**Vantagens:**
 
+- Simples e performático
+- Ideal para serviços Singleton ou Scoped
+
+### 2. IOptionsSnapshot<AppSettings>
+
+```csharp
 public class MyController : ControllerBase
 {
     private readonly AppSettings _settings;
@@ -136,32 +180,41 @@ public class MyController : ControllerBase
         _settings = options.Value;
     }
 }
-✅ **Vantagens:**
-- Recarrega configurações a cada request (se configurado)
-- Ideal para Scoped services
-- Suporta reload de configuração em runtime
+```
 
-#### 3. AppSettings Diretamente (Singleton)
+**Vantagens:**
 
-public class MyService
+- Recarrega configurações em cada request (quando habilitado)
+- Ideal para serviços Scoped
+
+### 3. AppSettings Diretamente (Singleton)
+
+```csharp
+public class MySingletonService
 {
     private readonly AppSettings _settings;
 
-    public MyService(AppSettings settings)
+    public MySingletonService(AppSettings settings)
     {
         _settings = settings;
     }
 }
-✅ **Vantagens:**
+```
+
+**Vantagens:**
+
 - Mais simples
 - Registrado como Singleton em `AppSettingsExtension`
 
 ---
 
+<a id="best-practices"></a>
+
 ## 📌 Best Practices
 
 ### ✅ DO's
 
+```csharp
 // ✅ Injete IOptions<AppSettings> em Controllers
 public class ProductController : ApiControllerBase
 {
@@ -213,8 +266,11 @@ public class CleanupBackgroundService : BackgroundService
         _settings = settings.Value;
     }
 }
+```
+
 ### ❌ DON'Ts
 
+```csharp
 // ❌ NUNCA use IConfiguration diretamente
 public class MyService
 {
@@ -238,188 +294,193 @@ public class MyService
         var provider = services.BuildServiceProvider(); // ❌ MEMORY LEAK!
     }
 }
+```
+
 ---
 
 ## 🎓 Exemplos Práticos
 
 ### Exemplo 1: Controller com Configurações
 
+```csharp
 [ApiController]
 [Route("api/[controller]")]
 public class ProductController : ApiControllerBase
 {
-    private readonly IProductService _productService;
-    private readonly AppSettings _settings;
-    private readonly ILogger<ProductController> _logger;
+  private readonly IProductService _productService;
+  private readonly AppSettings _settings;
+  private readonly ILogger<ProductController> _logger;
 
-    public ProductController(
-        IProductService productService,
-        IOptions<AppSettings> settings,
-        ILogger<ProductController> logger)
+  public ProductController(
+    IProductService productService,
+    IOptions<AppSettings> settings,
+    ILogger<ProductController> logger)
+  {
+    _productService = productService;
+    _settings = settings.Value;
+    _logger = logger;
+  }
+
+  [HttpGet]
+  public async Task<IActionResult> GetAll()
+  {
+    if (_settings.Infrastructure.Cache.Enabled)
     {
-        _productService = productService;
-        _settings = settings.Value;
-        _logger = logger;
+      _logger.LogInformation("Cache is enabled, checking cache first");
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        // Usar configuração para decisões de negócio
-        if (_settings.Infrastructure.Cache.Enabled)
-        {
-            _logger.LogInformation("Cache is enabled, checking cache first");
-            // Lógica com cache
-        }
-
-        var products = await _productService.GetAllAsync();
-        return Ok(products);
-    }
+    var products = await _productService.GetAllAsync();
+    return Ok(products);
+  }
 }
+```
+
 ### Exemplo 2: Service com Configurações
 
+```csharp
 public class ProductService : IProductService
 {
-    private readonly IRepository<Product> _repository;
-    private readonly AppSettings _settings;
-    private readonly ILogger<ProductService> _logger;
+  private readonly IRepository<Product> _repository;
+  private readonly AppSettings _settings;
+  private readonly ILogger<ProductService> _logger;
 
-    public ProductService(
-        IRepository<Product> repository,
-        IOptions<AppSettings> settings,
-        ILogger<ProductService> logger)
+  public ProductService(
+    IRepository<Product> repository,
+    IOptions<AppSettings> settings,
+    ILogger<ProductService> logger)
+  {
+    _repository = repository;
+    _settings = settings.Value;
+    _logger = logger;
+  }
+
+  public async Task<Product> CreateAsync(Product product)
+  {
+    if (_settings.Infrastructure.EventSourcing.Enabled)
     {
-        _repository = repository;
-        _settings = settings.Value;
-        _logger = logger;
+      await SaveProductCreatedEvent(product);
     }
 
-    public async Task<Product> CreateAsync(Product product)
-    {
-        // Usar configuração de Event Sourcing
-        if (_settings.Infrastructure.EventSourcing.Enabled)
-        {
-            // Salvar evento
-            await SaveProductCreatedEvent(product);
-        }
+    return await _repository.AddAsync(product);
+  }
 
-        return await _repository.AddAsync(product);
-    }
-
-    private async Task SaveProductCreatedEvent(Product product)
-    {
-        var eventProvider = _settings.Infrastructure.EventSourcing.Provider;
-        _logger.LogInformation("Saving event to {Provider}", eventProvider);
-
-        // Lógica de event sourcing
-    }
+  private async Task SaveProductCreatedEvent(Product product)
+  {
+    var eventProvider = _settings.Infrastructure.EventSourcing.Provider;
+    _logger.LogInformation("Saving event to {Provider}", eventProvider);
+  }
 }
+```
+
 ### Exemplo 3: Repository Customizado
 
+```csharp
 public class ProductDapperRepository : IRepository<Product>
 {
-    private readonly IDbConnectionFactory _connectionFactory;
-    private readonly AppSettings _settings;
-    private readonly ILogger<ProductDapperRepository> _logger;
+  private readonly IDbConnectionFactory _connectionFactory;
+  private readonly AppSettings _settings;
+  private readonly ILogger<ProductDapperRepository> _logger;
 
-    public ProductDapperRepository(
-        IDbConnectionFactory connectionFactory,
-        IOptions<AppSettings> settings,
-        ILogger<ProductDapperRepository> logger)
-    {
-        _connectionFactory = connectionFactory;
-        _settings = settings.Value;
-        _logger = logger;
-    }
+  public ProductDapperRepository(
+    IDbConnectionFactory connectionFactory,
+    IOptions<AppSettings> settings,
+    ILogger<ProductDapperRepository> logger)
+  {
+    _connectionFactory = connectionFactory;
+    _settings = settings.Value;
+    _logger = logger;
+  }
 
-    public async Task<IEnumerable<Product>> GetAllAsync()
-    {
-        using var connection = _connectionFactory.CreateConnection();
+  public async Task<IEnumerable<Product>> GetAllAsync()
+  {
+    using var connection = _connectionFactory.CreateConnection();
+    var commandTimeout = _settings.Infrastructure.Database.CommandTimeoutSeconds;
 
-        // Usar timeout da configuração
-        var commandTimeout = _settings.Infrastructure.Database.CommandTimeoutSeconds;
-
-        return await connection.QueryAsync<Product>(
-            "SELECT * FROM Products",
-            commandTimeout: commandTimeout);
-    }
+    return await connection.QueryAsync<Product>(
+      "SELECT * FROM Products",
+      commandTimeout: commandTimeout);
+  }
 }
+```
+
 ### Exemplo 4: Background Service
 
+```csharp
 public class DataCleanupService : BackgroundService
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly AppSettings _settings;
-    private readonly ILogger<DataCleanupService> _logger;
+  private readonly IServiceProvider _serviceProvider;
+  private readonly AppSettings _settings;
+  private readonly ILogger<DataCleanupService> _logger;
 
-    public DataCleanupService(
-        IServiceProvider serviceProvider,
-        IOptions<AppSettings> settings,
-        ILogger<DataCleanupService> logger)
-    {
-        _serviceProvider = serviceProvider;
-        _settings = settings.Value;
-        _logger = logger;
-    }
+  public DataCleanupService(
+    IServiceProvider serviceProvider,
+    IOptions<AppSettings> settings,
+    ILogger<DataCleanupService> logger)
+  {
+    _serviceProvider = serviceProvider;
+    _settings = settings.Value;
+    _logger = logger;
+  }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+  protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+  {
+    while (!stoppingToken.IsCancellationRequested)
     {
-        while (!stoppingToken.IsCancellationRequested)
+      try
+      {
+        _logger.LogInformation("Running cleanup job...");
+
+        if (_settings.IsProduction())
         {
-            try
-            {
-                _logger.LogInformation("Running cleanup job...");
+          using var scope = _serviceProvider.CreateScope();
+          var repository = scope.ServiceProvider.GetRequiredService<IRepository<Product>>();
 
-                // Verificar se está em produção
-                if (_settings.IsProduction())
-                {
-                    using var scope = _serviceProvider.CreateScope();
-                    var repository = scope.ServiceProvider.GetRequiredService<IRepository<Product>>();
-
-                    // Limpeza de dados
-                    await CleanupOldData(repository);
-                }
-
-                // Aguardar intervalo configurado
-                await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error during cleanup");
-            }
+          await CleanupOldData(repository);
         }
+
+        await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError(ex, "Error during cleanup");
+      }
     }
+  }
 }
+```
+
 ### Exemplo 5: Middleware Customizado
 
+```csharp
 public class CustomHeaderMiddleware
 {
-    private readonly RequestDelegate _next;
-    private readonly AppSettings _settings;
-    private readonly ILogger<CustomHeaderMiddleware> _logger;
+  private readonly RequestDelegate _next;
+  private readonly AppSettings _settings;
+  private readonly ILogger<CustomHeaderMiddleware> _logger;
 
-    public CustomHeaderMiddleware(
-        RequestDelegate next,
-        IOptions<AppSettings> settings,
-        ILogger<CustomHeaderMiddleware> logger)
+  public CustomHeaderMiddleware(
+    RequestDelegate next,
+    IOptions<AppSettings> settings,
+    ILogger<CustomHeaderMiddleware> logger)
+  {
+    _next = next;
+    _settings = settings.Value;
+    _logger = logger;
+  }
+
+  public async Task InvokeAsync(HttpContext context)
+  {
+    if (_settings.IsDevelopment())
     {
-        _next = next;
-        _settings = settings.Value;
-        _logger = logger;
+      context.Response.Headers["X-Environment"] = "Development";
+      context.Response.Headers["X-Debug-Mode"] = "true";
     }
 
-    public async Task InvokeAsync(HttpContext context)
-    {
-        // Adicionar header customizado se em development
-        if (_settings.IsDevelopment())
-        {
-            context.Response.Headers["X-Environment"] = "Development";
-            context.Response.Headers["X-Debug-Mode"] = "true";
-        }
-
-        await _next(context);
-    }
+    await _next(context);
+  }
 }
+```
+
 ---
 
 ## ✅ Validação de Configurações
@@ -428,58 +489,65 @@ public class CustomHeaderMiddleware
 
 O template usa `IValidateOptions<T>` para validar configurações no startup:
 
+```csharp
 // Infrastructure/Configuration/AuthenticationSettingsValidator.cs
 public class AuthenticationSettingsValidator : IValidateOptions<AppSettings>
 {
-    public ValidateOptionsResult Validate(string? name, AppSettings options)
+  public ValidateOptionsResult Validate(string? name, AppSettings options)
+  {
+    var authSettings = options.Authentication;
+
+    if (!authSettings.Enabled)
+      return ValidateOptionsResult.Success;
+
+    if (string.IsNullOrWhiteSpace(authSettings.Jwt.Secret))
     {
-        var authSettings = options.Authentication;
-
-        if (!authSettings.Enabled)
-            return ValidateOptionsResult.Success;
-
-        // Validar JWT Secret
-        if (string.IsNullOrWhiteSpace(authSettings.Jwt.Secret))
-        {
-            return ValidateOptionsResult.Fail(
-                "JWT Secret is required");
-        }
-
-        if (authSettings.Jwt.Secret.Length < 32)
-        {
-            return ValidateOptionsResult.Fail(
-                "JWT Secret must be at least 32 characters");
-        }
-
-        return ValidateOptionsResult.Success;
+      return ValidateOptionsResult.Fail(
+        "JWT Secret is required");
     }
+
+    if (authSettings.Jwt.Secret.Length < 32)
+    {
+      return ValidateOptionsResult.Fail(
+        "JWT Secret must be at least 32 characters");
+    }
+
+    return ValidateOptionsResult.Success;
+  }
 }
+```
+
 ### Registro do Validador
 
+```csharp
 // No seu extension method
 services.AddSingleton<IValidateOptions<AppSettings>, AuthenticationSettingsValidator>();
+```
+
 ### Criando Seu Próprio Validador
 
+```csharp
 public class CacheSettingsValidator : IValidateOptions<AppSettings>
 {
-    public ValidateOptionsResult Validate(string? name, AppSettings options)
+  public ValidateOptionsResult Validate(string? name, AppSettings options)
+  {
+    var cacheSettings = options.Infrastructure.Cache;
+
+    if (!cacheSettings.Enabled)
+      return ValidateOptionsResult.Success;
+
+    if (cacheSettings.Provider == "Redis" &&
+      string.IsNullOrWhiteSpace(cacheSettings.Redis?.ConnectionString))
     {
-        var cacheSettings = options.Infrastructure.Cache;
-
-        if (!cacheSettings.Enabled)
-            return ValidateOptionsResult.Success;
-
-        // Validar Redis
-        if (cacheSettings.Provider == "Redis" &&
-            string.IsNullOrWhiteSpace(cacheSettings.Redis?.ConnectionString))
-        {
-            return ValidateOptionsResult.Fail(
-                "Redis connection string is required when Redis provider is selected");
-        }
-
-        return ValidateOptionsResult.Success;
+      return ValidateOptionsResult.Fail(
+        "Redis connection string is required when Redis provider is selected");
     }
+
+    return ValidateOptionsResult.Success;
+  }
 }
+```
+
 ---
 
 ## 🌍 Sobrescrita de Configurações
@@ -490,10 +558,13 @@ O ASP.NET Core permite sobrescrever configurações do `appsettings.json` usando
 
 Use **dois underscores** (`__`) para navegar na hierarquia do JSON:
 
-```json
+```text
 AppSettings__Propriedade__SubPropriedade
+```
+
 ### Estrutura de Configuração
 
+```json
 {
   "AppSettings": {
     "EnvironmentName": "Development",
@@ -525,14 +596,17 @@ AppSettings__Propriedade__SubPropriedade
     }
   }
 }
+```
+
 ### Exemplos de Variáveis de Ambiente
 
+```bash
 # Ambiente
 AppSettings__EnvironmentName=Production
 
 # Database Connection
 AppSettings__Infrastructure__Database__DatabaseType=SqlServer
-AppSettings__Infrastructure__Database__ConnectionString=Server=prod-server;Database=MyDb;...
+AppSettings__Infrastructure__Database__ConnectionString="Server=prod-server;Database=MyDb;..."
 
 # JWT Settings
 AppSettings__Authentication__Jwt__Secret=super-secret-production-key-with-at-least-32-chars
@@ -552,13 +626,16 @@ AppSettings__Infrastructure__Database__CommandTimeoutSeconds=60
 # Telemetry
 AppSettings__Infrastructure__Telemetry__Enabled=true
 AppSettings__Infrastructure__Telemetry__Provider=ApplicationInsights
-AppSettings__Infrastructure__Telemetry__ApplicationInsights__ConnectionString=InstrumentationKey=xxx
+AppSettings__Infrastructure__Telemetry__ApplicationInsights__ConnectionString="InstrumentationKey=xxx"
+```
+
 ---
 
 ## 🐳 Docker Compose
 
 ### docker-compose.yml
 
+```yaml
 version: '3.8'
 
 services:
@@ -567,28 +644,18 @@ services:
     ports:
       - "5000:8080"
     environment:
-      # Ambiente
       - AppSettings__EnvironmentName=Production
-
-      # Database
       - AppSettings__Infrastructure__Database__DatabaseType=SqlServer
       - AppSettings__Infrastructure__Database__ConnectionString=Server=sqlserver;Database=MyDb;User Id=sa;Password=YourPassword123!;TrustServerCertificate=true
-
-      # JWT
       - AppSettings__Authentication__Jwt__Secret=my-super-secret-key-for-production-with-64-characters-minimum
       - AppSettings__Authentication__Jwt__Issuer=https://api.mycompany.com
       - AppSettings__Authentication__Jwt__Audience=https://app.mycompany.com
       - AppSettings__Authentication__Jwt__ExpirationMinutes=120
-
-      # Cache Redis
       - AppSettings__Infrastructure__Cache__Enabled=true
       - AppSettings__Infrastructure__Cache__Provider=Redis
       - AppSettings__Infrastructure__Cache__Redis__ConnectionString=redis:6379
-
-      # Telemetry
       - AppSettings__Infrastructure__Telemetry__Enabled=true
       - AppSettings__Infrastructure__Telemetry__Provider=Console
-
     depends_on:
       - sqlserver
       - redis
@@ -605,18 +672,24 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+```
+
 ### Usando arquivo .env
 
 Crie um arquivo `.env` na raiz do projeto:
 
+```env
 # .env
 ENVIRONMENT_NAME=Production
 JWT_SECRET=my-super-secret-key-for-production-with-64-characters-minimum
 JWT_ISSUER=https://api.mycompany.com
 REDIS_CONNECTION=redis:6379
 SQL_CONNECTION=Server=sqlserver;Database=MyDb;User Id=sa;Password=YourPassword123!;TrustServerCertificate=true
+```
+
 No `docker-compose.yml`:
 
+```yaml
 version: '3.8'
 
 services:
@@ -630,12 +703,15 @@ services:
       - AppSettings__Authentication__Jwt__Issuer=${JWT_ISSUER}
       - AppSettings__Infrastructure__Cache__Redis__ConnectionString=${REDIS_CONNECTION}
       - AppSettings__Infrastructure__Database__ConnectionString=${SQL_CONNECTION}
+```
+
 ---
 
 ## ☸️ Kubernetes
 
 ### ConfigMap para configurações não-sensíveis
 
+```yaml
 # configmap.yaml
 apiVersion: v1
 kind: ConfigMap
@@ -653,8 +729,11 @@ data:
   AppSettings__Infrastructure__Database__CommandTimeoutSeconds: "60"
   AppSettings__Infrastructure__Telemetry__Enabled: "true"
   AppSettings__Infrastructure__Telemetry__Provider: "ApplicationInsights"
+```
+
 ### Secret para configurações sensíveis
 
+```yaml
 # secret.yaml
 apiVersion: v1
 kind: Secret
@@ -670,8 +749,11 @@ stringData:
   AppSettings__Infrastructure__MongoDB__ConnectionString: "mongodb://username:password@prod-mongodb:27017/mydb"
   AppSettings__Infrastructure__RabbitMQ__ConnectionString: "amqp://username:password@prod-rabbitmq:5672/"
   AppSettings__Infrastructure__Storage__ServiceAccount: "base64-encoded-service-account-json"
+```
+
 ### Deployment usando ConfigMap e Secret
 
+```yaml
 # deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -693,35 +775,32 @@ spec:
         image: myregistry.azurecr.io/myapi:latest
         ports:
         - containerPort: 8080
-
-        # Injetar variáveis do ConfigMap
         envFrom:
         - configMapRef:
             name: api-config
         - secretRef:
             name: api-secrets
-
-        # OU variáveis individuais
         env:
         - name: AppSettings__EnvironmentName
           valueFrom:
             configMapKeyRef:
               name: api-config
               key: AppSettings__EnvironmentName
-
         - name: AppSettings__Authentication__Jwt__Secret
           valueFrom:
             secretKeyRef:
               name: api-secrets
               key: AppSettings__Authentication__Jwt__Secret
-
         - name: AppSettings__Infrastructure__Database__ConnectionString
           valueFrom:
             secretKeyRef:
               name: api-secrets
               key: AppSettings__Infrastructure__Database__ConnectionString
+```
+
 ### Aplicar no Kubernetes
 
+```bash
 # Criar ConfigMap
 kubectl apply -f configmap.yaml
 
@@ -734,6 +813,8 @@ kubectl apply -f deployment.yaml
 # Verificar
 kubectl get pods
 kubectl logs <pod-name>
+```
+
 ---
 
 ## ☁️ Azure App Service
@@ -744,12 +825,14 @@ kubectl logs <pod-name>
 2. **Configuration** → **Application settings**
 3. **+ New application setting**
 
-```
-```powershell
+```text
 Name: AppSettings__Authentication__Jwt__Secret
-Value: my-super-secret-key-for-production-with-64-characters-minimum
+Value: my-super-secret-key-for-production-with-at-least-32-characters-minimum
+```
+
 ### Configurar via Azure CLI
 
+```bash
 # Login
 az login
 
@@ -767,20 +850,26 @@ az webapp config appsettings set \
 az webapp config appsettings list \
   --resource-group MyResourceGroup \
   --name MyApiApp
+```
+
 ### Key Vault Integration
 
+```bash
 # Referenciar secret do Key Vault
 az webapp config appsettings set \
   --resource-group MyResourceGroup \
   --name MyApiApp \
   --settings \
     "AppSettings__Authentication__Jwt__Secret=@Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/JwtSecret/)"
+```
+
 ---
 
 ## ☁️ AWS Elastic Beanstalk
 
 ### .ebextensions/environment.config
 
+```yaml
 option_settings:
   aws:elasticbeanstalk:application:environment:
     AppSettings__EnvironmentName: "Production"
@@ -788,14 +877,19 @@ option_settings:
     AppSettings__Authentication__Jwt__Issuer: "https://api.mycompany.com"
     AppSettings__Infrastructure__Cache__Provider: "Redis"
     AppSettings__Infrastructure__Cache__Redis__ConnectionString: "prod-redis.cache.amazonaws.com:6379"
+```
+
 ### AWS CLI
 
+```bash
 # Definir variáveis
 aws elasticbeanstalk update-environment \
   --environment-name my-api-env \
   --option-settings \
     Namespace=aws:elasticbeanstalk:application:environment,OptionName=AppSettings__EnvironmentName,Value=Production \
     Namespace=aws:elasticbeanstalk:application:environment,OptionName=AppSettings__Authentication__Jwt__Secret,Value=my-secret
+```
+
 ---
 
 ## 🔐 Ordem de Precedência
@@ -810,7 +904,7 @@ O ASP.NET Core carrega configurações na seguinte ordem (última sobrescreve pr
 
 ### Exemplo Prático
 
-// appsettings.json
+```json
 {
   "AppSettings": {
     "Authentication": {
@@ -821,10 +915,11 @@ O ASP.NET Core carrega configurações na seguinte ordem (última sobrescreve pr
   }
 }
 ```
-```bash
 
-# Variável de Ambiente sobrescreve
+```bash
 AppSettings__Authentication__Jwt__Secret=production-secret
+```
+
 **Resultado:** Aplicação usa `"production-secret"` 🎯
 
 ---
@@ -833,6 +928,7 @@ AppSettings__Authentication__Jwt__Secret=production-secret
 
 ### Windows PowerShell
 
+```powershell
 # Definir variável temporária
 $env:AppSettings__Authentication__Jwt__Secret="test-secret-key-with-at-least-32-characters"
 $env:AppSettings__EnvironmentName="Development"
@@ -842,8 +938,11 @@ dotnet run --project src/Api/Api.csproj
 
 # Limpar após teste
 Remove-Item Env:AppSettings__Authentication__Jwt__Secret
+```
+
 ### Linux / macOS
 
+```bash
 # Definir variável temporária
 export AppSettings__Authentication__Jwt__Secret="test-secret-key-with-at-least-32-characters"
 export AppSettings__EnvironmentName="Development"
@@ -853,10 +952,13 @@ dotnet run --project src/Api/Api.csproj
 
 # Limpar após teste
 unset AppSettings__Authentication__Jwt__Secret
+```
+
 ### Visual Studio / VS Code
 
 Crie `launchSettings.json`:
 
+```json
 {
   "profiles": {
     "Api": {
@@ -869,6 +971,8 @@ Crie `launchSettings.json`:
     }
   }
 }
+```
+
 ---
 
 ## 📋 Checklist de Deployment
@@ -894,33 +998,42 @@ Antes de fazer deploy, verifique:
 
 **Causa:** Nome da propriedade no JSON não corresponde à classe C#
 
+```text
 // ❌ Errado
 {
   "AppSettings": {
-    "Infraestructure": { ... }  // ❌ Typo (Infraestructure ao invés de Infrastructure)
+    "Infraestructure": { ... }
   }
 }
 
 // ✅ Correto
 {
   "AppSettings": {
-    "Infrastructure": { ... }  // ✅ Nome correto
+    "Infrastructure": { ... }
   }
 }
+```
+
 ### Problema: Erro "Cannot resolve IOptions<AppSettings>"
 
 **Causa:** Esqueceu de chamar `AddAppSettingsConfiguration`
 
+```csharp
 // Program.cs ou InfrastructureExtensions.cs
 services.AddAppSettingsConfiguration(configuration, environment); // ✅ Necessário
+```
+
 ### Problema: Validação não acontece
 
 **Causa:** Faltou registrar o validador ou chamar `.ValidateOnStart()`
 
+```csharp
 services.AddOptions<AppSettings>()
     .Bind(configuration.GetSection("AppSettings"))
     .ValidateDataAnnotations()
     .ValidateOnStart(); // ✅ Necessário para validação no startup
+```
+
 ---
 
 ## 📚 Referências
@@ -937,16 +1050,17 @@ services.AddOptions<AppSettings>()
 
 > **Sempre que precisar de configurações em qualquer lugar do código (Controller, Service, Repository, Middleware, Background Service), injete `IOptions<AppSettings>`**
 
+```csharp
 // ✅ Sempre faça assim
 public MyClass(IOptions<AppSettings> settings)
 {
-    var config = settings.Value;
+  var config = settings.Value;
 }
 
 // ❌ Nunca faça assim
 public MyClass(IConfiguration configuration)
 {
-    var config = configuration.GetSection("AppSettings");
+  var config = configuration.GetSection("AppSettings");
 }
 ```
 

@@ -11,7 +11,9 @@ Este projeto contém testes unitários para os controllers da API, utilizando **
 ## 🧪 Estrutura dos Testes
 
 ### Controllers/ProductControllerTests.cs
+
 Testes unitários para `ProductController`:
+
 - ✅ `GetAll_ReturnsOkResult_WithListOfProducts` - Testa listagem de produtos
 - ✅ `GetById_WithValidId_ReturnsOkResult_WithProduct` - Testa busca de produto por ID válido
 - ✅ `GetById_WithInvalidId_ReturnsNotFound` - Testa busca com ID inválido
@@ -26,7 +28,9 @@ Testes unitários para `ProductController`:
 **Total: 10 testes**
 
 ### Controllers/OrderControllerTests.cs
+
 Testes unitários para `OrderController`:
+
 - ✅ `GetAll_ReturnsOkResult_WithListOfOrders` - Testa listagem de pedidos
 - ✅ `GetById_WithValidId_ReturnsOkResult_WithOrderDetails` - Testa busca de pedido por ID
 - ✅ `GetById_WithInvalidId_ReturnsNotFound` - Testa busca com ID inválido
@@ -43,7 +47,10 @@ Testes unitários para `OrderController`:
 ## 🎯 Padrões de Teste
 
 ### Arrange-Act-Assert (AAA)
+
 Todos os testes seguem o padrão AAA:
+
+```csharp
 [Fact]
 public async Task GetById_WithValidId_ReturnsOkResult_WithProduct()
 {
@@ -60,8 +67,13 @@ public async Task GetById_WithValidId_ReturnsOkResult_WithProduct()
     var returnedProduct = okResult.Value.Should().BeAssignableTo<Product>().Subject;
     returnedProduct.Should().BeEquivalentTo(product);
 }
+```
+
 ### Uso de Mocks
+
 Os testes utilizam **Moq** para criar mocks dos serviços:
+
+```csharp
 // Mock do serviço
 _mockService = new Mock<IService<Product>>();
 
@@ -70,8 +82,13 @@ _mockService.Setup(s => s.GetByIdAsync(productId)).ReturnsAsync(product);
 
 // Verificar se método foi chamado
 _mockService.Verify(s => s.GetByIdAsync(productId), Times.Once);
+```
+
 ### FluentAssertions
+
 Asserções mais legíveis e expressivas:
+
+```csharp
 // Ao invés de:
 Assert.IsType<OkObjectResult>(result);
 
@@ -82,21 +99,38 @@ result.Should().BeOfType<OkObjectResult>();
 returnedProducts.Should().HaveCount(2);
 returnedProducts.Should().BeEquivalentTo(expectedProducts);
 returnedProduct.Name.Should().Be("Test Product");
+```
+
 ## 🚀 Executando os Testes
 
 ### Via linha de comando
-# Executar todos os testes
+
+#### Executar todos os testes
+
+```bash
 dotnet test
+```
 
-# Executar testes de um projeto específico
+#### Executar testes de um projeto específico
+
+```bash
 dotnet test tests/UnitTests/UnitTests.csproj
+```
 
-# Executar com verbosidade
+#### Executar com verbosidade
+
+```bash
 dotnet test --verbosity detailed
+```
 
-# Executar testes com cobertura
+#### Executar testes com cobertura
+
+```bash
 dotnet test --collect:"XPlat Code Coverage"
+```
+
 ### Via Visual Studio Code
+
 1. Instalar extensão **.NET Core Test Explorer**
 2. Abrir painel de testes (Test Explorer)
 3. Clicar em "Run All Tests" ou executar testes individuais
@@ -104,6 +138,7 @@ dotnet test --collect:"XPlat Code Coverage"
 ## 📊 Cobertura de Testes
 
 Os testes unitários cobrem:
+
 - ✅ **Casos de sucesso** - Operações bem-sucedidas
 - ✅ **Casos de erro** - IDs inválidos, dados não encontrados
 - ✅ **Validações** - Dados inválidos, IDs incompatíveis
@@ -112,12 +147,14 @@ Os testes unitários cobrem:
 ## 🔍 Diferença entre Testes Unitários e de Integração
 
 ### Testes Unitários (este projeto)
+
 - Testam unidades isoladas (controllers)
 - Usam **mocks** para dependências
 - Rápidos e independentes
 - Focam na lógica do controller
 
 ### Testes de Integração (projeto Integration)
+
 - Testam a aplicação inteira
 - Usam banco de dados real (InMemory)
 - Verificam integração entre camadas
@@ -135,6 +172,7 @@ Os testes unitários cobrem:
 ## 🎓 Exemplos de Uso
 
 ### Testar retorno de lista vazia
+
 ```csharp
 _mockService.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<Product>());
 var result = await _controller.GetAll();
@@ -144,6 +182,7 @@ products.Should().BeEmpty();
 ```
 
 ### Testar exceção
+
 ```csharp
 _mockService.Setup(s => s.GetByIdAsync(It.IsAny<long>()))
     .ThrowsAsync(new Exception("Database error"));
@@ -153,6 +192,7 @@ result.Should().BeOfType<ObjectResult>();
 ```
 
 ### Verificar chamadas ao serviço
+
 ```csharp
 _mockService.Verify(s => s.AddAsync(It.IsAny<Product>()), Times.Once);
 _mockService.Verify(s => s.UpdateAsync(It.IsAny<Product>()), Times.Never);

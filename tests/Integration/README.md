@@ -5,6 +5,7 @@ This project contains integration tests for the ProjectTemplate API.
 ## Overview
 
 Integration tests verify that all layers of the application work together correctly, including:
+
 - API Controllers
 - Services
 - Repositories
@@ -21,14 +22,24 @@ Integration tests verify that all layers of the application work together correc
 
 ## Running Tests
 
-# Run all integration tests
+### Run all integration tests
+
+```bash
 dotnet test tests/Integration
+```
 
-# Run with coverage
+### Run with coverage
+
+```bash
 dotnet test tests/Integration /p:CollectCoverage=true
+```
 
-# Run specific test
+### Run specific test
+
+```bash
 dotnet test tests/Integration --filter "FullyQualifiedName~ProductControllerTests.GetAll_ReturnsSuccessStatusCode"
+```
+
 ## Test Structure
 
 ```csharp
@@ -38,11 +49,12 @@ tests/Integration/
 │   └── OrderControllerTests.cs
 ├── WebApplicationFactoryFixture.cs
 └── README.md
+```
+
 ## Writing Integration Tests
 
 ### Example Test
 
-```
 ```csharp
 public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture>
 {
@@ -78,6 +90,7 @@ public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture
 ## Test Coverage
 
 Integration tests should cover:
+
 - ✅ CRUD operations
 - ✅ Business logic validation
 - ✅ Error handling

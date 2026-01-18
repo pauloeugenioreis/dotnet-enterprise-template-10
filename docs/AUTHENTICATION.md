@@ -3,11 +3,11 @@
 ## 📋 Índice
 
 - [Overview](#overview)
-- [Default Admin Credentials](#-default-admin-credentials)
+- [Default Admin Credentials](#default-admin-credentials)
 - [Features](#features)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
-- [Quick Start](#-quick-start)
+- [Quick Start](#quick-start)
 - [API Endpoints](#api-endpoints)
 - [Usage Examples](#usage-examples)
 - [Security Best Practices](#security-best-practices)
@@ -27,23 +27,31 @@
 
 This template provides a comprehensive authentication system with JWT (JSON Web Tokens) and OAuth2 support. The implementation follows security best practices and is fully configurable via `appsettings.json`.
 
-## 🔑 Default Admin Credentials
+## Default Admin Credentials
 
 For development and testing, a default admin user is automatically created when seeding the database:
 
+```text
 Username: admin
 Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com
 Role:     Admin
-```bash
+```
 
 > ⚠️ **IMPORTANT**: Change this password immediately in production environments!
 
 To seed the database with the default admin user, run:
+
+```bash
 dotnet run --project src/Api
+```
+
 The seeder will automatically create:
+
 - **Roles**: Admin, User, Manager
 - **Default Admin User** with the credentials above
+
+<a id="features"></a>
 
 ## Features
 
@@ -56,10 +64,11 @@ The seeder will automatically create:
 - ✅ **IP Tracking** - Track login IPs for security auditing
 - ✅ **Configurable** - Enable/disable via settings
 
+<a id="architecture"></a>
+
 ## Architecture
 
-```
-```bash
+```text
 ┌─────────────────┐
 │  AuthController │  ← REST API endpoints
 └────────┬────────┘
@@ -79,10 +88,15 @@ The seeder will automatically create:
     ┌────▼──────────────┐
     │ ApplicationDbContext │  ← EF Core
     └───────────────────┘
+  ```
+
+<a id="configuration"></a>
+
 ## Configuration
 
 ### appsettings.json
 
+```json
 {
   "AppSettings": {
     "Authentication": {
@@ -133,9 +147,12 @@ The seeder will automatically create:
     }
   }
 }
+```
+
 ### Configuration Options
 
 #### JwtSettings
+
 - **Secret**: Secret key for signing JWTs (minimum 32 characters for HS256)
 - **Issuer**: Token issuer (who created the token)
 - **Audience**: Token audience (who can use the token)
@@ -144,6 +161,7 @@ The seeder will automatically create:
 - **Validate*** flags: Enable/disable JWT validation checks
 
 #### PasswordPolicySettings
+
 - **MinimumLength**: Minimum password length (default: 8)
 - **RequireDigit**: Require at least one number
 - **RequireLowercase**: Require at least one lowercase letter
@@ -153,29 +171,40 @@ The seeder will automatically create:
 - **LockoutMinutes**: Account lockout duration
 
 #### RefreshTokenSettings
+
 - **ExpirationDays**: How long refresh tokens are valid
 - **ReuseTokens**: Allow reusing the same refresh token (not recommended)
 
-## 🚀 Quick Start
+<a id="quick-start"></a>
+
+## Quick Start
 
 ### 1. Run the Application
 
+```bash
 # Start the API
 dotnet run --project src/Api
 
 # API will be available at http://localhost:5000
 # Swagger UI at http://localhost:5000/swagger
+```
+
 ### 2. Login with Admin Credentials
 
 Use the default admin credentials to get a JWT token:
 
+```bash
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "usernameOrEmail": "admin",
     "password": "Admin@2026!Secure"
   }'
+```
+
 **Response:**
+
+```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "refreshToken": "random-secure-token...",
@@ -189,12 +218,17 @@ curl -X POST http://localhost:5000/api/auth/login \
     "roles": ["Admin"]
   }
 }
+```
+
 ### 3. Use the Access Token
 
 Add the token to the `Authorization` header:
 
+```bash
 curl -X GET http://localhost:5000/api/auth/me \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
 ### 4. Test in Swagger
 
 1. Open http://localhost:5000/swagger
@@ -202,6 +236,8 @@ curl -X GET http://localhost:5000/api/auth/me \
 3. Enter: `Bearer <your-access-token>`
 4. Click "Authorize" and "Close"
 5. All endpoints will now use your authentication
+
+<a id="api-endpoints"></a>
 
 ## API Endpoints
 
@@ -212,6 +248,8 @@ Create a new user account.
 **Endpoint:** `POST /api/auth/register`
 
 **Request:**
+
+```json
 {
   "username": "john.doe",
   "email": "john.doe@example.com",
@@ -219,7 +257,11 @@ Create a new user account.
   "firstName": "John",
   "lastName": "Doe"
 }
+```
+
 **Response:**
+
+```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "refreshToken": "a1b2c3d4e5f6...",
@@ -233,6 +275,8 @@ Create a new user account.
     "roles": ["User"]
   }
 }
+```
+
 ### 2. Login
 
 Authenticate with username/email and password.
@@ -240,11 +284,17 @@ Authenticate with username/email and password.
 **Endpoint:** `POST /api/auth/login`
 
 **Request:**
+
+```json
 {
   "usernameOrEmail": "john.doe",
   "password": "P@ssw0rd123"
 }
+```
+
 **Response:**
+
+```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "refreshToken": "a1b2c3d4e5f6...",
@@ -258,6 +308,8 @@ Authenticate with username/email and password.
     "roles": ["User"]
   }
 }
+```
+
 ### 3. Refresh Token
 
 Get a new access token using a refresh token.
@@ -265,10 +317,16 @@ Get a new access token using a refresh token.
 **Endpoint:** `POST /api/auth/refresh-token`
 
 **Request:**
+
+```json
 {
   "refreshToken": "a1b2c3d4e5f6..."
 }
+```
+
 **Response:**
+
+```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "refreshToken": "g7h8i9j0k1l2...",
@@ -282,6 +340,8 @@ Get a new access token using a refresh token.
     "roles": ["User"]
   }
 }
+```
+
 ### 4. Revoke Token (Logout)
 
 Invalidate a refresh token.
@@ -289,9 +349,13 @@ Invalidate a refresh token.
 **Endpoint:** `POST /api/auth/revoke-token`
 
 **Request:**
+
+```json
 {
   "refreshToken": "a1b2c3d4e5f6..."
 }
+```
+
 **Response:** `204 No Content`
 
 ### 5. Get Current User
@@ -301,10 +365,14 @@ Get authenticated user information.
 **Endpoint:** `GET /api/auth/me`
 
 **Headers:**
-```
+
 ```text
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
 **Response:**
+
+```json
 {
   "id": 1,
   "username": "john.doe",
@@ -313,6 +381,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   "lastName": "Doe",
   "roles": ["User"]
 }
+```
+
 ### 6. Change Password
 
 Change the current user's password.
@@ -320,14 +390,20 @@ Change the current user's password.
 **Endpoint:** `POST /api/auth/change-password`
 
 **Headers:**
-```
+
 ```bash
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
 **Request:**
+
+```json
 {
   "currentPassword": "P@ssw0rd123",
   "newPassword": "NewP@ssw0rd456"
 }
+```
+
 **Response:** `204 No Content`
 
 ### 7. Update Profile
@@ -337,17 +413,25 @@ Update user profile information.
 **Endpoint:** `PUT /api/auth/profile`
 
 **Headers:**
-```
+
 ```bash
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
 **Request:**
+
+```json
 {
   "firstName": "John",
   "lastName": "Smith",
   "phoneNumber": "+1234567890",
   "profileImageUrl": "https://example.com/avatar.jpg"
 }
+```
+
 **Response:**
+
+```json
 {
   "id": 1,
   "username": "john.doe",
@@ -358,6 +442,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
   "profileImageUrl": "https://example.com/avatar.jpg",
   "roles": ["User"]
 }
+```
+
 ### 8. OAuth2 Login (Coming Soon)
 
 Login with external OAuth2 providers.
@@ -365,11 +451,17 @@ Login with external OAuth2 providers.
 **Endpoint:** `POST /api/auth/oauth2/login`
 
 **Request:**
+
+```json
 {
   "provider": "Google",
   "accessToken": "ya29.a0AfH6SMBx..."
 }
+```
+
 **Response:**
+
+```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "refreshToken": "a1b2c3d4e5f6...",
@@ -383,52 +475,53 @@ Login with external OAuth2 providers.
     "roles": ["User"]
   }
 }
+```
+
+<a id="usage-examples"></a>
+
 ## Usage Examples
 
 ### C# Client
 
+```csharp
 using System.Net.Http.Json;
 
 var client = new HttpClient { BaseAddress = new Uri("http://localhost:5000") };
 
-// Register
 var registerDto = new
 {
-    Username = "john.doe",
-    Email = "john.doe@example.com",
-    Password = "P@ssw0rd123",
-    FirstName = "John",
-    LastName = "Doe"
+  Username = "john.doe",
+  Email = "john.doe@example.com",
+  Password = "P@ssw0rd123",
+  FirstName = "John",
+  LastName = "Doe"
 };
 
 var registerResponse = await client.PostAsJsonAsync("/api/auth/register", registerDto);
 var authResponse = await registerResponse.Content.ReadFromJsonAsync<AuthResponse>();
 
-// Login
 var loginDto = new
 {
-    UsernameOrEmail = "john.doe",
-    Password = "P@ssw0rd123"
+  UsernameOrEmail = "john.doe",
+  Password = "P@ssw0rd123"
 };
 
 var loginResponse = await client.PostAsJsonAsync("/api/auth/login", loginDto);
 authResponse = await loginResponse.Content.ReadFromJsonAsync<AuthResponse>();
 
-// Use access token
 client.DefaultRequestHeaders.Authorization =
-    new AuthenticationHeaderValue("Bearer", authResponse.AccessToken);
+  new AuthenticationHeaderValue("Bearer", authResponse.AccessToken);
 
-// Get current user
 var meResponse = await client.GetAsync("/api/auth/me");
 var user = await meResponse.Content.ReadFromJsonAsync<UserDto>();
 
-// Refresh token when expired
 var refreshDto = new { RefreshToken = authResponse.RefreshToken };
 var refreshResponse = await client.PostAsJsonAsync("/api/auth/refresh-token", refreshDto);
 authResponse = await refreshResponse.Content.ReadFromJsonAsync<AuthResponse>();
+```
+
 ### JavaScript/TypeScript
 
-```
 ```typescript
 const API_URL = 'http://localhost:5000/api/auth';
 
@@ -508,8 +601,11 @@ async function logout() {
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
 }
+```
+
 ### cURL
 
+```bash
 # Register
 curl -X POST http://localhost:5000/api/auth/register \
   -H "Content-Type: application/json" \
@@ -546,34 +642,48 @@ curl -X POST http://localhost:5000/api/auth/revoke-token \
   -d '{
     "refreshToken": "YOUR_REFRESH_TOKEN"
   }'
+```
+
+<a id="security-best-practices"></a>
+
 ## Security Best Practices
 
 ### 1. JWT Secret Key
+
 - Use a strong, random secret key (minimum 32 characters for HS256)
 - Store in environment variables or Azure Key Vault, **never commit to source control**
 - Rotate keys periodically
 
-# Generate a secure random key
+**Generate a secure random key:**
+
+```bash
 openssl rand -base64 32
+```
+
 ### 2. HTTPS Only
+
 - Always use HTTPS in production
 - Set `RequireHttpsMetadata = true` in production
 
 ### 3. Token Storage
+
 - **Client-side:**
   - Store access tokens in memory (variables)
   - Store refresh tokens in HttpOnly cookies (preferred) or secure storage
   - **Never store tokens in localStorage** (XSS vulnerable)
 
 ### 4. Token Expiration
+
 - Keep access tokens short-lived (15-60 minutes)
 - Use longer-lived refresh tokens (7-30 days)
 - Implement token rotation (generate new refresh token on refresh)
 
 ### 5. Password Hashing
+
 - Current implementation uses SHA256 (simplified)
 - **Production recommendation:** Use BCrypt, Argon2, or PBKDF2
 
+```csharp
 // Example with BCrypt.Net
 using BCrypt.Net;
 
@@ -582,71 +692,96 @@ var hashedPassword = BCrypt.HashPassword(password, workFactor: 12);
 
 // Verify password
 bool isValid = BCrypt.Verify(password, hashedPassword);
+```
+
 ### 6. Rate Limiting
+
 - Enable rate limiting to prevent brute force attacks
 - Limit login attempts per IP
 
 ### 7. Account Lockout
+
 - Implement account lockout after failed login attempts
 - Configure `MaxFailedAccessAttempts` and `LockoutMinutes`
 
 ### 8. Audit Logging
+
 - Log authentication events (login, logout, failed attempts)
 - Track IP addresses and user agents
 - Monitor for suspicious activity
 
+<a id="database-schema"></a>
+
 ## Database Schema
 
 ### Users Table
+
+```sql
 CREATE TABLE Users (
-    Id BIGINT IDENTITY(1,1) PRIMARY KEY,
-    Username NVARCHAR(50) UNIQUE NOT NULL,
-    Email NVARCHAR(100) UNIQUE NOT NULL,
-    PasswordHash NVARCHAR(256) NOT NULL,
-    FirstName NVARCHAR(50),
-    LastName NVARCHAR(50),
-    PhoneNumber NVARCHAR(20),
-    IsActive BIT NOT NULL DEFAULT 1,
-    EmailConfirmed BIT NOT NULL DEFAULT 0,
-    TwoFactorEnabled BIT NOT NULL DEFAULT 0,
-    LastLoginAt DATETIME2,
-    ProfileImageUrl NVARCHAR(500),
-    ExternalProvider NVARCHAR(50),
-    ExternalId NVARCHAR(200),
-    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    UpdatedAt DATETIME2
+  Id BIGINT IDENTITY(1,1) PRIMARY KEY,
+  Username NVARCHAR(50) UNIQUE NOT NULL,
+  Email NVARCHAR(100) UNIQUE NOT NULL,
+  PasswordHash NVARCHAR(256) NOT NULL,
+  FirstName NVARCHAR(50),
+  LastName NVARCHAR(50),
+  PhoneNumber NVARCHAR(20),
+  IsActive BIT NOT NULL DEFAULT 1,
+  EmailConfirmed BIT NOT NULL DEFAULT 0,
+  TwoFactorEnabled BIT NOT NULL DEFAULT 0,
+  LastLoginAt DATETIME2,
+  ProfileImageUrl NVARCHAR(500),
+  ExternalProvider NVARCHAR(50),
+  ExternalId NVARCHAR(200),
+  CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+  UpdatedAt DATETIME2
 );
+```
+
 ### Roles Table
+
+```sql
 CREATE TABLE Roles (
-    Id BIGINT IDENTITY(1,1) PRIMARY KEY,
-    Name NVARCHAR(50) UNIQUE NOT NULL,
-    Description NVARCHAR(200),
-    IsSystemRole BIT NOT NULL DEFAULT 0,
-    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE()
+  Id BIGINT IDENTITY(1,1) PRIMARY KEY,
+  Name NVARCHAR(50) UNIQUE NOT NULL,
+  Description NVARCHAR(200),
+  IsSystemRole BIT NOT NULL DEFAULT 0,
+  CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE()
 );
+```
+
 ### UserRoles Table (Many-to-Many)
+
+```sql
 CREATE TABLE UserRoles (
-    UserId BIGINT NOT NULL,
-    RoleId BIGINT NOT NULL,
-    AssignedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    PRIMARY KEY (UserId, RoleId),
-    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
-    FOREIGN KEY (RoleId) REFERENCES Roles(Id) ON DELETE CASCADE
+  UserId BIGINT NOT NULL,
+  RoleId BIGINT NOT NULL,
+  AssignedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+  PRIMARY KEY (UserId, RoleId),
+  FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
+  FOREIGN KEY (RoleId) REFERENCES Roles(Id) ON DELETE CASCADE
 );
+```
+
 ### RefreshTokens Table
+
+```sql
 CREATE TABLE RefreshTokens (
-    Id BIGINT IDENTITY(1,1) PRIMARY KEY,
-    UserId BIGINT NOT NULL,
-    Token NVARCHAR(200) UNIQUE NOT NULL,
-    ExpiresAt DATETIME2 NOT NULL,
-    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    CreatedByIp NVARCHAR(50),
-    IsRevoked BIT NOT NULL DEFAULT 0,
-    RevokedAt DATETIME2,
-    RevokedByIp NVARCHAR(50),
-    ReplacedByToken NVARCHAR(200),
-    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+  Id BIGINT IDENTITY(1,1) PRIMARY KEY,
+  UserId BIGINT NOT NULL,
+  Token NVARCHAR(200) UNIQUE NOT NULL,
+  ExpiresAt DATETIME2 NOT NULL,
+  CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+  CreatedByIp NVARCHAR(50),
+  IsRevoked BIT NOT NULL DEFAULT 0,
+  RevokedAt DATETIME2,
+  RevokedByIp NVARCHAR(50),
+  ReplacedByToken NVARCHAR(200),
+  FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
 );
+```
+
+<a id="oauth2-setup"></a>
+
 ## OAuth2 Setup
 
 ### Google OAuth2
@@ -659,18 +794,22 @@ CREATE TABLE RefreshTokens (
    - Add authorized redirect URIs: `https://yourdomain.com/signin-google`
 
 2. **Configure appsettings.json:**
-{
-  "Authentication": {
-    "OAuth2Settings": {
-      "Enabled": true,
-      "GoogleOAuthSettings": {
-        "Enabled": true,
-        "ClientId": "your-google-client-id.apps.googleusercontent.com",
-        "ClientSecret": "your-google-client-secret"
-      }
-    }
-  }
-}
+
+   ```json
+   {
+     "Authentication": {
+       "OAuth2Settings": {
+         "Enabled": true,
+         "GoogleOAuthSettings": {
+           "Enabled": true,
+           "ClientId": "your-google-client-id.apps.googleusercontent.com",
+           "ClientSecret": "your-google-client-secret"
+         }
+       }
+     }
+   }
+   ```
+
 ### Microsoft OAuth2
 
 1. **Register application:**
@@ -680,19 +819,23 @@ CREATE TABLE RefreshTokens (
    - Add redirect URI: `https://yourdomain.com/signin-microsoft`
 
 2. **Configure appsettings.json:**
-{
-  "Authentication": {
-    "OAuth2Settings": {
-      "Enabled": true,
-      "MicrosoftOAuthSettings": {
-        "Enabled": true,
-        "ClientId": "your-microsoft-client-id",
-        "ClientSecret": "your-microsoft-client-secret",
-        "TenantId": "common"
-      }
-    }
-  }
-}
+
+   ```json
+   {
+     "Authentication": {
+       "OAuth2Settings": {
+         "Enabled": true,
+         "MicrosoftOAuthSettings": {
+           "Enabled": true,
+           "ClientId": "your-microsoft-client-id",
+           "ClientSecret": "your-microsoft-client-secret",
+           "TenantId": "common"
+         }
+       }
+     }
+   }
+   ```
+
 ### GitHub OAuth2
 
 1. **Create OAuth App:**
@@ -701,95 +844,138 @@ CREATE TABLE RefreshTokens (
    - Authorization callback URL: `https://yourdomain.com/signin-github`
 
 2. **Configure appsettings.json:**
-{
-  "Authentication": {
-    "OAuth2Settings": {
-      "Enabled": true,
-      "GitHubOAuthSettings": {
-        "Enabled": true,
-        "ClientId": "your-github-client-id",
-        "ClientSecret": "your-github-client-secret"
-      }
-    }
-  }
-}
+
+   ```json
+   {
+     "Authentication": {
+       "OAuth2Settings": {
+         "Enabled": true,
+         "GitHubOAuthSettings": {
+           "Enabled": true,
+           "ClientId": "your-github-client-id",
+           "ClientSecret": "your-github-client-secret"
+         }
+       }
+     }
+   }
+   ```
+
+<a id="testing-with-swagger"></a>
+
 ## Testing with Swagger
 
-1. **Start the application:**
-dotnet run --project src/Api/Api.csproj
-2. **Open Swagger UI:**
-```
+### Step 1: Start the application
+
 ```bash
+dotnet run --project src/Api/Api.csproj
+```
+
+### Step 2: Open Swagger UI
+
+```text
 http://localhost:5000
-3. **Register a new user:**
-   - POST `/api/auth/register`
-   - Copy the `accessToken` from response
+```
 
-4. **Authorize in Swagger:**
-   - Click "Authorize" button (lock icon)
-   - Enter: `Bearer YOUR_ACCESS_TOKEN`
-   - Click "Authorize"
+### Step 3: Register a new user
 
-5. **Test authenticated endpoints:**
-   - GET `/api/auth/me`
-   - POST `/api/auth/change-password`
-   - PUT `/api/auth/profile`
+- POST `/api/auth/register`
+- Copy the `accessToken` from response
+
+### Step 4: Authorize in Swagger
+
+- Click "Authorize" button (lock icon)
+- Enter: `Bearer YOUR_ACCESS_TOKEN`
+- Click "Authorize"
+
+### Step 5: Test authenticated endpoints
+
+- GET `/api/auth/me`
+- POST `/api/auth/change-password`
+- PUT `/api/auth/profile`
+
+<a id="troubleshooting"></a>
 
 ## Troubleshooting
 
 ### "Unauthorized" errors
+
 - Check if token is expired
 - Verify token format: `Bearer <token>`
 - Check JWT secret matches in configuration
 
 ### "Invalid token" errors
+
 - Verify issuer/audience match configuration
 - Check token expiration time
 - Ensure secret key is correct
 
 ### Password policy errors
+
 - Check password meets all requirements
 - Verify password policy settings in configuration
 
 ### Database errors
+
 - Run migrations: `dotnet ef migrations add AddAuthentication`
 - Update database: `dotnet ef database update`
+
+<a id="migration-from-basic-auth"></a>
 
 ## Migration from Basic Auth
 
 If you're migrating from basic authentication:
 
 1. **Create migration:**
-dotnet ef migrations add AddAuthentication --project src/Data --startup-project src/Api
+
+    ```bash
+    dotnet ef migrations add AddAuthentication --project src/Data --startup-project src/Api
+    ```
+
 2. **Update database:**
-dotnet ef database update --project src/Data --startup-project src/Api
+
+    ```bash
+    dotnet ef database update --project src/Data --startup-project src/Api
+    ```
+
 3. **Seed default roles:**
-// In DbSeeder.cs
-if (!context.Roles.Any())
-{
-    context.Roles.AddRange(
+
+    ```csharp
+    // In DbSeeder.cs
+    if (!context.Roles.Any())
+    {
+      context.Roles.AddRange(
         new Role { Name = "Admin", Description = "Administrator role", IsSystemRole = true },
         new Role { Name = "User", Description = "Default user role", IsSystemRole = true }
-    );
-    await context.SaveChangesAsync();
-}
+      );
+      await context.SaveChangesAsync();
+    }
+    ```
+
+<a id="performance-considerations"></a>
+
 ## Performance Considerations
 
 ### Token Validation
+
 - JWT validation is stateless and fast
 - No database lookup required for access tokens
 - Refresh tokens require database lookup
 
 ### Caching
+
 - Cache user roles to reduce database queries
 - Implement distributed cache for scalability
 
 ### Database Indexing
+
+```sql
 CREATE INDEX IX_Users_Username ON Users(Username);
 CREATE INDEX IX_Users_Email ON Users(Email);
 CREATE INDEX IX_RefreshTokens_Token ON RefreshTokens(Token);
 CREATE INDEX IX_RefreshTokens_UserId ON RefreshTokens(UserId);
 ```
+
+<a id="advanced-features-future"></a>
 
 ## Advanced Features (Future)
 
@@ -802,6 +988,8 @@ CREATE INDEX IX_RefreshTokens_UserId ON RefreshTokens(UserId);
 - [ ] Biometric authentication
 - [ ] Single Sign-On (SSO)
 
+<a id="references"></a>
+
 ## References
 
 - [JWT.io](https://jwt.io/) - JWT specification
@@ -809,8 +997,11 @@ CREATE INDEX IX_RefreshTokens_UserId ON RefreshTokens(UserId);
 - [Microsoft Identity Platform](https://docs.microsoft.com/en-us/azure/active-directory/develop/)
 - [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
 
+<a id="support"></a>
+
 ## Support
 
 For issues or questions:
+
 - GitHub Issues: [Create an issue](https://github.com/yourrepo/issues)
 - Documentation: [Read the docs](https://github.com/yourrepo/docs)

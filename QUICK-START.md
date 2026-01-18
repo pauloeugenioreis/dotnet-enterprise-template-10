@@ -10,6 +10,7 @@ Guia rápido para começar a usar o template em menos de 5 minutos!
 - Editor de código (VS Code, Visual Studio, Rider, etc.)
 
 **Opcional (para Docker/Kubernetes):**
+
 - [Docker Desktop](https://docs.docker.com/get-docker/)
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
@@ -23,12 +24,14 @@ Guia rápido para começar a usar o template em menos de 5 minutos!
 cd scripts
 .\new-project.ps1 -ProjectName "MeuProjeto"
 cd MeuProjeto
+
 ### Linux/macOS
 
 cd scripts
 chmod +x new-project.sh
 ./new-project.sh MeuProjeto
 cd MeuProjeto
+
 ### Windows (CMD)
 
 ```cmd
@@ -74,6 +77,7 @@ Acesse:
 O sistema cria automaticamente um usuário administrador:
 
 ```
+
 ```bash
 Username: admin
 Password: Admin@2026!Secure
@@ -195,6 +199,7 @@ cd scripts/linux
 `src/Domain/Entities/Product.cs`:
 
 ```
+
 ```csharp
 namespace MeuProjeto.Domain.Entities;
 
@@ -209,9 +214,11 @@ public class Product : EntityBase
 `src/Data/Context/ApplicationDbContext.cs`:
 
 ```
+
 ```csharp
 public DbSet<Product> Products { get; set; }
 ```
+
 ```csharp
 ### 3. Criar migration (EF Core)
 
@@ -223,6 +230,7 @@ dotnet ef database update
 `src/Api/Controllers/ProductController.cs`:
 
 ```
+
 ```csharp
 namespace MeuProjeto.Api.Controllers;
 
@@ -370,6 +378,7 @@ Use uma ferramenta como [dotnet-serilog-viewer](https://github.com/datalust/seqc
 ### IntelliSense no VS Code
 
 Instale as extensões:
+
 - C# Dev Kit
 - .NET Extension Pack
 
@@ -392,7 +401,7 @@ O template já inclui `.vscode/launch.json` configurado. Pressione F5!
 
 ---
 
-## 🎉 Pronto!
+## 🎉 Pronto
 
 Seu projeto está configurado e rodando! Agora é só desenvolver sua aplicação.
 

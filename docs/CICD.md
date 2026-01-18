@@ -10,8 +10,8 @@ Este guia explica como configurar e usar os pipelines de CI/CD incluídos no tem
 - [GitHub Actions](#-github-actions)
 - [Azure DevOps](#-azure-devops)
 - [GitLab CI/CD](#-gitlab-cicd)
-- [Recursos Comuns](#-recursos-comuns)
-- [Personalização](#-personalização)
+- [Recursos Comuns](#recursos-comuns)
+- [Personalização](#personalizacao)
 
 ---
 
@@ -20,7 +20,7 @@ Este guia explica como configurar e usar os pipelines de CI/CD incluídos no tem
 Todos os pipelines incluem as seguintes etapas:
 
 | Etapa | Descrição | GitHub Actions | Azure DevOps | GitLab CI |
-|-------|-----------|----------------|--------------|-----------|
+| --- | --- | --- | --- | --- |
 | **Build** | Compilação do projeto | ✅ | ✅ | ✅ |
 | **Unit Tests** | Testes unitários | ✅ | ✅ | ✅ |
 | **Integration Tests** | Testes de integração | ✅ | ✅ | ✅ |
@@ -55,7 +55,7 @@ Todos os pipelines incluem as seguintes etapas:
 Configure os seguintes secrets no repositório (**Settings → Secrets and variables → Actions**):
 
 | Secret | Descrição | Obrigatório |
-|--------|-----------|-------------|
+| --- | --- | --- |
 | `DOCKER_USERNAME` | Usuário Docker Hub | ⚠️ Sim (para Docker) |
 | `DOCKER_PASSWORD` | Token Docker Hub | ⚠️ Sim (para Docker) |
 | `CODECOV_TOKEN` | Token Codecov (opcional) | ❌ Não |
@@ -69,6 +69,7 @@ Configure os seguintes secrets no repositório (**Settings → Secrets and varia
 #### 3. Executar Pipeline
 
 O pipeline é executado automaticamente em:
+
 - ✅ Push para `main` ou `develop`
 - ✅ Pull Requests para `main` ou `develop`
 - ✅ Manualmente via **Actions → CI/CD Pipeline → Run workflow**
@@ -86,6 +87,7 @@ Adicione ao seu README.md:
 
 [![CI/CD](https://github.com/seu-usuario/seu-repo/actions/workflows/ci.yml/badge.svg)](https://github.com/seu-usuario/seu-repo/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/seu-usuario/seu-repo/branch/main/graph/badge.svg)](https://codecov.io/gh/seu-usuario/seu-repo)
+
 ---
 
 ## 🔷 Azure DevOps
@@ -124,12 +126,13 @@ Adicione ao seu README.md:
 Configure as seguintes service connections (**Project Settings → Service connections**):
 
 | Connection | Tipo | Uso |
-|------------|------|-----|
+| --- | --- | --- |
 | `DockerHubConnection` | Docker Registry | Push de imagens Docker |
 | `AzureSubscription` | Azure Resource Manager | Deploy para Azure |
 | `KubernetesConnection` | Kubernetes | Deploy para K8s |
 
 **Criar Docker Hub Connection:**
+
 1. **Service connections → New service connection**
 2. Selecione **Docker Registry**
 3. **Registry type**: Docker Hub
@@ -142,7 +145,7 @@ Configure as seguintes service connections (**Project Settings → Service conne
 Configure variáveis adicionais (**Pipelines → Edit → Variables**):
 
 | Variável | Valor | Segredo |
-|----------|-------|---------|
+| --- | --- | --- |
 | `dockerImageName` | Nome da imagem | ❌ |
 | `azureSubscription` | Nome da subscription | ❌ |
 
@@ -154,6 +157,7 @@ Crie os environments para deploy manual (**Pipelines → Environments**):
 2. `production` - Ambiente de produção
 
 Configure **Approvals** em Production:
+
 - **Environments → production → ⋮ → Approvals and checks**
 - Adicione aprovadores
 
@@ -169,6 +173,7 @@ Configure **Approvals** em Production:
 Adicione ao seu README.md:
 
 [![Build Status](https://dev.azure.com/your-org/your-project/_apis/build/status/your-pipeline?branchName=main)](https://dev.azure.com/your-org/your-project/_build/latest?definitionId=1&branchName=main)
+
 ---
 
 ## 🦊 GitLab CI/CD
@@ -198,15 +203,16 @@ O GitLab CI/CD é habilitado automaticamente quando você adiciona `.gitlab-ci.y
 Configure as seguintes variáveis (**Settings → CI/CD → Variables**):
 
 | Variável | Valor | Protected | Masked |
-|----------|-------|-----------|--------|
+| --- | --- | --- | --- |
 | `CI_REGISTRY` | `registry.gitlab.com` | ❌ | ❌ |
 | `CI_REGISTRY_USER` | `$CI_REGISTRY_USER` (built-in) | ✅ | ❌ |
 | `CI_REGISTRY_PASSWORD` | `$CI_REGISTRY_PASSWORD` (built-in) | ✅ | ✅ |
 | `DOCKER_IMAGE` | `$CI_REGISTRY_IMAGE/api` | ❌ | ❌ |
 
 **Variáveis adicionais (opcional):**
+
 | Variável | Valor | Uso |
-|----------|-------|-----|
+| --- | --- | --- |
 | `KUBECONFIG` | Conteúdo do kubeconfig | Deploy Kubernetes |
 | `DEPLOY_KEY` | SSH key | Deploy em servidores |
 
@@ -240,8 +246,11 @@ Habilite o GitLab Container Registry:
 1. **Settings → General → Visibility → Container Registry**: ✅ Enabled
 
 Suas imagens ficarão em:
+
 ```bash
 registry.gitlab.com/seu-usuario/seu-projeto/projecttemplate-api
+```
+
 ### 📊 Visualização de Resultados
 
 1. **CI/CD → Pipelines**: Ver execuções
@@ -256,14 +265,17 @@ Adicione ao seu README.md:
 
 [![pipeline status](https://gitlab.com/seu-usuario/seu-projeto/badges/main/pipeline.svg)](https://gitlab.com/seu-usuario/seu-projeto/-/commits/main)
 [![coverage report](https://gitlab.com/seu-usuario/seu-projeto/badges/main/coverage.svg)](https://gitlab.com/seu-usuario/seu-projeto/-/commits/main)
+
 ---
+
+<a id="recursos-comuns"></a>
 
 ## 🔄 Recursos Comuns
 
 ### 1. Triggers (Quando o Pipeline Executa)
 
 | Evento | GitHub Actions | Azure DevOps | GitLab CI |
-|--------|----------------|--------------|-----------|
+| --- | --- | --- | --- |
 | Push para main | ✅ | ✅ | ✅ |
 | Push para develop | ✅ | ✅ | ✅ |
 | Pull/Merge Request | ✅ | ✅ | ✅ |
@@ -274,7 +286,7 @@ Adicione ao seu README.md:
 Todos os pipelines geram os seguintes artifacts:
 
 | Artifact | Descrição | Retenção |
-|----------|-----------|----------|
+| --- | --- | --- |
 | **API Build** | DLLs compiladas | 7-30 dias |
 | **Test Results** | Relatórios de testes (TRX/JUnit) | 30 dias |
 | **Coverage** | Relatórios de cobertura | 30 dias |
@@ -293,32 +305,50 @@ Para acelerar builds, todos os pipelines fazem cache de:
 Configure notificações de falhas:
 
 **GitHub Actions:**
+
 - **Settings → Notifications**: Configure para receber emails
 
 **Azure DevOps:**
+
 - **Project Settings → Notifications**: Configure regras personalizadas
 
 **GitLab CI:**
+
 - **Settings → Integrations → Pipeline emails**: Adicione emails
 
 ---
+
+<a id="personalizacao"></a>
 
 ## 🎨 Personalização
 
 ### Alterar Versão do .NET
 
 **GitHub Actions** (`.github/workflows/ci.yml`):
+
+```yaml
 env:
   DOTNET_VERSION: '10.0.x'  # Altere aqui
+```
+
 **Azure DevOps** (`azure-pipelines.yml`):
+
+```yaml
 variables:
   dotnetVersion: '10.0.x'  # Altere aqui
+```
+
 **GitLab CI** (`.gitlab-ci.yml`):
+
+```yaml
 image: mcr.microsoft.com/dotnet/sdk:10.0  # Altere aqui
+```
+
 ### Adicionar Stages Personalizadas
 
 #### GitHub Actions
 
+```yaml
   deploy-aws:
     name: Deploy to AWS
     runs-on: ubuntu-latest
@@ -327,58 +357,88 @@ image: mcr.microsoft.com/dotnet/sdk:10.0  # Altere aqui
       - name: Deploy to ECS
         run: |
           # Comandos de deploy AWS
+```
+
 #### Azure DevOps
 
+```yaml
 - stage: DeployAWS
   displayName: 'Deploy to AWS'
   dependsOn: Docker
   jobs:
-  - job: Deploy
-    steps:
-    - script: |
-        # Comandos de deploy AWS
+    - job: Deploy
+      steps:
+        - script: |
+            # Comandos de deploy AWS
+```
+
 #### GitLab CI
 
+```yaml
 deploy:aws:
   stage: deploy
   script:
     - echo "Deploying to AWS..."
     # Comandos de deploy AWS
+```
+
 ### Alterar Docker Registry
 
 **GitHub Actions:**
+
+```yaml
 - name: Login to Docker Hub
   uses: docker/login-action@v3
   with:
     registry: ghcr.io  # GitHub Container Registry
     username: ${{ github.actor }}
     password: ${{ secrets.GITHUB_TOKEN }}
+```
+
 **Azure DevOps:**
+
+```yaml
 - task: Docker@2
   displayName: 'Login to ACR'
   inputs:
     command: login
     containerRegistry: 'AzureContainerRegistry'  # ACR connection
+```
+
 **GitLab CI:**
+
+```bash
 # GitLab Registry é usado por padrão
 # Para Docker Hub, altere:
 before_script:
-  - echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USER --password-stdin
+  - echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USER" --password-stdin
+```
+
 ### Configurar Deploy Automático
 
-Por padrão, todos os deploys são **manuais** (`when: manual`).
-
-Para deploy automático:
+Por padrão, todos os deploys são **manuais** (`when: manual`). Para deploy automático:
 
 **GitHub Actions:**
+
+```yaml
   deploy:
     if: github.ref == 'refs/heads/main'  # Remove when: manual
+```
+
 **Azure DevOps:**
+
+```yaml
 - deployment: DeployToProduction
   # Remove: condition: manual
+```
+
 **GitLab CI:**
+
+```yaml
 deploy:production:
   # Remove: when: manual
+```
+
 ---
 
 ## 🧪 Testando Localmente
@@ -387,24 +447,30 @@ deploy:production:
 
 Use [act](https://github.com/nektos/act):
 
+```bash
 # Instalar act
 choco install act  # Windows
 brew install act   # macOS
 
 # Executar workflow
 act -j build-and-test
+```
+
 ### Azure DevOps
 
 Não há ferramenta oficial, mas você pode:
 
-# Executar comandos individuais
+```bash
 dotnet restore
 dotnet build
 dotnet test
+```
+
 ### GitLab CI
 
 Use [gitlab-runner](https://docs.gitlab.com/runner/):
 
+```bash
 # Instalar gitlab-runner
 curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | sudo bash
 sudo apt-get install gitlab-runner
@@ -423,6 +489,7 @@ gitlab-runner exec docker test:unit
 **Erro:** `Error: Process completed with exit code 1.`
 
 **Solução:**
+
 1. Verifique logs detalhados no pipeline
 2. Execute localmente: `dotnet build --configuration Release`
 3. Verifique se todas as dependências estão no `.csproj`
@@ -432,6 +499,7 @@ gitlab-runner exec docker test:unit
 **Erro:** `Failed!  - Failed: X, Passed: Y`
 
 **Solução:**
+
 1. Execute localmente: `dotnet test --logger "console;verbosity=detailed"`
 2. Verifique configurações de ambiente (connection strings, etc.)
 3. Verifique se testes de integração precisam de serviços (DB, Redis)
@@ -441,6 +509,7 @@ gitlab-runner exec docker test:unit
 **Erro:** `Error: Cannot connect to the Docker daemon`
 
 **Solução:**
+
 1. **GitHub Actions**: Use `docker/setup-buildx-action`
 2. **Azure DevOps**: Verifique se agent tem Docker instalado
 3. **GitLab CI**: Use `docker:dind` service
@@ -448,6 +517,7 @@ gitlab-runner exec docker test:unit
 ### Secrets/Variables não Funcionam
 
 **Solução:**
+
 1. Verifique se secrets estão configurados corretamente
 2. Verifique se nome está correto (case-sensitive)
 3. **GitLab**: Marque como **Protected** para branches protegidas
@@ -457,16 +527,19 @@ gitlab-runner exec docker test:unit
 ## 📚 Referências
 
 ### GitHub Actions
+
 - [Documentação Oficial](https://docs.github.com/actions)
 - [Marketplace](https://github.com/marketplace?type=actions)
 - [Workflow Syntax](https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions)
 
 ### Azure DevOps
+
 - [Documentação Oficial](https://learn.microsoft.com/azure/devops/pipelines)
 - [YAML Schema](https://learn.microsoft.com/azure/devops/pipelines/yaml-schema)
 - [Tasks Reference](https://learn.microsoft.com/azure/devops/pipelines/tasks)
 
 ### GitLab CI/CD
+
 - [Documentação Oficial](https://docs.gitlab.com/ee/ci/)
 - [CI/CD YAML Reference](https://docs.gitlab.com/ee/ci/yaml/)
 - [Examples](https://docs.gitlab.com/ee/ci/examples/)

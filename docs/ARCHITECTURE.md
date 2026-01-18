@@ -6,70 +6,52 @@ Visão geral da arquitetura Clean Architecture implementada neste template.
 
 ## 📐 Diagrama de Camadas
 
-┌─────────────────────────────────────────────────────────────────┐
-│                         API LAYER                                │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │ Controllers, Program.cs, Middleware, Swagger             │  │
-│  │ Endpoints: GET, POST, PUT, DELETE                        │  │
-│  │ Authentication, Authorization (Future)                   │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└────────────────────────┬────────────────────────────────────────┘
-                         │ HTTP Requests
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   INFRASTRUCTURE LAYER                           │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │ Extensions, Middleware, Filters, Notifications           │  │
-│  │ Cache (Memory/Redis/SQL), Health Checks, CORS            │  │
-│  │ Compression, Rate Limiting, OpenTelemetry                │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└────────────────────────┬────────────────────────────────────────┘
-                         │ Cross-Cutting Concerns
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   APPLICATION LAYER                              │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │ Services (Business Logic)                                │  │
-│  │ DTOs, Mappings (AutoMapper)                             │  │
-│  │ Validators (FluentValidation)                           │  │
-│  │ Orchestration, Workflows                                 │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└────────────────────────┬────────────────────────────────────────┘
-                         │ Business Operations
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      DATA LAYER                                  │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │ Repositories (IRepository<T> implementation)             │  │
-│  │ DbContext (Entity Framework Core)                        │  │
-│  │ ADO (Dapper, raw SQL)                                    │  │
-│  │ Mappings (EF Core configurations)                        │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└────────────────────────┬────────────────────────────────────────┘
-                         │ Data Access
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     DOMAIN LAYER                                 │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │ Entities (Business Objects)                              │  │
-│  │ Interfaces (Contracts: IRepository, IService)            │  │
-│  │ Enums, Value Objects                                     │  │
-│  │ Domain Exceptions, Validators                            │  │
-│  │ AppSettings (Configuration Model)                        │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-                         │ Core Business Logic
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      DATABASE                                    │
-│  SQL Server | PostgreSQL | MySQL | Oracle                       │
-└─────────────────────────────────────────────────────────────────┘
-```xml
+```text
+┌─────────────────────────────── API LAYER ───────────────────────────────┐
+│ • Controllers, Program.cs, Middleware, Swagger                         │
+│ • Endpoints: GET / POST / PUT / DELETE                                 │
+│ • Authentication & Authorization (Atual/Futuro)                        │
+└────────────────────────────────────────────────────────────────────────┘
+                          │ HTTP Requests │
+                          ▼
+┌──────────────────────── INFRASTRUCTURE LAYER ───────────────────────────┐
+│ • Extensions, Middleware, Filters, Notifications                        │
+│ • Cache (Memory/Redis/SQL), Health Checks, CORS                         │
+│ • Compression, Rate Limiting, OpenTelemetry                             │
+└────────────────────────────────────────────────────────────────────────┘
+                          │ Cross-cutting │
+                          ▼
+┌────────────────────────── APPLICATION LAYER ────────────────────────────┐
+│ • Services (Business Logic), Orchestration, Workflows                   │
+│ • DTOs & AutoMapper Profiles                                            │
+│ • Validators (FluentValidation)                                         │
+└────────────────────────────────────────────────────────────────────────┘
+                          │ Business Ops │
+                          ▼
+┌────────────────────────────── DATA LAYER ───────────────────────────────┐
+│ • Repositories (IRepository<T>)                                         │
+│ • DbContext (EF Core) / ADO (Dapper / SQL)                              │
+│ • EF Core Configurations (Mappings)                                     │
+└────────────────────────────────────────────────────────────────────────┘
+                          │ Data Access │
+                          ▼
+┌────────────────────────────── DOMAIN LAYER ─────────────────────────────┐
+│ • Entities, Enums, Value Objects                                        │
+│ • Interfaces (IRepository, IService)                                    │
+│ • Domain Exceptions, Validators, AppSettings                            │
+└────────────────────────────────────────────────────────────────────────┘
+                          │ Core Business │
+                          ▼
+┌────────────────────────────── DATABASE ─────────────────────────────────┐
+│ SQL Server │ PostgreSQL │ MySQL │ Oracle                                │
+└────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## 🔄 Fluxo de Requisição
 
+```text
 ┌────────────┐
 │   Client   │
 └─────┬──────┘
@@ -108,32 +90,37 @@ Visão geral da arquitetura Clean Architecture implementada neste template.
 │  SQL Server / Others  │
 └───────────────────────┘
 ```
-```csharp
 
 ---
 
 ## 🎯 Princípios de Arquitetura
 
 ### 1. Separation of Concerns (SoC)
+
 Cada camada tem uma responsabilidade específica e bem definida.
 
 ### 2. Dependency Inversion (DIP)
+
 Camadas superiores não dependem diretamente de camadas inferiores.
 Todas dependem de abstrações (interfaces).
 
 ### 3. Single Responsibility (SRP)
+
 Cada classe/módulo tem uma única razão para mudar.
 
 ### 4. Open/Closed (OCP)
+
 Aberto para extensão, fechado para modificação.
 
 ### 5. Interface Segregation (ISP)
+
 Interfaces específicas em vez de uma interface geral.
 
 ---
 
 ## 📦 Dependências Entre Camadas
 
+```text
 Api
  ├── → Infrastructure (DI, Extensions)
  ├── → Application (Services)
@@ -155,7 +142,6 @@ Data
 Domain
  └── (No dependencies - Pure business logic)
 ```
-```csharp
 
 ---
 
@@ -166,6 +152,7 @@ Domain
 **Responsabilidade:** Regras de negócio e entidades core
 
 **Contém:**
+
 - `Entities/` - Objetos de negócio (Product, Order, etc.)
 - `Interfaces/` - Contratos (IRepository, IService)
 - `Enums/` - Enumerações de domínio
@@ -176,6 +163,8 @@ Domain
 **Dependências:** Nenhuma ❌
 
 **Exemplo:**
+
+```csharp
 // Domain/Entities/Product.cs
 public class Product : EntityBase
 {
@@ -189,6 +178,8 @@ public interface IRepository<T> where T : EntityBase
     Task<T?> GetByIdAsync(long id, CancellationToken ct);
     Task<IEnumerable<T>> GetAllAsync(CancellationToken ct);
 }
+```
+
 ---
 
 ### 2️⃣ Data Layer (Camada de Dados)
@@ -196,6 +187,7 @@ public interface IRepository<T> where T : EntityBase
 **Responsabilidade:** Acesso a dados e persistência
 
 **Contém:**
+
 - `Context/` - DbContext do EF Core
 - `Repository/` - Implementação de repositórios
 - `Mappings/` - Configurações de EF Core
@@ -204,6 +196,8 @@ public interface IRepository<T> where T : EntityBase
 **Dependências:** Domain ✅
 
 **Exemplo:**
+
+```csharp
 // Data/Repository/Repository.cs
 public class Repository<T> : IRepository<T> where T : EntityBase
 {
@@ -214,6 +208,8 @@ public class Repository<T> : IRepository<T> where T : EntityBase
         return await _context.Set<T>().FindAsync(new object[] { id }, ct);
     }
 }
+```
+
 ---
 
 ### 3️⃣ Application Layer (Camada de Aplicação)
@@ -221,6 +217,7 @@ public class Repository<T> : IRepository<T> where T : EntityBase
 **Responsabilidade:** Lógica de negócio e orquestração
 
 **Contém:**
+
 - `Services/` - Services de aplicação
 - `Mappings/` - AutoMapper profiles
 - `Builders/` - Object builders
@@ -229,6 +226,8 @@ public class Repository<T> : IRepository<T> where T : EntityBase
 **Dependências:** Domain, Data ✅
 
 **Exemplo:**
+
+```csharp
 // Application/Services/ProductService.cs
 public class ProductService : Service<Product>
 {
@@ -239,6 +238,8 @@ public class ProductService : Service<Product>
 
     // Custom business logic here
 }
+```
+
 ---
 
 ### 4️⃣ Infrastructure Layer (Camada de Infraestrutura)
@@ -246,6 +247,7 @@ public class ProductService : Service<Product>
 **Responsabilidade:** Cross-cutting concerns e integrações
 
 **Contém:**
+
 - `Extensions/` - Extension methods (DI, Cache, DB)
 - `Middleware/` - Middlewares customizados
 - `Filters/` - Action filters
@@ -255,6 +257,8 @@ public class ProductService : Service<Product>
 **Dependências:** Todas as camadas ✅
 
 **Exemplo:**
+
+```csharp
 // Infrastructure/Extensions/DatabaseExtension.cs
 public static IServiceCollection AddDatabase(this IServiceCollection services)
 {
@@ -269,6 +273,8 @@ public static IServiceCollection AddDatabase(this IServiceCollection services)
             break;
     }
 }
+```
+
 ---
 
 ### 5️⃣ API Layer (Camada de Apresentação)
@@ -276,6 +282,7 @@ public static IServiceCollection AddDatabase(this IServiceCollection services)
 **Responsabilidade:** Endpoints HTTP e configuração da API
 
 **Contém:**
+
 - `Controllers/` - API controllers
 - `Program.cs` - Configuração da aplicação
 - `appsettings.json` - Configurações por ambiente
@@ -283,6 +290,8 @@ public static IServiceCollection AddDatabase(this IServiceCollection services)
 **Dependências:** Todas as camadas ✅
 
 **Exemplo:**
+
+```csharp
 // Api/Controllers/ProductController.cs
 [Route("api/[controller]")]
 public class ProductController : ApiControllerBase
@@ -296,21 +305,26 @@ public class ProductController : ApiControllerBase
         return HandleResult(product);
     }
 }
+```
+
 ---
 
 ## 🔌 Padrões Implementados
 
 ### 1. Repository Pattern
+
 - Interface genérica `IRepository<T>`
 - Implementação genérica `Repository<T>`
 - Abstração do acesso a dados
 
 ### 2. Service Pattern
+
 - Classe base `Service<T>`
 - Lógica de negócio centralizada
 - Logging e error handling
 
 ### 3. Dependency Injection
+
 - Constructor injection
 - **Scrutor para registro automático inteligente**
   - `.AsMatchingInterface()` - Registra apenas interface correspondente ao nome
@@ -318,8 +332,9 @@ public class ProductController : ApiControllerBase
   - **Zero configuração manual** para novos repositórios/serviços
 - Lifetime management (Scoped, Singleton, Transient)
 
-#### Como funciona o registro automático:
+#### Como funciona o registro automático
 
+```csharp
 // Registra TODOS os repositórios automaticamente
 services.Scan(scan => scan
     .FromAssembliesOf(typeof(Repository<>))
@@ -327,26 +342,32 @@ services.Scan(scan => scan
     .AsMatchingInterface()  // ← Evita conflitos de DI!
     .WithScopedLifetime()
 );
+```
+
 **Exemplo de mapeamento automático:**
+
 | Classe | Interface Registrada |
-|--------|---------------------|
+| -------- | --------------------- |
 | `Repository<Product>` | `IRepository<Product>` |
 | `ProductDapperRepository` | `IProductDapperRepository` |
 | `ProductAdoRepository` | `IProductAdoRepository` |
 | `OrderService` | `IOrderService` |
 
 **Benefícios:**
+
 - ✅ Adicione um novo repositório → Registrado automaticamente
 - ✅ Múltiplos ORMs sem conflito
 - ✅ Testes isolados (usam `IRepository<T>` com InMemory)
 - ✅ Produção escolhe o ORM específico via injeção
 
 ### 4. Options Pattern
+
 - `AppSettings.cs` fortemente tipado
 - `IOptions<T>` injection
 - Validação em startup
 
 ### 5. Factory Pattern
+
 - Database provider factory
 - Cache provider factory
 - Extensible para novos providers
@@ -355,7 +376,6 @@ services.Scan(scan => scan
 
 ## 🎛️ Configuração Modular
 
-```
 ```text
 Program.cs
     │
@@ -385,11 +405,12 @@ Program.cs
         ├── Rate Limiting
         ├── OpenTelemetry
         └── Swagger
+```
+
 ---
 
 ## 🚀 Deploy Architecture
 
-```
 ```text
 ┌─────────────────────────────────────────────────────┐
 │                  Kubernetes Cluster                  │
@@ -427,11 +448,12 @@ Program.cs
 │  │  SQL Server  │  │    Cache     │  │   APIs   │ │
 │  └──────────────┘  └──────────────┘  └──────────┘ │
 └─────────────────────────────────────────────────────┘
+```
+
 ---
 
 ## 📊 Fluxo de Dados
 
-```
 ```text
 User Request
      ↓
@@ -454,11 +476,12 @@ User Request
 [Controller] ← Format response
      ↓
 User Response (JSON)
+```
+
 ---
 
 ## 🔐 Security Layers
 
-```
 ```text
 ┌─────────────────────────────────────────────┐
 │  1. Network Security                        │
@@ -491,13 +514,14 @@ User Response (JSON)
 │     - Security context                     │
 │     - Resource limits                      │
 └─────────────────────────────────────────────┘
+```
+
 ---
 
 ## 📈 Escalabilidade
 
 ### Horizontal Scaling
 
-```
 ```text
 Load Balancer
       │
@@ -512,7 +536,6 @@ Load Balancer
 
 ### Vertical Scaling
 
-```
 ```text
 Initial: 256Mi memory, 100m CPU
     ↓
@@ -522,6 +545,7 @@ Max:    1Gi memory, 2000m CPU
 ```
 
 **Features:**
+
 - Resource requests and limits
 - Vertical Pod Autoscaler (VPA) - Future
 
@@ -557,10 +581,11 @@ Para entender melhor a arquitetura:
 ---
 
 **Navegação:**
+
 - [⬆️ Voltar ao README](../README.md)
 - [📖 Ver Índice](../INDEX.md)
 - [🚀 Quick Start](../QUICK-START.md)
 
 ---
 
-*Última atualização: Janeiro 2025 | Versão: 1.0.0*
+_Última atualização: Janeiro 2025 | Versão: 1.0.0_

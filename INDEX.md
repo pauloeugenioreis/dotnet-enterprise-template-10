@@ -9,31 +9,31 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 ### Para Iniciantes
 
 1. **[QUICK-START.md](QUICK-START.md)** ⚡
-   - Comece aqui! Guia rápido para rodar o projeto em 5 minutos
-   - Setup inicial, primeiro projeto, primeira entidade
-   - Problemas comuns e soluções
+    - Comece aqui! Guia rápido para rodar o projeto em 5 minutos
+    - Setup inicial, primeiro projeto, primeira entidade
+    - Problemas comuns e soluções
 
 2. **[README.md](README.md)** 📖
-   - Visão geral completa do template
-   - Características, estrutura, configurações
-   - Exemplos de uso detalhados
+    - Visão geral completa do template
+    - Características, estrutura, configurações
+    - Exemplos de uso detalhados
 
 ### Para Desenvolvedores Experientes
 
-3. **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** 🏗️
-   - Visão detalhada da arquitetura Clean Architecture
-   - Diagramas de camadas e fluxos
-   - Padrões implementados e princípios SOLID
+1. **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** 🏗️
+    - Visão detalhada da arquitetura Clean Architecture
+    - Diagramas de camadas e fluxos
+    - Padrões implementados e princípios SOLID
 
-4. **[docs/ORM-GUIDE.md](docs/ORM-GUIDE.md)** 🔄
-   - Guia completo de ORMs suportados
-   - Como alternar entre EF Core, Dapper, NHibernate, Linq2Db
-   - Comparações e casos de uso
+2. **[docs/ORM-GUIDE.md](docs/ORM-GUIDE.md)** 🔄
+    - Guia completo de ORMs suportados
+    - Como alternar entre EF Core, Dapper, NHibernate, Linq2Db
+    - Comparações e casos de uso
 
-5. **[docs/KUBERNETES.md](docs/KUBERNETES.md)** ☸️
-   - Deploy completo no Kubernetes
-   - Minikube (local) e clusters de produção
-   - Troubleshooting, monitoramento, segurança
+3. **[docs/KUBERNETES.md](docs/KUBERNETES.md)** ☸️
+    - Deploy completo no Kubernetes
+    - Minikube (local) e clusters de produção
+    - Troubleshooting, monitoramento, segurança
 
 ---
 
@@ -41,29 +41,29 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 
 ### Documentação Principal
 
-| Documento | Descrição | Quando Usar |
-|-----------|-----------|-------------|
-| **[README.md](README.md)** | Documentação principal e overview completo | Entender o projeto como um todo |
-| **[QUICK-START.md](QUICK-START.md)** | Início rápido em 5 minutos | Primeira vez usando o template |
-| **[LICENSE](LICENSE)** | Licença do projeto (MIT) | Entender termos de uso |
+| Documento                            | Descrição                                  | Quando Usar                     |
+| ------------------------------------ | ------------------------------------------ | ------------------------------- |
+| **[README.md](README.md)**           | Documentação principal e overview completo | Entender o projeto como um todo |
+| **[QUICK-START.md](QUICK-START.md)** | Início rápido em 5 minutos                 | Primeira vez usando o template  |
+| **[LICENSE](LICENSE)**               | Licença do projeto (MIT)                   | Entender termos de uso          |
 
 ### Guias Técnicos
 
-| Documento | Descrição | Quando Usar |
-|-----------|-----------|-------------|
-| **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** | Visão detalhada da arquitetura | Entender Clean Architecture e padrões |
-| **[docs/FEATURES.md](docs/FEATURES.md)** | Recursos avançados (MongoDB, Queue, Jobs, etc.) | Usar MongoDB, RabbitMQ, Quartz, Storage |
-| **[docs/ORM-GUIDE.md](docs/ORM-GUIDE.md)** | Guia de ORMs (EF Core, Dapper, etc.) | Escolher ou alternar ORM |
-| **[docs/KUBERNETES.md](docs/KUBERNETES.md)** | Deploy no Kubernetes | Deploy em produção ou local |
+| Documento                                        | Descrição                                       | Quando Usar                             |
+| ------------------------------------------------ | ----------------------------------------------- | --------------------------------------- |
+| **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** | Visão detalhada da arquitetura                  | Entender Clean Architecture e padrões   |
+| **[docs/FEATURES.md](docs/FEATURES.md)**         | Recursos avançados (MongoDB, Queue, Jobs, etc.) | Usar MongoDB, RabbitMQ, Quartz, Storage |
+| **[docs/ORM-GUIDE.md](docs/ORM-GUIDE.md)**       | Guia de ORMs (EF Core, Dapper, etc.)            | Escolher ou alternar ORM                |
+| **[docs/KUBERNETES.md](docs/KUBERNETES.md)**     | Deploy no Kubernetes                            | Deploy em produção ou local             |
 
 ### Arquivos de Configuração
 
-| Arquivo | Descrição | Quando Usar |
-|---------|-----------|-------------|
-| **[.env.example](.env.example)** | Exemplo de variáveis de ambiente | Configurar ambiente local |
-| **[global.json](global.json)** | Versão do .NET SDK | Garantir SDK correto |
-| **[docker-compose.yml](docker-compose.yml)** | Configuração Docker Compose | Rodar com Docker localmente |
-| **[Dockerfile](Dockerfile)** | Build da imagem Docker | Criar imagem Docker |
+| Arquivo                                      | Descrição                        | Quando Usar                 |
+| -------------------------------------------- | -------------------------------- | --------------------------- |
+| **[.env.example](.env.example)**             | Exemplo de variáveis de ambiente | Configurar ambiente local   |
+| **[global.json](global.json)**               | Versão do .NET SDK               | Garantir SDK correto        |
+| **[docker-compose.yml](docker-compose.yml)** | Configuração Docker Compose      | Rodar com Docker localmente |
+| **[Dockerfile](Dockerfile)**                 | Build da imagem Docker           | Criar imagem Docker         |
 
 ---
 
@@ -315,4 +315,4 @@ Este índice deve ajudá-lo a navegar pela documentação do template. Comece pe
 
 ---
 
-*Última atualização: Janeiro 2025 | Versão: 1.0.0*
+_Última atualização: Janeiro 2025 | Versão: 1.0.0_

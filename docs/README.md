@@ -7,6 +7,7 @@ Esta pasta contém documentação técnica adicional e guias especializados para
 ## 📄 Documentos Disponíveis
 
 ### [ORM-GUIDE.md](ORM-GUIDE.md)
+
 **Guia Completo de ORMs**
 
 Documentação detalhada sobre os ORMs suportados pelo template:
@@ -17,6 +18,7 @@ Documentação detalhada sobre os ORMs suportados pelo template:
 - **Linq2Db** - ORM focado em performance
 
 Inclui:
+
 - Como alternar entre ORMs
 - Comparação de features
 - Casos de uso recomendados
@@ -29,6 +31,7 @@ Inclui:
 ---
 
 ### [KUBERNETES.md](KUBERNETES.md)
+
 **Guia de Deploy no Kubernetes**
 
 Documentação completa sobre deploy da aplicação no Kubernetes:
@@ -40,6 +43,7 @@ Documentação completa sobre deploy da aplicação no Kubernetes:
 - **Scripts de Automação**
 
 Inclui:
+
 - Pré-requisitos e instalação
 - Passo a passo de deploy
 - Configuração de manifests
@@ -55,6 +59,7 @@ Inclui:
 ---
 
 ### [CONFIGURATION-GUIDE.md](CONFIGURATION-GUIDE.md)
+
 **Guia de Configuração com IOptions<T>**
 
 Documentação essencial sobre como trabalhar com configurações no projeto:
@@ -65,6 +70,7 @@ Documentação essencial sobre como trabalhar com configurações no projeto:
 - **Exemplos Práticos** - Controllers, Services, Repositories
 
 Inclui:
+
 - Como injetar IOptions<AppSettings> corretamente
 - 5 exemplos práticos completos
 - Padrões de validação com IValidateOptions<T>
@@ -88,10 +94,11 @@ Se você está começando, **não comece por aqui!** Primeiro:
 ## 📂 Organização
 
 docs/
-├── README.md                # Este arquivo
-├── CONFIGURATION-GUIDE.md   # Guia de Configuração (IOptions<T>)
-├── ORM-GUIDE.md             # Guia de ORMs
-└── KUBERNETES.md            # Guia de Kubernetes
+├── README.md # Este arquivo
+├── CONFIGURATION-GUIDE.md # Guia de Configuração (IOptions<T>)
+├── ORM-GUIDE.md # Guia de ORMs
+└── KUBERNETES.md # Guia de Kubernetes
+
 ```xml
 
 ### Documentos Futuros
@@ -227,15 +234,18 @@ Se algo não está claro ou faltando:
 
 ## 📚 Recursos Externos
 
-### .NET e C#
+### .NET e C
+
 - [Microsoft Learn - .NET](https://learn.microsoft.com/dotnet/)
 - [C# Documentation](https://learn.microsoft.com/dotnet/csharp/)
 
 ### Kubernetes
+
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
 - [Kubernetes Best Practices](https://kubernetes.io/docs/concepts/configuration/overview/)
 
 ### Clean Architecture
+
 - [Clean Architecture Blog](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [Clean Architecture Book](https://www.amazon.com/Clean-Architecture-Craftsmans-Software-Structure/dp/0134494164)
 
@@ -266,10 +276,11 @@ Ao criar nova documentação:
 ---
 
 **Navegação:**
+
 - [⬆️ Voltar ao README Principal](../README.md)
 - [📖 Ver Índice Completo](../INDEX.md)
 - [🚀 Quick Start](../QUICK-START.md)
 
 ---
 
-*Última atualização: Janeiro 2025 | Versão: 1.0.0*
+_Última atualização: Janeiro 2025 | Versão: 1.0.0_

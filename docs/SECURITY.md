@@ -8,7 +8,8 @@ The system creates a default admin user on first run with these credentials:
 
 Username: admin
 Password: Admin@2026!Secure
-Email:    admin@projecttemplate.com
+Email: admin@projecttemplate.com
+
 ```json
 
 **⚠️ CRITICAL: Change this password immediately in production!**
@@ -143,6 +144,7 @@ Never commit real database credentials to version control.
   }
 }
 ```
+
 ```text
 
 export DB_CONNECTION_STRING="Server=prod-server;Database=MyDb;User Id=sa;Password=RealPassword123!;"

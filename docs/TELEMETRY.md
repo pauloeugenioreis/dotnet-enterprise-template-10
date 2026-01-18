@@ -10,18 +10,20 @@ Este guia explica como configurar e usar telemetria (tracing, metrics, logs) no 
 
 ## 📋 Índice
 
-- [Visão Geral](#-visão-geral)
-- [Quick Start](#-quick-start)
-- [Configuração por Provedor](#-configuração-por-provedor)
-- [Configurações Avançadas](#-configurações-avançadas)
-- [Métricas Customizadas](#-métricas-customizadas)
-- [O que é Rastreado Automaticamente](#-o-que-é-rastreado-automaticamente)
-- [Troubleshooting](#-troubleshooting)
-- [Recursos Adicionais](#-recursos-adicionais)
-- [Melhores Práticas](#-melhores-práticas)
-- [Próximos Passos](#-próximos-passos)
+- [Visão Geral](#visao-geral)
+- [Quick Start](#quick-start)
+- [Configuração por Provedor](#configuracao-por-provedor)
+- [Configurações Avançadas](#configuracoes-avancadas)
+- [Métricas Customizadas](#metricas-customizadas)
+- [O que é Rastreado Automaticamente](#o-que-e-rastreado-automaticamente)
+- [Troubleshooting](#troubleshooting)
+- [Recursos Adicionais](#recursos-adicionais)
+- [Melhores Práticas](#melhores-praticas)
+- [Próximos Passos](#proximos-passos)
 
 ---
+
+<a id="visao-geral"></a>
 
 ## 🎯 Visão Geral
 
@@ -29,36 +31,48 @@ O template suporta **múltiplos backends de telemetria** através do **OpenTelem
 
 ### ✅ Provedores Suportados
 
-| Provedor | Tipo | Uso | Custo |
-|----------|------|-----|-------|
-| **Jaeger (via OTLP)** | Traces | Local/Self-hosted | 🆓 Gratuito |
-| **Grafana Cloud** | Traces + Metrics | Cloud/Self-hosted | 💰 Freemium |
-| **Prometheus** | Metrics | Local/Self-hosted | 🆓 Gratuito |
-| **Application Insights** | APM Completo | Azure Cloud | 💰💰 Pago |
-| **Datadog** | APM Completo | Cloud | 💰💰💰 Pago |
-| **Dynatrace** | APM Completo | Cloud/On-premise | 💰💰💰 Pago |
-| **Console** | Debug | Development | 🆓 Gratuito |
+| Provedor                 | Tipo             | Uso               | Custo       |
+| ------------------------ | ---------------- | ----------------- | ----------- |
+| **Jaeger (via OTLP)**    | Traces           | Local/Self-hosted | 🆓 Gratuito |
+| **Grafana Cloud**        | Traces + Metrics | Cloud/Self-hosted | 💰 Freemium |
+| **Prometheus**           | Metrics          | Local/Self-hosted | 🆓 Gratuito |
+| **Application Insights** | APM Completo     | Azure Cloud       | 💰💰 Pago   |
+| **Datadog**              | APM Completo     | Cloud             | 💰💰💰 Pago |
+| **Dynatrace**            | APM Completo     | Cloud/On-premise  | 💰💰💰 Pago |
+| **Console**              | Debug            | Development       | 🆓 Gratuito |
 
 ---
+
+<a id="quick-start"></a>
 
 ## 🚀 Quick Start
 
 ### 1️⃣ Habilitar Telemetria (appsettings.json)
 
+```jsonc
 {
-  "AppSettings": {
-    "Infrastructure": {
-      "Telemetry": {
-        "Enabled": true,
-        "Providers": ["jaeger", "prometheus", "console"],
-        "SamplingRatio": 1.0
-      }
+    "AppSettings": {
+        "Infrastructure": {
+            "Telemetry": {
+                "Enabled": true,
+                "Providers": [
+                    "jaeger",
+                    "prometheus",
+                    "console"
+                ],
+                "SamplingRatio": 1.0
+            }
+        }
     }
-  }
 }
+```
+
 ### 2️⃣ Iniciar Stack Completa com Docker
 
+```bash
 docker-compose up -d
+```
+
 ### 3️⃣ Acessar as UIs
 
 - **Jaeger UI**: http://localhost:16686 (Distributed Tracing)
@@ -69,6 +83,8 @@ docker-compose up -d
 
 ---
 
+<a id="configuracao-por-provedor"></a>
+
 ## 📋 Configuração por Provedor
 
 ### 🔵 Jaeger (Local - Desenvolvimento)
@@ -76,31 +92,42 @@ docker-compose up -d
 **Melhor para:** Desenvolvimento local, aprendizado, POCs
 
 **Configuração Atualizada (OTLP Protocol):**
+
+```jsonc
 {
-  "Telemetry": {
-    "Enabled": true,
-    "Providers": ["jaeger"],
-    "Jaeger": {
-      "Host": "localhost",
-      "Port": 4317,
-      "UseGrpc": true
+    "Telemetry": {
+        "Enabled": true,
+        "Providers": [
+            "jaeger"
+        ],
+        "Jaeger": {
+            "Endpoint": "http://localhost:4317",
+            "UseGrpc": true
+        }
     }
-  }
 }
+```
+
 **⚠️ Mudança Importante:**
+
 - **Antes (Deprecated):** Porta 6831 (protocolo nativo Jaeger)
 - **Agora (Recomendado):** Porta 4317 (OTLP gRPC) ou 4318 (OTLP HTTP)
 - O exporter nativo `OpenTelemetry.Exporter.Jaeger` foi removido
 - Agora usamos `OpenTelemetry.Exporter.OpenTelemetryProtocol` (OTLP)
 
 **Docker (com OTLP habilitado):**
+
+```bash
 docker run -d --name jaeger \
-  -e COLLECTOR_OTLP_ENABLED=true \
-  -p 16686:16686 \
-  -p 4317:4317 \
-  -p 4318:4318 \
-  jaegertracing/all-in-one:latest
+    -e COLLECTOR_OTLP_ENABLED=true \
+    -p 16686:16686 \
+    -p 4317:4317 \
+    -p 4318:4318 \
+    jaegertracing/all-in-one:latest
+```
+
 **Portas do Jaeger:**
+
 - `16686` - Jaeger UI (Web interface)
 - `4317` - OTLP gRPC receiver ✅ **RECOMENDADO**
 - `4318` - OTLP HTTP receiver ✅ **RECOMENDADO**
@@ -111,6 +138,7 @@ docker run -d --name jaeger \
 **Acessar UI:** http://localhost:16686
 
 **Documentação:**
+
 - [Jaeger OTLP Support](https://www.jaegertracing.io/docs/1.46/apis/#opentelemetry-protocol-otlp)
 - [OpenTelemetry Migration Guide](https://opentelemetry.io/docs/instrumentation/net/exporters/)
 
@@ -121,12 +149,13 @@ docker run -d --name jaeger \
 **Melhor para:** Monitoramento de métricas, alertas
 
 {
-  "Telemetry": {
-    "Enabled": true,
-    "Providers": ["prometheus"]
-  }
+"Telemetry": {
+"Enabled": true,
+"Providers": ["prometheus"]
+}
 }
 **Métricas disponíveis:**
+
 - `http_server_request_duration_seconds` - Latência HTTP
 - `http_server_active_requests` - Requests ativas
 - `process_runtime_dotnet_gc_collections_count` - GC collections
@@ -136,6 +165,7 @@ docker run -d --name jaeger \
 **Endpoint:** http://localhost:5000/metrics
 
 **Visualizar no Grafana:**
+
 1. Acesse http://localhost:3000
 2. Datasources já configurados automaticamente
 3. Crie dashboards personalizados
@@ -147,23 +177,25 @@ docker run -d --name jaeger \
 **Melhor para:** Apps hospedados no Azure
 
 {
-  "Telemetry": {
-    "Enabled": true,
-    "Providers": ["applicationinsights"],
-    "SamplingRatio": 0.5,
-    "ApplicationInsights": {
-      "ConnectionString": "InstrumentationKey=...;IngestionEndpoint=https://...",
-      "EnableAdaptiveSampling": true,
-      "EnableLiveMetrics": true
-    }
-  }
+"Telemetry": {
+"Enabled": true,
+"Providers": ["applicationinsights"],
+"SamplingRatio": 0.5,
+"ApplicationInsights": {
+"ConnectionString": "InstrumentationKey=...;IngestionEndpoint=https://...",
+"EnableAdaptiveSampling": true,
+"EnableLiveMetrics": true
+}
+}
 }
 **Como obter a Connection String:**
+
 1. Portal Azure → Application Insights
 2. Overview → Connection String
 3. Copiar e colar no appsettings
 
 **Features:**
+
 - ✅ Live Metrics Stream
 - ✅ Application Map
 - ✅ Smart Detection
@@ -178,33 +210,50 @@ docker run -d --name jaeger \
 **Melhor para:** APM enterprise completo
 
 **Passo 1: Instalar Datadog Agent**
-# Windows
+
+#### Windows
+
+```powershell
 msiexec /qn /i datadog-agent-latest.msi
+```
 
-# Linux
+#### Linux
+
+```bash
 DD_API_KEY=<your-api-key> DD_SITE="datadoghq.com" bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+```
 
-# Docker
+#### Docker
+
+```bash
 docker run -d --name datadog-agent \
-  -e DD_API_KEY=<your-api-key> \
-  -e DD_SITE="datadoghq.com" \
-  -e DD_APM_ENABLED=true \
-  -e DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_GRPC_ENDPOINT="0.0.0.0:4317" \
-  -p 4317:4317 \
-  gcr.io/datadoghq/agent:latest
+    -e DD_API_KEY=<your-api-key> \
+    -e DD_SITE="datadoghq.com" \
+    -e DD_APM_ENABLED=true \
+    -e DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_GRPC_ENDPOINT="0.0.0.0:4317" \
+    -p 4317:4317 \
+    gcr.io/datadoghq/agent:latest
+```
+
 **Passo 2: Configurar appsettings.json**
+
+```jsonc
 {
-  "Telemetry": {
-    "Enabled": true,
-    "Providers": ["datadog"],
-    "Datadog": {
-      "Endpoint": "http://localhost:4317",
-      "ApiKey": "your-api-key-here",
-      "Site": "datadoghq.com",
-      "Environment": "production"
+    "Telemetry": {
+        "Enabled": true,
+        "Providers": [
+            "datadog"
+        ],
+        "Datadog": {
+            "Endpoint": "http://localhost:4317",
+            "ApiKey": "your-api-key-here",
+            "Site": "datadoghq.com",
+            "Environment": "production"
+        }
     }
-  }
 }
+```
+
 **Obter API Key:**
 https://app.datadoghq.com/organization-settings/api-keys
 
@@ -214,18 +263,24 @@ https://app.datadoghq.com/organization-settings/api-keys
 
 **Melhor para:** Enterprise, análise avançada de performance
 
+```jsonc
 {
-  "Telemetry": {
-    "Enabled": true,
-    "Providers": ["dynatrace"],
-    "Dynatrace": {
-      "Endpoint": "https://{your-environment-id}.live.dynatrace.com/api/v2/otlp",
-      "ApiToken": "dt0c01.YOUR.TOKEN.HERE",
-      "Environment": "production"
+    "Telemetry": {
+        "Enabled": true,
+        "Providers": [
+            "dynatrace"
+        ],
+        "Dynatrace": {
+            "Endpoint": "https://{your-environment-id}.live.dynatrace.com/api/v2/otlp",
+            "ApiToken": "dt0c01.YOUR.TOKEN.HERE",
+            "Environment": "production"
+        }
     }
-  }
 }
+```
+
 **Como obter credenciais:**
+
 1. Dynatrace UI → Settings → Integration → OpenTelemetry
 2. Copy OTLP endpoint
 3. Generate API token com scope `openTelemetryTrace.ingest`
@@ -236,23 +291,31 @@ https://app.datadoghq.com/organization-settings/api-keys
 
 **Melhor para:** Stack completa gerenciada
 
+```jsonc
 {
-  "Telemetry": {
-    "Enabled": true,
-    "Providers": ["otlp"],
-    "Otlp": {
-      "Endpoint": "https://otlp-gateway-prod-us-east-0.grafana.net/otlp",
-      "Protocol": "http",
-      "Headers": "Authorization=Basic <base64-encoded-instance-id:token>"
+    "Telemetry": {
+        "Enabled": true,
+        "Providers": [
+            "otlp"
+        ],
+        "Otlp": {
+            "Endpoint": "https://otlp-gateway-prod-us-east-0.grafana.net/otlp",
+            "Protocol": "http",
+            "Headers": "Authorization=Basic <base64-encoded-instance-id:token>"
+        }
     }
-  }
 }
+```
+
 **Como obter credenciais:**
+
 1. Grafana Cloud → Connections → Add new connection → OpenTelemetry
 2. Copy endpoint e token
 3. Encode: `echo -n "instance-id:token" | base64`
 
 ---
+
+<a id="configuracoes-avancadas"></a>
 
 ## 🎛️ Configurações Avançadas
 
@@ -260,13 +323,17 @@ https://app.datadoghq.com/organization-settings/api-keys
 
 Em produção, use sampling para reduzir custos:
 
+```jsonc
 {
-  "Telemetry": {
-    "Enabled": true,
-    "SamplingRatio": 0.1  // 10% das requests
-  }
+    "Telemetry": {
+        "Enabled": true,
+        "SamplingRatio": 0.1 // 10% das requests
+    }
 }
+```
+
 **Recomendações:**
+
 - **Development**: 1.0 (100%)
 - **Staging**: 0.5 (50%)
 - **Production (low traffic)**: 0.2 (20%)
@@ -274,30 +341,43 @@ Em produção, use sampling para reduzir custos:
 
 ### Desabilitar Instrumentação
 
+```jsonc
 {
-  "Telemetry": {
-    "EnableSqlInstrumentation": false,  // Não rastrear queries SQL
-    "EnableHttpInstrumentation": false  // Não rastrear HTTP calls
-  }
+    "Telemetry": {
+        "EnableSqlInstrumentation": false, // Não rastrear queries SQL
+        "EnableHttpInstrumentation": false // Não rastrear HTTP calls
+    }
 }
+```
+
 ### Múltiplos Backends
 
 Você pode usar múltiplos backends simultaneamente:
 
+```jsonc
 {
-  "Telemetry": {
-    "Enabled": true,
-    "Providers": ["jaeger", "prometheus", "applicationinsights"]
-  }
+    "Telemetry": {
+        "Enabled": true,
+        "Providers": [
+            "jaeger",
+            "prometheus",
+            "applicationinsights"
+        ]
+    }
 }
+```
+
 **Exemplo:** Jaeger local para debug + Application Insights para produção
 
 ---
+
+<a id="metricas-customizadas"></a>
 
 ## 📈 Métricas Customizadas
 
 ### Criar Contador
 
+```csharp
 public class ProductService : Service<Product>
 {
     private readonly Counter<long> _productCreatedCounter;
@@ -318,8 +398,11 @@ public class ProductService : Service<Product>
         return result;
     }
 }
+```
+
 ### Criar Histograma (Latência)
 
+```csharp
 private readonly Histogram<double> _requestDuration;
 
 _requestDuration = meter.CreateHistogram<double>(
@@ -332,7 +415,11 @@ var stopwatch = Stopwatch.StartNew();
 // ... operação ...
 stopwatch.Stop();
 _requestDuration.Record(stopwatch.ElapsedMilliseconds);
+```
+
 ---
+
+<a id="o-que-e-rastreado-automaticamente"></a>
 
 ## 🔍 O que é Rastreado Automaticamente
 
@@ -352,40 +439,67 @@ _requestDuration.Record(stopwatch.ElapsedMilliseconds);
 
 ---
 
+<a id="troubleshooting"></a>
+
 ## 🐛 Troubleshooting
 
 ### Telemetria não aparece
 
 **1. Verificar se está habilitado:**
+
+```jsonc
 "Enabled": true
+```
+
 **2. Verificar logs de startup:**
+
 ```text
 ✅ Telemetry enabled: jaeger, prometheus
-  📊 Jaeger exporter enabled: localhost:6831
-  📈 Prometheus exporter enabled (endpoint: /metrics)
+📊 Jaeger exporter enabled: localhost:6831
+📈 Prometheus exporter enabled (endpoint: /metrics)
+```
+
 **3. Testar endpoint Prometheus:**
+
+```bash
 curl http://localhost:5000/metrics
+```
+
 ### Jaeger não recebe traces
 
 **Verificar se Jaeger está rodando:**
+
+```bash
 docker ps | grep jaeger
+```
+
 **Testar conectividade:**
+
+```bash
 telnet localhost 6831
+```
+
 **Verificar logs:**
+
+```bash
 docker logs jaeger
 ```
 
 ### Application Insights não funciona
 
 **Verificar Connection String:**
+
 - Deve começar com `InstrumentationKey=`
 - Incluir `IngestionEndpoint=`
 
 **Verificar no Azure Portal:**
+
 - Application Insights → Live Metrics
 - Deve aparecer servidor conectado
 
 ---
+
+<a id="recursos-adicionais"></a>
 
 ## 📚 Recursos Adicionais
 
@@ -407,6 +521,8 @@ docker logs jaeger
 
 ---
 
+<a id="melhores-praticas"></a>
+
 ## 💡 Melhores Práticas
 
 ### ✅ DO
@@ -425,6 +541,8 @@ docker logs jaeger
 - ❌ Não rastrear health checks (filtrado automaticamente)
 
 ---
+
+<a id="proximos-passos"></a>
 
 ## 🎯 Próximos Passos
 

@@ -21,6 +21,7 @@ services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
 app.UseIpRateLimiting();
 **Features in Use:**
+
 - ✅ IP-based rate limiting
 - ✅ Client ID rate limiting
 - ✅ Endpoint-specific rules
@@ -61,6 +62,7 @@ app.UseRateLimiter();
 ### Rationale
 
 #### Pros - AspNetCoreRateLimit
+
 - ✅ **Implementação madura e battle-tested** (5+ anos em produção)
 - ✅ **Features avançadas** já implementadas (whitelist, custom messages, distributed cache)
 - ✅ **Configuração JSON completa** no appsettings.json
@@ -69,17 +71,20 @@ app.UseRateLimiter();
 - ✅ **Documentação completa** em [RATE-LIMITING.md](RATE-LIMITING.md)
 
 #### Pros - .NET Native
+
 - ✅ **Suporte oficial Microsoft** (parte do framework)
 - ✅ **Performance ligeiramente melhor** (integração mais profunda)
 - ✅ **Menos dependências externas**
 - ✅ **Syntax moderna** com Minimal APIs
 
 #### Cons - AspNetCoreRateLimit
+
 - ⚠️ **Baixa atividade de manutenção** (último commit significativo em 2023)
 - ⚠️ **Dependência externa** adicional
 - ⚠️ **Compatibilidade futura** incerta com .NET 11+
 
 #### Cons - .NET Native
+
 - ❌ **Migração exige refatoração significativa** (3-5 dias de trabalho)
 - ❌ **Menos features out-of-the-box** (precisaria implementar whitelist, custom messages, etc)
 - ❌ **Curva de aprendizado** para desenvolvedores acostumados com AspNetCoreRateLimit
@@ -90,17 +95,20 @@ app.UseRateLimiter();
 ## Consequences
 
 ### Immediate Actions (Q1 2026)
+
 - ✅ **Manter versão atual** - AspNetCoreRateLimit v5.0.0 funciona perfeitamente
 - ✅ **Monitorar issues** no repositório GitHub do pacote
 - ✅ **Documentar decisão** neste ADR
 
 ### Short-term (Q2-Q3 2026)
+
 - 🔄 **Avaliar novamente** quando .NET 11 for lançado
 - 🔄 **Verificar roadmap** do AspNetCoreRateLimit
 - 🔄 **Avaliar features** adicionadas ao .NET native rate limiting
 - 🔄 **Criar PoC** com .NET native se necessário
 
 ### Long-term (2027+)
+
 - 🎯 **Migrar para .NET native** se:
   - AspNetCoreRateLimit não receber atualizações por 12+ meses
   - .NET native adicionar features equivalentes
@@ -113,17 +121,17 @@ app.UseRateLimiter();
 
 ## Comparison Matrix
 
-| Feature | AspNetCoreRateLimit | .NET Native | Winner |
-|---------|---------------------|-------------|---------|
-| **Maturity** | 5+ years | 2+ years | 🏆 AspNetCoreRateLimit |
-| **Official Support** | Community | Microsoft | 🏆 .NET Native |
-| **Configuration** | JSON-based | Code-based | 🏆 AspNetCoreRateLimit |
-| **Features** | Rich (whitelist, blacklist, custom messages) | Basic | 🏆 AspNetCoreRateLimit |
-| **Performance** | Excellent | Slightly better | 🏆 .NET Native |
-| **Breaking Changes** | None | Significant refactoring | 🏆 AspNetCoreRateLimit |
-| **Maintenance** | Low activity | Active | 🏆 .NET Native |
-| **Documentation** | Extensive | Growing | 🏆 AspNetCoreRateLimit |
-| **Future-proofing** | Uncertain | Guaranteed | 🏆 .NET Native |
+| Feature              | AspNetCoreRateLimit                          | .NET Native             | Winner                 |
+| -------------------- | -------------------------------------------- | ----------------------- | ---------------------- |
+| **Maturity**         | 5+ years                                     | 2+ years                | 🏆 AspNetCoreRateLimit |
+| **Official Support** | Community                                    | Microsoft               | 🏆 .NET Native         |
+| **Configuration**    | JSON-based                                   | Code-based              | 🏆 AspNetCoreRateLimit |
+| **Features**         | Rich (whitelist, blacklist, custom messages) | Basic                   | 🏆 AspNetCoreRateLimit |
+| **Performance**      | Excellent                                    | Slightly better         | 🏆 .NET Native         |
+| **Breaking Changes** | None                                         | Significant refactoring | 🏆 AspNetCoreRateLimit |
+| **Maintenance**      | Low activity                                 | Active                  | 🏆 .NET Native         |
+| **Documentation**    | Extensive                                    | Growing                 | 🏆 AspNetCoreRateLimit |
+| **Future-proofing**  | Uncertain                                    | Guaranteed              | 🏆 .NET Native         |
 
 **Current Score:** AspNetCoreRateLimit 6 - .NET Native 3
 
@@ -139,6 +147,7 @@ app.UseRateLimiter();
 - **24+ months:** Alto risco, migração recomendada
 
 **Estimated Migration Effort:**
+
 - Analysis & Planning: 1 day
 - Implementation: 2-3 days
 - Testing: 1 day
@@ -158,10 +167,10 @@ app.UseRateLimiter();
 
 ## Review History
 
-| Date | Decision | Rationale |
-|------|----------|-----------|
+| Date       | Decision | Rationale                                                   |
+| ---------- | -------- | ----------------------------------------------------------- |
 | 2026-01-14 | DEFERRED | Package works perfectly, migration effort not justified yet |
-| Q2 2026 | PENDING | Next review scheduled |
+| Q2 2026    | PENDING  | Next review scheduled                                       |
 
 ---
 

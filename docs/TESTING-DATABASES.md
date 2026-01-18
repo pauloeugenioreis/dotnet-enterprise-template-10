@@ -4,8 +4,6 @@ Este guia explica como testar o projeto com todos os 4 bancos de dados suportado
 
 ---
 
-## 📋 Pré-requisitos
-
 - Docker Desktop instalado e rodando
 - .NET 10 SDK instalado
 - Projeto compilado: `dotnet build`
@@ -18,12 +16,14 @@ Este guia explica como testar o projeto com todos os 4 bancos de dados suportado
 
 cd scripts\windows
 .\test-all-databases.ps1
+
 ### Linux/macOS
 
 cd scripts/linux
 chmod +x test-all-databases.sh
 ./test-all-databases.sh
 O script irá:
+
 1. ✅ Subir os 4 bancos de dados no Docker
 2. ✅ Aplicar migrations em cada banco
 3. ✅ Compilar o projeto
@@ -39,111 +39,191 @@ O script irá:
 
 ### 1. Subir os Bancos de Dados
 
-# Na raiz do projeto
-docker-compose up -d sqlserver oracle postgres mysql
-**Aguarde os bancos ficarem prontos (30-60 segundos):**
-
-# SQL Server
-docker exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -C -Q "SELECT 1"
-
-# Oracle (pode levar 1-2 minutos)
-docker exec oracle healthcheck.sh
-
-# PostgreSQL
-docker exec postgres pg_isready -U postgres
-
-# MySQL
-docker exec mysql mysqladmin ping -h localhost -u root -pMySqlPass123
-### 2. Testar SQL Server
-
-# Aplicar migrations
-$env:ASPNETCORE_ENVIRONMENT="SqlServer"
-dotnet ef database update --project src/Data --startup-project src/Api
-
-# Rodar aplicação
-dotnet run --project src/Api --environment SqlServer
+#### Na raiz do projeto
 
 ```bash
-# Testar (em outro terminal)
+docker-compose up -d sqlserver oracle postgres mysql
+```
+
+**Aguarde os bancos ficarem prontos (30-60 segundos):**
+
+#### SQL Server
+
+```bash
+docker exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -C -Q "SELECT 1"
+```
+
+#### Oracle (pode levar 1-2 minutos)
+
+```bash
+docker exec oracle healthcheck.sh
+```
+
+#### PostgreSQL
+
+```bash
+docker exec postgres pg_isready -U postgres
+```
+
+### 2. Testar SQL Server
+
+#### Aplicar migrations (SqlServer)
+
+```powershell
+$env:ASPNETCORE_ENVIRONMENT="SqlServer"
+dotnet ef database update --project src/Data --startup-project src/Api
+```
+
+#### Rodar aplicação (SqlServer)
+
+```powershell
+dotnet run --project src/Api --environment SqlServer
+```
+
+#### Testar (SqlServer)
+
+```bash
 curl http://localhost:5000/health
 curl http://localhost:5000/swagger/index.html
 ```
-```powershell
-**Connection String:**
-```
-```bash
+
+#### Connection String (SqlServer)
+
+```text
 Server=localhost,1433;Database=ProjectTemplate;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+```
+
+---
+
 ### 3. Testar Oracle
 
-```
+#### Aplicar migrations (Oracle)
+
 ```powershell
-# Aplicar migrations
 $env:ASPNETCORE_ENVIRONMENT="Oracle"
 dotnet ef database update --project src/Data --startup-project src/Api
+```
 
-# Rodar aplicação
+#### Rodar aplicação (Oracle)
+
+```powershell
 dotnet run --project src/Api --environment Oracle
+```
 
-# Testar
+#### Testar (Oracle)
+
+```bash
 curl http://localhost:5000/health
+curl http://localhost:5000/swagger/index.html
 ```
-```powershell
-**Connection String:**
-```
-```powershell
+
+#### Connection String (Oracle)
+
+```text
 User Id=appuser;Password=AppPass123;Data Source=localhost:1521/FREEPDB1;
+```
+
 **⚠️ Nota:** Oracle pode levar 1-2 minutos para ficar pronto na primeira execução.
+
+---
 
 ### 4. Testar PostgreSQL
 
-```
+#### Aplicar migrations (PostgreSQL)
+
 ```powershell
-# Aplicar migrations
 $env:ASPNETCORE_ENVIRONMENT="PostgreSQL"
 dotnet ef database update --project src/Data --startup-project src/Api
-
-# Rodar aplicação
-dotnet run --project src/Api --environment PostgreSQL
-
-# Testar
-curl http://localhost:5000/health
 ```
+
+#### Rodar aplicação (PostgreSQL)
+
 ```powershell
-**Connection String:**
+dotnet run --project src/Api --environment PostgreSQL
 ```
+
+#### Testar (PostgreSQL)
+
 ```bash
+curl http://localhost:5000/health
+curl http://localhost:5000/swagger/index.html
+```
+
+#### Connection String (PostgreSQL)
+
+```text
 Host=localhost;Port=5433;Database=ProjectTemplate;Username=postgres;Password=PostgresPass123;
+```
+
 **⚠️ Nota:** PostgreSQL principal roda na porta **5433** (5432 é usada pelo Event Store).
+
+---
 
 ### 5. Testar MySQL
 
-```
+#### Aplicar migrations (MySQL)
+
 ```powershell
-# Aplicar migrations
 $env:ASPNETCORE_ENVIRONMENT="MySQL"
 dotnet ef database update --project src/Data --startup-project src/Api
+```
 
-# Rodar aplicação
+#### Rodar aplicação (MySQL)
+
+```powershell
 dotnet run --project src/Api --environment MySQL
+```
 
-# Testar
-curl http://localhost:5000/health
-```
+#### Testar (MySQL)
+
 ```bash
-**Connection String:**
+curl http://localhost:5000/health
+curl http://localhost:5000/swagger/index.html
 ```
+
+#### Connection String (MySQL)
+
 ```text
 Server=localhost;Port=3306;Database=ProjectTemplate;User=appuser;Password=AppPass123;
 ```
+
+---
+
+#### Aplicar migrations
+
+```powershell
+$env:ASPNETCORE_ENVIRONMENT="PostgreSQL"
+
+```
+
+#### Rodar aplicação
+
+```powershell
+dotnet run --project src/Api --environment PostgreSQL
+```
+
+#### Testar
+
 ```bash
+curl http://localhost:5000/health
+curl http://localhost:5000/swagger/index.html
+```
+
+#### Connection String
+
+```text
+Host=localhost;Port=5433;Database=ProjectTemplate;Username=postgres;Password=PostgresPass123;
+```
+
+**⚠️ Nota:** PostgreSQL principal roda na porta **5433** (5432 é usada pelo Event Store).
+
 ---
 
 ## 📝 Arquivos de Configuração
 
 Cada banco tem seu próprio arquivo `appsettings.{Database}.json`:
 
-```
-```bash
+```text
 src/Api/
 ├── appsettings.json              # Base (InMemory)
 ├── appsettings.Development.json  # Overrides de desenvolvimento
@@ -151,9 +231,12 @@ src/Api/
 ├── appsettings.Oracle.json       # Oracle config
 ├── appsettings.PostgreSQL.json   # PostgreSQL config
 └── appsettings.MySQL.json        # MySQL config
+```
+
 **Como funciona:**
 
 Quando você roda `dotnet run --environment SqlServer`, o .NET carrega:
+
 1. `appsettings.json` (base)
 2. `appsettings.SqlServer.json` (sobrescreve configurações específicas)
 
@@ -161,12 +244,12 @@ Quando você roda `dotnet run --environment SqlServer`, o .NET carrega:
 
 ## 🐳 Docker Compose - Portas e Credenciais
 
-| Banco      | Porta | Usuário  | Senha            | Database         |
-|------------|-------|----------|------------------|------------------|
-| SQL Server | 1433  | sa       | YourStrong@Passw0rd | ProjectTemplate  |
-| Oracle     | 1521  | appuser  | AppPass123       | FREEPDB1         |
-| PostgreSQL | 5433  | postgres | PostgresPass123  | ProjectTemplate  |
-| MySQL      | 3306  | appuser  | AppPass123       | ProjectTemplate  |
+| Banco      | Porta | Usuário  | Senha               | Database        |
+|------------|-------|----------|---------------------|-----------------|
+| SQL Server | 1433  | sa       | YourStrong@Passw0rd | ProjectTemplate |
+| Oracle     | 1521  | appuser  | AppPass123          | FREEPDB1        |
+| PostgreSQL | 5433  | postgres | PostgresPass123     | ProjectTemplate |
+| MySQL      | 3306  | appuser  | AppPass123          | ProjectTemplate |
 
 ---
 
@@ -174,57 +257,104 @@ Quando você roda `dotnet run --environment SqlServer`, o .NET carrega:
 
 ### Windows PowerShell
 
-# Testar tudo
+#### Testar tudo
+
+```powershell
 .\test-all-databases.ps1
+```
 
-# Pular Docker (se já estiver rodando)
+#### Pular Docker (se já estiver rodando)
+
+```powershell
 .\test-all-databases.ps1 -SkipDocker
+```
 
-# Pular migrations
+#### Pular migrations
+
+```powershell
 .\test-all-databases.ps1 -SkipMigrations
+```
 
-# Pular testes de API
+#### Pular testes de API
+
+```powershell
 .\test-all-databases.ps1 -SkipTests
+```
 
-# Combinar opções
+#### Combinar opções
+
+```powershell
 .\test-all-databases.ps1 -SkipDocker -SkipMigrations
+```
 
-# Aumentar timeout de startup da API (padrão: 30s)
+#### Aumentar timeout de startup da API (padrão: 30s)
+
+```powershell
 .\test-all-databases.ps1 -ApiStartupTimeout 60
+```
+
 ### Linux/macOS
 
-# Testar tudo
+#### Testar tudo
+
+```bash
 ./test-all-databases.sh
+```
 
-# Pular Docker
+#### Pular Docker
+
+```bash
 ./test-all-databases.sh --skip-docker
+```
 
-# Pular migrations
+#### Pular migrations
+
+```bash
 ./test-all-databases.sh --skip-migrations
+```
 
-# Pular testes
+#### Pular testes
+
+```bash
 ./test-all-databases.sh --skip-tests
+```
 
-# Combinar opções
+#### Combinar opções
+
+```bash
 ./test-all-databases.sh --skip-docker --skip-migrations
+```
 
-# Aumentar timeout
+#### Aumentar timeout
+
+```bash
 ./test-all-databases.sh --timeout 60
+```
+
 ---
 
 ## 🧹 Limpeza
 
 ### Parar todos os bancos
 
+```bash
 docker-compose down
+```
+
 ### Parar e remover volumes (limpar dados)
 
+```bash
 docker-compose down -v
+```
+
 ### Remover apenas um banco específico
 
+```bash
 docker-compose stop sqlserver
 docker-compose rm -f sqlserver
 docker volume rm template_sqlserver-data
+```
+
 ---
 
 ## 🐛 Troubleshooting
@@ -233,34 +363,55 @@ docker volume rm template_sqlserver-data
 
 Oracle Free Edition pode levar 1-2 minutos para inicializar na primeira vez.
 
-# Verificar logs
-docker logs oracle -f
+#### Verificar logs
 
-# Aguardar até ver: "DATABASE IS READY TO USE!"
+```bash
+docker logs oracle -f
+```
+
+#### Aguardar até ver: "DATABASE IS READY TO USE!"
+
 ### Erro de conexão "Network unreachable"
 
 Aguarde mais tempo. Os health checks do Docker podem levar até 30-60 segundos.
 
-# Verificar status dos containers
-docker-compose ps
+#### Verificar status dos containers
 
-# Verificar health status
+```bash
+docker-compose ps
+```
+
+#### Verificar health status
+
+```bash
 docker inspect sqlserver --format='{{.State.Health.Status}}'
+```
+
 ### Migrations falham com "database already exists"
 
 Limpe o banco antes de rodar migrations:
 
+```bash
 dotnet ef database drop --project src/Data --startup-project src/Api --force
 dotnet ef database update --project src/Data --startup-project src/Api
+```
+
 ### Porta já em uso
 
 Verifique se há outro serviço usando a porta:
 
-# Windows
-netstat -ano | findstr :1433
+#### Windows
 
-# Linux/macOS
+```powershell
+netstat -ano | findstr :1433
+```
+
+#### Linux/macOS
+
+```bash
 lsof -i :1433
+```
+
 Pare o serviço conflitante ou altere a porta no `docker-compose.yml`.
 
 ---
@@ -281,7 +432,6 @@ Para cada banco de dados:
 
 ## 📊 Exemplo de Saída do Script
 
-```
 ```text
 ================================================
   Testing All Database Providers

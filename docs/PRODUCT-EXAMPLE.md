@@ -19,14 +19,17 @@ public class Product : EntityBase
     public bool IsActive { get; set; } = true;
 }
 ```
+
 ```xml
 
 ### 2. **DbSet no Context** (`Data/Context/ApplicationDbContext.cs`)
 
 ```
+
 ```csharp
 public DbSet<Product> Products { get; set; }
 ```
+
 ```csharp
 ### 3. **Controller Completo** (`Api/Controllers/ProductController.cs`)
 
@@ -102,6 +105,7 @@ dotnet run --project src/Api
 ### 3. Acessar Swagger
 
 ```
+
 ```xml
 https://localhost:5001/swagger
 ### 4. Testar Endpoints
@@ -191,6 +195,7 @@ Adiciona 5 unidades ao estoque do produto ID 1.
 ```
 
 **MiniExcel** é uma biblioteca de alta performance para geração de arquivos Excel (.xlsx):
+
 - ⚡ 10x mais rápido que EPPlus
 - 💾 Baixo consumo de memória
 - 📊 Suporta grandes volumes de dados
@@ -212,6 +217,7 @@ Para estender este exemplo:
 ---
 
 **Navegação:**
+
 - [⬆️ Voltar ao README](../README.md)
 - [📖 Ver Índice](../INDEX.md)
 - [🚀 Quick Start](../QUICK-START.md)
