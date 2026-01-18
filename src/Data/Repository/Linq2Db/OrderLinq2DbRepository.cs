@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using LinqToDB;
 using ProjectTemplate.Data.Context;
 using ProjectTemplate.Domain.Entities;
@@ -22,14 +23,14 @@ public class OrderLinq2DbRepository : IRepository<Order>
     {
         var order = await _db.Orders
             .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
-        
+
         if (order != null)
         {
             order.Items = await _db.OrderItems
                 .Where(oi => oi.OrderId == id)
                 .ToListAsync(cancellationToken);
         }
-        
+
         return order;
     }
 
@@ -37,35 +38,55 @@ public class OrderLinq2DbRepository : IRepository<Order>
     {
         var orders = await _db.Orders.ToListAsync(cancellationToken);
         var orderIds = orders.Select(o => o.Id).ToList();
-        
+
         var items = await _db.OrderItems
             .Where(oi => orderIds.Contains(oi.OrderId))
             .ToListAsync(cancellationToken);
-        
+
         foreach (var order in orders)
         {
             order.Items = items.Where(i => i.OrderId == order.Id).ToList();
         }
-        
+
         return orders;
     }
 
-    public async Task<IEnumerable<Order>> FindAsync(Func<Order, bool> predicate, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Order>> FindAsync(
+        Expression<Func<Order, bool>> predicate,
+        CancellationToken cancellationToken = default)
     {
-        var all = await GetAllAsync(cancellationToken);
-        return all.Where(predicate);
+        var orders = await _db.Orders
+            .Where(predicate)
+            .ToListAsync(cancellationToken);
+
+        if (!orders.Any())
+        {
+            return orders;
+        }
+
+        var orderIds = orders.Select(o => o.Id).ToList();
+        var items = await _db.OrderItems
+            .Where(oi => orderIds.Contains(oi.OrderId))
+            .ToListAsync(cancellationToken);
+
+        foreach (var order in orders)
+        {
+            order.Items = items.Where(i => i.OrderId == order.Id).ToList();
+        }
+
+        return orders;
     }
 
     public async Task<Order> AddAsync(Order entity, CancellationToken cancellationToken = default)
     {
         await _db.BeginTransactionAsync(cancellationToken);
-        
+
         try
         {
             // Insert order
             entity.CreatedAt = DateTime.UtcNow;
             entity.Id = await _db.InsertWithInt64IdentityAsync(entity, token: cancellationToken);
-            
+
             // Insert order items
             if (entity.Items?.Any() == true)
             {
@@ -76,7 +97,7 @@ public class OrderLinq2DbRepository : IRepository<Order>
                     await _db.InsertAsync(item, token: cancellationToken);
                 }
             }
-            
+
             await _db.CommitTransactionAsync(cancellationToken);
             return entity;
         }
@@ -100,18 +121,18 @@ public class OrderLinq2DbRepository : IRepository<Order>
     public async Task UpdateAsync(Order entity, CancellationToken cancellationToken = default)
     {
         await _db.BeginTransactionAsync(cancellationToken);
-        
+
         try
         {
             // Update order
             entity.UpdatedAt = DateTime.UtcNow;
             await _db.UpdateAsync(entity, token: cancellationToken);
-            
+
             // Delete existing items
             await _db.OrderItems
                 .Where(oi => oi.OrderId == entity.Id)
                 .DeleteAsync(cancellationToken);
-            
+
             // Re-insert items
             if (entity.Items?.Any() == true)
             {
@@ -122,7 +143,7 @@ public class OrderLinq2DbRepository : IRepository<Order>
                     await _db.InsertAsync(item, token: cancellationToken);
                 }
             }
-            
+
             await _db.CommitTransactionAsync(cancellationToken);
         }
         catch
@@ -135,17 +156,17 @@ public class OrderLinq2DbRepository : IRepository<Order>
     public async Task DeleteAsync(Order entity, CancellationToken cancellationToken = default)
     {
         await _db.BeginTransactionAsync(cancellationToken);
-        
+
         try
         {
             // Delete order items first
             await _db.OrderItems
                 .Where(oi => oi.OrderId == entity.Id)
                 .DeleteAsync(cancellationToken);
-            
+
             // Delete order
             await _db.DeleteAsync(entity, token: cancellationToken);
-            
+
             await _db.CommitTransactionAsync(cancellationToken);
         }
         catch
@@ -164,28 +185,28 @@ public class OrderLinq2DbRepository : IRepository<Order>
     }
 
     public async Task<(IEnumerable<Order> Items, int Total)> GetPagedAsync(
-        int page, 
-        int pageSize, 
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default)
     {
         var total = await _db.Orders.CountAsync(cancellationToken);
-        
+
         var orders = await _db.Orders
             .OrderBy(o => o.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
-        
+
         var orderIds = orders.Select(o => o.Id).ToList();
         var items = await _db.OrderItems
             .Where(oi => orderIds.Contains(oi.OrderId))
             .ToListAsync(cancellationToken);
-        
+
         foreach (var order in orders)
         {
             order.Items = items.Where(i => i.OrderId == order.Id).ToList();
         }
-        
+
         return (orders, total);
     }
 

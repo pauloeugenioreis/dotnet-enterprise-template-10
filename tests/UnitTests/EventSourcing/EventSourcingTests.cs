@@ -47,6 +47,7 @@ public class EventSourcingDisabledTests
         };
 
         await repository.AddAsync(order);
+        await repository.SaveChangesAsync();
 
         // Assert
         var events = await eventStore.GetEventsAsync("Order", order.Id.ToString());
@@ -95,6 +96,7 @@ public class EventSourcingEnabledTests
         };
 
         await repository.AddAsync(order);
+        await repository.SaveChangesAsync();
 
         // Assert
         var events = await eventStore.GetEventsAsync("Order", order.Id.ToString());

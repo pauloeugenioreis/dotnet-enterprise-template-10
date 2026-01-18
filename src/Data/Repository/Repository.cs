@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using ProjectTemplate.Domain.Interfaces;
 
@@ -30,10 +31,10 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     }
 
     public virtual async Task<IEnumerable<TEntity>> FindAsync(
-        Func<TEntity, bool> predicate,
+        Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default)
     {
-        return await Task.Run(() => _dbSet.Where(predicate).ToList(), cancellationToken);
+        return await _dbSet.Where(predicate).ToListAsync(cancellationToken);
     }
 
     public virtual async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)

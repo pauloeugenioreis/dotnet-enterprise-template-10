@@ -1,4 +1,5 @@
 using System.Data;
+using System.Linq.Expressions;
 using Dapper;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
@@ -40,12 +41,14 @@ public class ProductDapperRepository : IProductDapperRepository
         return await connection.QueryAsync<Product>(sql);
     }
 
-    public async Task<IEnumerable<Product>> FindAsync(Func<Product, bool> predicate, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Product>> FindAsync(
+        Expression<Func<Product, bool>> predicate,
+        CancellationToken cancellationToken = default)
     {
-        // Dapper doesn't support LINQ predicates directly
-        // For complex queries, implement specific methods or use GetAllAsync and filter in memory
+        // Dapper doesn't translate arbitrary expressions, so filter after retrieval
+        var compiledPredicate = predicate.Compile();
         var all = await GetAllAsync(cancellationToken);
-        return all.Where(predicate);
+        return all.Where(compiledPredicate);
     }
 
     public async Task<Product> AddAsync(Product entity, CancellationToken cancellationToken = default)

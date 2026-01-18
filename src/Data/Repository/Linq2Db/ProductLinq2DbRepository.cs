@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using LinqToDB;
 using ProjectTemplate.Data.Context;
 using ProjectTemplate.Domain.Entities;
@@ -29,11 +30,13 @@ public class ProductLinq2DbRepository : IRepository<Product>
         return await _db.Products.ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<Product>> FindAsync(Func<Product, bool> predicate, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Product>> FindAsync(
+        Expression<Func<Product, bool>> predicate,
+        CancellationToken cancellationToken = default)
     {
-        // For complex predicates, get all and filter in memory
-        var all = await GetAllAsync(cancellationToken);
-        return all.Where(predicate);
+        return await _db.Products
+            .Where(predicate)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<Product> AddAsync(Product entity, CancellationToken cancellationToken = default)
@@ -50,7 +53,7 @@ public class ProductLinq2DbRepository : IRepository<Product>
         {
             entity.CreatedAt = DateTime.UtcNow;
         }
-        
+
         await _db.BulkCopyAsync(entityList, cancellationToken);
         return entityList;
     }
@@ -75,18 +78,18 @@ public class ProductLinq2DbRepository : IRepository<Product>
     }
 
     public async Task<(IEnumerable<Product> Items, int Total)> GetPagedAsync(
-        int page, 
-        int pageSize, 
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default)
     {
         var total = await _db.Products.CountAsync(cancellationToken);
-        
+
         var items = await _db.Products
             .OrderBy(p => p.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
-        
+
         return (items, total);
     }
 

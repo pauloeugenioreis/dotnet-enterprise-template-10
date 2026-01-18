@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using NHibernate;
 using NHibernate.Linq;
 using ProjectTemplate.Domain.Entities;
@@ -28,10 +29,13 @@ public class ProductNHibernateRepository : IRepository<Product>
         return await _session.Query<Product>().ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<Product>> FindAsync(Func<Product, bool> predicate, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Product>> FindAsync(
+        Expression<Func<Product, bool>> predicate,
+        CancellationToken cancellationToken = default)
     {
-        var all = await GetAllAsync(cancellationToken);
-        return all.Where(predicate);
+        return await _session.Query<Product>()
+            .Where(predicate)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<Product> AddAsync(Product entity, CancellationToken cancellationToken = default)
@@ -72,17 +76,17 @@ public class ProductNHibernateRepository : IRepository<Product>
     }
 
     public async Task<(IEnumerable<Product> Items, int Total)> GetPagedAsync(
-        int page, 
-        int pageSize, 
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default)
     {
         var total = await _session.Query<Product>().CountAsync(cancellationToken);
-        
+
         var items = await _session.Query<Product>()
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
-        
+
         return (items, total);
     }
 

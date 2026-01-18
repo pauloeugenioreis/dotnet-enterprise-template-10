@@ -1,4 +1,5 @@
 using System.Data;
+using System.Linq.Expressions;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 
@@ -115,10 +116,13 @@ public class OrderAdoRepository : IOrderAdoRepository
         return orders.Values;
     }
 
-    public async Task<IEnumerable<Order>> FindAsync(Func<Order, bool> predicate, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Order>> FindAsync(
+        Expression<Func<Order, bool>> predicate,
+        CancellationToken cancellationToken = default)
     {
+        var compiledPredicate = predicate.Compile();
         var all = await GetAllAsync(cancellationToken);
-        return all.Where(predicate);
+        return all.Where(compiledPredicate);
     }
 
     public async Task<Order> AddAsync(Order entity, CancellationToken cancellationToken = default)

@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+
 namespace ProjectTemplate.Domain.Interfaces;
 
 /// <summary>
@@ -10,7 +12,9 @@ public interface IRepository<TEntity> where TEntity : class
     // Query Operations
     Task<TEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
     Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task<IEnumerable<TEntity>> FindAsync(Func<TEntity, bool> predicate, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TEntity>> FindAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken cancellationToken = default);
 
     // Command Operations
     Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default);

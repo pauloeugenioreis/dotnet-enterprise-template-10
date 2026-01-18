@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -16,6 +17,7 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
     private readonly IEventStore _eventStore;
     private readonly EventSourcingSettings _settings;
     private readonly IExecutionContextService? _executionContextService;
+    private readonly List<Func<CancellationToken, Task>> _pendingEventDispatchers = new();
 
     public HybridRepository(
         DbContext context,
@@ -33,12 +35,11 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
     {
         // 1. Save to EF Core (traditional approach)
         var result = await base.AddAsync(entity, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
 
         // 2. Record event if Event Sourcing is enabled and entity is in audit list
         if (ShouldAuditEntity(typeof(TEntity).Name))
         {
-            await RecordCreatedEvent(entity, cancellationToken);
+            EnqueueEvent(ct => RecordCreatedEvent(entity, ct));
         }
 
         return result;
@@ -48,14 +49,15 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         IEnumerable<TEntity> entities,
         CancellationToken cancellationToken = default)
     {
-        var result = await base.AddRangeAsync(entities, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        var entityList = entities.ToList();
+        var result = await base.AddRangeAsync(entityList, cancellationToken);
 
         if (ShouldAuditEntity(typeof(TEntity).Name))
         {
-            foreach (var entity in entities)
+            foreach (var entity in entityList)
             {
-                await RecordCreatedEvent(entity, cancellationToken);
+                var capturedEntity = entity;
+                EnqueueEvent(ct => RecordCreatedEvent(capturedEntity, ct));
             }
         }
 
@@ -73,12 +75,12 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
 
         // 1. Update in EF Core
         await base.UpdateAsync(entity, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
 
         // 2. Record event
         if (changes != null && changes.Count > 0)
         {
-            await RecordUpdatedEvent(entity, changes, cancellationToken);
+            var changesSnapshot = new Dictionary<string, object>(changes);
+            EnqueueEvent(ct => RecordUpdatedEvent(entity, changesSnapshot, ct));
         }
 
         return;
@@ -88,15 +90,38 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
     {
         // 1. Delete from EF Core
         await base.DeleteAsync(entity, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
 
         // 2. Record event
         if (ShouldAuditEntity(typeof(TEntity).Name))
         {
-            await RecordDeletedEvent(entity, cancellationToken);
+            EnqueueEvent(ct => RecordDeletedEvent(entity, ct));
         }
 
         return;
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var result = await base.SaveChangesAsync(cancellationToken);
+
+        if (_pendingEventDispatchers.Count == 0)
+        {
+            return result;
+        }
+
+        try
+        {
+            foreach (var dispatcher in _pendingEventDispatchers)
+            {
+                await dispatcher(cancellationToken);
+            }
+        }
+        finally
+        {
+            _pendingEventDispatchers.Clear();
+        }
+
+        return result;
     }
 
     private bool ShouldAuditEntity(string entityType)
@@ -114,6 +139,11 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
 
         // Otherwise, check if entity is in the list
         return _settings.AuditEntities.Contains(entityType);
+    }
+
+    private void EnqueueEvent(Func<CancellationToken, Task> dispatcher)
+    {
+        _pendingEventDispatchers.Add(dispatcher);
     }
 
     private Task RecordCreatedEvent(TEntity entity, CancellationToken cancellationToken = default)

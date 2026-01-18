@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using NHibernate;
 using NHibernate.Linq;
 using ProjectTemplate.Domain.Entities;
@@ -33,16 +34,20 @@ public class OrderNHibernateRepository : IRepository<Order>
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<Order>> FindAsync(Func<Order, bool> predicate, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Order>> FindAsync(
+        Expression<Func<Order, bool>> predicate,
+        CancellationToken cancellationToken = default)
     {
-        var all = await GetAllAsync(cancellationToken);
-        return all.Where(predicate);
+        return await _session.Query<Order>()
+            .Where(predicate)
+            .Fetch(o => o.Items)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<Order> AddAsync(Order entity, CancellationToken cancellationToken = default)
     {
         entity.CreatedAt = DateTime.UtcNow;
-        
+
         if (entity.Items?.Any() == true)
         {
             foreach (var item in entity.Items)
@@ -50,7 +55,7 @@ public class OrderNHibernateRepository : IRepository<Order>
                 item.CreatedAt = DateTime.UtcNow;
             }
         }
-        
+
         await _session.SaveAsync(entity, cancellationToken);
         return entity;
     }
@@ -61,7 +66,7 @@ public class OrderNHibernateRepository : IRepository<Order>
         foreach (var entity in entityList)
         {
             entity.CreatedAt = DateTime.UtcNow;
-            
+
             if (entity.Items?.Any() == true)
             {
                 foreach (var item in entity.Items)
@@ -69,7 +74,7 @@ public class OrderNHibernateRepository : IRepository<Order>
                     item.CreatedAt = DateTime.UtcNow;
                 }
             }
-            
+
             await _session.SaveAsync(entity, cancellationToken);
         }
         return entityList;
@@ -78,7 +83,7 @@ public class OrderNHibernateRepository : IRepository<Order>
     public async Task UpdateAsync(Order entity, CancellationToken cancellationToken = default)
     {
         entity.UpdatedAt = DateTime.UtcNow;
-        
+
         if (entity.Items?.Any() == true)
         {
             foreach (var item in entity.Items)
@@ -86,7 +91,7 @@ public class OrderNHibernateRepository : IRepository<Order>
                 item.UpdatedAt = DateTime.UtcNow;
             }
         }
-        
+
         await _session.UpdateAsync(entity, cancellationToken);
     }
 
@@ -104,18 +109,18 @@ public class OrderNHibernateRepository : IRepository<Order>
     }
 
     public async Task<(IEnumerable<Order> Items, int Total)> GetPagedAsync(
-        int page, 
-        int pageSize, 
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default)
     {
         var total = await _session.Query<Order>().CountAsync(cancellationToken);
-        
+
         var items = await _session.Query<Order>()
             .Fetch(o => o.Items)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
-        
+
         return (items, total);
     }
 
