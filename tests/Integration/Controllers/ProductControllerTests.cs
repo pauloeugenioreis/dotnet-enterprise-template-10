@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using ProjectTemplate.Domain.Entities;
+using ProjectTemplate.Domain.Dtos;
 using Xunit;
 
 namespace ProjectTemplate.Integration.Tests.Controllers;
@@ -34,7 +34,7 @@ public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture
     public async Task Create_ValidProduct_ReturnsCreated()
     {
         // Arrange
-        var product = new Product
+        var product = new CreateProductRequest
         {
             Name = "Test Product",
             Description = "Test Description",
@@ -50,7 +50,7 @@ public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
-        var createdProduct = await response.Content.ReadFromJsonAsync<Product>();
+        var createdProduct = await response.Content.ReadFromJsonAsync<ProductResponseDto>();
         createdProduct.Should().NotBeNull();
         createdProduct!.Name.Should().Be("Test Product");
         createdProduct.Price.Should().Be(29.99m);
@@ -60,7 +60,7 @@ public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture
     public async Task GetById_ExistingProduct_ReturnsProduct()
     {
         // Arrange - Create a product first
-        var product = new Product
+        var product = new CreateProductRequest
         {
             Name = "Test Product for GetById",
             Description = "Test",
@@ -70,14 +70,14 @@ public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture
             IsActive = true
         };
         var createResponse = await _client.PostAsJsonAsync("/api/v1/Product", product);
-        var createdProduct = await createResponse.Content.ReadFromJsonAsync<Product>();
+        var createdProduct = await createResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
 
         // Act
         var response = await _client.GetAsync($"/api/v1/Product/{createdProduct!.Id}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var retrievedProduct = await response.Content.ReadFromJsonAsync<Product>();
+        var retrievedProduct = await response.Content.ReadFromJsonAsync<ProductResponseDto>();
         retrievedProduct.Should().NotBeNull();
         retrievedProduct!.Id.Should().Be(createdProduct.Id);
     }
@@ -96,7 +96,7 @@ public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture
     public async Task Update_ExistingProduct_ReturnsSuccess()
     {
         // Arrange - Create a product first
-        var product = new Product
+        var product = new CreateProductRequest
         {
             Name = "Original Name",
             Description = "Original Description",
@@ -106,14 +106,12 @@ public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture
             IsActive = true
         };
         var createResponse = await _client.PostAsJsonAsync("/api/v1/Product", product);
-        var createdProduct = await createResponse.Content.ReadFromJsonAsync<Product>();
+        var createdProduct = await createResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
 
-        // Create a new instance to avoid EF Core tracking conflict
-        var productToUpdate = new Product
+        var productToUpdate = new UpdateProductRequest
         {
-            Id = createdProduct!.Id,
             Name = "Updated Name",
-            Description = createdProduct.Description,
+            Description = createdProduct!.Description,
             Price = 25.00m,
             Stock = createdProduct.Stock,
             Category = createdProduct.Category,
@@ -121,14 +119,14 @@ public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/Product/{productToUpdate.Id}", productToUpdate);
+        var response = await _client.PutAsJsonAsync($"/api/v1/Product/{createdProduct.Id}", productToUpdate);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         // Verify the update by getting the product
-        var getResponse = await _client.GetAsync($"/api/v1/Product/{productToUpdate.Id}");
-        var updatedProduct = await getResponse.Content.ReadFromJsonAsync<Product>();
+        var getResponse = await _client.GetAsync($"/api/v1/Product/{createdProduct.Id}");
+        var updatedProduct = await getResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
         updatedProduct!.Name.Should().Be("Updated Name");
         updatedProduct.Price.Should().Be(25.00m);
     }
@@ -137,7 +135,7 @@ public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture
     public async Task Delete_ExistingProduct_ReturnsNoContent()
     {
         // Arrange - Create a product first
-        var product = new Product
+        var product = new CreateProductRequest
         {
             Name = "Product to Delete",
             Description = "Will be deleted",
@@ -147,7 +145,7 @@ public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture
             IsActive = true
         };
         var createResponse = await _client.PostAsJsonAsync("/api/v1/Product", product);
-        var createdProduct = await createResponse.Content.ReadFromJsonAsync<Product>();
+        var createdProduct = await createResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
 
         // Act
         var response = await _client.DeleteAsync($"/api/v1/Product/{createdProduct!.Id}");

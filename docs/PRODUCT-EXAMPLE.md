@@ -22,7 +22,38 @@ public class Product : EntityBase
 
 ```xml
 
-### 2. **DbSet no Context** (`Data/Context/ApplicationDbContext.cs`)
+### 2. **DTOs + Validators** (`Domain/Dtos/ProductDtos.cs` + `Domain/Validators/ProductValidators.cs`)
+
+```csharp
+public record CreateProductRequest
+{
+  public required string Name { get; init; }
+  public string? Description { get; init; }
+  public decimal Price { get; init; }
+  public int Stock { get; init; }
+  public required string Category { get; init; }
+  public bool IsActive { get; init; } = true;
+}
+
+public record ProductResponseDto
+{
+  public long Id { get; init; }
+  public string Name { get; init; } = string.Empty;
+  public string? Description { get; init; }
+  public decimal Price { get; init; }
+  public int Stock { get; init; }
+  public string Category { get; init; } = string.Empty;
+  public bool IsActive { get; init; }
+  public DateTime CreatedAt { get; init; }
+  public DateTime? UpdatedAt { get; init; }
+}
+```
+
+- **Requests separados** para criação, atualização, toggle de status e ajustes de estoque.
+- **Response dedicado** evita expor entidades e mantém contratos versionáveis.
+- **FluentValidation** garante regras (nome obrigatório, preço > 0, estoque >= 0, categoria com limite de caracteres, quantidade no estoque diferente de zero etc.).
+
+### 3. **DbSet no Context** (`Data/Context/ApplicationDbContext.cs`)
 
 ```
 
@@ -31,18 +62,18 @@ public DbSet<Product> Products { get; set; }
 ```
 
 ```csharp
-### 3. **Controller Completo** (`Api/Controllers/ProductController.cs`)
+### 4. **Controller Completo** (`Api/Controllers/ProductController.cs`)
 
 #### Endpoints Disponíveis:
 
-- **GET** `/api/v1/product` - Lista todos os produtos com filtros e métricas de performance
-- **GET** `/api/v1/product/{id}` - Busca produto por ID
-- **POST** `/api/v1/product` - Cria novo produto
-- **PUT** `/api/v1/product/{id}` - Atualiza produto
-- **DELETE** `/api/v1/product/{id}` - Remove produto
-- **GET** `/api/v1/product/GerarExcel` - **Gera arquivo Excel com produtos**
-- **PATCH** `/api/v1/product/{id}/status` - Ativa/desativa produto
-- **PATCH** `/api/v1/product/{id}/stock` - Atualiza estoque
+- **GET** `/api/v1/product` — Lista todos os produtos com filtros e métricas de performance
+- **GET** `/api/v1/product/{id}` — Busca produto por ID (retorna `ProductResponseDto`)
+- **POST** `/api/v1/product` — Cria novo produto a partir de `CreateProductRequest`
+- **PUT** `/api/v1/product/{id}` — Atualiza detalhes via `UpdateProductRequest`
+- **DELETE** `/api/v1/product/{id}` — Remove produto
+- **GET** `/api/v1/product/ExportToExcel` — **Gera arquivo Excel com DTOs filtrados**
+- **PATCH** `/api/v1/product/{id}/status` — Ativa/desativa produto com `UpdateProductStatusRequest`
+- **PATCH** `/api/v1/product/{id}/stock` — Ajusta estoque com `UpdateProductStockRequest`
 
 ---
 
@@ -50,37 +81,36 @@ public DbSet<Product> Products { get; set; }
 
 ### Como Funciona
 
-O endpoint `GerarExcel` usa a biblioteca **MiniExcel** para gerar arquivos Excel de alta performance:
+O endpoint `ExportToExcel` usa a biblioteca **MiniExcel** para gerar arquivos Excel de alta performance (agora exportando `ProductResponseDto`):
 
-[HttpGet("GerarExcel")]
-public async Task<ActionResult> GerarExcelAsync(
-    [FromQuery] bool? isActive,
-    [FromQuery] string? category,
-    CancellationToken cancellationToken)
+```csharp
+[HttpGet("ExportToExcel")]
+public async Task<ActionResult> ExportToExcelAsync(
+  [FromQuery] bool? isActive,
+  [FromQuery] string? category,
+  CancellationToken cancellationToken)
 {
-    // Busca produtos com filtros
-    var products = await _service.GetAllAsync(cancellationToken);
-    var filtered = ApplyFilters(products, isActive, category);
+  var products = await _service.GetAllAsync(cancellationToken);
+  var filtered = ApplyFilters(products, isActive, category).ToList();
+  var dtoResults = filtered.Select(MapToResponse).ToList();
 
-    // Configuração do Excel
-    var config = new OpenXmlConfiguration
-    {
-        FastMode = true,           // Alta performance
-        EnableAutoWidth = true,    // Auto-ajuste de colunas
-        AutoFilter = true          // Filtro automático no Excel
-    };
+  var config = new OpenXmlConfiguration
+  {
+    FastMode = true,
+    EnableAutoWidth = true,
+    AutoFilter = true
+  };
 
-    // Gera Excel em memória
-    var memoryStream = new MemoryStream();
-    await memoryStream.SaveAsAsync(filtered,
-        sheetName: "Products",
-        configuration: config);
+  var memoryStream = new MemoryStream();
+  await memoryStream.SaveAsAsync(dtoResults,
+    sheetName: "Products",
+    configuration: config);
 
-    // Retorna arquivo
-    return File(memoryStream,
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        $"Products_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+  return File(memoryStream,
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    $"Products_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
 }
+```
 ### Características:
 
 ✅ **Alta Performance**: MiniExcel usa FastMode para geração rápida
@@ -126,13 +156,34 @@ POST /api/v1/product
 GET /api/v1/product?isActive=true&category=Electronics
 #### Gerar Excel:
 
-GET /api/v1/product/GerarExcel?isActive=true&category=Electronics
+GET /api/v1/product/ExportToExcel?isActive=true&category=Electronics
 O navegador fará download do arquivo `Products_20260111_143022.xlsx`
 
 #### Atualizar Estoque:
 
-PATCH /api/v1/product/1/stock?quantity=5
-Adiciona 5 unidades ao estoque do produto ID 1.
+```http
+PATCH /api/v1/product/1/stock
+Content-Type: application/json
+
+{
+  "quantity": 5
+}
+```
+
+Adiciona 5 unidades ao estoque do produto ID 1 (valores negativos removem itens).
+
+#### Alterar Status:
+
+```http
+PATCH /api/v1/product/1/status
+Content-Type: application/json
+
+{
+  "isActive": false
+}
+```
+
+Desativa o produto ID 1 utilizando o `UpdateProductStatusRequest`.
 
 ---
 
@@ -207,12 +258,11 @@ Adiciona 5 unidades ao estoque do produto ID 1.
 
 Para estender este exemplo:
 
-1. **Adicionar DTOs** para separar entidades de transporte de dados
-2. **Implementar Validators** com FluentValidation
-3. **Adicionar Paginação** nos endpoints de listagem
-4. **Criar Testes** unitários e de integração
-5. **Adicionar Cache** nos endpoints de leitura
-6. **Implementar Busca** com filtros mais avançados
+1. **Adicionar Paginação/Ordenação** nos endpoints de listagem
+2. **Criar filtros avançados** (preço, categoria, busca textual)
+3. **Adicionar Cache** nos endpoints de leitura
+4. **Implementar Busca** com índices full-text ou Elastic
+5. **Publicar eventos de domínio** (por exemplo, quando estoque atinge nível crítico)
 
 ---
 

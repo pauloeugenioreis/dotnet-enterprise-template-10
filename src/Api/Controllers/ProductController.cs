@@ -1,8 +1,10 @@
+using System;
 using System.Diagnostics;
-using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using MiniExcelLibs;
 using MiniExcelLibs.OpenXml;
+using ProjectTemplate.Domain.Dtos;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 
@@ -43,29 +45,16 @@ public class ProductController : ApiControllerBase
         var stopwatch = Stopwatch.StartNew();
 
         var products = await _service.GetAllAsync(cancellationToken);
-
-        // Apply filters
-        var filtered = products.AsQueryable();
-
-        if (isActive.HasValue)
-        {
-            filtered = filtered.Where(p => p.IsActive == isActive.Value);
-        }
-
-        if (!string.IsNullOrEmpty(category))
-        {
-            filtered = filtered.Where(p => p.Category.Contains(category, StringComparison.OrdinalIgnoreCase));
-        }
-
-        var results = filtered.ToList();
+        var filtered = ApplyFilters(products, isActive, category).ToList();
+        var responseItems = filtered.Select(MapToResponse).ToList();
 
         stopwatch.Stop();
 
         return Ok(new
         {
             executionTime = $"{stopwatch.ElapsedMilliseconds}ms",
-            totalCount = results.Count,
-            items = results
+            totalCount = responseItems.Count,
+            items = responseItems
         });
     }
 
@@ -76,7 +65,7 @@ public class ProductController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Product details</returns>
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProductResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetByIdAsync(long id, CancellationToken cancellationToken)
     {
@@ -88,32 +77,28 @@ public class ProductController : ApiControllerBase
             return NotFound(new { message = $"Product with ID {id} not found" });
         }
 
-        return Ok(product);
+        return Ok(MapToResponse(product));
     }
 
     /// <summary>
     /// Create new product
     /// </summary>
-    /// <param name="product">Product data</param>
+    /// <param name="dto">Product data</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Created product</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(Product), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProductResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateAsync(
-        [FromBody] Product product,
+        [FromBody] CreateProductRequest dto,
         CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {
-            var errors = ModelState.Values
-                .SelectMany(v => v.Errors)
-                .Select(e => e.ErrorMessage)
-                .ToList();
-
-            return BadRequest(new { error = true, messages = errors });
+            return BuildValidationProblem();
         }
 
+        var product = MapToEntity(dto);
         var created = await _service.CreateAsync(product, cancellationToken);
 
         _logger.LogInformation("Product {ProductName} created with ID {ProductId}",
@@ -123,14 +108,14 @@ public class ProductController : ApiControllerBase
             nameof(GetByIdAsync),
             values: new { id = created.Id }) ?? $"/api/v1/product/{created.Id}";
 
-        return Created(location, created);
+        return Created(location, MapToResponse(created));
     }
 
     /// <summary>
     /// Update existing product
     /// </summary>
     /// <param name="id">Product ID</param>
-    /// <param name="product">Updated product data</param>
+    /// <param name="dto">Updated product data</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>No content</returns>
     [HttpPut("{id}")]
@@ -139,22 +124,12 @@ public class ProductController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateAsync(
         long id,
-        [FromBody] Product product,
+        [FromBody] UpdateProductRequest dto,
         CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {
-            var errors = ModelState.Values
-                .SelectMany(v => v.Errors)
-                .Select(e => e.ErrorMessage)
-                .ToList();
-
-            return BadRequest(new { error = true, messages = errors });
-        }
-
-        if (product.Id == 0 || (id > 0 && product.Id != id))
-        {
-            product.Id = id;
+            return BuildValidationProblem();
         }
 
         var existing = await _service.GetByIdAsync(id, cancellationToken);
@@ -164,7 +139,8 @@ public class ProductController : ApiControllerBase
             return NotFound(new { message = $"Product with ID {id} not found" });
         }
 
-        await _service.UpdateAsync(id, product, cancellationToken);
+        ApplyUpdates(existing, dto);
+        await _service.UpdateAsync(id, existing, cancellationToken);
 
         _logger.LogInformation("Product {ProductId} updated", id);
 
@@ -215,23 +191,9 @@ public class ProductController : ApiControllerBase
 
         var stopwatch = Stopwatch.StartNew();
 
-        // Get all products
         var products = await _service.GetAllAsync(cancellationToken);
-
-        // Apply filters
-        var filtered = products.AsQueryable();
-
-        if (isActive.HasValue)
-        {
-            filtered = filtered.Where(p => p.IsActive == isActive.Value);
-        }
-
-        if (!string.IsNullOrEmpty(category))
-        {
-            filtered = filtered.Where(p => p.Category.Contains(category, StringComparison.OrdinalIgnoreCase));
-        }
-
-        var results = filtered.ToList();
+        var filtered = ApplyFilters(products, isActive, category).ToList();
+        var dtoResults = filtered.Select(MapToResponse).ToList();
 
         // Configure Excel generation
         var config = new OpenXmlConfiguration
@@ -243,7 +205,7 @@ public class ProductController : ApiControllerBase
 
         // Generate Excel file in memory
         var memoryStream = new MemoryStream();
-        await memoryStream.SaveAsAsync(results, sheetName: "Products", configuration: config);
+        await memoryStream.SaveAsAsync(dtoResults, sheetName: "Products", configuration: config);
 
         memoryStream.Seek(0, SeekOrigin.Begin);
 
@@ -251,7 +213,7 @@ public class ProductController : ApiControllerBase
 
         _logger.LogInformation(
             "Excel generated with {Count} products in {ElapsedMs}ms",
-            results.Count,
+            dtoResults.Count,
             stopwatch.ElapsedMilliseconds);
 
         // Return file
@@ -265,7 +227,7 @@ public class ProductController : ApiControllerBase
     /// Activate or deactivate product
     /// </summary>
     /// <param name="id">Product ID</param>
-    /// <param name="isActive">Active status</param>
+    /// <param name="dto">Request payload</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>No content</returns>
     [HttpPatch("{id}/status")]
@@ -273,22 +235,29 @@ public class ProductController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateStatusAsync(
         long id,
-        [FromQuery] bool isActive,
+        [FromBody] UpdateProductStatusRequest dto,
         CancellationToken cancellationToken)
     {
+        if (!ModelState.IsValid)
+        {
+            return BuildValidationProblem();
+        }
+
         var product = await _service.GetByIdAsync(id, cancellationToken);
         if (product == null)
         {
             return NotFound(new { message = $"Product with ID {id} not found" });
         }
 
-        product.IsActive = isActive;
+        var desiredStatus = dto.IsActive ?? product.IsActive;
+        product.IsActive = desiredStatus;
+        product.UpdatedAt = DateTime.UtcNow;
         await _service.UpdateAsync(id, product, cancellationToken);
 
         _logger.LogInformation(
             "Product {ProductId} status changed to {Status}",
             id,
-            isActive ? "active" : "inactive");
+            desiredStatus ? "active" : "inactive");
 
         return NoContent();
     }
@@ -297,25 +266,30 @@ public class ProductController : ApiControllerBase
     /// Update product stock
     /// </summary>
     /// <param name="id">Product ID</param>
-    /// <param name="quantity">Quantity to add (positive) or remove (negative)</param>
+    /// <param name="dto">Quantity to add (positive) or remove (negative)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Updated product</returns>
     [HttpPatch("{id}/stock")]
-    [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProductResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateStockAsync(
         long id,
-        [FromQuery] int quantity,
+        [FromBody] UpdateProductStockRequest dto,
         CancellationToken cancellationToken)
     {
+        if (!ModelState.IsValid)
+        {
+            return BuildValidationProblem();
+        }
+
         var product = await _service.GetByIdAsync(id, cancellationToken);
         if (product == null)
         {
             return NotFound(new { message = $"Product with ID {id} not found" });
         }
 
-        var newStock = product.Stock + quantity;
+        var newStock = product.Stock + dto.Quantity;
 
         if (newStock < 0)
         {
@@ -323,21 +297,86 @@ public class ProductController : ApiControllerBase
             {
                 message = "Insufficient stock",
                 currentStock = product.Stock,
-                requestedChange = quantity,
+                requestedChange = dto.Quantity,
                 resultingStock = newStock
             });
         }
 
         product.Stock = newStock;
+        product.UpdatedAt = DateTime.UtcNow;
         await _service.UpdateAsync(id, product, cancellationToken);
 
         _logger.LogInformation(
             "Product {ProductId} stock updated: {OldStock} -> {NewStock} ({Change})",
             id,
-            product.Stock - quantity,
+            product.Stock - dto.Quantity,
             product.Stock,
-            quantity > 0 ? $"+{quantity}" : quantity.ToString());
+            dto.Quantity > 0 ? $"+{dto.Quantity}" : dto.Quantity.ToString());
 
-        return Ok(product);
+        return Ok(MapToResponse(product));
+    }
+
+    private static IEnumerable<Product> ApplyFilters(
+        IEnumerable<Product> products,
+        bool? isActive,
+        string? category)
+    {
+        var query = products.AsQueryable();
+
+        if (isActive.HasValue)
+        {
+            query = query.Where(p => p.IsActive == isActive.Value);
+        }
+
+        if (!string.IsNullOrEmpty(category))
+        {
+            query = query.Where(p => p.Category.Contains(category, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return query;
+    }
+
+    private static ProductResponseDto MapToResponse(Product product) => new()
+    {
+        Id = product.Id,
+        Name = product.Name,
+        Description = product.Description,
+        Price = product.Price,
+        Stock = product.Stock,
+        Category = product.Category,
+        IsActive = product.IsActive,
+        CreatedAt = product.CreatedAt,
+        UpdatedAt = product.UpdatedAt
+    };
+
+    private static Product MapToEntity(CreateProductRequest dto) => new()
+    {
+        Name = dto.Name,
+        Description = dto.Description,
+        Price = dto.Price,
+        Stock = dto.Stock,
+        Category = dto.Category,
+        IsActive = dto.IsActive
+    };
+
+    private static void ApplyUpdates(Product product, UpdateProductRequest dto)
+    {
+        product.Name = dto.Name;
+        product.Description = dto.Description;
+        product.Price = dto.Price;
+        product.Stock = dto.Stock;
+        product.Category = dto.Category;
+        product.IsActive = dto.IsActive;
+        product.UpdatedAt = DateTime.UtcNow;
+    }
+
+    private BadRequestObjectResult BuildValidationProblem()
+    {
+        var errors = ModelState.Values
+            .SelectMany(v => v.Errors)
+            .Select(e => e.ErrorMessage)
+            .ToList();
+
+        return BadRequest(new { error = true, messages = errors });
     }
 }

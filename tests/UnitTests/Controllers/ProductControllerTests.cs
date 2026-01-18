@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ProjectTemplate.Api.Controllers;
+using ProjectTemplate.Domain.Dtos;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 using Xunit;
@@ -91,12 +92,13 @@ public class ProductControllerTests
     }
 
     [Fact]
-    public async Task CreateAsync_WithValidProduct_ReturnsCreatedAtAction()
+    public async Task CreateAsync_WithValidDto_ReturnsCreatedAtAction()
     {
         // Arrange
-        var newProduct = new Product
+        var newProduct = new CreateProductRequest
         {
             Name = "New Product",
+            Description = "Desc",
             Price = 25.99m,
             Stock = 30,
             Category = "Games",
@@ -121,7 +123,7 @@ public class ProductControllerTests
     }
 
     [Fact]
-    public async Task UpdateAsync_WithValidIdAndProduct_ReturnsOkResult()
+    public async Task UpdateAsync_WithValidDto_ReturnsNoContent()
     {
         // Arrange
         var productId = 1L;
@@ -134,10 +136,10 @@ public class ProductControllerTests
             Category = "Electronics",
             IsActive = true
         };
-        var updatedProduct = new Product
+        var updatedProduct = new UpdateProductRequest
         {
-            Id = productId,
             Name = "Updated Product",
+            Description = existingProduct.Description,
             Price = 15.99m,
             Stock = 100,
             Category = "Electronics",
@@ -159,7 +161,15 @@ public class ProductControllerTests
     {
         // Arrange
         var productId = 999L;
-        var product = new Product { Id = productId, Name = "Test", Price = 10m, Stock = 10, Category = "Test", IsActive = true };
+        var product = new UpdateProductRequest
+        {
+            Name = "Test",
+            Description = "Desc",
+            Price = 10m,
+            Stock = 10,
+            Category = "Test",
+            IsActive = true
+        };
         _mockService.Setup(s => s.GetByIdAsync(productId, It.IsAny<CancellationToken>())).ReturnsAsync((Product?)null);
 
         // Act
@@ -170,21 +180,23 @@ public class ProductControllerTests
     }
 
     [Fact]
-    public async Task UpdateAsync_WithMismatchedIds_StillSucceeds()
+    public async Task UpdateStatusAsync_WithValidPayload_ReturnsNoContent()
     {
         // Arrange
         var productId = 1L;
-        var product = new Product { Id = 2L, Name = "Test", Price = 10m, Stock = 10, Category = "Test", IsActive = true };
         var existingProduct = new Product { Id = productId, Name = "Existing", Price = 5m, Stock = 5, Category = "Test", IsActive = true };
 
         _mockService.Setup(s => s.GetByIdAsync(productId, It.IsAny<CancellationToken>())).ReturnsAsync(existingProduct);
         _mockService.Setup(s => s.UpdateAsync(productId, It.IsAny<Product>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
+        var dto = new UpdateProductStatusRequest { IsActive = false };
+
         // Act
-        var result = await _controller.UpdateAsync(productId, product, CancellationToken.None);
+        var result = await _controller.UpdateStatusAsync(productId, dto, CancellationToken.None);
 
         // Assert
         result.Should().BeOfType<NoContentResult>();
+        existingProduct.IsActive.Should().BeFalse();
     }
 
     [Fact]
