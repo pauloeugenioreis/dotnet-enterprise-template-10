@@ -1,0 +1,46 @@
+version: "0.2"
+language: en
+ignorePaths:
+  - .git
+  - node_modules
+  - bin
+  - obj
+  - coverage
+  - "**/bin/**"
+  - "**/obj/**"
+  - "**/node_modules/**"
+  - ".github/workflows/*.yml"
+  - "monitoring/**"
+  - "docs/examples/**/screenshots/**"
+words:
+  - AppInsights
+  - appsettings
+  - Auth
+  - autoscaling
+  - bootstrapper
+  - chocolatey
+  - cronjob
+  - DTOs
+  - EFCore
+  - githubactions
+  - hpa
+  - Jaeger
+  - kustomize
+  - Linq2Db
+  - markdownlint
+  - minikube
+  - multiarch
+  - namespace
+  - nodejs
+  - postdeploy
+  - Postgres
+  - Prometheus
+  - roadmap
+  - ssh
+  - telemetry
+  - Terraform
+  - todo
+  - troubleshooting
+  - webhook
+allowCompoundWords: true
+caseSensitive: false

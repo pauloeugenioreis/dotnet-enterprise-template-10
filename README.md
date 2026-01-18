@@ -207,6 +207,29 @@ new-project.bat MeuProjeto
 
 ---
 
+## 🧱 Dev Container / Codespaces
+
+> Requer Docker Desktop (ou Docker Engine) com suporte ao Compose v2 habilitado.
+
+### VS Code (Dev Containers)
+
+1. Instale a extensão **Dev Containers** (ms-vscode-remote.remote-containers).
+2. Abra o repositório no VS Code e execute o comando `Dev Containers: Reopen in Container`.
+3. O `.devcontainer` monta automaticamente o `docker-compose.yml` raiz, inicializando SQL Server, Oracle, PostgreSQL, MySQL, Postgres (event sourcing), Jaeger, Prometheus e Grafana.
+4. Ao concluir o build, o comando `dotnet restore && dotnet tool restore` já terá sido executado dentro do container.
+5. Use o terminal integrado para rodar `dotnet run --project src/Api` ou qualquer script; o workspace está disponível em `/workspace`.
+
+### GitHub Codespaces
+
+1. Clique em **Code ▸ Create codespace on main** (ou branch desejada).
+2. O Codespace usa os mesmos arquivos do `.devcontainer`, então todas as dependências (SDK .NET 10 preview, Node 20, ferramentas de lint) já estarão disponíveis.
+3. Os serviços definidos no Docker Compose são levantados automaticamente; acompanhe os logs na aba **Ports** e **Terminal**.
+4. As portas mais comuns (5000/5001 para API, 16686 para Jaeger, 3000 para Grafana, 9090 para Prometheus) ficam encaminhadas e descritas no `devcontainer.json`.
+
+> Dica: se não quiser subir todos os bancos, edite `runServices` em `.devcontainer/devcontainer.json` antes de abrir o container e remova os serviços dispensáveis.
+
+---
+
 ## ⚙️ Configuração Inicial
 
 Após criar seu projeto, siga estes passos:
