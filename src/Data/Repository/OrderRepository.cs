@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ProjectTemplate.Data.Context;
+using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 
@@ -8,11 +9,16 @@ namespace ProjectTemplate.Data.Repository;
 /// <summary>
 /// Order repository with custom query methods
 /// </summary>
-public class OrderRepository : Repository<Order>, IOrderRepository
+public class OrderRepository : HybridRepository<Order>, IOrderRepository
 {
     private readonly ApplicationDbContext _dbContext;
 
-    public OrderRepository(ApplicationDbContext context) : base(context)
+    public OrderRepository(
+        ApplicationDbContext context,
+        IEventStore eventStore,
+        EventSourcingSettings settings,
+        IExecutionContextService? executionContextService = null)
+        : base(context, eventStore, settings, executionContextService)
     {
         _dbContext = context;
     }

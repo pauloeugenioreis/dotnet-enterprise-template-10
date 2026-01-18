@@ -78,7 +78,7 @@ public static class InfrastructureExtensions
         services.AddCustomizedApiVersioning();
 
         // Application dependencies
-        services.AddApplicationDependencies();
+        services.AddApplicationDependencies(appSettings.Value);
 
         return services;
     }

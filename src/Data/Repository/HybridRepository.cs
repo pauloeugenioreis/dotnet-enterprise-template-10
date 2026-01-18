@@ -116,31 +116,20 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         return _settings.AuditEntities.Contains(entityType);
     }
 
-    private async Task RecordCreatedEvent(TEntity entity, CancellationToken cancellationToken)
+    private Task RecordCreatedEvent(TEntity entity, CancellationToken cancellationToken = default)
     {
         var entityType = typeof(TEntity).Name;
         var entityId = entity.Id.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-        // Create type-specific event based on entity type
-        object eventData = entityType switch
+        return entity switch
         {
-            "Order" => CreateOrderCreatedEvent(entity as Order),
-            "Product" => CreateProductCreatedEvent(entity as Product),
-            _ => entity // Generic fallback
+            Order order => AppendDomainEventAsync(entityType, entityId, CreateOrderCreatedEvent(order), cancellationToken),
+            Product product => AppendDomainEventAsync(entityType, entityId, CreateProductCreatedEvent(product), cancellationToken),
+            _ => AppendDomainEventAsync(entityType, entityId, entity, cancellationToken)
         };
-
-        var metadata = GetMetadata();
-
-        await _eventStore.AppendEventAsync(
-            aggregateType: entityType,
-            aggregateId: entityId,
-            eventData: eventData,
-            userId: GetCurrentUserId(),
-            metadata: metadata,
-            cancellationToken: cancellationToken);
     }
 
-    private async Task RecordUpdatedEvent(
+    private Task RecordUpdatedEvent(
         TEntity entity,
         Dictionary<string, object> changes,
         CancellationToken cancellationToken)
@@ -148,51 +137,47 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         var entityType = typeof(TEntity).Name;
         var entityId = entity.Id.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-        // Create type-specific update event
-        object eventData = entityType switch
+        return entity switch
         {
-            "Order" => new OrderUpdatedEvent
+            Order => AppendDomainEventAsync(entityType, entityId, new OrderUpdatedEvent
             {
                 OrderId = entity.Id,
                 Changes = changes
-            },
-            "Product" => new ProductUpdatedEvent
+            }, cancellationToken),
+            Product => AppendDomainEventAsync(entityType, entityId, new ProductUpdatedEvent
             {
                 ProductId = entity.Id,
                 Changes = changes
-            },
-            _ => new { EntityId = entity.Id, Changes = changes }
+            }, cancellationToken),
+            _ => AppendDomainEventAsync(entityType, entityId, new { EntityId = entity.Id, Changes = changes }, cancellationToken)
         };
-
-        var metadata = GetMetadata();
-
-        await _eventStore.AppendEventAsync(
-            aggregateType: entityType,
-            aggregateId: entityId,
-            eventData: eventData,
-            userId: GetCurrentUserId(),
-            metadata: metadata,
-            cancellationToken: cancellationToken);
     }
 
-    private async Task RecordDeletedEvent(TEntity entity, CancellationToken cancellationToken)
+    private Task RecordDeletedEvent(TEntity entity, CancellationToken cancellationToken)
     {
         var entityType = typeof(TEntity).Name;
         var entityId = entity.Id.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-        object eventData = entityType switch
+        return entity switch
         {
-            "Order" => new OrderDeletedEvent { OrderId = entity.Id },
-            "Product" => new ProductDeletedEvent { ProductId = entity.Id },
-            _ => new { EntityId = entity.Id }
+            Order => AppendDomainEventAsync(entityType, entityId, new OrderDeletedEvent { OrderId = entity.Id }, cancellationToken),
+            Product => AppendDomainEventAsync(entityType, entityId, new ProductDeletedEvent { ProductId = entity.Id }, cancellationToken),
+            _ => AppendDomainEventAsync(entityType, entityId, new { EntityId = entity.Id }, cancellationToken)
         };
+    }
 
+    private Task AppendDomainEventAsync<TEvent>(
+        string aggregateType,
+        string aggregateId,
+        TEvent payload,
+        CancellationToken cancellationToken) where TEvent : class
+    {
         var metadata = GetMetadata();
 
-        await _eventStore.AppendEventAsync(
-            aggregateType: entityType,
-            aggregateId: entityId,
-            eventData: eventData,
+        return _eventStore.AppendEventAsync(
+            aggregateType: aggregateType,
+            aggregateId: aggregateId,
+            eventData: payload,
             userId: GetCurrentUserId(),
             metadata: metadata,
             cancellationToken: cancellationToken);
@@ -203,21 +188,31 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         CancellationToken cancellationToken)
     {
         var changes = new Dictionary<string, object>();
-
         var entry = _context.Entry(entity);
-        var existingEntity = await _dbSet.FindAsync(new object[] { entity.Id }, cancellationToken);
 
-        if (existingEntity == null)
-        {
-            return changes;
-        }
-
-        var existingEntry = _context.Entry(existingEntity);
+        // Detached entities don't have original values tracked, so fall back to the database snapshot
+        Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues? databaseValues = null;
 
         foreach (var property in entry.Properties)
         {
             var currentValue = property.CurrentValue;
-            var originalValue = existingEntry.Property(property.Metadata.Name).CurrentValue;
+            object? originalValue;
+
+            if (entry.State == EntityState.Detached)
+            {
+                databaseValues ??= await entry.GetDatabaseValuesAsync(cancellationToken);
+
+                if (databaseValues == null)
+                {
+                    return changes;
+                }
+
+                originalValue = databaseValues[property.Metadata.Name];
+            }
+            else
+            {
+                originalValue = property.OriginalValue;
+            }
 
             if (!Equals(currentValue, originalValue))
             {

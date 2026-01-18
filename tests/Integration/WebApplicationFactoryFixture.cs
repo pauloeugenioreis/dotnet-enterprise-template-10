@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -5,7 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using ProjectTemplate.Domain;
 using ProjectTemplate.Data.Context;
+using ProjectTemplate.Domain.Interfaces;
+using ProjectTemplate.Integration.Tests.Support;
 
 namespace ProjectTemplate.Integration.Tests;
 
@@ -24,7 +29,15 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
         {
             config.AddInMemoryCollection(new Dictionary<string, string>
             {
-                ["Authentication:Enabled"] = "false"
+                ["Authentication:Enabled"] = "false", // Backward compatibility with legacy key
+                ["AppSettings:Authentication:Enabled"] = "false",
+                ["AppSettings:Infrastructure:EventSourcing:Enabled"] = "true",
+                ["AppSettings:Infrastructure:EventSourcing:Mode"] = "Hybrid",
+                ["AppSettings:Infrastructure:EventSourcing:Provider"] = "Custom",
+                ["AppSettings:Infrastructure:EventSourcing:EnableAuditApi"] = "true",
+                ["AppSettings:Infrastructure:EventSourcing:StoreMetadata"] = "true",
+                ["AppSettings:Infrastructure:EventSourcing:AuditEntities:0"] = "Order",
+                ["AppSettings:Infrastructure:EventSourcing:AuditEntities:1"] = "Product"
             }!);
         });
 
@@ -67,6 +80,22 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
 
             // Register DbContext as ApplicationDbContext for Repository<T> that expects DbContext
             services.AddScoped<DbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+
+            // Replace Marten-based event store with an in-memory implementation for tests
+            services.RemoveAll(typeof(IEventStore));
+            services.AddSingleton<IEventStore, InMemoryEventStore>();
+
+            // Ensure EventSourcing settings are available for controllers
+            services.RemoveAll<EventSourcingSettings>();
+            services.AddSingleton(new EventSourcingSettings
+            {
+                Enabled = true,
+                Mode = EventSourcingMode.Hybrid,
+                Provider = "Custom",
+                EnableAuditApi = true,
+                StoreMetadata = true,
+                AuditEntities = new List<string> { "Order", "Product" }
+            });
 
             // Configure API Versioning for tests
             services.AddApiVersioning(options =>

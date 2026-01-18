@@ -21,15 +21,15 @@ public static class EventSourcingExtension
     {
         var settings = appSettings.Value.Infrastructure.EventSourcing;
 
+        // Register settings so repositories/controllers can resolve even when disabled
+        services.AddSingleton(settings);
+
         if (!settings.Enabled)
         {
             // Event Sourcing disabled - register empty implementation
             services.AddScoped<IEventStore, NoOpEventStore>();
             return services;
         }
-
-        // Register settings
-        services.AddSingleton(settings);
 
         // Configure based on provider
         switch (settings.Provider.ToLowerInvariant())

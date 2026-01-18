@@ -484,6 +484,132 @@ Reconstrói o estado atual a partir dos eventos.
 
 ---
 
+## Cenários Reais End-to-End
+
+### 1. Preparando o cenário (payloads reais)
+
+**Criar produto (gera `ProductCreatedEvent`)**
+
+```http
+POST /api/v1/Product
+Content-Type: application/json
+
+{
+  "name": "Telemetry Headphones",
+  "description": "Noise cancelling headset criada para auditoria",
+  "price": 199.9,
+  "stock": 25,
+  "category": "audit",
+  "isActive": true
+}
+```
+
+**Criar pedido (gera `OrderCreatedEvent`)**
+
+```http
+POST /api/v1/Order
+Content-Type: application/json
+
+{
+  "customerName": "Audit Customer",
+  "customerEmail": "audit@example.com",
+  "shippingAddress": "Rua Teste, 123 - São Paulo",
+  "phone": "+55 11 99999-1234",
+  "items": [
+    {
+      "productId": 42,
+      "quantity": 1,
+      "unitPrice": 199.9
+    }
+  ],
+  "notes": "Pedido criado via cenário Event Sourcing"
+}
+```
+
+### 2. Mutação controlada (gera `OrderUpdatedEvent`)
+
+```http
+PATCH /api/v1/Order/42/status
+Content-Type: application/json
+
+{
+  "status": "Processing",
+  "notes": "Priorizar envio para o cliente de auditoria"
+}
+```
+
+### 3. Consultar histórico completo
+
+```http
+GET /api/Audit/Order/42
+```
+
+**Resposta truncada:**
+
+```json
+[
+  {
+    "eventType": "OrderCreatedEvent",
+    "aggregateType": "Order",
+    "aggregateId": "42",
+    "occurredOn": "2026-01-18T13:15:11Z",
+    "version": 1,
+    "metadata": {
+      "MachineName": "devbox",
+      "Timestamp": "2026-01-18T13:15:11Z"
+    }
+  },
+  {
+    "eventType": "OrderUpdatedEvent",
+    "aggregateType": "Order",
+    "aggregateId": "42",
+    "occurredOn": "2026-01-18T13:16:02Z",
+    "version": 2,
+    "metadata": {
+      "MachineName": "devbox",
+      "Timestamp": "2026-01-18T13:16:02Z"
+    }
+  }
+]
+```
+
+### 4. Time travel com checkpoint
+
+1. Capture o timestamp *antes* de atualizar o pedido (por exemplo `2026-01-18T13:15:30Z`).
+2. Chame `GET /api/Audit/Order/42/at/2026-01-18T13:15:30Z`.
+
+```json
+{
+  "entityType": "Order",
+  "entityId": "42",
+  "timestamp": "2026-01-18T13:15:30Z",
+  "eventCount": 1,
+  "events": [
+    {
+      "eventType": "OrderCreatedEvent",
+      "version": 1,
+      "occurredOn": "2026-01-18T13:15:11Z"
+    }
+  ]
+}
+```
+
+### 5. Replay automatizado
+
+- **Coleção REST Client/VS Code:** execute os passos descritos em [docs/examples/event-sourcing.http](docs/examples/event-sourcing.http). Ela já define as variáveis `@productId`, `@orderId` e `@timeTravelCutoff` para que você replique o fluxo acima com um clique.
+- **Script shell:** use [scripts/event-sourcing/replay-order.sh](scripts/event-sourcing/replay-order.sh) para baixar o histórico e disparar o replay direto do terminal (requer `curl` + `jq`).
+
+```bash
+API_URL=http://localhost:8080 ./scripts/event-sourcing/replay-order.sh 42 Order
+```
+
+### 6. Garantias automatizadas
+
+- Os testes de integração em [tests/Integration/Controllers/AuditControllerTests.cs](tests/Integration/Controllers/AuditControllerTests.cs) criam pedidos reais, modificam o status e validam os endpoints `/api/Audit/*` (histórico, time travel e replay) usando um `IEventStore` em memória.
+- Rode `dotnet test` (ou `dotnet test tests/Integration/Integration.csproj --filter AuditController`) para garantir que regressões no AuditController sejam detectadas junto com o restante da suíte.
+
+---
+
 <a id="eventos-disponiveis"></a>
 
 ## Eventos Disponíveis

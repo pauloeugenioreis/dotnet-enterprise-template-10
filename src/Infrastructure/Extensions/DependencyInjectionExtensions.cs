@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using ProjectTemplate.Application.Services;
 using ProjectTemplate.Data.Repository;
+using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Interfaces;
 using ProjectTemplate.Infrastructure.Services;
 
@@ -12,11 +13,11 @@ namespace ProjectTemplate.Infrastructure.Extensions;
 /// </summary>
 public static class DependencyInjectionExtensions
 {
-    public static IServiceCollection AddApplicationDependencies(this IServiceCollection services)
+    public static IServiceCollection AddApplicationDependencies(this IServiceCollection services, AppSettings appSettings)
     {
         // Scan and register ALL repositories automatically using AsMatchingInterface()
         // AsMatchingInterface() registers only the interface that matches the class name:
-        // 
+        //
         // ✅ Repository<Product> → IRepository<Product>
         // ✅ ProductDapperRepository → IProductDapperRepository (NOT IRepository<Product>)
         // ✅ ProductAdoRepository → IProductAdoRepository (NOT IRepository<Product>)
@@ -42,7 +43,14 @@ public static class DependencyInjectionExtensions
         );
 
         // Register generic repository and service (fallback)
-        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        if (appSettings.Infrastructure.EventSourcing.Enabled)
+        {
+            services.AddScoped(typeof(IRepository<>), typeof(HybridRepository<>));
+        }
+        else
+        {
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        }
         services.AddScoped(typeof(IService<>), typeof(Service<>));
 
         // Register UserRepository explicitly (doesn't inherit from Repository<T>)

@@ -1,0 +1,66 @@
+### Variables (adjust apiUrl if you exposed the API on a different port)
+@apiUrl = http://localhost:8080
+@apiVersion = v1
+@customerEmail = audit.e2e@example.com
+
+### 1. Create a catalog product that will be referenced by the order
+# @name create_product
+POST {{apiUrl}}/api/{{apiVersion}}/Product
+Content-Type: application/json
+
+{
+  "name": "Telemetry Headphones",
+  "description": "Noise cancelling headset created by the event-sourcing recipe",
+  "price": 199.9,
+  "stock": 25,
+  "category": "audit",
+  "isActive": true
+}
+
+@productId = {{create_product.response.body.id}}
+
+### 2. Create an order so that HybridRepository generates the OrderCreatedEvent
+# @name create_order
+POST {{apiUrl}}/api/{{apiVersion}}/Order
+Content-Type: application/json
+
+{
+  "customerName": "Audit Customer",
+  "customerEmail": "{{customerEmail}}",
+  "shippingAddress": "Rua Teste, 123 - São Paulo - SP",
+  "phone": "+55 11 99999 1234",
+  "items": [
+    {
+      "productId": {{productId}},
+      "quantity": 1,
+      "unitPrice": 199.9
+    }
+  ],
+  "notes": "Pedido criado via collection event-sourcing.http"
+}
+
+@orderId = {{create_order.response.body.id}}
+
+### 3. Capture the timestamp just before we mutate the order (used for the time-travel step)
+@timeTravelCutoff = {{$datetime rfc3339}}
+
+### 4. Change the order status to generate an OrderUpdatedEvent
+PATCH {{apiUrl}}/api/{{apiVersion}}/Order/{{orderId}}/status
+Content-Type: application/json
+
+{
+  "status": "Processing",
+  "notes": "Atualizado pela collection event-sourcing.http"
+}
+
+### 5. Fetch the full audit trail for this aggregate
+GET {{apiUrl}}/api/Audit/Order/{{orderId}}
+Accept: application/json
+
+### 6. Travel back in time using the timestamp captured in step 3
+GET {{apiUrl}}/api/Audit/Order/{{orderId}}/at/{{timeTravelCutoff}}
+Accept: application/json
+
+### 7. Replay every event to reconstruct the aggregate state
+POST {{apiUrl}}/api/Audit/Order/{{orderId}}/replay
+Accept: application/json
