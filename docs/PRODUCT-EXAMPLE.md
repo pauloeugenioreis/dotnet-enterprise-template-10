@@ -59,7 +59,7 @@ public DbSet<Product> Products { get; set; }
 
 ### 4. **Controller Completo** (`Api/Controllers/ProductController.cs`)
 
-#### Endpoints Disponíveis:
+#### Endpoints Disponíveis
 
 - **GET** `/api/v1/product` — Lista todos os produtos com filtros e métricas de performance
 - **GET** `/api/v1/product/{id}` — Busca produto por ID (retorna `ProductResponseDto`)
@@ -221,6 +221,7 @@ Desativa o produto ID 1 utilizando o `UpdateProductStatusRequest`.
   ]
 }
 ```
+
 ---
 
 ## 🎨 Features Demonstradas
