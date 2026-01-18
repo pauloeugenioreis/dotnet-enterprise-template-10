@@ -33,75 +33,85 @@ public class OrderService : Service<Order>, IOrderService
         {
             throw new ValidationException("Order must have at least one item");
         }
+        await using var transaction = await _orderRepository.BeginTransactionAsync(cancellationToken);
 
-        // Create order entity
-        var order = new Order
+        try
         {
-            OrderNumber = GenerateOrderNumber(),
-            CustomerName = dto.CustomerName,
-            CustomerEmail = dto.CustomerEmail,
-            CustomerPhone = dto.Phone,
-            ShippingAddress = dto.ShippingAddress,
-            Status = OrderStatus.Pending,
-            Notes = dto.Notes,
-            Items = new List<OrderItem>()
-        };
-
-        decimal subtotal = 0;
-
-        // Process items
-        foreach (var itemDto in dto.Items)
-        {
-            var product = await _productRepository.GetByIdAsync(itemDto.ProductId, cancellationToken);
-
-            if (product == null)
+            // Create order entity
+            var order = new Order
             {
-                throw new NotFoundException($"Product {itemDto.ProductId} not found");
-            }
-
-            if (!product.IsActive)
-            {
-                throw new BusinessException($"Product {product.Name} is not available");
-            }
-
-            if (product.Stock < itemDto.Quantity)
-            {
-                throw new BusinessException($"Insufficient stock for {product.Name}. Available: {product.Stock}");
-            }
-
-            var itemSubtotal = itemDto.UnitPrice * itemDto.Quantity;
-            subtotal += itemSubtotal;
-
-            var orderItem = new OrderItem
-            {
-                ProductId = itemDto.ProductId,
-                ProductName = product.Name,
-                Quantity = itemDto.Quantity,
-                UnitPrice = itemDto.UnitPrice,
-                Subtotal = itemSubtotal
+                OrderNumber = GenerateOrderNumber(),
+                CustomerName = dto.CustomerName,
+                CustomerEmail = dto.CustomerEmail,
+                CustomerPhone = dto.Phone,
+                ShippingAddress = dto.ShippingAddress,
+                Status = OrderStatus.Pending,
+                Notes = dto.Notes,
+                Items = new List<OrderItem>()
             };
 
-            order.Items.Add(orderItem);
+            decimal subtotal = 0;
 
-            // Update product stock
-            product.Stock -= itemDto.Quantity;
-            await _productRepository.UpdateAsync(product, cancellationToken);
+            // Process items
+            foreach (var itemDto in dto.Items)
+            {
+                var product = await _productRepository.GetByIdAsync(itemDto.ProductId, cancellationToken);
+
+                if (product == null)
+                {
+                    throw new NotFoundException($"Product {itemDto.ProductId} not found");
+                }
+
+                if (!product.IsActive)
+                {
+                    throw new BusinessException($"Product {product.Name} is not available");
+                }
+
+                if (product.Stock < itemDto.Quantity)
+                {
+                    throw new BusinessException($"Insufficient stock for {product.Name}. Available: {product.Stock}");
+                }
+
+                var itemSubtotal = itemDto.UnitPrice * itemDto.Quantity;
+                subtotal += itemSubtotal;
+
+                var orderItem = new OrderItem
+                {
+                    ProductId = itemDto.ProductId,
+                    ProductName = product.Name,
+                    Quantity = itemDto.Quantity,
+                    UnitPrice = itemDto.UnitPrice,
+                    Subtotal = itemSubtotal
+                };
+
+                order.Items.Add(orderItem);
+
+                // Update product stock
+                product.Stock -= itemDto.Quantity;
+                await _productRepository.UpdateAsync(product, cancellationToken);
+            }
+
+            // Calculate totals
+            order.Subtotal = subtotal;
+            order.Tax = subtotal * 0.10m; // 10% tax
+            order.ShippingCost = subtotal > 100 ? 0 : 10.00m; // Free shipping over $100
+            order.Total = order.Subtotal + order.Tax + order.ShippingCost;
+
+            // Save order
+            var createdOrder = await _orderRepository.AddAsync(order, cancellationToken);
+            await _orderRepository.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            _logger.LogInformation("Order {OrderNumber} created for {CustomerEmail}. Total: {Total:C}",
+                order.OrderNumber, order.CustomerEmail, order.Total);
+
+            return MapToResponseDto(createdOrder);
         }
-
-        // Calculate totals
-        order.Subtotal = subtotal;
-        order.Tax = subtotal * 0.10m; // 10% tax
-        order.ShippingCost = subtotal > 100 ? 0 : 10.00m; // Free shipping over $100
-        order.Total = order.Subtotal + order.Tax + order.ShippingCost;
-
-        // Save order
-        var createdOrder = await _orderRepository.AddAsync(order, cancellationToken);
-        await _orderRepository.SaveChangesAsync(cancellationToken);
-
-        _logger.LogInformation("Order {OrderNumber} created for {CustomerEmail}. Total: {Total:C}",
-            order.OrderNumber, order.CustomerEmail, order.Total);
-
-        return MapToResponseDto(createdOrder);
+        catch
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 
     public async Task<OrderResponseDto> UpdateOrderStatusAsync(long id, UpdateOrderStatusDto dto, CancellationToken cancellationToken = default)

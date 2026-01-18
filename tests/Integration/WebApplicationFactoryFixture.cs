@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using ProjectTemplate.Domain;
 using ProjectTemplate.Data.Context;
+using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Interfaces;
 using ProjectTemplate.Integration.Tests.Support;
 

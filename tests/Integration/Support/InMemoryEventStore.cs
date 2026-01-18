@@ -204,8 +204,8 @@ internal sealed class InMemoryEventStore : IEventStore
         return Task.FromResult(stats);
     }
 
-    private static string BuildStreamKey(string aggregateType, string aggregateId) =>
-        $"{aggregateType}:{aggregateId}";
+    private static string BuildStreamKey(string aggregateType, string aggregateId)
+        => $"{aggregateType}:{aggregateId}";
 
     private List<DomainEvent> FilterByAggregate(string aggregateType, string aggregateId)
     {

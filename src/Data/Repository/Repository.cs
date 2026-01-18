@@ -9,7 +9,7 @@ namespace ProjectTemplate.Data.Repository;
 /// This is the default ORM implementation
 /// </summary>
 /// <typeparam name="TEntity">Entity type</typeparam>
-public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
+public class Repository<TEntity> : IRepository<TEntity>, ITransactionalRepository where TEntity : class
 {
     protected readonly DbContext _context;
     protected readonly DbSet<TEntity> _dbSet;
@@ -103,5 +103,16 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     public virtual async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public virtual async Task<IRepositoryTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        if (!_context.Database.IsRelational())
+        {
+            return new NoOpRepositoryTransaction();
+        }
+
+        var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+        return new EfRepositoryTransaction(transaction);
     }
 }

@@ -5,7 +5,7 @@ namespace ProjectTemplate.Domain.Interfaces;
 /// <summary>
 /// Order-specific repository interface with custom methods
 /// </summary>
-public interface IOrderRepository : IRepository<Order>
+public interface IOrderRepository : IRepository<Order>, ITransactionalRepository
 {
     /// <summary>
     /// Get orders by customer email

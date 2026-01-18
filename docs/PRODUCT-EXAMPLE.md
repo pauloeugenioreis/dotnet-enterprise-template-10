@@ -20,8 +20,6 @@ public class Product : EntityBase
 }
 ```
 
-```xml
-
 ### 2. **DTOs + Validators** (`Domain/Dtos/ProductDtos.cs` + `Domain/Validators/ProductValidators.cs`)
 
 ```csharp
@@ -55,13 +53,10 @@ public record ProductResponseDto
 
 ### 3. **DbSet no Context** (`Data/Context/ApplicationDbContext.cs`)
 
-```
-
 ```csharp
 public DbSet<Product> Products { get; set; }
 ```
 
-```csharp
 ### 4. **Controller Completo** (`Api/Controllers/ProductController.cs`)
 
 #### Endpoints Disponíveis:
@@ -111,7 +106,8 @@ public async Task<ActionResult> ExportToExcelAsync(
     $"Products_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
 }
 ```
-### Características:
+
+### Características
 
 ✅ **Alta Performance**: MiniExcel usa FastMode para geração rápida
 ✅ **Filtros**: Suporta filtrar por status ativo e categoria
@@ -126,23 +122,32 @@ public async Task<ActionResult> ExportToExcelAsync(
 
 ### 1. Criar Migration
 
+```bash
 cd template
 dotnet ef migrations add AddProduct --project src/Data --startup-project src/Api
 dotnet ef database update --project src/Data --startup-project src/Api
-### 2. Executar a API
-
-dotnet run --project src/Api
-### 3. Acessar Swagger
-
 ```
 
-```xml
+### 2. Executar a API
+
+```bash
+dotnet run --project src/Api
+```
+
+### 3. Acessar Swagger
+
+```text
 https://localhost:5001/swagger
+```
+
 ### 4. Testar Endpoints
 
-#### Criar Produto:
+#### Criar Produto
 
+```http
 POST /api/v1/product
+Content-Type: application/json
+
 {
   "name": "Notebook Dell",
   "description": "Notebook Dell Inspiron 15",
@@ -151,15 +156,23 @@ POST /api/v1/product
   "category": "Electronics",
   "isActive": true
 }
-#### Listar Produtos com Filtros:
+```
 
+#### Listar Produtos com Filtros
+
+```http
 GET /api/v1/product?isActive=true&category=Electronics
-#### Gerar Excel:
+```
 
+#### Gerar Excel
+
+```http
 GET /api/v1/product/ExportToExcel?isActive=true&category=Electronics
+```
+
 O navegador fará download do arquivo `Products_20260111_143022.xlsx`
 
-#### Atualizar Estoque:
+#### Atualizar Estoque
 
 ```http
 PATCH /api/v1/product/1/stock
@@ -172,7 +185,7 @@ Content-Type: application/json
 
 Adiciona 5 unidades ao estoque do produto ID 1 (valores negativos removem itens).
 
-#### Alterar Status:
+#### Alterar Status
 
 ```http
 PATCH /api/v1/product/1/status
@@ -189,6 +202,7 @@ Desativa o produto ID 1 utilizando o `UpdateProductStatusRequest`.
 
 ## 📊 Exemplo de Resposta com Métricas
 
+```json
 {
   "executionTime": "45ms",
   "totalCount": 3,
@@ -197,7 +211,7 @@ Desativa o produto ID 1 utilizando o `UpdateProductStatusRequest`.
       "id": 1,
       "name": "Notebook Dell",
       "description": "Notebook Dell Inspiron 15",
-      "price": 3500.00,
+      "price": 3500.0,
       "stock": 15,
       "category": "Electronics",
       "isActive": true,
@@ -206,11 +220,12 @@ Desativa o produto ID 1 utilizando o `UpdateProductStatusRequest`.
     }
   ]
 }
+```
 ---
 
 ## 🎨 Features Demonstradas
 
-### ✅ Boas Práticas:
+### ✅ Boas Práticas
 
 - **Logging estruturado** com ILogger
 - **Métricas de performance** com Stopwatch
@@ -220,7 +235,7 @@ Desativa o produto ID 1 utilizando o `UpdateProductStatusRequest`.
 - **CreatedAtAction** retornando URI do recurso criado
 - **XML Documentation** para Swagger
 
-### ✅ Funcionalidades:
+### ✅ Funcionalidades
 
 - CRUD completo
 - Filtros avançados
@@ -229,7 +244,7 @@ Desativa o produto ID 1 utilizando o `UpdateProductStatusRequest`.
 - Ativação/desativação (PATCH)
 - Métricas de performance
 
-### ✅ Padrões:
+### ✅ Padrões
 
 - Clean Architecture
 - Repository Pattern
@@ -242,6 +257,7 @@ Desativa o produto ID 1 utilizando o `UpdateProductStatusRequest`.
 
 ## 📦 Pacote Adicionado
 
+```xml
 <PackageReference Include="MiniExcel" Version="1.37.3" />
 ```
 
