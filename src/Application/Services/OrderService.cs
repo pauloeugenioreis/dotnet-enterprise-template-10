@@ -42,7 +42,7 @@ public class OrderService : Service<Order>, IOrderService
             CustomerEmail = dto.CustomerEmail,
             CustomerPhone = dto.Phone,
             ShippingAddress = dto.ShippingAddress,
-            Status = "Pending",
+            Status = OrderStatus.Pending,
             Notes = dto.Notes,
             Items = new List<OrderItem>()
         };
@@ -114,17 +114,23 @@ public class OrderService : Service<Order>, IOrderService
         }
 
         var previousStatus = order.Status;
-        order.Status = dto.Status;
+        if (!OrderStatus.TryNormalize(dto.Status, out var normalizedStatus))
+        {
+            throw new ValidationException(
+                $"Status must be one of: {string.Join(", ", OrderStatus.AllowedStatuses)}");
+        }
+
+        order.Status = normalizedStatus;
 
         if (!string.IsNullOrEmpty(dto.Reason))
         {
-            order.Notes = $"{order.Notes}\n[{DateTime.UtcNow:yyyy-MM-dd HH:mm}] Status changed to {dto.Status}: {dto.Reason}";
+            order.Notes = $"{order.Notes}\n[{DateTime.UtcNow:yyyy-MM-dd HH:mm}] Status changed to {normalizedStatus}: {dto.Reason}";
         }
 
         await _orderRepository.UpdateAsync(order, cancellationToken);
         await _orderRepository.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("Order {OrderNumber} status updated: {OldStatus} -> {NewStatus}",
-            order.OrderNumber, previousStatus, dto.Status);
+            order.OrderNumber, previousStatus, normalizedStatus);
 
         return MapToResponseDto(order);
     }
@@ -143,7 +149,13 @@ public class OrderService : Service<Order>, IOrderService
 
     public async Task<IEnumerable<OrderResponseDto>> GetOrdersByStatusAsync(string status, CancellationToken cancellationToken = default)
     {
-        var orders = await _orderRepository.GetByStatusAsync(status, cancellationToken);
+        if (!OrderStatus.TryNormalize(status, out var normalizedStatus))
+        {
+            throw new ValidationException(
+                $"Status must be one of: {string.Join(", ", OrderStatus.AllowedStatuses)}");
+        }
+
+        var orders = await _orderRepository.GetByStatusAsync(normalizedStatus, cancellationToken);
         return orders.Select(MapToResponseDto);
     }
 

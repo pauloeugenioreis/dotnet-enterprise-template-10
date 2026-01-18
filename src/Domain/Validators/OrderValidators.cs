@@ -1,5 +1,6 @@
 using FluentValidation;
 using ProjectTemplate.Domain.Dtos;
+using ProjectTemplate.Domain.Entities;
 
 namespace ProjectTemplate.Domain.Validators;
 
@@ -47,13 +48,11 @@ public class CreateOrderValidator : AbstractValidator<CreateOrderRequest>
 /// </summary>
 public class UpdateOrderStatusValidator : AbstractValidator<UpdateOrderStatusDto>
 {
-    private static readonly string[] ValidStatuses = { "Pending", "Processing", "Shipped", "Delivered", "Cancelled" };
-
     public UpdateOrderStatusValidator()
     {
         RuleFor(x => x.Status)
             .NotEmpty().WithMessage("Status is required")
-            .Must(status => ValidStatuses.Contains(status))
-            .WithMessage($"Status must be one of: {string.Join(", ", ValidStatuses)}");
+            .Must(status => OrderStatus.TryNormalize(status, out _))
+            .WithMessage($"Status must be one of: {string.Join(", ", OrderStatus.AllowedStatuses)}");
     }
 }

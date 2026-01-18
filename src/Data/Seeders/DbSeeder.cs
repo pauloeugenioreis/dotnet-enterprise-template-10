@@ -337,11 +337,11 @@ public class DbSeeder
     {
         var statusWeights = new[]
         {
-            ("Pending", 10),
-            ("Processing", 15),
-            ("Shipped", 25),
-            ("Delivered", 45),
-            ("Cancelled", 5)
+            (OrderStatus.Pending, 10),
+            (OrderStatus.Processing, 15),
+            (OrderStatus.Shipped, 25),
+            (OrderStatus.Delivered, 45),
+            (OrderStatus.Cancelled, 5)
         };
 
         var totalWeight = statusWeights.Sum(x => x.Item2);
@@ -357,7 +357,7 @@ public class DbSeeder
             }
         }
 
-        return "Pending";
+        return OrderStatus.Pending;
     }
 
     private static string? GenerateOrderNotes()
