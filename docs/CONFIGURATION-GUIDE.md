@@ -586,8 +586,24 @@ AppSettings__Propriedade__SubPropriedade
         "ConnectionString": ""
       },
       "Storage": {
-        "ServiceAccount": "",
-        "DefaultBucket": ""
+        "Provider": "Google",
+        "DefaultBucket": "",
+        "Google": {
+          "ServiceAccount": "",
+          "ProjectId": ""
+        },
+        "Azure": {
+          "ConnectionString": "",
+          "BlobServiceUri": "",
+          "ManagedIdentityClientId": ""
+        },
+        "Aws": {
+          "AccessKeyId": "",
+          "SecretAccessKey": "",
+          "Region": "us-east-1",
+          "Profile": "",
+          "ServiceUrl": ""
+        }
       },
       "Cache": {
         "Enabled": true,
@@ -627,6 +643,20 @@ AppSettings__Infrastructure__Database__CommandTimeoutSeconds=60
 AppSettings__Infrastructure__Telemetry__Enabled=true
 AppSettings__Infrastructure__Telemetry__Provider=ApplicationInsights
 AppSettings__Infrastructure__Telemetry__ApplicationInsights__ConnectionString="InstrumentationKey=xxx"
+
+# Storage Provider (choose one)
+AppSettings__Infrastructure__Storage__Provider=Google
+AppSettings__Infrastructure__Storage__Google__ServiceAccount="{\"type\":\"service_account\",...}"
+
+# Azure example
+# AppSettings__Infrastructure__Storage__Provider=Azure
+# AppSettings__Infrastructure__Storage__Azure__ConnectionString="DefaultEndpointsProtocol=https;AccountName=..."
+
+# AWS example
+# AppSettings__Infrastructure__Storage__Provider=Aws
+# AppSettings__Infrastructure__Storage__Aws__Region=us-east-1
+# AppSettings__Infrastructure__Storage__Aws__AccessKeyId=AKIAXXXXX
+# AppSettings__Infrastructure__Storage__Aws__SecretAccessKey=YOURSECRET
 ```
 
 ---
@@ -748,7 +778,10 @@ stringData:
   AppSettings__Infrastructure__Telemetry__ApplicationInsights__ConnectionString: "InstrumentationKey=xxxxx-xxxx-xxxx-xxxx-xxxxx"
   AppSettings__Infrastructure__MongoDB__ConnectionString: "mongodb://username:password@prod-mongodb:27017/mydb"
   AppSettings__Infrastructure__RabbitMQ__ConnectionString: "amqp://username:password@prod-rabbitmq:5672/"
-  AppSettings__Infrastructure__Storage__ServiceAccount: "base64-encoded-service-account-json"
+  AppSettings__Infrastructure__Storage__Google__ServiceAccount: "base64-encoded-service-account-json"
+  AppSettings__Infrastructure__Storage__Azure__ConnectionString: "DefaultEndpointsProtocol=https;AccountName=..."
+  AppSettings__Infrastructure__Storage__Aws__AccessKeyId: "AKIAXXXXX"
+  AppSettings__Infrastructure__Storage__Aws__SecretAccessKey: "YOURSECRET"
 ```
 
 ### Deployment usando ConfigMap e Secret

@@ -99,8 +99,74 @@ public class QuartzSettings
 
 public class StorageSettings
 {
-    public string? ServiceAccount { get; set; } // Google Cloud Service Account JSON
+    [AllowedValues("Google", "Azure", "Aws",
+        ErrorMessage = "Storage Provider must be Google, Azure, or Aws")]
+    public string Provider { get; set; } = "Google";
+
+    public GoogleStorageSettings Google { get; set; } = new();
+    public AzureStorageSettings Azure { get; set; } = new();
+    public AwsStorageSettings Aws { get; set; } = new();
+
     public string DefaultBucket { get; set; } = string.Empty;
+}
+
+public class GoogleStorageSettings
+{
+    /// <summary>
+    /// Google Cloud service account JSON payload
+    /// </summary>
+    public string? ServiceAccount { get; set; }
+
+    /// <summary>
+    /// Optional Google Cloud project identifier
+    /// </summary>
+    public string? ProjectId { get; set; }
+}
+
+public class AzureStorageSettings
+{
+    /// <summary>
+    /// Azure Storage connection string (preferred for development)
+    /// </summary>
+    public string? ConnectionString { get; set; }
+
+    /// <summary>
+    /// Service URI when using SAS or Managed Identity authentication
+    /// </summary>
+    public string? BlobServiceUri { get; set; }
+
+    /// <summary>
+    /// Optional Managed Identity client id when authenticating via DefaultAzureCredential
+    /// </summary>
+    public string? ManagedIdentityClientId { get; set; }
+}
+
+public class AwsStorageSettings
+{
+    /// <summary>
+    /// AWS access key id. Leave empty to rely on default credential chain
+    /// </summary>
+    public string? AccessKeyId { get; set; }
+
+    /// <summary>
+    /// AWS secret access key. Leave empty to rely on default credential chain
+    /// </summary>
+    public string? SecretAccessKey { get; set; }
+
+    /// <summary>
+    /// AWS region (e.g. us-east-1)
+    /// </summary>
+    public string Region { get; set; } = "us-east-1";
+
+    /// <summary>
+    /// Optional profile name when using shared credentials file
+    /// </summary>
+    public string? Profile { get; set; }
+
+    /// <summary>
+    /// Optional custom endpoint (e.g. http://localhost:4566 for LocalStack)
+    /// </summary>
+    public string? ServiceUrl { get; set; }
 }
 
 public class AuthenticationSettings

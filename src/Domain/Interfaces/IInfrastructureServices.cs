@@ -25,7 +25,7 @@ public interface IQueueService
 
 /// <summary>
 /// Interface for cloud storage service
-/// Provides blob storage operations through Google Cloud Storage
+/// Provides blob storage operations independent of vendor implementation
 /// </summary>
 public interface IStorageService
 {

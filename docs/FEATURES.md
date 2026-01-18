@@ -9,7 +9,7 @@ Este guia explica como habilitar e configurar os recursos avançados incluídos 
 1. [MongoDB](#mongodb)
 2. [Quartz.NET (Background Jobs)](#quartznet-background-jobs)
 3. [RabbitMQ (Message Queue)](#rabbitmq-message-queue)
-4. [Google Cloud Storage](#google-cloud-storage)
+4. [Cloud Storage Multicloud](#cloud-storage-multicloud)
 5. [JWT Authentication](#jwt-authentication)
 6. [API Versioning](#api-versioning)
 7. [Global Exception Handler](#global-exception-handler)
@@ -242,75 +242,86 @@ builder.Services.AddRabbitMq();
 
 ---
 
-## Google Cloud Storage
+## Cloud Storage Multicloud
 
 ### O que é?
 
-Google Cloud Storage é um serviço de armazenamento de objetos para arquivos e blobs.
+Integração de armazenamento de objetos com suporte transparente a **Google Cloud Storage**, **Azure Blob Storage** e **AWS S3** usando a mesma interface `IStorageService`.
 
 ### Quando Usar?
 
-- Upload de arquivos/imagens
-- Armazenamento de documentos
-- Backup de dados
+- Upload/Download de arquivos
+- Armazenamento de documentos e imagens
 - Distribuição de conteúdo estático
+- Backups ou arquivos temporários
 
 ### Como Habilitar
 
-**1. Já está habilitado no Infrastructure.csproj** ✅
-
-**2. Configure no appsettings.json:**
+1. Os pacotes necessários já estão referenciados no `Infrastructure.csproj` (Google, Azure e AWS).
+2. Configure o provedor no `appsettings.json`:
 
 ```json
 {
     "AppSettings": {
         "Infrastructure": {
             "Storage": {
-                "ServiceAccount": "{\"type\":\"service_account\",\"project_id\":\"your-project\",...}",
-                "DefaultBucket": "your-bucket-name"
+                "Provider": "Google", // ou Azure, Aws
+                "DefaultBucket": "your-container-or-bucket",
+                "Google": {
+                    "ServiceAccount": "{\"type\":\"service_account\",...}"
+                },
+                "Azure": {
+                    "ConnectionString": "DefaultEndpointsProtocol=https;AccountName=..."
+                },
+                "Aws": {
+                    "Region": "us-east-1",
+                    "AccessKeyId": "AKIAXXXXX",
+                    "SecretAccessKey": "YOURSECRET"
+                }
             }
         }
     }
 }
 ```
 
-**3. Adicione no Program.cs:**
+3. No `Program.cs`, mantenha a extensão:
 
 ```csharp
-// Add Google Cloud Storage (OPTIONAL)
 builder.Services.AddStorage<Program>();
 ```
 
-```csharp
-
-**4. Use no código:**
-
-```
+4. Use normalmente no código (a implementação muda de acordo com o provedor, mas a interface permanece):
 
 ```csharp
 public class DocumentController : ApiControllerBase
 {
-    private readonly IStorageService _storageService;
+        private readonly IStorageService _storageService;
 
-    public DocumentController(IStorageService storageService)
-    {
-        _storageService = storageService;
-    }
+        public DocumentController(IStorageService storageService)
+        {
+                _storageService = storageService;
+        }
 
-    [HttpPost("upload")]
-    public async Task<IActionResult> Upload(IFormFile file)
-    {
-        using var stream = file.OpenReadStream();
-        var url = await _storageService.UploadAsync(
-            bucketName: "my-bucket",
-            objectName: file.FileName,
-            contentType: file.ContentType,
-            stream: stream);
+        [HttpPost("upload")]
+        public async Task<IActionResult> Upload(IFormFile file)
+        {
+                using var stream = file.OpenReadStream();
+                var url = await _storageService.UploadAsync(
+                        bucketName: "my-bucket",
+                        objectName: file.FileName,
+                        contentType: file.ContentType,
+                        stream: stream);
 
-        return Ok(new { Url = url });
-    }
+                return Ok(new { Url = url });
+        }
 }
 ```
+
+### Dicas por provedor
+
+- **Google**: forneça o JSON do Service Account ou use variáveis de ambiente (`GOOGLE_APPLICATION_CREDENTIALS`).
+- **Azure**: utilize connection string (desenvolvimento) ou `BlobServiceUri` + `DefaultAzureCredential`/Managed Identity em produção.
+- **AWS**: defina `AccessKeyId`/`SecretAccessKey`, use perfis locais ou deixe o SDK resolver via IAM role. Para LocalStack, ajuste `Aws.ServiceUrl`.
 
 ---
 

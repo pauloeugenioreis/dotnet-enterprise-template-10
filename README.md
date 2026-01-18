@@ -52,7 +52,7 @@ Este template fornece uma estrutura completa e moderna para desenvolvimento de A
 - **MongoDB support** (NoSQL opcional)
 - **Background jobs** com Quartz.NET
 - **Message queue** com RabbitMQ
-- **Cloud storage** (Google Cloud Storage)
+- **Cloud storage** (Google Cloud, Azure, AWS)
 - **JWT Authentication** ready
 - **Global exception handler** com ProblemDetails
 - **Automatic validation** com FluentValidation
@@ -104,7 +104,7 @@ ProjectTemplate/
 │       │   ├── MongoExtension.cs                # MongoDB support
 │       │   ├── QuartzExtension.cs               # Background jobs (Quartz.NET)
 │       │   ├── RabbitMqExtension.cs             # Message queue (RabbitMQ)
-│       │   ├── StorageExtension.cs              # Google Cloud Storage
+│       │   ├── StorageExtension.cs              # Cloud storage (Google/Azure/AWS)
 │       │   ├── AuthenticationExtension.cs       # JWT Authentication
 │       │   ├── ApiVersioningExtension.cs        # API Versioning
 │       │   ├── LoggingExtensions.cs             # Google Cloud Logging
@@ -118,9 +118,11 @@ ProjectTemplate/
 │       │   └── ValidationFilter.cs   # Validação automática com FluentValidation
 │       │
 │       ├── Services/                 # Serviços de infraestrutura
-│       │   ├── QueueService.cs       # Implementação RabbitMQ
-│       │   ├── StorageService.cs     # Implementação Google Cloud Storage
-│       │   └── ExceptionNotificationService.cs  # Notificações de exceção
+│       │   ├── QueueService.cs                 # Implementação RabbitMQ
+│       │   ├── GoogleCloudStorageService.cs    # Implementação Google Cloud Storage
+│       │   ├── AzureBlobStorageService.cs      # Implementação Azure Blob Storage
+│       │   ├── AwsS3StorageService.cs          # Implementação AWS S3
+│       │   └── ExceptionNotificationService.cs # Notificações de exceção
 │       │
 │       └── Swagger/                  # Configurações Swagger/OpenAPI
 │           └── SwaggerGroupByController.cs      # Agrupamento por controller

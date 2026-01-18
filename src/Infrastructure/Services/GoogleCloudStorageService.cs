@@ -9,15 +9,14 @@ using ProjectTemplate.Domain.Interfaces;
 namespace ProjectTemplate.Infrastructure.Services;
 
 /// <summary>
-/// Google Cloud Storage service implementation
-/// Provides blob storage operations for file management
+/// Google Cloud Storage implementation for <see cref="IStorageService"/>
 /// </summary>
-public class StorageService : IStorageService
+public class GoogleCloudStorageService : IStorageService
 {
     private readonly StorageClient _storageClient;
-    private readonly ILogger<StorageService> _logger;
+    private readonly ILogger<GoogleCloudStorageService> _logger;
 
-    public StorageService(StorageClient storageClient, ILogger<StorageService> logger)
+    public GoogleCloudStorageService(StorageClient storageClient, ILogger<GoogleCloudStorageService> logger)
     {
         _storageClient = storageClient;
         _logger = logger;
@@ -121,7 +120,7 @@ public class StorageService : IStorageService
         catch (Google.GoogleApiException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
         {
             _logger.LogWarning(ex, "Object {ObjectName} not found in bucket {BucketName} (already deleted?)", objectName, bucketName);
-            // Don't throw - delete is idempotent
+            // Delete is idempotent
         }
         catch (Google.GoogleApiException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.Forbidden)
         {
