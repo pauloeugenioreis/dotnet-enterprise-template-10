@@ -135,6 +135,7 @@ services:
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: jaeger
+    restart: unless-stopped
     ports:
       - "16686:16686"     # Jaeger UI
       - "4317:4317"       # OTLP gRPC receiver (PRIMARY - replaces deprecated 6831)
@@ -149,7 +150,11 @@ services:
       # - "14268:14268"     # deprecated: jaeger.thrift HTTP
     environment:
       - COLLECTOR_OTLP_ENABLED=true
+      - COLLECTOR_OTLP_HTTP_ENABLED=true
+      - COLLECTOR_OTLP_GRPC_HOST_PORT=0.0.0.0:4317
+      - COLLECTOR_OTLP_HTTP_HOST_PORT=0.0.0.0:4318
       - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+      - METRICS_STORAGE_TYPE=prometheus
       - LOG_LEVEL=info
     networks:
       - app-network
@@ -163,6 +168,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    restart: unless-stopped
     ports:
       - "9090:9090"
     volumes:
@@ -175,11 +181,17 @@ services:
       - '--web.console.templates=/usr/share/prometheus/consoles'
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
 
   # Grafana - Visualization
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+    restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
@@ -195,6 +207,11 @@ services:
       - jaeger
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
 
   # OpenTelemetry Collector (Optional - Advanced)
   # Uncomment if you want a centralized collector

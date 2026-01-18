@@ -70,8 +70,10 @@ O template suporta **múltiplos backends de telemetria** através do **OpenTelem
 ### 2️⃣ Iniciar Stack Completa com Docker
 
 ```bash
-docker-compose up -d
+docker compose -f docker-compose.yml -f compose-observability.yml up -d
 ```
+
+> Use `docker compose -f compose-observability.yml up -d` se quiser subir apenas Jaeger, Prometheus e Grafana para conectar outras aplicações.
 
 ### 3️⃣ Acessar as UIs
 
@@ -80,6 +82,12 @@ docker-compose up -d
 - **Grafana**: http://localhost:3000 (Visualization)
   - User: `admin`
   - Password: `admin`
+
+### 🔌 Stack Observability Independente
+
+- Rode apenas a observabilidade com `docker compose -f compose-observability.yml up -d`.
+- Para integrar com a API localmente, basta adicionar `-f docker-compose.yml` e incluir `api` no comando (`docker compose -f docker-compose.yml -f compose-observability.yml up api`).
+- Use `docker compose -f compose-observability.yml down -v` para limpar containers e volumes de métricas/dashboards.
 
 ---
 

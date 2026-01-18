@@ -230,6 +230,16 @@ new-project.bat MeuProjeto
 
 ---
 
+## 📡 Observabilidade Plug-and-Play
+
+- **Somente stack de telemetria**: `docker compose -f compose-observability.yml up -d`
+- **API + observabilidade**: `docker compose -f docker-compose.yml -f compose-observability.yml up -d api`
+- Os serviços Jaeger, Prometheus e Grafana já vêm com OTLP habilitado, health checks e persistência configurada.
+- As portas expostas são: 16686 (Jaeger UI), 4317/4318 (OTLP), 9090 (Prometheus) e 3000 (Grafana).
+- Para desmontar: `docker compose -f compose-observability.yml down -v` (remove volumes de métricas/dashboards).
+
+---
+
 ## ⚙️ Configuração Inicial
 
 Após criar seu projeto, siga estes passos:

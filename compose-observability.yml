@@ -1,0 +1,24 @@
+# Docker Compose helper to run only the observability stack
+services:
+  jaeger:
+    extends:
+      file: docker-compose.yml
+      service: jaeger
+
+  prometheus:
+    extends:
+      file: docker-compose.yml
+      service: prometheus
+
+  grafana:
+    extends:
+      file: docker-compose.yml
+      service: grafana
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  prometheus-data:
+  grafana-data:
