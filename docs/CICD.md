@@ -77,7 +77,7 @@ O pipeline é executado automaticamente em:
 
 #### 4. Markdownlint
 
-Antes de restaurar/buildar, o job **Build and Test** instala Node.js 20.x e roda o comando abaixo. Utilize o mesmo comando localmente para evitar falhas:
+Antes de restaurar e compilar, o job **Build and Test** instala Node.js 20.x e roda o comando abaixo. Utilize o mesmo comando localmente para evitar falhas:
 
 ```bash
 npx --yes markdownlint-cli@0.41.0 "**/*.md" --ignore "**/node_modules/**" --ignore "**/bin/**" --ignore "**/obj/**"
