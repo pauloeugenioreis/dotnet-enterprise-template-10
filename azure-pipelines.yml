@@ -37,6 +37,15 @@ stages:
         version: $(dotnetVersion)
         packageType: sdk
 
+    - task: NodeTool@0
+      displayName: 'Install Node.js'
+      inputs:
+        versionSpec: '20.x'
+
+    - script: |
+        npx --yes markdownlint-cli@0.41.0 "**/*.md" --ignore "**/node_modules/**" --ignore "**/bin/**" --ignore "**/obj/**"
+      displayName: 'Run markdownlint'
+
     - task: Cache@2
       displayName: 'Cache NuGet packages'
       inputs:
@@ -169,7 +178,7 @@ stages:
 
 - stage: Deploy
   displayName: 'Deploy to Environment'
-  dependsOn: 
+  dependsOn:
   - Build
   - Docker
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))

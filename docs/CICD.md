@@ -101,6 +101,7 @@ Adicione ao seu README.md:
 - ✅ Multi-stage pipeline (Build, Quality, Docker, Deploy)
 - ✅ Cache de pacotes NuGet
 - ✅ Testes com cobertura (Cobertura format)
+- ✅ Markdownlint com o mesmo comando usado localmente
 - ✅ Security scan e outdated packages
 - ✅ Docker build e push
 - ✅ Deploy para Staging e Production
@@ -140,7 +141,17 @@ Configure as seguintes service connections (**Project Settings → Service conne
 5. **Password**: Seu token do Docker Hub
 6. **Service connection name**: `DockerHubConnection`
 
-#### 4. Variáveis
+#### 4. Markdownlint
+
+O estágio **Build** executa automaticamente o comando abaixo para garantir que toda a documentação passa pelo lint:
+
+```bash
+npx --yes markdownlint-cli@0.41.0 "**/*.md" --ignore "**/node_modules/**" --ignore "**/bin/**" --ignore "**/obj/**"
+```
+
+Rode o mesmo comando localmente antes dos commits para evitar falhas no pipeline.
+
+#### 5. Variáveis
 
 Configure variáveis adicionais (**Pipelines → Edit → Variables**):
 
@@ -149,7 +160,7 @@ Configure variáveis adicionais (**Pipelines → Edit → Variables**):
 | `dockerImageName` | Nome da imagem | ❌ |
 | `azureSubscription` | Nome da subscription | ❌ |
 
-#### 5. Environments
+#### 6. Environments
 
 Crie os environments para deploy manual (**Pipelines → Environments**):
 
