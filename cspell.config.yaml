@@ -20,6 +20,7 @@ words:
   - Auth
   - CICD
   - Containerização
+  - CQRS
   - Descomente
   - Dtos
   - autoscaling
@@ -76,6 +77,7 @@ words:
   - Postgres
   - prometheus
   - Prometheus
+  - Brotli
   - rabbitmq
   - roadmap
   - Scrutor
