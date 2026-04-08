@@ -228,7 +228,8 @@ Adicione badges do SonarCloud ao README.md:
 
 ### Coverage não aparece
 
-**Solução**: 
+**Solução**:
+
 1. Certifique-se de que os testes estão rodando com coverage
 2. Verifique se o path do coverage está correto em `sonar-project.properties`
 3. Use formato OpenCover: `--collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover`
@@ -236,13 +237,15 @@ Adicione badges do SonarCloud ao README.md:
 ### Análise muito lenta
 
 **Solução**:
+
 1. Adicione mais exclusões em `sonar.exclusions`
 2. Use cache do scanner
 3. Desabilite análise de testes: `sonar.dotnet.excludeTestProjects=true`
 
 ### PRs não mostram análise
 
-**Solução**: 
+**Solução**:
+
 1. Verifique se o SonarCloud tem permissões no repositório
 2. GitHub: **Settings** → **Integrations** → **SonarCloud** → Verify permissions
 

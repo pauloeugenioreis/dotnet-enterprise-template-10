@@ -9,7 +9,7 @@ Scripts utilitários para facilitar o desenvolvimento e testes do projeto.
 - [test-all-databases](#-test-all-databases) - Testar com todos os bancos de dados
 - [new-project](#-new-project) - Criar novo projeto a partir do template
 - [run-sonar-analysis](#-run-sonar-analysis) - Executar análise SonarCloud local
-- [Kubernetes Scripts](#-kubernetes-scripts) - Deploy/destroy no Minikube
+- [Kubernetes (Minikube)](#%EF%B8%8F-minikube-deploy) - Deploy/destroy no Minikube
 
 ---
 
