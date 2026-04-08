@@ -25,6 +25,7 @@ Todos os pipelines incluem as seguintes etapas:
 | **Unit Tests** | Testes unitários | ✅ | ✅ | ✅ |
 | **Integration Tests** | Testes de integração | ✅ | ✅ | ✅ |
 | **Code Coverage** | Cobertura de código | ✅ | ✅ | ✅ |
+| **SonarCloud** | Análise de qualidade de código | ✅ | ✅ | ✅ |
 | **Security Scan** | Verificação de vulnerabilidades | ✅ | ✅ | ✅ |
 | **Docker Build** | Build de imagem Docker | ✅ | ✅ | ✅ |
 | **Artifacts** | Publicação de artefatos | ✅ | ✅ | ✅ |
@@ -44,6 +45,7 @@ Todos os pipelines incluem as seguintes etapas:
 - ✅ Cache de pacotes NuGet
 - ✅ Testes com relatórios (TRX)
 - ✅ Code coverage com Codecov
+- ✅ SonarCloud analysis (qualidade de código)
 - ✅ Security scan de vulnerabilidades
 - ✅ Docker build e push
 - ✅ Artifacts upload
@@ -57,9 +59,12 @@ Configure os seguintes secrets no repositório (**Settings → Secrets and varia
 
 | Secret | Descrição | Obrigatório |
 | --- | --- | --- |
+| `SONAR_TOKEN` | Token SonarCloud | ⚠️ Sim (para SonarCloud) |
 | `DOCKER_USERNAME` | Usuário Docker Hub | ⚠️ Sim (para Docker) |
 | `DOCKER_PASSWORD` | Token Docker Hub | ⚠️ Sim (para Docker) |
 | `CODECOV_TOKEN` | Token Codecov (opcional) | ❌ Não |
+
+> **📖 Para configurar SonarCloud**, veja o [Guia de SonarCloud](SONARCLOUD.md)
 
 #### 2. Habilitar Actions
 

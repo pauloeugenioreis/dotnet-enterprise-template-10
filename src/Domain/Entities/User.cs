@@ -11,7 +11,7 @@ public class User : EntityBase
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? PhoneNumber { get; set; }
-    public new bool IsActive { get; set; } = true;  // Override EntityBase.IsActive
+    public override bool IsActive { get; set; } = true;
     public bool EmailConfirmed { get; set; }
     public bool TwoFactorEnabled { get; set; }
     public DateTime? LastLoginAt { get; set; }
@@ -72,5 +72,5 @@ public class RefreshToken : EntityBase
     public string CreatedByIp { get; set; } = string.Empty;
 
     public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
-    public new bool IsActive => !IsRevoked && !IsExpired;  // Override EntityBase.IsActive
+    public new bool IsActive => !IsRevoked && !IsExpired;
 }

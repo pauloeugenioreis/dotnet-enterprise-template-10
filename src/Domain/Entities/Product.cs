@@ -1,5 +1,3 @@
-using ProjectTemplate.Domain.Entities;
-
 namespace ProjectTemplate.Domain.Entities;
 
 /// <summary>
@@ -12,5 +10,5 @@ public class Product : EntityBase
     public decimal Price { get; set; }
     public int Stock { get; set; }
     public string Category { get; set; } = string.Empty;
-    public new bool IsActive { get; set; } = true;  // Override EntityBase.IsActive
+    public override bool IsActive { get; set; } = true;
 }

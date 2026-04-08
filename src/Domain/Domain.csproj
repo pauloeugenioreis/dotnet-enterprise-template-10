@@ -12,12 +12,12 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <!-- Microsoft.AspNetCore.Http.Abstractions REMOVED - Violates Clean Architecture -->
     <!-- Domain layer should not depend on HTTP infrastructure -->
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.5" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.102" />
-    <PackageReference Update="SonarAnalyzer.CSharp" Version="10.18.0.131500" />
+    <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.201" />
+    <PackageReference Update="SonarAnalyzer.CSharp" Version="10.22.0.136894" />
   </ItemGroup>
 
 </Project>

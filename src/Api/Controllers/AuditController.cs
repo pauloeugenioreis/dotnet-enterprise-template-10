@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Events;
 using ProjectTemplate.Domain.Interfaces;
@@ -9,7 +10,7 @@ namespace ProjectTemplate.Api.Controllers;
 /// Audit API - Query event history and audit trails
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class AuditController : ApiControllerBase
 {
     private readonly IEventStore _eventStore;
@@ -25,11 +26,18 @@ public class AuditController : ApiControllerBase
     /// Get full history of events for a specific entity
     /// </summary>
     [HttpGet("{entityType}/{entityId}")]
+    [ProducesResponseType(typeof(List<DomainEvent>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<List<DomainEvent>>> GetEntityHistory(
         string entityType,
         string entityId,
         CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrWhiteSpace(entityType) || string.IsNullOrWhiteSpace(entityId))
+        {
+            return BadRequest("entityType and entityId are required");
+        }
+
         if (!_settings.Enabled || !_settings.EnableAuditApi)
         {
             return BadRequest("Event Sourcing or Audit API is disabled");
@@ -43,6 +51,10 @@ public class AuditController : ApiControllerBase
     /// Get entity state at a specific point in time (time travel)
     /// </summary>
     [HttpGet("{entityType}/{entityId}/at/{timestamp}")]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<object>> GetStateAt(
         string entityType,
         string entityId,
@@ -86,6 +98,8 @@ public class AuditController : ApiControllerBase
     /// Get events by version range
     /// </summary>
     [HttpGet("{entityType}/{entityId}/versions/{fromVersion}/{toVersion}")]
+    [ProducesResponseType(typeof(List<DomainEvent>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<List<DomainEvent>>> GetEventsByVersion(
         string entityType,
         string entityId,
@@ -108,6 +122,8 @@ public class AuditController : ApiControllerBase
     /// Get all events for an entity type within a date range
     /// </summary>
     [HttpGet("type/{entityType}")]
+    [ProducesResponseType(typeof(List<DomainEvent>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<List<DomainEvent>>> GetEventsByType(
         string entityType,
         [FromQuery] DateTime? from = null,
@@ -130,6 +146,8 @@ public class AuditController : ApiControllerBase
     /// Get events by user
     /// </summary>
     [HttpGet("user/{userId}")]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> GetEventsByUser(
         string userId,
         [FromQuery] DateTime? from = null,
@@ -165,6 +183,8 @@ public class AuditController : ApiControllerBase
     /// Get event statistics
     /// </summary>
     [HttpGet("statistics")]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> GetStatistics(
         [FromQuery] DateTime? from = null,
         [FromQuery] DateTime? to = null,
@@ -184,6 +204,9 @@ public class AuditController : ApiControllerBase
     /// Replay events to rebuild state
     /// </summary>
     [HttpPost("{entityType}/{entityId}/replay")]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> ReplayEvents(
         string entityType,
         string entityId,

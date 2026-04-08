@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Dtos;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Exceptions;
@@ -14,16 +16,19 @@ public class OrderService : Service<Order>, IOrderService
     private readonly IOrderRepository _orderRepository;
     private readonly IRepository<Product> _productRepository;
     private readonly ILogger<OrderService> _logger;
+    private readonly OrderSettings _orderSettings;
 
     public OrderService(
         IOrderRepository orderRepository,
         IRepository<Product> productRepository,
-        ILogger<OrderService> logger)
+        ILogger<OrderService> logger,
+        IOptions<AppSettings> appSettings)
         : base(orderRepository, logger)
     {
         _orderRepository = orderRepository;
         _productRepository = productRepository;
         _logger = logger;
+        _orderSettings = appSettings.Value.Infrastructure.Order;
     }
 
     public async Task<OrderResponseDto> CreateOrderAsync(CreateOrderRequest dto, CancellationToken cancellationToken = default)
@@ -93,8 +98,8 @@ public class OrderService : Service<Order>, IOrderService
 
             // Calculate totals
             order.Subtotal = subtotal;
-            order.Tax = subtotal * 0.10m; // 10% tax
-            order.ShippingCost = subtotal > 100 ? 0 : 10.00m; // Free shipping over $100
+            order.Tax = subtotal * _orderSettings.TaxRate;
+            order.ShippingCost = subtotal > _orderSettings.FreeShippingThreshold ? 0 : _orderSettings.DefaultShippingCost;
             order.Total = order.Subtotal + order.Tax + order.ShippingCost;
 
             // Save order
@@ -154,7 +159,7 @@ public class OrderService : Service<Order>, IOrderService
     public async Task<IEnumerable<OrderResponseDto>> GetOrdersByCustomerAsync(string email, CancellationToken cancellationToken = default)
     {
         var orders = await _orderRepository.GetByCustomerEmailAsync(email, cancellationToken);
-        return orders.Select(MapToResponseDto);
+        return orders.Select(MapToResponseDto).ToList();
     }
 
     public async Task<IEnumerable<OrderResponseDto>> GetOrdersByStatusAsync(string status, CancellationToken cancellationToken = default)
@@ -166,7 +171,13 @@ public class OrderService : Service<Order>, IOrderService
         }
 
         var orders = await _orderRepository.GetByStatusAsync(normalizedStatus, cancellationToken);
-        return orders.Select(MapToResponseDto);
+        return orders.Select(MapToResponseDto).ToList();
+    }
+
+    public async Task<IEnumerable<OrderResponseDto>> GetAllOrderDetailsAsync(CancellationToken cancellationToken = default)
+    {
+        var orders = await _orderRepository.GetAllAsync(cancellationToken);
+        return orders.Select(MapToResponseDto).ToList();
     }
 
     public async Task<decimal> CalculateOrderTotalAsync(long orderId, CancellationToken cancellationToken = default)

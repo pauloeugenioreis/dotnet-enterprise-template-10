@@ -91,3 +91,8 @@ appsettings.*.json
 !appsettings.PostgreSQL.json
 !appsettings.MySQL.json
 secrets.json
+
+# SonarCloud / SonarQube
+.sonarqube/
+.sonar/
+.scannerwork/

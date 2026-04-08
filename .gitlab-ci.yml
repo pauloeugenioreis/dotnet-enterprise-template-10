@@ -149,6 +149,53 @@ code_quality:outdated:
   script:
     - echo "📦 Checking for outdated packages..."
     - dotnet tool install --global dotnet-outdated-tool
+    - dotnet outdated
+
+  allow_failure: true
+  only:
+    - main
+    - develop
+    - merge_requests
+
+sonarcloud:
+  stage: quality
+  dependencies:
+    - build
+  image: mcr.microsoft.com/dotnet/sdk:10.0
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: 0
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - echo "🔍 Running SonarCloud Analysis..."
+    - dotnet tool install --global dotnet-sonarscanner
+    - export PATH="$PATH:$HOME/.dotnet/tools"
+
+    - dotnet sonarscanner begin \
+        /k:"pauloeugenioreis_dotnet-enterprise-template-10" \
+        /o:"pauloeugenioreis" \
+        /d:sonar.token="${SONAR_TOKEN}" \
+        /d:sonar.host.url="https://sonarcloud.io" \
+        /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+
+    - dotnet build $SOLUTION_FILE --configuration $BUILD_CONFIGURATION
+
+    - dotnet test $SOLUTION_FILE \
+        --configuration $BUILD_CONFIGURATION \
+        --no-build \
+        --collect:"XPlat Code Coverage" \
+        -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+    - dotnet sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
+
+  only:
+    - main
+    - develop
+    - merge_requests
+    - dotnet tool install --global dotnet-outdated-tool
     - export PATH="$PATH:$HOME/.dotnet/tools"
     - dotnet outdated --output outdated-packages.json --format json || true
 

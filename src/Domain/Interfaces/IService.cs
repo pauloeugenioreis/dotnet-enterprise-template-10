@@ -1,18 +1,11 @@
 namespace ProjectTemplate.Domain.Interfaces;
 
 /// <summary>
-/// Generic service interface for business logic layer
+/// Generic service interface for business logic layer.
+/// Composes query and command operations for backward compatibility.
 /// </summary>
 /// <typeparam name="TEntity">Entity type</typeparam>
-public interface IService<TEntity> where TEntity : class
+public interface IService<TEntity> : IQueryService<TEntity>, ICommandService<TEntity>
+    where TEntity : class
 {
-    Task<TEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
-    Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken = default);
-    Task UpdateAsync(long id, TEntity entity, CancellationToken cancellationToken = default);
-    Task DeleteAsync(long id, CancellationToken cancellationToken = default);
-    Task<(IEnumerable<TEntity> Items, int Total)> GetPagedAsync(
-        int page,
-        int pageSize,
-        CancellationToken cancellationToken = default);
 }

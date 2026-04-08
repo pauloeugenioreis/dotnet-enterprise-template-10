@@ -162,10 +162,6 @@ public static class DatabaseExtension
         // Register DbContext as generic DbContext for Repository<T> to resolve
         services.AddScoped<DbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
-        // Register IDbConnectionFactory for Dapper/ADO.NET repositories (if they are auto-registered by Scrutor)
-        services.AddSingleton<IDbConnectionFactory>(sp =>
-            new SqlConnectionFactory(connectionString));
-
         return services;
     }
 

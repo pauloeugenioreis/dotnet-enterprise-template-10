@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using MiniExcelLibs;
 using MiniExcelLibs.OpenXml;
 using ProjectTemplate.Domain.Dtos;
@@ -29,6 +30,7 @@ public class OrderController : ApiControllerBase
     /// Get all orders
     /// </summary>
     [HttpGet]
+    [OutputCache(PolicyName = "Expire300")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<ActionResult<dynamic>> GetAllAsync(
         [FromQuery] string? status,
@@ -44,8 +46,7 @@ public class OrderController : ApiControllerBase
         }
         else
         {
-            var allOrders = await _orderService.GetAllAsync(cancellationToken);
-            orders = allOrders.Select(o => _orderService.GetOrderDetailsAsync(o.Id, cancellationToken).Result!);
+            orders = await _orderService.GetAllOrderDetailsAsync(cancellationToken);
         }
 
         var results = orders.ToList();
@@ -64,6 +65,7 @@ public class OrderController : ApiControllerBase
     /// Get order by ID
     /// </summary>
     [HttpGet("{id}")]
+    [OutputCache(PolicyName = "Expire300")]
     [ProducesResponseType(typeof(OrderResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetByIdAsync(long id, CancellationToken cancellationToken)
@@ -176,8 +178,7 @@ public class OrderController : ApiControllerBase
         }
         else
         {
-            var allOrders = await _orderService.GetAllAsync(cancellationToken);
-            orders = allOrders.Select(o => _orderService.GetOrderDetailsAsync(o.Id, cancellationToken).Result!);
+            orders = await _orderService.GetAllOrderDetailsAsync(cancellationToken);
         }
 
         var results = orders.ToList();
@@ -234,8 +235,7 @@ public class OrderController : ApiControllerBase
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetStatisticsAsync(CancellationToken cancellationToken)
     {
-        var allOrders = await _orderService.GetAllAsync(cancellationToken);
-        var orders = allOrders.Select(o => _orderService.GetOrderDetailsAsync(o.Id, cancellationToken).Result!).ToList();
+        var orders = (await _orderService.GetAllOrderDetailsAsync(cancellationToken)).ToList();
 
         var stats = new
         {

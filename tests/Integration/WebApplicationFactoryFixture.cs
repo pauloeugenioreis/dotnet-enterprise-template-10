@@ -72,10 +72,11 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
             services.RemoveAll(typeof(ApplicationDbContext));
             services.RemoveAll(typeof(DbContext));
 
-            // Add in-memory database for testing
+            // Add in-memory database for testing (unique per fixture instance for isolation)
+            var databaseName = $"TestDb_{Guid.NewGuid()}";
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseInMemoryDatabase("TestDatabase");
+                options.UseInMemoryDatabase(databaseName);
             });
 
             // Register DbContext as ApplicationDbContext for Repository<T> that expects DbContext

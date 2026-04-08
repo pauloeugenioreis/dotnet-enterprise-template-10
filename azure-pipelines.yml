@@ -134,6 +134,54 @@ stages:
       displayName: 'Check for outdated packages'
       continueOnError: true
 
+  - job: SonarCloud
+    displayName: 'SonarCloud Analysis'
+    pool:
+      vmImage: $(vmImageName)
+
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Install .NET SDK'
+      inputs:
+        version: $(dotnetVersion)
+        packageType: sdk
+
+    - task: SonarCloudPrepare@2
+      displayName: 'Prepare SonarCloud Analysis'
+      inputs:
+        SonarCloud: 'SonarCloudConnection'
+        organization: 'pauloeugenioreis'
+        scannerMode: 'MSBuild'
+        projectKey: 'pauloeugenioreis_dotnet-enterprise-template-10'
+        projectName: '.NET 10 Enterprise Template'
+        extraProperties: |
+          sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/**/coverage.opencover.xml
+          sonar.exclusions=**/obj/**,**/bin/**,**/wwwroot/**,**/node_modules/**,**/Migrations/**
+          sonar.coverage.exclusions=**/Program.cs,**/Startup.cs,**/Migrations/**,**/Seeders/**,**/*Extensions.cs
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build solution'
+      inputs:
+        command: 'build'
+        projects: '$(solutionFile)'
+        arguments: '--configuration $(buildConfiguration)'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Run tests with coverage'
+      inputs:
+        command: 'test'
+        projects: '$(solutionFile)'
+        arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover'
+        publishTestResults: true
+
+    - task: SonarCloudAnalyze@2
+      displayName: 'Run SonarCloud Analysis'
+
+    - task: SonarCloudPublish@2
+      displayName: 'Publish SonarCloud Results'
+      inputs:
+        pollingTimeoutSec: '300'
+
 - stage: Docker
   displayName: 'Docker Build and Push'
   dependsOn: Build

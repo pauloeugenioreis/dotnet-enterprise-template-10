@@ -218,7 +218,7 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         CancellationToken cancellationToken)
     {
         var changes = new Dictionary<string, object>();
-        var entry = _context.Entry(entity);
+        var entry = Context.Entry(entity);
 
         // Detached entities don't have original values tracked, so fall back to the database snapshot
         Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues? databaseValues = null;
@@ -257,10 +257,8 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         return changes;
     }
 
-    private OrderCreatedEvent CreateOrderCreatedEvent(Order? order)
+    private OrderCreatedEvent CreateOrderCreatedEvent(Order order)
     {
-        ArgumentNullException.ThrowIfNull(order);
-
         return new OrderCreatedEvent
         {
             OrderId = order.Id,
@@ -285,10 +283,8 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         };
     }
 
-    private ProductCreatedEvent CreateProductCreatedEvent(Product? product)
+    private ProductCreatedEvent CreateProductCreatedEvent(Product product)
     {
-        ArgumentNullException.ThrowIfNull(product);
-
         return new ProductCreatedEvent
         {
             ProductId = product.Id,

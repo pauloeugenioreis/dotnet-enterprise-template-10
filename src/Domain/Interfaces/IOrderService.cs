@@ -34,6 +34,11 @@ public interface IOrderService : IService<Order>
     Task<IEnumerable<OrderResponseDto>> GetOrdersByStatusAsync(string status, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Get all orders with details
+    /// </summary>
+    Task<IEnumerable<OrderResponseDto>> GetAllOrderDetailsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Calculate order totals
     /// </summary>
     Task<decimal> CalculateOrderTotalAsync(long orderId, CancellationToken cancellationToken = default);

@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 
 namespace ProjectTemplate.Data.Repository;
@@ -9,37 +10,31 @@ namespace ProjectTemplate.Data.Repository;
 /// This is the default ORM implementation
 /// </summary>
 /// <typeparam name="TEntity">Entity type</typeparam>
-public class Repository<TEntity> : IRepository<TEntity>, ITransactionalRepository where TEntity : class
+public class Repository<TEntity>(DbContext context) : IRepository<TEntity>, ITransactionalRepository where TEntity : class
 {
-    protected readonly DbContext _context;
-    protected readonly DbSet<TEntity> _dbSet;
-
-    public Repository(DbContext context)
-    {
-        _context = context;
-        _dbSet = context.Set<TEntity>();
-    }
+    protected DbContext Context => context;
+    private DbSet<TEntity> DbSet => context.Set<TEntity>();
 
     public virtual async Task<TEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
-        return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+        return await DbSet.FindAsync(new object[] { id }, cancellationToken);
     }
 
     public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await _dbSet.ToListAsync(cancellationToken);
+        return await DbSet.AsNoTracking().ToListAsync(cancellationToken);
     }
 
     public virtual async Task<IEnumerable<TEntity>> FindAsync(
         Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default)
     {
-        return await _dbSet.Where(predicate).ToListAsync(cancellationToken);
+        return await DbSet.AsNoTracking().Where(predicate).ToListAsync(cancellationToken);
     }
 
     public virtual async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        await _dbSet.AddAsync(entity, cancellationToken);
+        await DbSet.AddAsync(entity, cancellationToken);
         return entity;
     }
 
@@ -48,41 +43,44 @@ public class Repository<TEntity> : IRepository<TEntity>, ITransactionalRepositor
         CancellationToken cancellationToken = default)
     {
         var entityList = entities.ToList();
-        await _dbSet.AddRangeAsync(entityList, cancellationToken);
+        await DbSet.AddRangeAsync(entityList, cancellationToken);
         return entityList;
     }
 
     public virtual async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        // Get the ID value from the incoming entity
-        var entityEntry = _context.Entry(entity);
-        var idValue = entityEntry.Property("Id").CurrentValue;
+        // Get the ID from the incoming entity via reflection-free property access
+        var idValue = context.Entry(entity).Property(nameof(EntityBase.Id)).CurrentValue
+            ?? throw new InvalidOperationException("Entity must have a non-null Id value");
 
-        // Find the existing tracked entity with the same ID
-        var existingEntity = await _dbSet.FindAsync(new object[] { idValue! }, cancellationToken);
+        // Check if an entity with the same key is already tracked
+        var tracked = context.ChangeTracker.Entries<TEntity>()
+            .FirstOrDefault(e => Equals(e.Property(nameof(EntityBase.Id)).CurrentValue, idValue));
 
-        if (existingEntity != null)
+        if (tracked != null)
         {
-            // Copy values from the incoming entity to the tracked entity
-            _context.Entry(existingEntity).CurrentValues.SetValues(entity);
+            // Entity already tracked — copy incoming values to the tracked instance
+            tracked.CurrentValues.SetValues(entity);
         }
         else
         {
-            // If entity doesn't exist in the database, attach and mark as modified
-            _dbSet.Attach(entity);
-            entityEntry.State = EntityState.Modified;
+            // Not tracked — attach and mark as modified
+            DbSet.Attach(entity);
+            context.Entry(entity).State = EntityState.Modified;
         }
+
+        await Task.CompletedTask;
     }
 
     public virtual Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        _dbSet.Remove(entity);
+        DbSet.Remove(entity);
         return Task.CompletedTask;
     }
 
     public virtual Task DeleteRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
-        _dbSet.RemoveRange(entities);
+        DbSet.RemoveRange(entities);
         return Task.CompletedTask;
     }
 
@@ -91,8 +89,11 @@ public class Repository<TEntity> : IRepository<TEntity>, ITransactionalRepositor
         int pageSize,
         CancellationToken cancellationToken = default)
     {
-        var total = await _dbSet.CountAsync(cancellationToken);
-        var items = await _dbSet
+        var query = DbSet.AsNoTracking();
+
+        var total = await query.CountAsync(cancellationToken);
+        var items = await query
+            .OrderBy(e => EF.Property<long>(e, nameof(EntityBase.Id)))
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
@@ -102,17 +103,17 @@ public class Repository<TEntity> : IRepository<TEntity>, ITransactionalRepositor
 
     public virtual async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        return await _context.SaveChangesAsync(cancellationToken);
+        return await context.SaveChangesAsync(cancellationToken);
     }
 
     public virtual async Task<IRepositoryTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
-        if (!_context.Database.IsRelational())
+        if (!context.Database.IsRelational())
         {
             return new NoOpRepositoryTransaction();
         }
 
-        var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+        var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         return new EfRepositoryTransaction(transaction);
     }
 }

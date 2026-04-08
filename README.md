@@ -4,6 +4,12 @@
 
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pauloeugenioreis_dotnet-enterprise-template-10&metric=alert_status)](https://sonarcloud.io/dashboard?id=pauloeugenioreis_dotnet-enterprise-template-10)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=pauloeugenioreis_dotnet-enterprise-template-10&metric=coverage)](https://sonarcloud.io/dashboard?id=pauloeugenioreis_dotnet-enterprise-template-10)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=pauloeugenioreis_dotnet-enterprise-template-10&metric=security_rating)](https://sonarcloud.io/dashboard?id=pauloeugenioreis_dotnet-enterprise-template-10)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=pauloeugenioreis_dotnet-enterprise-template-10&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=pauloeugenioreis_dotnet-enterprise-template-10)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=pauloeugenioreis_dotnet-enterprise-template-10&metric=code_smells)](https://sonarcloud.io/dashboard?id=pauloeugenioreis_dotnet-enterprise-template-10)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=pauloeugenioreis_dotnet-enterprise-template-10&metric=ncloc)](https://sonarcloud.io/dashboard?id=pauloeugenioreis_dotnet-enterprise-template-10)
 
 ---
 
@@ -19,6 +25,7 @@
 - **[📜 Guia de Event Sourcing](docs/EVENT-SOURCING.md)** - Auditoria completa e time travel
 - **[🔐 Guia de Authentication](docs/AUTHENTICATION.md)** - JWT & OAuth2
 - **[🔄 Guia de CI/CD](docs/CICD.md)** - GitHub Actions, Azure DevOps, GitLab CI
+- **[☁️ Guia de SonarCloud](docs/SONARCLOUD.md)** - Análise de qualidade de código
 - **[☸️ Guia Kubernetes](docs/KUBERNETES.md)** - Deploy em K8s
 
 ---

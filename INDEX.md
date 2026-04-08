@@ -41,11 +41,12 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 
 ### Documentação Principal
 
-| Documento                            | Descrição                                  | Quando Usar                     |
-| ------------------------------------ | ------------------------------------------ | ------------------------------- |
-| **[README.md](README.md)**           | Documentação principal e overview completo | Entender o projeto como um todo |
-| **[QUICK-START.md](QUICK-START.md)** | Início rápido em 5 minutos                 | Primeira vez usando o template  |
-| **[LICENSE](LICENSE)**               | Licença do projeto (MIT)                   | Entender termos de uso          |
+| Documento                                        | Descrição                                       | Quando Usar                             |
+| ------------------------------------------------ | ----------------------------------------------- | --------------------------------------- |
+| **[README.md](README.md)**                       | Documentação principal e overview completo      | Entender o projeto como um todo         |
+| **[QUICK-START.md](QUICK-START.md)**             | Início rápido em 5 minutos                      | Primeira vez usando o template          |
+| **[LICENSE](LICENSE)**                           | Licença do projeto (MIT)                        | Entender termos de uso                  |
+| **[sonar-project.properties](sonar-project.properties)** | Configuração do SonarCloud            | Configurar análise de qualidade         |
 
 ### Guias Técnicos
 
@@ -55,6 +56,7 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 | **[docs/FEATURES.md](docs/FEATURES.md)**         | Recursos avançados (MongoDB, Queue, Jobs, etc.) | Usar MongoDB, RabbitMQ, Quartz, Storage |
 | **[docs/ORM-GUIDE.md](docs/ORM-GUIDE.md)**       | Guia de ORMs (EF Core, Dapper, etc.)            | Escolher ou alternar ORM                |
 | **[docs/KUBERNETES.md](docs/KUBERNETES.md)**     | Deploy no Kubernetes                            | Deploy em produção ou local             |
+| **[docs/SONARCLOUD.md](docs/SONARCLOUD.md)**     | Configuração do SonarCloud                      | Implementar análise de qualidade        |
 
 ### Arquivos de Configuração
 

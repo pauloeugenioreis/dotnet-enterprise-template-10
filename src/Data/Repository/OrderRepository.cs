@@ -37,6 +37,7 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
     public async Task<IEnumerable<Order>> GetByStatusAsync(string status, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Orders
+            .AsNoTracking()
             .Include(o => o.Items)
                 .ThenInclude(i => i.Product)
             .Where(o => o.Status == status)
@@ -47,6 +48,7 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
     public async Task<IEnumerable<Order>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Orders
+            .AsNoTracking()
             .Include(o => o.Items)
                 .ThenInclude(i => i.Product)
             .Where(o => o.CreatedAt >= startDate && o.CreatedAt <= endDate)
@@ -57,6 +59,7 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
     public async Task<Order?> GetByOrderNumberAsync(string orderNumber, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Orders
+            .AsNoTracking()
             .Include(o => o.Items)
                 .ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber, cancellationToken);
@@ -65,6 +68,7 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
     public override async Task<Order?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Orders
+            .AsNoTracking()
             .Include(o => o.Items)
                 .ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
@@ -73,6 +77,7 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
     public override async Task<IEnumerable<Order>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _dbContext.Orders
+            .AsNoTracking()
             .Include(o => o.Items)
                 .ThenInclude(i => i.Product)
             .OrderByDescending(o => o.CreatedAt)

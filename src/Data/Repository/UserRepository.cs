@@ -20,6 +20,7 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
         return await _context.Users
+            .AsNoTracking()
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
@@ -28,6 +29,7 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
         return await _context.Users
+            .AsNoTracking()
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
@@ -36,6 +38,7 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         return await _context.Users
+            .AsNoTracking()
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
@@ -44,6 +47,7 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetByExternalProviderAsync(string provider, string externalId, CancellationToken cancellationToken = default)
     {
         return await _context.Users
+            .AsNoTracking()
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.ExternalProvider == provider && u.ExternalId == externalId, cancellationToken);
@@ -91,7 +95,6 @@ public class UserRepository : IUserRepository
                 CreatedAt = DateTime.UtcNow
             };
             await _context.Roles.AddAsync(role, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
         }
 
         var userRole = new UserRole
@@ -108,6 +111,7 @@ public class UserRepository : IUserRepository
     public async Task<RefreshToken?> GetRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
     {
         return await _context.RefreshTokens
+            .AsNoTracking()
             .Include(rt => rt.User)
                 .ThenInclude(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)

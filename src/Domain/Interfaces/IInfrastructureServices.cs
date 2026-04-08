@@ -13,14 +13,16 @@ public interface IQueueService
     /// </summary>
     /// <param name="queueName">Name of the queue</param>
     /// <param name="message">Message content as string</param>
-    Task PublishAsync(string queueName, string message);
+    /// <param name="cancellationToken">Cancellation token</param>
+    Task PublishAsync(string queueName, string message, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Publishes an object as JSON to the specified queue
     /// </summary>
     /// <param name="queueName">Name of the queue</param>
     /// <param name="payload">Object to serialize and publish</param>
-    Task PublishAsync(string queueName, object payload);
+    /// <param name="cancellationToken">Cancellation token</param>
+    Task PublishAsync(string queueName, object payload, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

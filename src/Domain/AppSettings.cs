@@ -37,6 +37,19 @@ public class InfrastructureSettings
     public TelemetrySettings Telemetry { get; set; } = new();
     public RateLimitingSettings RateLimiting { get; set; } = new();
     public EventSourcingSettings EventSourcing { get; set; } = new();
+    public OrderSettings Order { get; set; } = new();
+}
+
+public class OrderSettings
+{
+    [Range(0.0, 1.0, ErrorMessage = "TaxRate must be between 0.0 and 1.0")]
+    public decimal TaxRate { get; set; } = 0.10m;
+
+    [Range(0, double.MaxValue, ErrorMessage = "FreeShippingThreshold must be non-negative")]
+    public decimal FreeShippingThreshold { get; set; } = 100m;
+
+    [Range(0, double.MaxValue, ErrorMessage = "DefaultShippingCost must be non-negative")]
+    public decimal DefaultShippingCost { get; set; } = 10.00m;
 }
 
 public class CacheSettings

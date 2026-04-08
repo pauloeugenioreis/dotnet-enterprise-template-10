@@ -10,7 +10,7 @@ namespace ProjectTemplate.Api.Controllers;
 /// Authentication controller for user management and JWT tokens
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class AuthController : ApiControllerBase
 {
     private readonly IAuthService _authService;

@@ -39,6 +39,35 @@ if (!builder.Environment.IsEnvironment("Testing"))
 // Add infrastructure services
 builder.Services.AddInfrastructureServices(builder.Configuration, builder.Environment);
 
+// ============================================================
+// OPTIONAL FEATURES — Uncomment to enable
+// See docs/FEATURES.md for configuration details
+// ============================================================
+
+// Add Custom Logging (structured JSON + Google Cloud Logging)
+// builder.AddCustomLogging();
+
+// Add MongoDB (NoSQL document store)
+// builder.Services.AddMongo<Program>();
+
+// Add Quartz.NET (background job scheduler)
+// builder.Services.AddCustomizedQuartz((q, settings) =>
+// {
+//     // Example: Daily cleanup at 3 AM
+//     // var cleanupJobKey = new JobKey("cleanup-job");
+//     // q.AddJob<CleanupJob>(opts => opts.WithIdentity(cleanupJobKey));
+//     // q.AddTrigger(opts => opts
+//     //     .ForJob(cleanupJobKey)
+//     //     .WithIdentity("cleanup-trigger")
+//     //     .WithCronSchedule("0 0 3 * * ?"));
+// });
+
+// Add RabbitMQ (message queue / event-driven)
+// builder.Services.AddRabbitMq();
+
+// Add Cloud Storage (Google Cloud Storage / Azure Blob / AWS S3)
+// builder.Services.AddStorage<Program>();
+
 var app = builder.Build();
 
 // Seed database on startup (Development only)

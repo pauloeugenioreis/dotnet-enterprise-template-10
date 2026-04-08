@@ -4,6 +4,65 @@ Scripts utilitários para facilitar o desenvolvimento e testes do projeto.
 
 ---
 
+## 📋 Índice
+
+- [test-all-databases](#-test-all-databases) - Testar com todos os bancos de dados
+- [new-project](#-new-project) - Criar novo projeto a partir do template
+- [run-sonar-analysis](#-run-sonar-analysis) - Executar análise SonarCloud local
+- [Kubernetes Scripts](#-kubernetes-scripts) - Deploy/destroy no Minikube
+
+---
+
+## 🔍 run-sonar-analysis
+
+Executa análise SonarCloud localmente.
+
+### Windows (PowerShell)
+
+```powershell
+# Set token
+$env:SONAR_TOKEN = "your-sonarcloud-token"
+
+# Run analysis
+.\scripts\run-sonar-analysis.ps1
+
+# OR pass token as parameter
+.\scripts\run-sonar-analysis.ps1 -SonarToken "your-token"
+```
+
+### Linux/macOS (Bash)
+
+```bash
+# Set token
+export SONAR_TOKEN="your-sonarcloud-token"
+
+# Run analysis
+chmod +x scripts/run-sonar-analysis.sh
+./scripts/run-sonar-analysis.sh
+
+# OR pass token as parameter
+./scripts/run-sonar-analysis.sh "your-token"
+```
+
+### O que o script faz?
+
+1. ✅ **Instala** dotnet-sonarscanner (se necessário)
+2. ✅ **Begin** - Inicia análise SonarCloud
+3. ✅ **Build** - Compila o projeto
+4. ✅ **Test** - Executa testes com cobertura (OpenCover)
+5. ✅ **End** - Finaliza e envia dados ao SonarCloud
+6. ✅ **Link** - Mostra URL para ver resultados
+
+**Requisitos:**
+
+- Token SonarCloud (obtenha em https://sonarcloud.io/account/security)
+- .NET 10 SDK instalado
+- Projeto configurado no SonarCloud
+
+**📖 Para configuração completa**, veja [docs/SONARCLOUD.md](../docs/SONARCLOUD.md)
+
+---
+
 ## 🧪 test-all-databases
 
 Testa a aplicação com todos os 4 bancos de dados suportados (SQL Server, Oracle, PostgreSQL, MySQL).

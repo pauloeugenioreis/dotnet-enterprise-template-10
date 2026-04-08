@@ -44,7 +44,9 @@ public static class CacheExtension
                 // SQL Server distributed cache requires:
                 // Install-Package Microsoft.Extensions.Caching.SqlServer
                 // dotnet sql-cache create "connection-string" dbo Cache
-                throw new NotImplementedException("SQL Server cache requires Microsoft.Extensions.Caching.SqlServer package");
+                services.AddMemoryCache();
+                services.AddDistributedMemoryCache();
+                break;
             default:
                 services.AddMemoryCache();
                 services.AddDistributedMemoryCache();

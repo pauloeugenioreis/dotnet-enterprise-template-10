@@ -30,7 +30,7 @@ public class AuditControllerTests : IClassFixture<WebApplicationFactoryFixture>
         var orderId = await SeedOrderLifecycleAsync(additionalUpdates: 1);
 
         // Act
-        var response = await _client.GetAsync($"/api/Audit/Order/{orderId}");
+        var response = await _client.GetAsync($"/api/v1/Audit/Order/{orderId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -53,7 +53,7 @@ public class AuditControllerTests : IClassFixture<WebApplicationFactoryFixture>
         await UpdateOrderStatusAsync(order.Id, "Processing");
 
         // Act
-        var response = await _client.GetAsync($"/api/Audit/Order/{order.Id}/at/{Uri.EscapeDataString(cutoff.ToString("O"))}");
+        var response = await _client.GetAsync($"/api/v1/Audit/Order/{order.Id}/at/{Uri.EscapeDataString(cutoff.ToString("O"))}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -72,7 +72,7 @@ public class AuditControllerTests : IClassFixture<WebApplicationFactoryFixture>
         var orderId = await SeedOrderLifecycleAsync(additionalUpdates: 2);
 
         // Act
-        var response = await _client.PostAsync($"/api/Audit/Order/{orderId}/replay", content: null);
+        var response = await _client.PostAsync($"/api/v1/Audit/Order/{orderId}/replay", content: null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

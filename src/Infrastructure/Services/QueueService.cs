@@ -30,20 +30,18 @@ public class QueueService : IQueueService
         _logger = logger;
     }
 
-    public Task PublishAsync(string queueName, object payload)
+    public Task PublishAsync(string queueName, object payload, CancellationToken cancellationToken = default)
     {
         var message = JsonSerializer.Serialize(payload ?? new { });
-        return PublishAsync(queueName, message);
+        return PublishAsync(queueName, message, cancellationToken);
     }
 
-    public async Task PublishAsync(string queueName, string message)
+    public async Task PublishAsync(string queueName, string message, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(queueName);
-
         if (string.IsNullOrWhiteSpace(ConnectionString))
         {
-            _logger.LogWarning("RabbitMQ connection string not configured. Message to queue {Queue} discarded.", queueName);
-            return;
+            throw new InvalidOperationException(
+                $"RabbitMQ connection string not configured. Cannot publish message to queue '{queueName}'.");
         }
 
         var factory = new ConnectionFactory
@@ -63,10 +61,10 @@ public class QueueService : IQueueService
                         retryCount, timeSpan.TotalSeconds);
                 });
 
-        await retryPolicy.ExecuteAsync(async () =>
+        await retryPolicy.ExecuteAsync(async (ct) =>
         {
-            using var connection = await factory.CreateConnectionAsync();
-            using var channel = await connection.CreateChannelAsync();
+            using var connection = await factory.CreateConnectionAsync(ct);
+            using var channel = await connection.CreateChannelAsync(cancellationToken: ct);
 
             // Declare queue (idempotent operation)
             await channel.QueueDeclareAsync(
@@ -85,6 +83,6 @@ public class QueueService : IQueueService
                 body: body);
 
             _logger.LogInformation("Message published to queue {Queue}", queueName);
-        });
+        }, cancellationToken);
     }
 }
