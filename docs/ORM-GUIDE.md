@@ -54,16 +54,16 @@ Cada ORM usa sua **interface específica** para evitar conflitos:
 ```csharp
 public class ProductService
 {
-    private readonly IRepository<Product> _efRepository;          // EF Core (padrão)
+    private readonly IRepository<Product> _repository;            // EF Core (padrão)
     private readonly IProductDapperRepository _dapperRepository;  // Dapper (alta performance)
     private readonly IProductAdoRepository _adoRepository;        // ADO.NET (controle total)
 
     public ProductService(
-        IRepository<Product> efRepository,
+        IRepository<Product> repository,
         IProductDapperRepository dapperRepository,
         IProductAdoRepository adoRepository)
     {
-        _efRepository = efRepository;
+        _repository = repository;
         _dapperRepository = dapperRepository;
         _adoRepository = adoRepository;
     }
@@ -71,7 +71,7 @@ public class ProductService
     // Use EF Core para CRUD normal com change tracking
     public async Task<Product> CreateAsync(Product product)
     {
-        return await _efRepository.AddAsync(product);
+        return await _repository.AddAsync(product);
     }
 
     // Use Dapper para queries de leitura complexas (melhor performance)
@@ -753,7 +753,7 @@ public class ProductLinq2DbRepository : IRepository<Product>
 ### 🎯 Como usar cada ORM?
 
 // Entity Framework Core (padrão)
-private readonly IRepository<Product> \_efRepo;
+private readonly IRepository<Product> \_repository;
 
 // Dapper (alta performance)
 private readonly IProductDapperRepository \_dapperRepo;
@@ -851,16 +851,16 @@ Por padrão, o template já está configurado com:
 public class ProductService
 {
     // Injete múltiplos repositórios simultaneamente!
-    private readonly IRepository<Product> _efRepository; // EF Core (padrão)
+    private readonly IRepository<Product> _repository; // EF Core (padrão)
     private readonly IProductDapperRepository _dapperRepository; // Dapper
     private readonly IProductAdoRepository _adoRepository; // ADO.NET
 
     public ProductService(
-        IRepository<Product> efRepository,
+        IRepository<Product> repository,
         IProductDapperRepository dapperRepository,
         IProductAdoRepository adoRepository)
     {
-        _efRepository = efRepository;
+        _repository = repository;
         _dapperRepository = dapperRepository;
         _adoRepository = adoRepository;
     }
@@ -868,7 +868,7 @@ public class ProductService
     // Use EF Core para operações normais de CRUD
     public async Task<Product> CreateAsync(Product product)
     {
-        return await _efRepository.AddAsync(product);
+        return await _repository.AddAsync(product);
     }
 
     // Use Dapper para relatórios e queries complexas
@@ -901,21 +901,21 @@ public class ProductService
 ```csharp
 public class OrderService
 {
-    private readonly IRepository<Order> _efRepo; // EF Core
+    private readonly IRepository<Order> _repository; // EF Core
     private readonly IOrderDapperRepository _dapperRepo; // Dapper
 
     public OrderService(
-        IRepository<Order> efRepo,
+        IRepository<Order> repository,
         IOrderDapperRepository dapperRepo)
     {
-        _efRepo = efRepo;
+        _repository = repository;
         _dapperRepo = dapperRepo;
     }
 
     // Use EF Core para criar pedidos (usa change tracking)
     public async Task<Order> CreateOrderAsync(Order order)
     {
-        return await _efRepo.AddAsync(order);
+        return await _repository.AddAsync(order);
     }
 
     // Use Dapper para relatórios de vendas (queries otimizadas)
@@ -932,7 +932,7 @@ Cada ORM usa interfaces específicas para evitar conflitos de injeção de depen
 
 ```csharp
 // Entity Framework Core
-IRepository<Product> efRepo;  // Usa InMemory em testes, SQL Server em produção
+IRepository<Product> repository;  // Usa InMemory em testes, SQL Server em produção
 
 // Dapper
 IProductDapperRepository dapperRepo;  // Sempre usa SQL Server
