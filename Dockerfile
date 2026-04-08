@@ -27,14 +27,13 @@ RUN dotnet publish "Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAp
 
 FROM base AS final
 
-# Create non-root user for security
-RUN adduser --disabled-password --gecos "" appuser
-USER appuser
+# Run as non-root user for security (user 'app' is built-in on .NET 10 images)
+USER $APP_UID
 
 WORKDIR /app
 COPY --from=publish /app/publish .
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:80/health || exit 1
+    CMD dotnet ProjectTemplate.Api.dll --urls=http://+:80 || exit 1
 
 ENTRYPOINT ["dotnet", "ProjectTemplate.Api.dll"]
