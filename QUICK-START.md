@@ -83,6 +83,7 @@ dotnet run
 ```
 
 Acesse:
+
 - **API**: `https://localhost:3060` ou `http://localhost:3062`
 - **Swagger UI**: `https://localhost:3060/swagger`
 
@@ -90,7 +91,7 @@ Acesse:
 
 O sistema cria automaticamente um usuário administrador:
 
-```
+```text
 Username: admin
 Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com
@@ -206,6 +207,7 @@ cd scripts/windows
 cd scripts/linux
 ./minikube-destroy.sh
 ```
+
 ---
 
 ## 🧪 6. Executar Testes
@@ -241,6 +243,7 @@ cd scripts/windows
 cd scripts/linux
 ./run-integration-tests.sh
 ```
+
 ---
 
 ## 📝 7. Criar sua Primeira Entidade
@@ -393,11 +396,13 @@ Para trocar de ORM, **não use appsettings.json**:
 ### Erro: SDK do .NET 10 não encontrado
 
 **Solução**: Instale o .NET 10 RC 2 ou superior:
+
 - https://dotnet.microsoft.com/download/dotnet/10.0
 
 ### Erro: Não é possível conectar ao banco de dados
 
 **Solução**:
+
 1. Verifique se o SQL Server está rodando
 2. Confirme a connection string em `appsettings.Development.json`
 3. Teste a conexão: `dotnet ef database update`
@@ -414,6 +419,7 @@ dotnet run --urls "http://localhost:5005"
 ### Docker: erro de build
 
 **Solução**:
+
 1. Verifique se o Docker está rodando
 2. Limpe o cache: `docker system prune -a`
 3. Rebuild: `docker build -t meuprojeto-api:latest . --no-cache`

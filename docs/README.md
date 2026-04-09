@@ -46,7 +46,7 @@ Se você está começando, **não comece por aqui!** Primeiro:
 
 ## 📂 Organização
 
-```
+```text
 docs/
 ├── README.md                    # Este arquivo (índice)
 ├── ARCHITECTURE.md              # Arquitetura Clean Architecture
@@ -94,6 +94,7 @@ Planejamos adicionar:
 ### Desenvolvedor Backend
 
 Foco principal:
+
 - [CONFIGURATION-GUIDE.md](CONFIGURATION-GUIDE.md) - **ESSENCIAL**: Como usar configurações corretamente
 - [ORM-GUIDE.md](ORM-GUIDE.md) - Entender opções de acesso a dados
 - ../[README.md](../README.md) - Entender arquitetura e padrões
@@ -101,12 +102,14 @@ Foco principal:
 ### DevOps Engineer
 
 Foco principal:
+
 - [KUBERNETES.md](KUBERNETES.md) - Deploy e infraestrutura
 - ../[docker-compose.yml](../docker-compose.yml) - Containerização
 
 ### Arquiteto de Software
 
 Foco principal:
+
 - ../[README.md](../README.md) - Arquitetura geral
 - [ORM-GUIDE.md](ORM-GUIDE.md) - Decisões de arquitetura de dados
 - [KUBERNETES.md](KUBERNETES.md) - Arquitetura de infraestrutura
@@ -114,6 +117,7 @@ Foco principal:
 ### QA / Tester
 
 Foco principal:
+
 - ../[QUICK-START.md](../QUICK-START.md#6-executar-testes) - Como rodar testes
 - [KUBERNETES.md](KUBERNETES.md#-testes) - Testes em ambiente K8s
 
@@ -159,6 +163,7 @@ Quer melhorar ou adicionar documentação? Ótimo!
 ### Formato
 
 Use Markdown com:
+
 - Emojis para seções principais (📚 🚀 ⚙️ etc.)
 - Code blocks com syntax highlighting
 - Tabelas para comparações

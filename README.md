@@ -388,6 +388,7 @@ Role:     Admin
 ```
 
 **Teste no Swagger:**
+
 1. Vá para `/swagger`
 2. Execute `POST /api/auth/login` com as credenciais acima
 3. Copie o `accessToken` da resposta
@@ -410,6 +411,7 @@ O template foi projetado para suportar diferentes ORMs.
 **Entity Framework Core é o padrão** e está habilitado no código.
 
 Para trocar de ORM, **não use appsettings.json**. Edite diretamente o arquivo:
+
 - **Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`
 - **Linha**: ~26 (procure por "DEFAULT: Entity Framework Core")
 
@@ -482,6 +484,7 @@ Já está habilitado. Não precisa fazer nada!
   }
 }
 ```
+
 ---
 
 ## 📊 Health Checks
@@ -653,6 +656,7 @@ services.Scan(scan => scan
 ```
 
 **Como funciona:**
+
 - `Repository<Product>` → registrado como `IRepository<Product>`
 - `ProductDapperRepository` → registrado como `IProductDapperRepository`
 - `ProductAdoRepository` → registrado como `IProductAdoRepository`
@@ -697,6 +701,7 @@ public class ProductService
 ```
 
 **Convenções necessárias:**
+
 - Interface: `IProductDapperRepository` (prefixo `I` + nome da classe)
 - Classe: `ProductDapperRepository` (implementa a interface)
 - Herança: `IProductDapperRepository : IRepository<T>`
@@ -785,6 +790,7 @@ docker build -t projecttemplate-api:latest .
 ```bash
 docker-compose up -d
 ```
+
 Acesse: `http://localhost:8080`
 
 ### Kubernetes
@@ -809,6 +815,7 @@ chmod +x minikube-deploy.sh
 ```
 
 O script automaticamente:
+
 1. Verifica pré-requisitos (Docker, Minikube, kubectl)
 2. Inicia o Minikube
 3. Constrói a imagem Docker

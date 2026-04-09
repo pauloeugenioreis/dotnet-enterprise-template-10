@@ -88,6 +88,8 @@ public class ProductService
 }
 ```
 
+<a id="escolha-o-orm-certo"></a>
+
 ### 📝 Escolha o ORM Certo para Cada Situação
 
 | Operação                      | ORM Recomendado      | Motivo                                |
@@ -146,6 +148,8 @@ src/Data/Repository/
 ```
 
 Use essa estrutura como catálogo: basta habilitar o ORM desejado e as implementações ficam imediatamente disponíveis para injeção de dependências.
+
+<a id="comparacao-rapida"></a>
 
 ## ⚡ Comparação Rápida por ORM
 
