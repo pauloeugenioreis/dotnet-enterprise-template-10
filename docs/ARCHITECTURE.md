@@ -529,6 +529,8 @@ Load Balancer
       ├─── Pod 2 (API Instance)
       ├─── Pod 3 (API Instance)
       └─── Pod N (Auto-scaled)
+```
+
 **Features:**
 - Horizontal Pod Autoscaler (HPA)
 - Resource-based scaling (CPU/Memory)
@@ -553,19 +555,19 @@ Max:    1Gi memory, 2000m CPU
 
 ## 🎓 Melhores Práticas Implementadas
 
-✅ **Clean Architecture** - Separação clara de responsabilidades
-✅ **SOLID Principles** - Código maintainable e extensível
-✅ **Dependency Injection** - Loose coupling, testability
-✅ **Repository Pattern** - Abstração de dados
-✅ **Service Pattern** - Lógica de negócio centralizada
-✅ **Options Pattern** - Configuração fortemente tipada
-✅ **Async/Await** - Operações assíncronas
-✅ **CancellationToken** - Cancelamento de operações
-✅ **Logging** - Structured logging
-✅ **Health Checks** - Monitoring e readiness
-✅ **Multi-ORM** - Flexibilidade de escolha
-✅ **Docker** - Containerização
-✅ **Kubernetes** - Orquestração
+- ✅ **Clean Architecture** - Separação clara de responsabilidades
+- ✅ **SOLID Principles** - Código maintainable e extensível
+- ✅ **Dependency Injection** - Loose coupling, testability
+- ✅ **Repository Pattern** - Abstração de dados
+- ✅ **Service Pattern** - Lógica de negócio centralizada
+- ✅ **Options Pattern** - Configuração fortemente tipada
+- ✅ **Async/Await** - Operações assíncronas
+- ✅ **CancellationToken** - Cancelamento de operações
+- ✅ **Logging** - Structured logging
+- ✅ **Health Checks** - Monitoring e readiness
+- ✅ **Multi-ORM** - Flexibilidade de escolha
+- ✅ **Docker** - Containerização
+- ✅ **Kubernetes** - Orquestração
 
 ---
 
