@@ -109,12 +109,12 @@ public async Task<ActionResult> ExportToExcelAsync(
 
 ### Características
 
-✅ **Alta Performance**: MiniExcel usa FastMode para geração rápida
-✅ **Filtros**: Suporta filtrar por status ativo e categoria
-✅ **Auto-width**: Colunas ajustadas automaticamente
-✅ **AutoFilter**: Excel gerado com filtros habilitados
-✅ **Timestamp**: Nome do arquivo inclui data/hora
-✅ **Memory Stream**: Não cria arquivos temporários no disco
+- ✅ **Alta Performance**: MiniExcel usa FastMode para geração rápida
+- ✅ **Filtros**: Suporta filtrar por status ativo e categoria
+- ✅ **Auto-width**: Colunas ajustadas automaticamente
+- ✅ **AutoFilter**: Excel gerado com filtros habilitados
+- ✅ **Timestamp**: Nome do arquivo inclui data/hora
+- ✅ **Memory Stream**: Não cria arquivos temporários no disco
 
 ---
 
@@ -226,7 +226,7 @@ Desativa o produto ID 1 utilizando o `UpdateProductStatusRequest`.
 
 ## 🎨 Features Demonstradas
 
-### ✅ Boas Práticas
+### Boas Práticas
 
 - **Logging estruturado** com ILogger
 - **Métricas de performance** com Stopwatch
@@ -236,7 +236,7 @@ Desativa o produto ID 1 utilizando o `UpdateProductStatusRequest`.
 - **CreatedAtAction** retornando URI do recurso criado
 - **XML Documentation** para Swagger
 
-### ✅ Funcionalidades
+### Funcionalidades
 
 - CRUD completo
 - Filtros avançados
@@ -245,7 +245,7 @@ Desativa o produto ID 1 utilizando o `UpdateProductStatusRequest`.
 - Ativação/desativação (PATCH)
 - Métricas de performance
 
-### ✅ Padrões
+### Padrões
 
 - Clean Architecture
 - Repository Pattern

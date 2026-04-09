@@ -14,7 +14,7 @@ Esta pasta contém documentação técnica adicional e guias especializados para
 | [CONFIGURATION-GUIDE.md](CONFIGURATION-GUIDE.md) | IOptions\<T\>, validação de configurações, boas práticas | Acessar configurações no código |
 | [AUTHENTICATION.md](AUTHENTICATION.md) | JWT, OAuth2 (Google, Microsoft, GitHub), refresh tokens | Configurar autenticação |
 | [SECURITY.md](SECURITY.md) | Headers de segurança, CORS, HTTPS, proteção contra ataques | Revisar segurança da API |
-| [RATE-LIMITING.md](RATE-LIMITING.md) | Fixed Window, Sliding Window, Token Bucket, Concurrency | Controle de taxa de requisições |
+| [RATE-LIMITING.md](RATE-LIMITING.md) | Fixed Window, Sliding Window, Token Bucket, Concurrency — inclui decisão arquitetural | Controle de taxa de requisições |
 | [EVENT-SOURCING.md](EVENT-SOURCING.md) | Marten + PostgreSQL, auditoria, time travel | Habilitar event sourcing |
 | [TELEMETRY.md](TELEMETRY.md) | OpenTelemetry, Jaeger, Prometheus, Grafana | Configurar observabilidade |
 | [TESTING-DATABASES.md](TESTING-DATABASES.md) | Testar com SQL Server, Oracle, PostgreSQL, MySQL | Validar suporte multi-banco |
@@ -22,7 +22,6 @@ Esta pasta contém documentação técnica adicional e guias especializados para
 | [KUBERNETES.md](KUBERNETES.md) | Deploy local (Minikube) e produção (AKS, EKS, GKE) | Deploy em Kubernetes |
 | [CICD.md](CICD.md) | GitHub Actions, Azure DevOps, GitLab CI | Configurar CI/CD |
 | [SONARCLOUD.md](SONARCLOUD.md) | Análise de qualidade de código | Configurar SonarCloud |
-| [ADR-RATE-LIMITING.md](ADR-RATE-LIMITING.md) | Decisão arquitetural sobre Rate Limiting | Referência de ADR |
 | [PRODUCT-EXAMPLE.md](PRODUCT-EXAMPLE.md) | Exemplo completo de entidade Product | Aprender padrões do template |
 
 ### Exemplos
@@ -55,8 +54,7 @@ docs/
 ├── CONFIGURATION-GUIDE.md       # Guia de Configuração (IOptions<T>)
 ├── AUTHENTICATION.md            # Autenticação JWT & OAuth2
 ├── SECURITY.md                  # Segurança da API
-├── RATE-LIMITING.md             # Rate Limiting
-├── ADR-RATE-LIMITING.md         # ADR - Decisão Rate Limiting
+├── RATE-LIMITING.md             # Rate Limiting (inclui ADR)
 ├── EVENT-SOURCING.md            # Event Sourcing
 ├── TELEMETRY.md                 # Observabilidade
 ├── TESTING-DATABASES.md         # Testes multi-banco

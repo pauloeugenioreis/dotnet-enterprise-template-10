@@ -14,6 +14,7 @@ Esta documentação descreve o sistema de **Rate Limiting** implementado no temp
 - [Melhores Práticas](#melhores-praticas)
 - [Monitoramento e Observabilidade](#monitoramento-e-observabilidade)
 - [Troubleshooting](#troubleshooting)
+- [Decisão Arquitetural](#decisao-arquitetural)
 - [Referências](#referencias)
 - [Exemplo Completo](#exemplo-completo)
 
@@ -706,6 +707,62 @@ O Rate Limiting padrão é **global por policy**. Para limitar **por cliente/IP*
 1. Criar policies personalizadas por IP
 2. Usar bibliotecas como `AspNetCoreRateLimit`
 3. Implementar partição customizada no `AddRateLimiter`
+
+---
+
+<a id="decisao-arquitetural"></a>
+
+## Decisão Arquitetural
+
+### Contexto
+
+O projeto inicialmente utilizava `AspNetCoreRateLimit` v5.0.0 para gerenciamento de rate limiting. O .NET 7+ introduziu rate limiting nativo através de `Microsoft.AspNetCore.RateLimiting`, oferecendo uma alternativa oficial da Microsoft.
+
+Após avaliação, a migração para .NET native rate limiting foi realizada com sucesso.
+
+### Implementação Atual (.NET Native)
+
+```csharp
+// RateLimitingExtension.cs
+services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("fixed", opt => { ... });
+    options.AddSlidingWindowLimiter("sliding", opt => { ... });
+    options.AddTokenBucketLimiter("token", opt => { ... });
+    options.AddConcurrencyLimiter("concurrent", opt => { ... });
+});
+
+app.UseRateLimiter();
+```
+
+### Comparativo (Antes vs. Agora)
+
+| Feature | Antes (`AspNetCoreRateLimit`) | Agora (.NET Native) |
+|---------|-------------------------------|----------------------|
+| **Suporte** | Community | ✅ Microsoft |
+| **Performance** | Excelente | ✅ Ligeiramente melhor |
+| **Dependências** | Package externo | ✅ Built-in |
+| **Configuração JSON** | ✅ Nativa | ✅ Via extension |
+| **IP Whitelisting** | ✅ Built-in | ✅ Implementado |
+| **Custom Messages** | ✅ Built-in | ✅ Implementado |
+| **Future-proofing** | ⚠️ Incerto | ✅ Garantido |
+
+### Justificativa da Migração
+
+- ✅ **Suporte oficial Microsoft** — parte do framework, manutenção garantida
+- ✅ **Zero dependências externas** — removeu `AspNetCoreRateLimit` do projeto
+- ✅ **Performance integrada** — integração mais profunda com o pipeline ASP.NET Core
+- ✅ **IP Whitelisting** — suporte a CIDR e `X-Forwarded-For`
+- ✅ **Custom response** — resposta JSON + headers `X-RateLimit-*`
+- ✅ **4 estratégias** — Fixed Window, Sliding Window, Token Bucket, Concurrency
+- ✅ **Integração OpenTelemetry** — métricas de rate limiting exportadas
+
+### Histórico de Revisões
+
+| Data | Decisão | Justificativa |
+|------|---------|---------------|
+| 2026-01-14 | ADIADA | `AspNetCoreRateLimit` funcional, migração não justificada |
+| 2026-04 | ACEITA | Migração para .NET native concluída com sucesso |
 
 ---
 

@@ -1,35 +1,35 @@
-# Authentication - JWT & OAuth2
+﻿# Autenticação - JWT & OAuth2
 
 ## 📋 Índice
 
-- [Overview](#overview)
-- [Default Admin Credentials](#default-admin-credentials)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Configuration](#configuration)
-- [Quick Start](#quick-start)
-- [API Endpoints](#api-endpoints)
-- [Usage Examples](#usage-examples)
-- [Security Best Practices](#security-best-practices)
-- [Database Schema](#database-schema)
-- [OAuth2 Setup](#oauth2-setup)
-- [Testing with Swagger](#testing-with-swagger)
-- [Troubleshooting](#troubleshooting)
-- [Migration from Basic Auth](#migration-from-basic-auth)
-- [Performance Considerations](#performance-considerations)
-- [Advanced Features (Future)](#advanced-features-future)
-- [References](#references)
-- [Support](#support)
+- [Visão Geral](#overview)
+- [Credenciais Padrão do Admin](#default-admin-credentials)
+- [Funcionalidades](#features)
+- [Arquitetura](#architecture)
+- [Configuração](#configuration)
+- [Início Rápido](#quick-start)
+- [Endpoints da API](#api-endpoints)
+- [Exemplos de Uso](#usage-examples)
+- [Boas Práticas de Segurança](#security-best-practices)
+- [Schema do Banco de Dados](#database-schema)
+- [Configuração do OAuth2](#oauth2-setup)
+- [Testando com Swagger](#testing-with-swagger)
+- [Solução de Problemas](#troubleshooting)
+- [Migração do Basic Auth](#migration-from-basic-auth)
+- [Considerações de Performance](#performance-considerations)
+- [Funcionalidades Avançadas (Futuro)](#advanced-features-future)
+- [Referências](#references)
+- [Suporte](#support)
 
 ---
 
-## Overview
+## Visão Geral
 
-This template provides a comprehensive authentication system with JWT (JSON Web Tokens) and OAuth2 support. The implementation follows security best practices and is fully configurable via `appsettings.json`.
+Este template oferece um sistema de autenticação completo com suporte a JWT (JSON Web Tokens) e OAuth2. A implementação segue as melhores práticas de segurança e é totalmente configurável via `appsettings.json`.
 
-## Default Admin Credentials
+## Credenciais Padrão do Admin
 
-For development and testing, a default admin user is automatically created when seeding the database:
+Para desenvolvimento e testes, um usuário admin padrão é criado automaticamente ao popular o banco de dados:
 
 ```text
 Username: admin
@@ -38,61 +38,69 @@ Email:    admin@projecttemplate.com
 Role:     Admin
 ```
 
-> ⚠️ **IMPORTANT**: Change this password immediately in production environments!
+> ⚠️ **IMPORTANTE**: Altere esta senha imediatamente em ambientes de produção!
 
-To seed the database with the default admin user, run:
+Para popular o banco com o usuário admin padrão, execute:
 
 ```bash
 dotnet run --project src/Api
 ```
 
-The seeder will automatically create:
+O seeder criará automaticamente:
 
 - **Roles**: Admin, User, Manager
-- **Default Admin User** with the credentials above
+- **Usuário Admin Padrão** com as credenciais acima
 
 <a id="features"></a>
 
-## Features
+## Funcionalidades
 
-- ✅ **JWT Authentication** - Secure token-based authentication
-- ✅ **Refresh Tokens** - Long-lived tokens for seamless token renewal
-- ✅ **OAuth2 Providers** - Google, Microsoft, GitHub integration
-- ✅ **Password Policy** - Configurable password requirements
-- ✅ **Role-Based Authorization** - Assign roles to users
-- ✅ **Token Revocation** - Logout and invalidate refresh tokens
-- ✅ **IP Tracking** - Track login IPs for security auditing
-- ✅ **Configurable** - Enable/disable via settings
+- ✅ **Autenticação JWT** - Autenticação segura baseada em tokens
+- ✅ **Refresh Tokens** - Tokens de longa duração para renovação transparente
+- ✅ **Provedores OAuth2** - Integração com Google, Microsoft e GitHub
+- ✅ **Política de Senhas** - Requisitos de senha configuráveis
+- ✅ **Autorização por Roles** - Atribuir roles aos usuários
+- ✅ **Revogação de Token** - Logout e invalidação de refresh tokens
+- ✅ **Rastreio de IP** - Registrar IPs de login para auditoria de segurança
+- ✅ **Configurável** - Habilitar/desabilitar via configurações
 
 <a id="architecture"></a>
 
-## Architecture
+## Arquitetura
 
 ```text
-┌─────────────────┐
-│  AuthController │  ← REST API endpoints
-└────────┬────────┘
-         │
-    ┌────▼────────┐
-    │ AuthService │  ← Business logic
-    └────┬────────┘
-         │
-    ┌────▼──────────────┐
-    │ JwtTokenService   │  ← Token generation/validation
-    └────┬──────────────┘
-         │
-    ┌────▼──────────────┐
-    │ UserRepository    │  ← Data access
-    └────┬──────────────┘
-         │
-    ┌────▼──────────────┐
-    │ ApplicationDbContext │  ← EF Core
-    └───────────────────┘
-  ```
+┌──────────────────────┐
+│  AuthController      │
+└──────────────────────┘
+           │
+           │  Endpoints REST da API
+           ▼
+┌──────────────────────┐
+│  AuthService         │
+└──────────────────────┘
+           │
+           │  Lógica de negócio
+           ▼
+┌──────────────────────┐
+│  JwtTokenService     │
+└──────────────────────┘
+           │
+           │  Geração/validação de tokens
+           ▼
+┌──────────────────────┐
+│  UserRepository      │
+└──────────────────────┘
+           │
+           │  Acesso a dados
+           ▼
+┌──────────────────────┐
+│  ApplicationDbContext│
+└──────────────────────┘
+```
 
 <a id="configuration"></a>
 
-## Configuration
+## Configuração
 
 ### appsettings.json
 
@@ -149,49 +157,49 @@ The seeder will automatically create:
 }
 ```
 
-### Configuration Options
+### Opções de Configuração
 
 #### JwtSettings
 
-- **Secret**: Secret key for signing JWTs (minimum 32 characters for HS256)
-- **Issuer**: Token issuer (who created the token)
-- **Audience**: Token audience (who can use the token)
-- **ExpirationMinutes**: Access token lifetime (default: 60 minutes)
-- **RefreshTokenExpirationDays**: Refresh token lifetime (default: 7 days)
-- **Validate*** flags: Enable/disable JWT validation checks
+- **Secret**: Chave secreta para assinar os JWTs (mínimo 32 caracteres para HS256)
+- **Issuer**: Emissor do token (quem criou o token)
+- **Audience**: Audiência do token (quem pode usar o token)
+- **ExpirationMinutes**: Tempo de vida do access token (padrão: 60 minutos)
+- **RefreshTokenExpirationDays**: Tempo de vida do refresh token (padrão: 7 dias)
+- Flags **Validate\***: Habilitar/desabilitar validações do JWT
 
 #### PasswordPolicySettings
 
-- **MinimumLength**: Minimum password length (default: 8)
-- **RequireDigit**: Require at least one number
-- **RequireLowercase**: Require at least one lowercase letter
-- **RequireUppercase**: Require at least one uppercase letter
-- **RequireNonAlphanumeric**: Require at least one special character
-- **MaxFailedAccessAttempts**: Max login attempts before lockout
-- **LockoutMinutes**: Account lockout duration
+- **MinimumLength**: Comprimento mínimo da senha (padrão: 8)
+- **RequireDigit**: Exigir pelo menos um número
+- **RequireLowercase**: Exigir pelo menos uma letra minúscula
+- **RequireUppercase**: Exigir pelo menos uma letra maiúscula
+- **RequireNonAlphanumeric**: Exigir pelo menos um caractere especial
+- **MaxFailedAccessAttempts**: Máximo de tentativas de login antes do bloqueio
+- **LockoutMinutes**: Duração do bloqueio da conta
 
 #### RefreshTokenSettings
 
-- **ExpirationDays**: How long refresh tokens are valid
-- **ReuseTokens**: Allow reusing the same refresh token (not recommended)
+- **ExpirationDays**: Validade dos refresh tokens
+- **ReuseTokens**: Permitir reutilização do mesmo refresh token (não recomendado)
 
 <a id="quick-start"></a>
 
-## Quick Start
+## Início Rápido
 
-### 1. Run the Application
+### 1. Executar a Aplicação
 
 ```bash
-# Start the API
+# Iniciar a API
 dotnet run --project src/Api
 
-# API will be available at http://localhost:5000
-# Swagger UI at http://localhost:5000/swagger
+# API disponível em http://localhost:5000
+# Swagger UI em http://localhost:5000/swagger
 ```
 
-### 2. Login with Admin Credentials
+### 2. Login com as Credenciais do Admin
 
-Use the default admin credentials to get a JWT token:
+Use as credenciais padrão do admin para obter um token JWT:
 
 ```bash
 curl -X POST http://localhost:5000/api/auth/login \
@@ -202,7 +210,7 @@ curl -X POST http://localhost:5000/api/auth/login \
   }'
 ```
 
-**Response:**
+**Resposta:**
 
 ```json
 {
@@ -220,34 +228,34 @@ curl -X POST http://localhost:5000/api/auth/login \
 }
 ```
 
-### 3. Use the Access Token
+### 3. Utilizar o Access Token
 
-Add the token to the `Authorization` header:
+Adicione o token ao cabeçalho `Authorization`:
 
 ```bash
 curl -X GET http://localhost:5000/api/auth/me \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-### 4. Test in Swagger
+### 4. Testar no Swagger
 
-1. Open http://localhost:5000/swagger
+1. Abrir http://localhost:5000/swagger
 2. Click "Authorize" button (🔒)
 3. Enter: `Bearer <your-access-token>`
 4. Click "Authorize" and "Close"
-5. All endpoints will now use your authentication
+5. Todos os endpoints passarão a usar sua autenticação
 
 <a id="api-endpoints"></a>
 
-## API Endpoints
+## Endpoints da API
 
-### 1. Register
+### 1. Registro
 
-Create a new user account.
+Cria uma nova conta de usuário.
 
 **Endpoint:** `POST /api/auth/register`
 
-**Request:**
+**Requisição:**
 
 ```json
 {
@@ -259,7 +267,7 @@ Create a new user account.
 }
 ```
 
-**Response:**
+**Resposta:**
 
 ```json
 {
@@ -279,11 +287,11 @@ Create a new user account.
 
 ### 2. Login
 
-Authenticate with username/email and password.
+Autentica com usuário/e-mail e senha.
 
 **Endpoint:** `POST /api/auth/login`
 
-**Request:**
+**Requisição:**
 
 ```json
 {
@@ -292,7 +300,7 @@ Authenticate with username/email and password.
 }
 ```
 
-**Response:**
+**Resposta:**
 
 ```json
 {
@@ -312,11 +320,11 @@ Authenticate with username/email and password.
 
 ### 3. Refresh Token
 
-Get a new access token using a refresh token.
+Obtém um novo access token usando um refresh token.
 
 **Endpoint:** `POST /api/auth/refresh-token`
 
-**Request:**
+**Requisição:**
 
 ```json
 {
@@ -324,7 +332,7 @@ Get a new access token using a refresh token.
 }
 ```
 
-**Response:**
+**Resposta:**
 
 ```json
 {
@@ -342,13 +350,13 @@ Get a new access token using a refresh token.
 }
 ```
 
-### 4. Revoke Token (Logout)
+### 4. Revogar Token (Logout)
 
-Invalidate a refresh token.
+Invalida um refresh token.
 
 **Endpoint:** `POST /api/auth/revoke-token`
 
-**Request:**
+**Requisição:**
 
 ```json
 {
@@ -356,21 +364,21 @@ Invalidate a refresh token.
 }
 ```
 
-**Response:** `204 No Content`
+**Resposta:** `204 No Content`
 
-### 5. Get Current User
+### 5. Obter Usuário Atual
 
-Get authenticated user information.
+Obtém as informações do usuário autenticado.
 
 **Endpoint:** `GET /api/auth/me`
 
-**Headers:**
+**Cabeçalhos:**
 
 ```text
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-**Response:**
+**Resposta:**
 
 ```json
 {
@@ -383,19 +391,19 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 6. Change Password
+### 6. Alterar Senha
 
-Change the current user's password.
+Altera a senha do usuário atual.
 
 **Endpoint:** `POST /api/auth/change-password`
 
-**Headers:**
+**Cabeçalhos:**
 
 ```bash
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-**Request:**
+**Requisição:**
 
 ```json
 {
@@ -404,21 +412,21 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-**Response:** `204 No Content`
+**Resposta:** `204 No Content`
 
-### 7. Update Profile
+### 7. Atualizar Perfil
 
-Update user profile information.
+Atualiza as informações do perfil do usuário.
 
 **Endpoint:** `PUT /api/auth/profile`
 
-**Headers:**
+**Cabeçalhos:**
 
 ```bash
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-**Request:**
+**Requisição:**
 
 ```json
 {
@@ -429,7 +437,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-**Response:**
+**Resposta:**
 
 ```json
 {
@@ -444,13 +452,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### 8. OAuth2 Login (Coming Soon)
+### 8. Login OAuth2 (Em Breve)
 
-Login with external OAuth2 providers.
+Login com provedores OAuth2 externos.
 
 **Endpoint:** `POST /api/auth/oauth2/login`
 
-**Request:**
+**Requisição:**
 
 ```json
 {
@@ -459,7 +467,7 @@ Login with external OAuth2 providers.
 }
 ```
 
-**Response:**
+**Resposta:**
 
 ```json
 {
@@ -479,7 +487,7 @@ Login with external OAuth2 providers.
 
 <a id="usage-examples"></a>
 
-## Usage Examples
+## Exemplos de Uso
 
 ### C# Client
 
@@ -525,7 +533,7 @@ authResponse = await refreshResponse.Content.ReadFromJsonAsync<AuthResponse>();
 ```typescript
 const API_URL = 'http://localhost:5000/api/auth';
 
-// Register
+// Registro
 async function register(username: string, email: string, password: string) {
   const response = await fetch(`${API_URL}/register`, {
     method: 'POST',
@@ -556,7 +564,7 @@ async function login(usernameOrEmail: string, password: string) {
   return data;
 }
 
-// API call with authentication
+// Chamada à API com autenticação
 async function getCurrentUser() {
   const token = localStorage.getItem('accessToken');
 
@@ -565,15 +573,15 @@ async function getCurrentUser() {
   });
 
   if (response.status === 401) {
-    // Token expired, refresh it
+    // Token expirado, renovar
     await refreshToken();
-    return getCurrentUser(); // Retry
+    return getCurrentUser(); // Tentar novamente
   }
 
   return await response.json();
 }
 
-// Refresh token
+// Renovar token
 async function refreshToken() {
   const refreshToken = localStorage.getItem('refreshToken');
 
@@ -606,7 +614,7 @@ async function logout() {
 ### cURL
 
 ```bash
-# Register
+# Registro
 curl -X POST http://localhost:5000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
@@ -625,11 +633,11 @@ curl -X POST http://localhost:5000/api/auth/login \
     "password": "P@ssw0rd123"
   }'
 
-# Get current user
+# Obter usuário atual
 curl -X GET http://localhost:5000/api/auth/me \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 
-# Refresh token
+# Renovar token
 curl -X POST http://localhost:5000/api/auth/refresh-token \
   -H "Content-Type: application/json" \
   -d '{
@@ -646,75 +654,75 @@ curl -X POST http://localhost:5000/api/auth/revoke-token \
 
 <a id="security-best-practices"></a>
 
-## Security Best Practices
+## Boas Práticas de Segurança
 
-### 1. JWT Secret Key
+### 1. Chave Secreta JWT
 
-- Use a strong, random secret key (minimum 32 characters for HS256)
-- Store in environment variables or Azure Key Vault, **never commit to source control**
-- Rotate keys periodically
+- Use uma chave secreta forte e aleatória (mínimo 32 caracteres para HS256)
+- Armazene em variáveis de ambiente ou Azure Key Vault, **nunca faça commit no controle de versão**
+- Rotacione as chaves periodicamente
 
-**Generate a secure random key:**
+**Gerar uma chave aleatória segura:**
 
 ```bash
 openssl rand -base64 32
 ```
 
-### 2. HTTPS Only
+### 2. Somente HTTPS
 
-- Always use HTTPS in production
-- Set `RequireHttpsMetadata = true` in production
+- Sempre use HTTPS em produção
+- Defina `RequireHttpsMetadata = true` em produção
 
-### 3. Token Storage
+### 3. Armazenamento de Tokens
 
-- **Client-side:**
-  - Store access tokens in memory (variables)
-  - Store refresh tokens in HttpOnly cookies (preferred) or secure storage
-  - **Never store tokens in localStorage** (XSS vulnerable)
+- **No cliente:**
+  - Armazene access tokens em memória (variáveis)
+  - Armazene refresh tokens em cookies HttpOnly (preferível) ou armazenamento seguro
+  - **Nunca armazene tokens no localStorage** (vulnerável a XSS)
 
-### 4. Token Expiration
+### 4. Expiração de Tokens
 
-- Keep access tokens short-lived (15-60 minutes)
-- Use longer-lived refresh tokens (7-30 days)
-- Implement token rotation (generate new refresh token on refresh)
+- Mantenha os access tokens com vida curta (15-60 minutos)
+- Use refresh tokens com vida mais longa (7-30 dias)
+- Implemente rotação de tokens (gere um novo refresh token a cada renovação)
 
-### 5. Password Hashing
+### 5. Hash de Senhas
 
-- Current implementation uses SHA256 (simplified)
-- **Production recommendation:** Use BCrypt, Argon2, or PBKDF2
+- A implementação atual usa SHA256 (simplificado)
+- **Recomendação para produção:** Use BCrypt, Argon2 ou PBKDF2
 
 ```csharp
-// Example with BCrypt.Net
+// Exemplo com BCrypt.Net
 using BCrypt.Net;
 
-// Hash password
+// Gerar hash da senha
 var hashedPassword = BCrypt.HashPassword(password, workFactor: 12);
 
-// Verify password
+// Verificar senha
 bool isValid = BCrypt.Verify(password, hashedPassword);
 ```
 
 ### 6. Rate Limiting
 
-- Enable rate limiting to prevent brute force attacks
-- Limit login attempts per IP
+- Habilite rate limiting para prevenir ataques de força bruta
+- Limite tentativas de login por IP
 
-### 7. Account Lockout
+### 7. Bloqueio de Conta
 
-- Implement account lockout after failed login attempts
-- Configure `MaxFailedAccessAttempts` and `LockoutMinutes`
+- Implemente bloqueio de conta após tentativas de login com falha
+- Configure `MaxFailedAccessAttempts` e `LockoutMinutes`
 
-### 8. Audit Logging
+### 8. Log de Auditoria
 
-- Log authentication events (login, logout, failed attempts)
-- Track IP addresses and user agents
-- Monitor for suspicious activity
+- Registre eventos de autenticação (login, logout, tentativas com falha)
+- Rastreie endereços IP e user agents
+- Monitore atividades suspeitas
 
 <a id="database-schema"></a>
 
-## Database Schema
+## Schema do Banco de Dados
 
-### Users Table
+### Tabela Users
 
 ```sql
 CREATE TABLE Users (
@@ -737,7 +745,7 @@ CREATE TABLE Users (
 );
 ```
 
-### Roles Table
+### Tabela Roles
 
 ```sql
 CREATE TABLE Roles (
@@ -749,7 +757,7 @@ CREATE TABLE Roles (
 );
 ```
 
-### UserRoles Table (Many-to-Many)
+### Tabela UserRoles (Many-to-Many)
 
 ```sql
 CREATE TABLE UserRoles (
@@ -762,7 +770,7 @@ CREATE TABLE UserRoles (
 );
 ```
 
-### RefreshTokens Table
+### Tabela RefreshTokens
 
 ```sql
 CREATE TABLE RefreshTokens (
@@ -782,18 +790,18 @@ CREATE TABLE RefreshTokens (
 
 <a id="oauth2-setup"></a>
 
-## OAuth2 Setup
+## Configuração do OAuth2
 
 ### Google OAuth2
 
-1. **Create OAuth2 credentials:**
-   - Go to [Google Cloud Console](https://console.cloud.google.com/)
-   - Create a new project or select existing
+1. **Criar credenciais OAuth2:**
+   - Acesse o [Google Cloud Console](https://console.cloud.google.com/)
+   - Crie um novo projeto ou selecione um existente
    - Enable Google+ API
-   - Create OAuth2 credentials (Web application)
-   - Add authorized redirect URIs: `https://yourdomain.com/signin-google`
+   - Crie as credenciais OAuth2 (Web application)
+   - Adicione as URIs de redirecionamento autorizadas: `https://yourdomain.com/signin-google`
 
-2. **Configure appsettings.json:**
+2. **Configurar appsettings.json:**
 
    ```json
    {
@@ -812,13 +820,13 @@ CREATE TABLE RefreshTokens (
 
 ### Microsoft OAuth2
 
-1. **Register application:**
-   - Go to [Azure Portal](https://portal.azure.com/)
-   - Navigate to Azure Active Directory > App registrations
-   - New registration
-   - Add redirect URI: `https://yourdomain.com/signin-microsoft`
+1. **Registrar a aplicação:**
+   - Acesse o [Azure Portal](https://portal.azure.com/)
+   - Navegue até Azure Active Directory > Registros de aplicativo
+   - Nova inscrição
+   - Adicione a URI de redirecionamento: `https://yourdomain.com/signin-microsoft`
 
-2. **Configure appsettings.json:**
+2. **Configurar appsettings.json:**
 
    ```json
    {
@@ -838,12 +846,12 @@ CREATE TABLE RefreshTokens (
 
 ### GitHub OAuth2
 
-1. **Create OAuth App:**
-   - Go to GitHub Settings > Developer settings > OAuth Apps
+1. **Criar OAuth App:**
+   - Acesse GitHub Settings > Developer settings > OAuth Apps
    - New OAuth App
-   - Authorization callback URL: `https://yourdomain.com/signin-github`
+   - URL de callback de autorização: `https://yourdomain.com/signin-github`
 
-2. **Configure appsettings.json:**
+2. **Configurar appsettings.json:**
 
    ```json
    {
@@ -862,32 +870,32 @@ CREATE TABLE RefreshTokens (
 
 <a id="testing-with-swagger"></a>
 
-## Testing with Swagger
+## Testando com Swagger
 
-### Step 1: Start the application
+### Passo 1: Iniciar a aplicação
 
 ```bash
 dotnet run --project src/Api/Api.csproj
 ```
 
-### Step 2: Open Swagger UI
+### Passo 2: Abrir o Swagger UI
 
 ```text
 http://localhost:5000
 ```
 
-### Step 3: Register a new user
+### Passo 3: Registrar um novo usuário
 
 - POST `/api/auth/register`
-- Copy the `accessToken` from response
+- Copiar o `accessToken` da resposta
 
-### Step 4: Authorize in Swagger
+### Passo 4: Autorizar no Swagger
 
-- Click "Authorize" button (lock icon)
+- Clicar no botão "Authorize" (ícone de cadeado)
 - Enter: `Bearer YOUR_ACCESS_TOKEN`
-- Click "Authorize"
+- Clicar em "Authorize"
 
-### Step 5: Test authenticated endpoints
+### Passo 5: Testar endpoints autenticados
 
 - GET `/api/auth/me`
 - POST `/api/auth/change-password`
@@ -895,57 +903,57 @@ http://localhost:5000
 
 <a id="troubleshooting"></a>
 
-## Troubleshooting
+## Solução de Problemas
 
-### "Unauthorized" errors
+### Erros "Unauthorized"
 
-- Check if token is expired
-- Verify token format: `Bearer <token>`
-- Check JWT secret matches in configuration
+- Verifique se o token expirou
+- Verifique o formato do token: `Bearer <token>`
+- Verifique se o secret JWT corresponde à configuração
 
-### "Invalid token" errors
+### Erros "Invalid token"
 
-- Verify issuer/audience match configuration
-- Check token expiration time
-- Ensure secret key is correct
+- Verifique se issuer/audience correspondem à configuração
+- Verifique o tempo de expiração do token
+- Certifique-se de que a chave secreta está correta
 
-### Password policy errors
+### Erros de política de senha
 
-- Check password meets all requirements
-- Verify password policy settings in configuration
+- Verifique se a senha atende a todos os requisitos
+- Verifique as configurações de política de senha
 
-### Database errors
+### Erros de banco de dados
 
-- Run migrations: `dotnet ef migrations add AddAuthentication`
-- Update database: `dotnet ef database update`
+- Execute as migrations: `dotnet ef migrations add AddAuthentication`
+- Atualize o banco de dados: `dotnet ef database update`
 
 <a id="migration-from-basic-auth"></a>
 
-## Migration from Basic Auth
+## Migração do Basic Auth
 
-If you're migrating from basic authentication:
+Se você está migrando da autenticação básica:
 
-1. **Create migration:**
+1. **Criar a migration:**
 
     ```bash
     dotnet ef migrations add AddAuthentication --project src/Data --startup-project src/Api
     ```
 
-2. **Update database:**
+2. **Atualizar o banco de dados:**
 
     ```bash
     dotnet ef database update --project src/Data --startup-project src/Api
     ```
 
-3. **Seed default roles:**
+3. **Popular as roles padrão:**
 
     ```csharp
-    // In DbSeeder.cs
+    // Em DbSeeder.cs
     if (!context.Roles.Any())
     {
       context.Roles.AddRange(
-        new Role { Name = "Admin", Description = "Administrator role", IsSystemRole = true },
-        new Role { Name = "User", Description = "Default user role", IsSystemRole = true }
+        new Role { Name = "Admin", Description = "Papel de administrador", IsSystemRole = true },
+        new Role { Name = "User", Description = "Papel padrão de usuário", IsSystemRole = true }
       );
       await context.SaveChangesAsync();
     }
@@ -953,20 +961,20 @@ If you're migrating from basic authentication:
 
 <a id="performance-considerations"></a>
 
-## Performance Considerations
+## Considerações de Performance
 
-### Token Validation
+### Validação de Tokens
 
-- JWT validation is stateless and fast
-- No database lookup required for access tokens
-- Refresh tokens require database lookup
+- A validação JWT é stateless e rápida
+- Não é necessário consultar o banco de dados para access tokens
+- Refresh tokens requerem consulta ao banco de dados
 
-### Caching
+### Cache
 
-- Cache user roles to reduce database queries
-- Implement distributed cache for scalability
+- Faça cache das roles do usuário para reduzir consultas ao banco
+- Implemente cache distribuído para escalabilidade
 
-### Database Indexing
+### Indexação do Banco de Dados
 
 ```sql
 CREATE INDEX IX_Users_Username ON Users(Username);
@@ -977,31 +985,31 @@ CREATE INDEX IX_RefreshTokens_UserId ON RefreshTokens(UserId);
 
 <a id="advanced-features-future"></a>
 
-## Advanced Features (Future)
+## Funcionalidades Avançadas (Futuro)
 
-- [ ] Two-Factor Authentication (2FA)
-- [ ] Email confirmation workflow
-- [ ] Password reset via email
-- [ ] Account lockout implementation
-- [ ] OAuth2 external provider verification
-- [ ] Token blacklisting
-- [ ] Biometric authentication
+- [ ] Autenticação de Dois Fatores (2FA)
+- [ ] Fluxo de confirmação de e-mail
+- [ ] Redefinição de senha por e-mail
+- [ ] Implementação de bloqueio de conta
+- [ ] Verificação de provedor externo OAuth2
+- [ ] Lista negra de tokens
+- [ ] Autenticação biométrica
 - [ ] Single Sign-On (SSO)
 
 <a id="references"></a>
 
-## References
+## Referências
 
-- [JWT.io](https://jwt.io/) - JWT specification
-- [OAuth 2.0](https://oauth.net/2/) - OAuth2 specification
+- [JWT.io](https://jwt.io/) - Especificação JWT
+- [OAuth 2.0](https://oauth.net/2/) - Especificação OAuth2
 - [Microsoft Identity Platform](https://docs.microsoft.com/en-us/azure/active-directory/develop/)
 - [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
 
 <a id="support"></a>
 
-## Support
+## Suporte
 
-For issues or questions:
+Para dúvidas ou problemas:
 
-- GitHub Issues: [Create an issue](https://github.com/yourrepo/issues)
-- Documentation: [Read the docs](https://github.com/yourrepo/docs)
+- GitHub Issues: [Abrir uma issue](https://github.com/yourrepo/issues)
+- Documentação: [Ler a documentação](https://github.com/yourrepo/docs)
