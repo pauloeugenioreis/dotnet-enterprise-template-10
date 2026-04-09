@@ -3,13 +3,22 @@
 > Template moderno e completo para criação de APIs .NET 10 seguindo Clean Architecture e melhores práticas de mercado.
 
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pauloeugenioreis_dotnet-enterprise-template-10&metric=alert_status)](https://sonarcloud.io/dashboard?id=pauloeugenioreis_dotnet-enterprise-template-10)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=pauloeugenioreis_dotnet-enterprise-template-10&metric=coverage)](https://sonarcloud.io/dashboard?id=pauloeugenioreis_dotnet-enterprise-template-10)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=pauloeugenioreis_dotnet-enterprise-template-10&metric=security_rating)](https://sonarcloud.io/dashboard?id=pauloeugenioreis_dotnet-enterprise-template-10)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=pauloeugenioreis_dotnet-enterprise-template-10&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=pauloeugenioreis_dotnet-enterprise-template-10)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=pauloeugenioreis_dotnet-enterprise-template-10&metric=code_smells)](https://sonarcloud.io/dashboard?id=pauloeugenioreis_dotnet-enterprise-template-10)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=pauloeugenioreis_dotnet-enterprise-template-10&metric=ncloc)](https://sonarcloud.io/dashboard?id=pauloeugenioreis_dotnet-enterprise-template-10)
+[![C#](https://img.shields.io/badge/C%23-latest-239120?logo=csharp&logoColor=white)](https://learn.microsoft.com/dotnet/csharp/)
+[![RabbitMQ](https://img.shields.io/badge/RabbitMQ-7-FF6600?logo=rabbitmq&logoColor=white)](docs/FEATURES.md)
+[![SQL Server](https://img.shields.io/badge/SQL_Server-2022-CC2927?logo=microsoftsqlserver&logoColor=white)](docs/ORM-GUIDE.md)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)](docs/ORM-GUIDE.md)
+[![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white)](docs/ORM-GUIDE.md)
+[![Oracle](https://img.shields.io/badge/Oracle-Free-F80000?logo=oracle&logoColor=white)](docs/ORM-GUIDE.md)
+[![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?logo=mongodb&logoColor=white)](docs/FEATURES.md)
+[![Redis](https://img.shields.io/badge/Redis-Cache-DC382D?logo=redis&logoColor=white)](docs/FEATURES.md)
+[![Azure](https://img.shields.io/badge/Azure-Storage%20%7C%20AppInsights-0078D4?logo=microsoftazure&logoColor=white)](docs/FEATURES.md)
+[![AWS](https://img.shields.io/badge/AWS-S3-FF9900?logo=amazonaws&logoColor=white)](docs/FEATURES.md)
+[![Google Cloud](https://img.shields.io/badge/GCP-Storage%20%7C%20Logging-4285F4?logo=googlecloud&logoColor=white)](docs/FEATURES.md)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](docker-compose.yml)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-Minikube-326CE5?logo=kubernetes&logoColor=white)](docs/KUBERNETES.md)
+[![Swagger](https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?logo=swagger&logoColor=black)](docs/DATA-ANNOTATIONS-GUIDE.md)
+[![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-Observability-7B5EA7?logo=opentelemetry&logoColor=white)](docs/TELEMETRY.md)
+[![JWT](https://img.shields.io/badge/JWT-Auth-000000?logo=jsonwebtokens&logoColor=white)](docs/AUTHENTICATION.md)
 
 ---
 
