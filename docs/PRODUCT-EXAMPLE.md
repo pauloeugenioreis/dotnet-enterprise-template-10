@@ -16,13 +16,14 @@ public class Product : EntityBase
     public decimal Price { get; set; }
     public int Stock { get; set; }
     public string Category { get; set; } = string.Empty;
-    public bool IsActive { get; set; } = true;
+    public override bool IsActive { get; set; } = true;
 }
 ```
 
 ### 2. **DTOs + Validators** (`Domain/Dtos/ProductDtos.cs` + `Domain/Validators/ProductValidators.cs`)
 
 ```csharp
+// Criação
 public record CreateProductRequest
 {
   public required string Name { get; init; }
@@ -33,6 +34,30 @@ public record CreateProductRequest
   public bool IsActive { get; init; } = true;
 }
 
+// Atualização completa
+public record UpdateProductRequest
+{
+  public required string Name { get; init; }
+  public string? Description { get; init; }
+  public decimal Price { get; init; }
+  public int Stock { get; init; }
+  public required string Category { get; init; }
+  public bool IsActive { get; init; } = true;
+}
+
+// Ativação/desativação
+public record UpdateProductStatusRequest
+{
+  public bool? IsActive { get; init; }
+}
+
+// Ajuste de estoque
+public record UpdateProductStockRequest
+{
+  public int Quantity { get; init; } // positivo = adiciona; negativo = remove
+}
+
+// Resposta da API
 public record ProductResponseDto
 {
   public long Id { get; init; }
@@ -47,9 +72,19 @@ public record ProductResponseDto
 }
 ```
 
-- **Requests separados** para criação, atualização, toggle de status e ajustes de estoque.
+- **Requests separados** para cada operação: criação, atualização completa, toggle de status e ajuste de estoque.
 - **Response dedicado** evita expor entidades e mantém contratos versionáveis.
-- **FluentValidation** garante regras (nome obrigatório, preço > 0, estoque >= 0, categoria com limite de caracteres, quantidade no estoque diferente de zero etc.).
+- **FluentValidation** com regras por campo:
+
+| Campo | Regra |
+|-------|-------|
+| `Name` | Obrigatório, máx. 200 caracteres |
+| `Description` | Opcional, máx. 2.000 caracteres |
+| `Price` | Deve ser > 0 |
+| `Stock` | Deve ser >= 0 |
+| `Category` | Obrigatório, máx. 120 caracteres |
+| `IsActive` (status) | Não pode ser `null` |
+| `Quantity` (estoque) | Diferente de 0, entre −100.000 e +100.000 |
 
 ### 3. **DbSet no Context** (`Data/Context/ApplicationDbContext.cs`)
 
@@ -61,14 +96,16 @@ public DbSet<Product> Products { get; set; }
 
 #### Endpoints Disponíveis
 
-- **GET** `/api/v1/product` — Lista todos os produtos com filtros e métricas de performance
-- **GET** `/api/v1/product/{id}` — Busca produto por ID (retorna `ProductResponseDto`)
-- **POST** `/api/v1/product` — Cria novo produto a partir de `CreateProductRequest`
-- **PUT** `/api/v1/product/{id}` — Atualiza detalhes via `UpdateProductRequest`
-- **DELETE** `/api/v1/product/{id}` — Remove produto
-- **GET** `/api/v1/product/ExportToExcel` — **Gera arquivo Excel com DTOs filtrados**
-- **PATCH** `/api/v1/product/{id}/status` — Ativa/desativa produto com `UpdateProductStatusRequest`
-- **PATCH** `/api/v1/product/{id}/stock` — Ajusta estoque com `UpdateProductStockRequest`
+| Método | Rota | Descrição | Cache |
+|--------|------|-----------|-------|
+| `GET` | `/api/v1/product` | Lista todos os produtos com filtros e métricas de performance | `Expire300` |
+| `GET` | `/api/v1/product/{id}` | Busca produto por ID (retorna `ProductResponseDto`) | `Expire300` |
+| `POST` | `/api/v1/product` | Cria novo produto a partir de `CreateProductRequest` | — |
+| `PUT` | `/api/v1/product/{id}` | Atualiza detalhes via `UpdateProductRequest` | — |
+| `DELETE` | `/api/v1/product/{id}` | Remove produto | — |
+| `GET` | `/api/v1/product/ExportToExcel` | Gera arquivo Excel com DTOs filtrados | — |
+| `PATCH` | `/api/v1/product/{id}/status` | Ativa/desativa produto com `UpdateProductStatusRequest` | — |
+| `PATCH` | `/api/v1/product/{id}/stock` | Ajusta estoque com `UpdateProductStockRequest` | — |
 
 ---
 
@@ -85,9 +122,8 @@ public async Task<ActionResult> ExportToExcelAsync(
   [FromQuery] string? category,
   CancellationToken cancellationToken)
 {
-  var products = await _service.GetAllAsync(cancellationToken);
-  var filtered = ApplyFilters(products, isActive, category).ToList();
-  var dtoResults = filtered.Select(MapToResponse).ToList();
+  var products = await productService.GetProductsForExportAsync(isActive, category, cancellationToken);
+  var productList = products.ToList();
 
   var config = new OpenXmlConfiguration
   {
@@ -97,11 +133,11 @@ public async Task<ActionResult> ExportToExcelAsync(
   };
 
   var memoryStream = new MemoryStream();
-  await memoryStream.SaveAsAsync(dtoResults,
-    sheetName: "Products",
-    configuration: config);
+  await memoryStream.SaveAsAsync(productList, sheetName: "Products", configuration: config);
+  memoryStream.Seek(0, SeekOrigin.Begin);
 
-  return File(memoryStream,
+  return File(
+    memoryStream,
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     $"Products_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
 }
@@ -233,7 +269,8 @@ Desativa o produto ID 1 utilizando o `UpdateProductStatusRequest`.
 - **CancellationToken** em todos os métodos async
 - **ModelState validation** com mensagens de erro
 - **HTTP status codes** apropriados (200, 201, 204, 400, 404)
-- **CreatedAtAction** retornando URI do recurso criado
+- **`Created(location, dto)`** retornando URI via `Url.Action`
+- **OutputCache** nos endpoints GET (política `Expire300` = 300 s)
 - **XML Documentation** para Swagger
 
 ### Funcionalidades
