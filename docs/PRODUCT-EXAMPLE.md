@@ -301,7 +301,6 @@ Desativa o produto ID 1 utilizando o `UpdateProductStatusRequest`.
 
 **MiniExcel** é uma biblioteca de alta performance para geração de arquivos Excel (.xlsx):
 
-- ⚡ 10x mais rápido que EPPlus
 - 💾 Baixo consumo de memória
 - 📊 Suporta grandes volumes de dados
 - 🎯 API simples e intuitiva
