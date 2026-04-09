@@ -532,6 +532,7 @@ Load Balancer
 ```
 
 **Features:**
+
 - Horizontal Pod Autoscaler (HPA)
 - Resource-based scaling (CPU/Memory)
 - Metrics-based scaling (custom metrics)

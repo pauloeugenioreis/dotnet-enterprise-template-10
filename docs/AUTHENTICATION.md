@@ -23,9 +23,13 @@
 
 ---
 
+<a id="overview"></a>
+
 ## Visão Geral
 
 Este template oferece um sistema de autenticação completo com suporte a JWT (JSON Web Tokens) e OAuth2. A implementação segue as melhores práticas de segurança e é totalmente configurável via `appsettings.json`.
+
+<a id="default-admin-credentials"></a>
 
 ## Credenciais Padrão do Admin
 
