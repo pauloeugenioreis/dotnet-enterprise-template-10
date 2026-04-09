@@ -6,78 +6,31 @@ Esta pasta contém documentação técnica adicional e guias especializados para
 
 ## 📄 Documentos Disponíveis
 
-### [ORM-GUIDE.md](ORM-GUIDE.md)
+| Documento | Descrição | Quando Usar |
+|-----------|-----------|-------------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Clean Architecture, diagramas de camadas, princípios SOLID | Entender a arquitetura do projeto |
+| [FEATURES.md](FEATURES.md) | MongoDB, Quartz, RabbitMQ, Storage, Logging, Swagger | Habilitar recursos avançados |
+| [ORM-GUIDE.md](ORM-GUIDE.md) | EF Core, Dapper, ADO.NET — como alternar e comparações | Escolher ou alternar ORM |
+| [CONFIGURATION-GUIDE.md](CONFIGURATION-GUIDE.md) | IOptions\<T\>, validação de configurações, boas práticas | Acessar configurações no código |
+| [AUTHENTICATION.md](AUTHENTICATION.md) | JWT, OAuth2 (Google, Microsoft, GitHub), refresh tokens | Configurar autenticação |
+| [SECURITY.md](SECURITY.md) | Headers de segurança, CORS, HTTPS, proteção contra ataques | Revisar segurança da API |
+| [RATE-LIMITING.md](RATE-LIMITING.md) | Fixed Window, Sliding Window, Token Bucket, Concurrency | Controle de taxa de requisições |
+| [EVENT-SOURCING.md](EVENT-SOURCING.md) | Marten + PostgreSQL, auditoria, time travel | Habilitar event sourcing |
+| [TELEMETRY.md](TELEMETRY.md) | OpenTelemetry, Jaeger, Prometheus, Grafana | Configurar observabilidade |
+| [TESTING-DATABASES.md](TESTING-DATABASES.md) | Testar com SQL Server, Oracle, PostgreSQL, MySQL | Validar suporte multi-banco |
+| [DATA-ANNOTATIONS-GUIDE.md](DATA-ANNOTATIONS-GUIDE.md) | Anotações XML para documentação Swagger | Documentar endpoints |
+| [KUBERNETES.md](KUBERNETES.md) | Deploy local (Minikube) e produção (AKS, EKS, GKE) | Deploy em Kubernetes |
+| [CICD.md](CICD.md) | GitHub Actions, Azure DevOps, GitLab CI | Configurar CI/CD |
+| [SONARCLOUD.md](SONARCLOUD.md) | Análise de qualidade de código | Configurar SonarCloud |
+| [ADR-RATE-LIMITING.md](ADR-RATE-LIMITING.md) | Decisão arquitetural sobre Rate Limiting | Referência de ADR |
+| [PRODUCT-EXAMPLE.md](PRODUCT-EXAMPLE.md) | Exemplo completo de entidade Product | Aprender padrões do template |
 
-**Guia Completo de ORMs**
+### Exemplos
 
-Documentação detalhada sobre os ORMs suportados pelo template:
-
-- **Entity Framework Core** - ORM padrão com suporte a migrations
-- **Dapper** - Micro-ORM de alta performance
-- **NHibernate** - ORM maduro e completo
-- **Linq2Db** - ORM focado em performance
-
-Inclui:
-
-- Como alternar entre ORMs
-- Comparação de features
-- Casos de uso recomendados
-- Exemplos de implementação
-- Configuração de cada ORM
-- Troubleshooting
-
-**Quando usar:** Ao escolher um ORM ou precisar alternar entre eles.
-
----
-
-### [KUBERNETES.md](KUBERNETES.md)
-
-**Guia de Deploy no Kubernetes**
-
-Documentação completa sobre deploy da aplicação no Kubernetes:
-
-- **Deploy Local** com Minikube
-- **Deploy em Produção** (AKS, EKS, GKE)
-- **Configurações Avançadas** (HPA, Network Policies, TLS)
-- **Monitoramento e Troubleshooting**
-- **Scripts de Automação**
-
-Inclui:
-
-- Pré-requisitos e instalação
-- Passo a passo de deploy
-- Configuração de manifests
-- Health checks e probes
-- Resource limits e requests
-- Ingress e Service configuration
-- Secrets e ConfigMaps
-- CI/CD integration
-- Problemas comuns e soluções
-
-**Quando usar:** Ao fazer deploy em Kubernetes (local ou produção).
-
----
-
-### [CONFIGURATION-GUIDE.md](CONFIGURATION-GUIDE.md)
-
-**Guia de Configuração com IOptions<T>**
-
-Documentação essencial sobre como trabalhar com configurações no projeto:
-
-- **Padrão IOptions<T>** - Injeção de dependência de configurações
-- **Validação de Configurações** - Validação no startup
-- **Melhores Práticas** - DO's e DON'Ts
-- **Exemplos Práticos** - Controllers, Services, Repositories
-
-Inclui:
-
-- Como injetar IOptions<AppSettings> corretamente
-- 5 exemplos práticos completos
-- Padrões de validação com IValidateOptions<T>
-- Troubleshooting comum
-- Checklist de boas práticas
-
-**Quando usar:** SEMPRE que precisar acessar configurações em qualquer parte do código (controllers, services, repositories, middleware, etc.).
+| Documento | Descrição |
+|-----------|-----------|
+| [examples/ORDER-EXAMPLE.md](examples/ORDER-EXAMPLE.md) | Exemplo completo de entidade Order com Event Sourcing |
+| [examples/event-sourcing.http](examples/event-sourcing.http) | Request collection para testar Event Sourcing |
 
 ---
 
@@ -93,13 +46,29 @@ Se você está começando, **não comece por aqui!** Primeiro:
 
 ## 📂 Organização
 
+```
 docs/
-├── README.md # Este arquivo
-├── CONFIGURATION-GUIDE.md # Guia de Configuração (IOptions<T>)
-├── ORM-GUIDE.md # Guia de ORMs
-└── KUBERNETES.md # Guia de Kubernetes
-
-```xml
+├── README.md                    # Este arquivo (índice)
+├── ARCHITECTURE.md              # Arquitetura Clean Architecture
+├── FEATURES.md                  # Recursos avançados
+├── ORM-GUIDE.md                 # Guia de ORMs
+├── CONFIGURATION-GUIDE.md       # Guia de Configuração (IOptions<T>)
+├── AUTHENTICATION.md            # Autenticação JWT & OAuth2
+├── SECURITY.md                  # Segurança da API
+├── RATE-LIMITING.md             # Rate Limiting
+├── ADR-RATE-LIMITING.md         # ADR - Decisão Rate Limiting
+├── EVENT-SOURCING.md            # Event Sourcing
+├── TELEMETRY.md                 # Observabilidade
+├── TESTING-DATABASES.md         # Testes multi-banco
+├── DATA-ANNOTATIONS-GUIDE.md    # Documentação Swagger
+├── KUBERNETES.md                # Deploy Kubernetes
+├── CICD.md                      # CI/CD
+├── SONARCLOUD.md                # SonarCloud
+├── PRODUCT-EXAMPLE.md           # Exemplo: Product
+└── examples/
+    ├── ORDER-EXAMPLE.md         # Exemplo: Order
+    └── event-sourcing.http      # HTTP requests Event Sourcing
+```
 
 ### Documentos Futuros
 
@@ -198,6 +167,7 @@ Use Markdown com:
 
 ### Exemplo de Estrutura
 
+```markdown
 # Título Principal
 
 Breve descrição do documento.
@@ -209,6 +179,7 @@ Breve descrição do documento.
 Conteúdo da seção com exemplos:
 
 comando exemplo
+
 ### Subseção 1.1
 
 Detalhes específicos.
@@ -283,4 +254,4 @@ Ao criar nova documentação:
 
 ---
 
-_Última atualização: Janeiro 2025 | Versão: 1.0.0_
+_Última atualização: Abril 2026 | Versão: 1.1.0_

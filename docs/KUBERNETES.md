@@ -496,16 +496,30 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Build Docker image
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build and push Docker image
         run: |
           docker build -t ${{ secrets.REGISTRY }}/projecttemplate-api:${{ github.sha }} .
           docker push ${{ secrets.REGISTRY }}/projecttemplate-api:${{ github.sha }}
 
-      - name: Deploy to Kubernetes
-        uses: azure/k8s-deploy@v1
+      - name: Set Kubernetes context
+        uses: azure/aks-set-context@v4
         with:
+          resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
+
+      - name: Deploy to Kubernetes
+        uses: azure/k8s-deploy@v5
+        with:
+          namespace: default
           manifests: |
             .k8s/deployment.yaml
             .k8s/service.yaml

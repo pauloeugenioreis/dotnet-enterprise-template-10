@@ -189,36 +189,6 @@ Server=localhost;Port=3306;Database=ProjectTemplate;User=appuser;Password=AppPas
 
 ---
 
-#### Aplicar migrations
-
-```powershell
-$env:ASPNETCORE_ENVIRONMENT="PostgreSQL"
-
-```
-
-#### Rodar aplicação
-
-```powershell
-dotnet run --project src/Api --environment PostgreSQL
-```
-
-#### Testar
-
-```bash
-curl http://localhost:5000/health
-curl http://localhost:5000/swagger/index.html
-```
-
-#### Connection String
-
-```text
-Host=localhost;Port=5433;Database=ProjectTemplate;Username=postgres;Password=PostgresPass123;
-```
-
-**⚠️ Nota:** PostgreSQL principal roda na porta **5433** (5432 é usada pelo Event Store).
-
----
-
 ## 📝 Arquivos de Configuração
 
 Cada banco tem seu próprio arquivo `appsettings.{Database}.json`:

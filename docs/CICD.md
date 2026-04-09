@@ -197,7 +197,7 @@ Configure **Approvals** em Production:
 
 Adicione ao seu README.md:
 
-[![Build Status](https://dev.azure.com/your-org/your-project/_apis/build/status/your-pipeline?branchName=main)](https://dev.azure.com/your-org/your-project/_build/latest?definitionId=1&branchName=main)
+[![Build Status](https://dev.azure.com/sua-org/seu-projeto/_apis/build/status/seu-pipeline?branchName=main)](https://dev.azure.com/sua-org/seu-projeto/_build/latest?definitionId=1&branchName=main)
 
 ---
 

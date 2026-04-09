@@ -10,7 +10,7 @@ Visão geral da arquitetura Clean Architecture implementada neste template.
 ┌─────────────────────────────── API LAYER ───────────────────────────────┐
 │ • Controllers, Program.cs, Middleware, Swagger                         │
 │ • Endpoints: GET / POST / PUT / DELETE                                 │
-│ • Authentication & Authorization (Atual/Futuro)                        │
+│ • Authentication & Authorization (JWT, OAuth2)                         │
 └────────────────────────────────────────────────────────────────────────┘
                           │ HTTP Requests │
                           ▼
@@ -588,4 +588,4 @@ Para entender melhor a arquitetura:
 
 ---
 
-_Última atualização: Janeiro 2025 | Versão: 1.0.0_
+_Última atualização: Abril 2026 | Versão: 1.1.0_

@@ -148,11 +148,7 @@ public class CleanupJob : IJob
 }
 ```
 
-```json
-
 **4. Registre no Program.cs:**
-
-```
 
 ```csharp
 // Add Quartz with Jobs (OPTIONAL)
@@ -209,11 +205,7 @@ RabbitMQ é um message broker para comunicação assíncrona entre serviços.
 builder.Services.AddRabbitMq();
 ```
 
-```csharp
-
 **4. Use no código:**
-
-```
 
 ```csharp
 {
@@ -461,8 +453,9 @@ public class ProductsV2Controller : ApiControllerBase
         return Ok(new { Version = "2.0", Message = "New version" });
     }
 }
-**4. Acesse:**
 ```
+
+**4. Acesse:**
 
 ```bash
 GET /api/v1/products
@@ -1270,7 +1263,7 @@ Retry-After: 45
     "message": "Too many requests. Limit: 100 per window.",
     "clientIp": "192.168.1.100",
     "retryAfter": 45,
-    "resetAt": "2024-01-15T10:51:00Z"
+    "resetAt": "2026-04-08T10:51:00Z"
 }
 ```
 
@@ -1499,150 +1492,28 @@ Mais detalhes em [docs/EVENT-SOURCING.md](EVENT-SOURCING.md).
 
 ## Authentication
 
-### O que é?
-
 Sistema completo de autenticação/autorização com JWT, refresh tokens e OAuth2 (Google, Microsoft, GitHub).
-
-### Quando Usar
-
-| Cenário                       | Recomendação   |
-| ----------------------------- | -------------- |
-| APIs públicas protegidas      | ✅ Essencial   |
-| Aplicações multi-usuário      | ✅ Essencial   |
-| Sistemas com múltiplos perfis | ✅ Recomendado |
-| Login social                  | ✅ Recomendado |
 
 ### Recursos
 
-- JWT Authentication
-- Refresh tokens com rotação
-- OAuth2 providers
+- JWT Authentication com access + refresh tokens
+- OAuth2 providers (Google, Microsoft, GitHub)
 - Políticas de senha configuráveis
-- Role-based authorization
+- Role-based authorization (RBAC)
 - Revogação de tokens e auditoria
+- Endpoints prontos: register, login, refresh-token, revoke-token, me, change-password, profile
 
-### Quick Start
-
-**1. Configure appsettings.json**
-
-```json
-{
-    "Authentication": {
-        "Enabled": true,
-        "JwtSettings": {
-            "Secret": "your-256-bit-secret-key-change-this",
-            "Issuer": "ProjectTemplate",
-            "Audience": "ProjectTemplate",
-            "ExpirationMinutes": 60
-        }
-    }
-}
-```
-
-**2. Criar migration**
-
-```bash
-dotnet ef migrations add AddAuthentication --project src/Data --startup-project src/Api
-dotnet ef database update --project src/Data --startup-project src/Api
-```
-
-**3. Executar**
-
-```bash
-dotnet run --project src/Api
-```
-
-Use o Swagger para registrar, fazer login e autorizar requisições.
-
-### Endpoints
+### Endpoints Principais
 
 | Método | Endpoint                    | Descrição                     |
 | ------ | --------------------------- | ----------------------------- |
 | POST   | `/api/auth/register`        | Registrar novo usuário        |
 | POST   | `/api/auth/login`           | Login com usuário/senha       |
 | POST   | `/api/auth/refresh-token`   | Renovar access token          |
-| POST   | `/api/auth/revoke-token`    | Revogar refresh token         |
 | GET    | `/api/auth/me`              | Dados do usuário autenticado  |
-| POST   | `/api/auth/change-password` | Alterar senha                 |
-| PUT    | `/api/auth/profile`         | Atualizar perfil              |
 | POST   | `/api/auth/oauth2/login`    | Login com provedores externos |
 
-### Exemplo de Uso
-
-```csharp
-var registerDto = new RegisterDto
-{
-    Username = "john.doe",
-    Email = "john@example.com",
-    Password = "P@ssw0rd123",
-    FirstName = "John",
-    LastName = "Doe"
-};
-
-var registerResponse = await authService.RegisterAsync(registerDto);
-
-var loginDto = new LoginDto
-{
-    UsernameOrEmail = "john.doe",
-    Password = "P@ssw0rd123"
-};
-
-var authResponse = await authService.LoginAsync(loginDto, "127.0.0.1");
-
-httpClient.DefaultRequestHeaders.Authorization =
-    new AuthenticationHeaderValue("Bearer", authResponse.AccessToken);
-```
-
-### OAuth2 Providers
-
-```json
-{
-    "OAuth2Settings": {
-        "GoogleOAuthSettings": {
-            "Enabled": true,
-            "ClientId": "your-google-client-id",
-            "ClientSecret": "your-google-client-secret"
-        },
-        "MicrosoftOAuthSettings": {
-            "Enabled": true,
-            "ClientId": "your-microsoft-client-id",
-            "ClientSecret": "your-microsoft-client-secret",
-            "TenantId": "common"
-        },
-        "GitHubOAuthSettings": {
-            "Enabled": true,
-            "ClientId": "your-github-client-id",
-            "ClientSecret": "your-github-client-secret"
-        }
-    }
-}
-```
-
-### Password Policy
-
-```json
-{
-    "PasswordPolicySettings": {
-        "MinimumLength": 8,
-        "RequireDigit": true,
-        "RequireLowercase": true,
-        "RequireUppercase": true,
-        "RequireNonAlphanumeric": true,
-        "MaxFailedAccessAttempts": 5,
-        "LockoutMinutes": 15
-    }
-}
-```
-
-### Security Best Practices
-
-- Use HTTPS (`RequireHttpsMetadata = true`)
-- Armazene o segredo JWT em variáveis seguras/Key Vault
-- Tokens curtos (15–60 min) + refresh rotation
-- Refresh tokens em cookies HttpOnly
-- Rate limiting nos endpoints de auth
-- Log de eventos para auditoria
-- Produção: prefira BCrypt ou Argon2 para hashing de senhas
+📖 **Documentação completa:** [AUTHENTICATION.md](AUTHENTICATION.md) — inclui configuração detalhada, exemplos de uso em C#/JavaScript, OAuth2 providers, password policy e security best practices.
 
 ---
 
@@ -1654,4 +1525,4 @@ httpClient.DefaultRequestHeaders.Authorization =
 
 ---
 
-_Última atualização: Janeiro 2026 | Versão: 1.0.0_
+_Última atualização: Abril 2026 | Versão: 1.1.0_

@@ -807,27 +807,7 @@ Se quiser habilitar NHibernate ou Linq2Db:
 | **NHibernate** | 💤 Opcional   | Boa         | Complexo   | Muito Alta | Sim             | Bom          | Limitado   | Maturidade, features enterprise        |
 | **Linq2Db**    | 💤 Opcional   | Excelente   | Moderado   | Alta       | Opcional        | Completo     | Limitado   | LINQ completo, performance             |
 
-### Quando usar cada um?
-
-| ORM                       | Use quando...                                                                        |
-| ------------------------- | ------------------------------------------------------------------------------------ |
-| **Entity Framework Core** | Operações CRUD normais, change tracking necessário, migrations automáticas           |
-| **Dapper**                | Queries complexas de leitura, relatórios, performance crítica em leitura             |
-| **ADO.NET**               | Controle total sobre SQL, bulk operations personalizadas, integração legada          |
-| **NHibernate**            | Projetos enterprise complexos (requer implementação adicional)                       |
-| **Linq2Db**               | Performance próxima ao Dapper com full LINQ support (requer implementação adicional) |
-
-### Métricas de Performance Práticas
-
-| ORM | Read Speed | Write Speed | Suporte a LINQ | Complexidade |
-| --- | ---------- | ----------- | -------------- | ------------ |
-| **Dapper** | ⚡⚡⚡⚡⚡ | ⚡⚡⚡⚡⚡ | ❌ | Média |
-| **Linq2Db** | ⚡⚡⚡⚡⚡ | ⚡⚡⚡⚡ | ✅ | Média |
-| **EF Core** | ⚡⚡⚡ | ⚡⚡⚡ | ✅ | Baixa |
-| **NHibernate** | ⚡⚡⚡ | ⚡⚡⚡ | ✅ | Alta |
-| **ADO.NET** | ⚡⚡⚡⚡⚡ | ⚡⚡⚡⚡⚡ | Manual | Alta |
-
-Use essa visão para decidir rapidamente qual ORM priorizar quando o foco é velocidade de leitura, escrita ou simplicidade.
+> 💡 Para um resumo visual rápido, veja a [Comparação Rápida](#comparacao-rapida) no início deste guia. Para decidir qual ORM usar por cenário, consulte a tabela em [Escolha o ORM Certo](#escolha-o-orm-certo).
 
 ---
 

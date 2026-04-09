@@ -6,60 +6,106 @@ Scripts utilitários para facilitar o desenvolvimento e testes do projeto.
 
 ## 📋 Índice
 
-- [test-all-databases](#-test-all-databases) - Testar com todos os bancos de dados
 - [new-project](#-new-project) - Criar novo projeto a partir do template
+- [test-all-databases](#-test-all-databases) - Testar com todos os bancos de dados
 - [run-sonar-analysis](#-run-sonar-analysis) - Executar análise SonarCloud local
-- [Kubernetes (Minikube)](#%EF%B8%8F-minikube-deploy) - Deploy/destroy no Minikube
+- [Kubernetes (Minikube)](#%EF%B8%8F-kubernetes-minikube) - Deploy, destroy e testes de integração no Minikube
 
 ---
 
-## 🔍 run-sonar-analysis
+## 🐳 new-project
 
-Executa análise SonarCloud localmente.
+Script interativo para criar um novo projeto a partir do template com configuração automática de banco de dados, cache, mensageria, storage, telemetria e event sourcing.
+
+### Modo Interativo
+
+O script apresenta um menu com opções para configurar o projeto:
+
+```
+╔══════════════════════════════════════════════════════════╗
+║  Novo Projeto: MeuProjeto                                ║
+╚══════════════════════════════════════════════════════════╝
+
+── Banco de Dados ──
+  [1] InMemory (padrão)   [2] SQL Server   [3] Oracle
+  [4] PostgreSQL          [5] MySQL
+
+── Cache ──
+  [1] Sim (Redis)   [2] Não (memória - padrão)
+
+── Mensageria ──
+  [1] Sim (RabbitMQ)   [2] Não (padrão)
+
+── Storage em Nuvem ──
+  [1] Nenhum (padrão)   [2] Azure Blob   [3] AWS S3   [4] Google Cloud
+
+── Observabilidade ──
+  [1] Sim (Jaeger + Prometheus + Grafana)   [2] Não (padrão)
+
+── Event Sourcing ──
+  [1] Sim (Marten + PostgreSQL)   [2] Não (padrão)
+
+── Git ──
+  [1] Sim (padrão)   [2] Não
+```
 
 ### Windows (PowerShell)
 
 ```powershell
-# Set token
-$env:SONAR_TOKEN = "your-sonarcloud-token"
+cd scripts
 
-# Run analysis
-.\scripts\run-sonar-analysis.ps1
+# Modo interativo (menu)
+.\new-project.ps1 -ProjectName "MeuProjeto"
 
-# OR pass token as parameter
-.\scripts\run-sonar-analysis.ps1 -SonarToken "your-token"
+# Modo não-interativo (CI/CD)
+.\new-project.ps1 -ProjectName "MeuProjeto" -Database PostgreSQL -Cache Redis -Queue Yes -Storage Azure -Telemetry Yes -EventSourcing No -GitInit Yes
 ```
 
-### Linux/macOS (Bash)
+### Windows (Batch)
+
+```batch
+cd scripts
+
+REM Wrapper que chama o script PowerShell
+new-project.bat MeuProjeto
+```
+
+### Linux/macOS
 
 ```bash
-# Set token
-export SONAR_TOKEN="your-sonarcloud-token"
+cd scripts
+chmod +x new-project.sh
 
-# Run analysis
-chmod +x scripts/run-sonar-analysis.sh
-./scripts/run-sonar-analysis.sh
+# Modo interativo (menu)
+./new-project.sh MeuProjeto
 
-# OR pass token as parameter
-./scripts/run-sonar-analysis.sh "your-token"
+# Modo não-interativo (CI/CD)
+./new-project.sh MeuProjeto --database PostgreSQL --cache Redis --queue yes --storage Azure --telemetry yes --event-sourcing no --git-init yes
 ```
 
-### O que o script faz?
+### Parâmetros (modo não-interativo)
 
-1. ✅ **Instala** dotnet-sonarscanner (se necessário)
-2. ✅ **Begin** - Inicia análise SonarCloud
-3. ✅ **Build** - Compila o projeto
-4. ✅ **Test** - Executa testes com cobertura (OpenCover)
-5. ✅ **End** - Finaliza e envia dados ao SonarCloud
-6. ✅ **Link** - Mostra URL para ver resultados
+| Parâmetro | Valores | Padrão |
+|-----------|---------|--------|
+| Database | `InMemory`, `SqlServer`, `Oracle`, `PostgreSQL`, `MySQL` | `InMemory` |
+| Cache | `Memory`, `Redis` | `Memory` |
+| Queue | `Yes`, `No` | `No` |
+| Storage | `None`, `Azure`, `Aws`, `Google` | `None` |
+| Telemetry | `Yes`, `No` | `No` |
+| EventSourcing | `Yes`, `No` | `No` |
+| GitInit | `Yes`, `No` | `Yes` |
 
-**Requisitos:**
+### O que o script faz
 
-- Token SonarCloud (obtenha em https://sonarcloud.io/account/security)
-- .NET 10 SDK instalado
-- Projeto configurado no SonarCloud
-
-**📖 Para configuração completa**, veja [docs/SONARCLOUD.md](../docs/SONARCLOUD.md)
+1. ✅ **Copia** - Template completo para novo diretório
+2. ✅ **Limpa** - Remove `.git`, `scripts`, `bin`, `obj`
+3. ✅ **Renomeia** - Solution e namespaces para novo nome
+4. ✅ **Substitui** - Todas referências de "ProjectTemplate" para nome escolhido
+5. ✅ **Configura** - `appsettings.json` com banco, cache, storage, telemetria e event sourcing
+6. ✅ **Gera** - `docker-compose.yml` customizado com apenas os containers necessários
+7. ✅ **Remove** - Arquivos `appsettings.{Banco}.json` dos bancos não selecionados
+8. ✅ **Git** - Inicializa repositório com `.gitignore` (opcional)
+9. ✅ **Resumo** - Mostra próximos passos personalizados
 
 ---
 
@@ -145,47 +191,70 @@ MySQL: ✅ PASSED
 
 ---
 
-## 🐳 new-project
+## 🔍 run-sonar-analysis
 
-Scripts para criar um novo projeto a partir do template.
+Executa análise SonarCloud localmente.
 
 ### Windows (PowerShell)
 
 ```powershell
-cd scripts
-.\new-project.ps1 -ProjectName "MeuProjeto"
+# Set token
+$env:SONAR_TOKEN = "your-sonarcloud-token"
+
+# Run analysis
+.\scripts\run-sonar-analysis.ps1
+
+# OR pass token as parameter
+.\scripts\run-sonar-analysis.ps1 -SonarToken "your-token"
 ```
 
-### Linux/macOS
+### Linux/macOS (Bash)
 
 ```bash
-cd scripts
-chmod +x new-project.sh
-./new-project.sh MeuProjeto
+# Set token
+export SONAR_TOKEN="your-sonarcloud-token"
+
+# Run analysis
+chmod +x scripts/run-sonar-analysis.sh
+./scripts/run-sonar-analysis.sh
+
+# OR pass token as parameter
+./scripts/run-sonar-analysis.sh "your-token"
 ```
 
-**O que o script faz:**
+### O que o script faz?
 
-1. ✅ **Copia** - Template completo para novo diretório
-2. ✅ **Limpa** - Remove `.git`, `scripts`, `bin`, `obj`
-3. ✅ **Renomeia** - Solution e namespaces para novo nome
-4. ✅ **Substitui** - Todas referências de "ProjectTemplate" para nome escolhido
-5. ✅ **Instruções** - Mostra próximos passos
+1. ✅ **Instala** dotnet-sonarscanner (se necessário)
+2. ✅ **Begin** - Inicia análise SonarCloud
+3. ✅ **Build** - Compila o projeto
+4. ✅ **Test** - Executa testes com cobertura (OpenCover)
+5. ✅ **End** - Finaliza e envia dados ao SonarCloud
+6. ✅ **Link** - Mostra URL para ver resultados
+
+**Requisitos:**
+
+- Token SonarCloud (obtenha em https://sonarcloud.io/account/security)
+- .NET 10 SDK instalado
+- Projeto configurado no SonarCloud
+
+**📖 Para configuração completa**, veja [docs/SONARCLOUD.md](../docs/SONARCLOUD.md)
 
 ---
 
-## ☸️ minikube-deploy
+## ☸️ Kubernetes (Minikube)
+
+### minikube-deploy
 
 Deploy da aplicação em cluster Kubernetes local (Minikube).
 
-### Windows (PowerShell)
+#### Windows (PowerShell)
 
 ```powershell
 cd scripts\windows
 .\minikube-deploy.ps1
 ```
 
-### Linux/macOS
+#### Linux/macOS
 
 ```bash
 cd scripts/linux
@@ -193,40 +262,36 @@ chmod +x minikube-deploy.sh
 ./minikube-deploy.sh
 ```
 
----
-
-## 🗑️ minikube-destroy
+### minikube-destroy
 
 Remove o deploy do Minikube.
 
-### Windows (PowerShell)
+#### Windows (PowerShell)
 
 ```powershell
 cd scripts\windows
 .\minikube-destroy.ps1
 ```
 
-### Linux/macOS
+#### Linux/macOS
 
 ```bash
 cd scripts/linux
 ./minikube-destroy.sh
 ```
 
----
-
-## 🧪 run-integration-tests
+### run-integration-tests
 
 Executa testes de integração no Minikube.
 
-### Windows (PowerShell)
+#### Windows (PowerShell)
 
 ```powershell
 cd scripts\windows
 .\run-integration-tests.ps1
 ```
 
-### Linux/macOS
+#### Linux/macOS
 
 ```bash
 cd scripts/linux

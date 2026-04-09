@@ -163,9 +163,19 @@ ProjectTemplate/
 │   └── kustomization.yaml           # Kustomize configuration
 │
 ├── docs/                             # Documentação adicional
+│   ├── ARCHITECTURE.md              # Arquitetura Clean Architecture
 │   ├── FEATURES.md                  # Recursos avançados (MongoDB, Queue, Jobs, etc.)
 │   ├── ORM-GUIDE.md                 # Guia de ORMs
-│   └── KUBERNETES.md                # Guia de deploy Kubernetes
+│   ├── CONFIGURATION-GUIDE.md       # Guia de Configuração (IOptions<T>)
+│   ├── AUTHENTICATION.md            # Autenticação JWT & OAuth2
+│   ├── SECURITY.md                  # Segurança da API
+│   ├── RATE-LIMITING.md             # Rate Limiting
+│   ├── EVENT-SOURCING.md            # Event Sourcing
+│   ├── TELEMETRY.md                 # Observabilidade
+│   ├── TESTING-DATABASES.md         # Testes multi-banco
+│   ├── KUBERNETES.md                # Guia de deploy Kubernetes
+│   ├── CICD.md                      # CI/CD
+│   └── SONARCLOUD.md               # SonarCloud
 │
 ├── Dockerfile                        # Multi-stage build
 ├── docker-compose.yml                # Compose para desenvolvimento
@@ -174,26 +184,18 @@ ProjectTemplate/
 └── .gitignore                        # Git ignore configurado
 ```
 
-```bash
-
 ---
 
 ## 🚀 Como Usar o Template
 
 ### Opção 1: Usando Script PowerShell (Recomendado para Windows)
 
-```
-
 ```powershell
 cd template/scripts
 .\new-project.ps1 -ProjectName "MeuProjeto"
 ```
 
-```bash
-
 ### Opção 2: Usando Script Bash (Linux/Mac)
-
-```
 
 ```bash
 cd template/scripts
@@ -201,18 +203,14 @@ chmod +x new-project.sh
 ./new-project.sh MeuProjeto
 ```
 
-```bash
-
 ### Opção 3: Usando Script Batch (Windows CMD)
-
-```
 
 ```cmd
 cd template\scripts
 new-project.bat MeuProjeto
 ```
 
-```bash
+> 💡 Os scripts são interativos — apresentam menus para configurar banco de dados, cache, mensageria, cloud storage, telemetria e event sourcing. Para modo não-interativo (CI/CD), veja [scripts/README.md](scripts/README.md).
 
 ---
 
@@ -233,7 +231,7 @@ new-project.bat MeuProjeto
 1. Clique em **Code ▸ Create codespace on main** (ou branch desejada).
 2. O Codespace usa os mesmos arquivos do `.devcontainer`, então todas as dependências (SDK .NET 10 preview, Node 20, ferramentas de lint) já estarão disponíveis.
 3. Os serviços definidos no Docker Compose são levantados automaticamente; acompanhe os logs na aba **Ports** e **Terminal**.
-4. As portas mais comuns (5000/5001 para API, 16686 para Jaeger, 3000 para Grafana, 9090 para Prometheus) ficam encaminhadas e descritas no `devcontainer.json`.
+4. As portas mais comuns (3060/3062 para API, 16686 para Jaeger, 3000 para Grafana, 9090 para Prometheus) ficam encaminhadas e descritas no `devcontainer.json`.
 
 > Dica: se não quiser subir todos os bancos, edite `runServices` em `.devcontainer/devcontainer.json` antes de abrir o container e remova os serviços dispensáveis.
 
@@ -255,19 +253,13 @@ Após criar seu projeto, siga estes passos:
 
 ### 1. Navegue até o diretório do projeto
 
-```
-
 ```bash
 cd MeuProjeto
 ```
 
-```json
-
 ### 2. Configure a Connection String
 
 Edite `src/Api/appsettings.json` e ajuste a connection string:
-
-```
 
 ```json
 {
@@ -282,15 +274,11 @@ Edite `src/Api/appsettings.json` e ajuste a connection string:
 }
 ```
 
-```json
-
 ### 3. Escolha seu Banco de Dados
 
 Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection string:
 
 **Para SQL Server:**
-
-```
 
 ```json
 {
@@ -305,11 +293,7 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
 }
 ```
 
-```json
-
 **Para Oracle:**
-
-```
 
 ```json
 {
@@ -324,11 +308,7 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
 }
 ```
 
-```bash
-
 **Para PostgreSQL:**
-
-```
 
 ```json
 {
@@ -343,11 +323,7 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
 }
 ```
 
-```json
-
 **Para MySQL:**
-
-```
 
 ```json
 {
@@ -362,72 +338,47 @@ Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection stri
 }
 ```
 
-```bash
 > ✨ **Todos os providers já estão instalados!** Basta mudar o `DatabaseType` e a connection string.
 
 **Nota sobre ORM**: Entity Framework Core, Dapper e ADO.NET estão habilitados simultaneamente. Para mais detalhes, veja [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md).
 
 ### 4. Restaure os Pacotes
 
-```
-
 ```bash
 dotnet restore
-```
-
-```bash
-
 ### 5. Compile o Projeto
-
-```
 
 ```bash
 dotnet build
 ```
 
-```bash
-
 ### 6. Crie a Primeira Migration
-
-```
 
 ```bash
 dotnet ef migrations add InitialCreate --project src/Data --startup-project src/Api
 ```
 
-```bash
-
 ### 7. Aplique a Migration no Banco
-
-```
 
 ```bash
 dotnet ef database update --project src/Data --startup-project src/Api
 ```
 
-```bash
-
 ### 8. Execute o Projeto
-
-```
 
 ```bash
 dotnet run --project src/Api
 ```
 
-```text
-
 ### 9. Acesse a API
 
-- API: `https://localhost:5001`
-- Swagger: `https://localhost:5001/swagger`
-- Health Check: `https://localhost:5001/health`
+- API: `https://localhost:3060`
+- Swagger: `https://localhost:3060/swagger`
+- Health Check: `https://localhost:3060/health`
 
 ### 10. Login com Credenciais Padrão 🔑
 
 O sistema cria automaticamente um usuário administrador na primeira execução:
-
-```
 
 ```text
 Username: admin
@@ -435,8 +386,6 @@ Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com
 Role:     Admin
 ```
-
-```bash
 
 **Teste no Swagger:**
 1. Vá para `/swagger`
@@ -486,6 +435,7 @@ Já está habilitado. Não precisa fazer nada!
 
 #### Memory Cache (Padrão para desenvolvimento)
 
+```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -497,8 +447,11 @@ Já está habilitado. Não precisa fazer nada!
     }
   }
 }
+```
+
 #### Redis (Recomendado para produção)
 
+```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -511,8 +464,11 @@ Já está habilitado. Não precisa fazer nada!
     }
   }
 }
+```
+
 #### SQL Server Cache
 
+```json
 {
   "AppSettings": {
     "Infrastructure": {
@@ -525,6 +481,7 @@ Já está habilitado. Não precisa fazer nada!
     }
   }
 }
+```
 ---
 
 ## 📊 Health Checks
@@ -550,19 +507,17 @@ Para adicionar health checks personalizados, edite `src/Infrastructure/Extension
 
 ### Fluxo de Dependências
 
-```
-
-```bash
+```text
 Api → Infrastructure → Application → Data → Domain
                                        ↓
                                     Domain
+```
+
 ---
 
 ## 🎨 Criando Novas Entidades
 
 ### 1. Crie a Entidade no Domain
-
-```
 
 ```csharp
 // src/Domain/Entities/Product.cs
@@ -574,9 +529,9 @@ public class Product : EntityBase
     public decimal Price { get; set; }
     public string? Description { get; set; }
 }
-### 2. Crie o Repositório (se necessário customização)
-
 ```
+
+### 2. Crie o Repositório (se necessário customização)
 
 ```csharp
 // src/Data/Repository/ProductRepository.cs
@@ -590,10 +545,9 @@ public class ProductRepository : Repository<Product>, IProductRepository
 
     // Métodos customizados aqui
 }
+```
 
 ### 3. Crie o Service (se necessário customização)
-
-```
 
 ```csharp
 // src/Application/Services/ProductService.cs
@@ -608,9 +562,9 @@ public class ProductService : Service<Product>, IProductService
 
     // Lógica de negócio customizada aqui
 }
-### 4. Crie o Controller
-
 ```
+
+### 4. Crie o Controller
 
 ```csharp
 // src/Api/Controllers/ProductController.cs
@@ -660,14 +614,22 @@ public class ProductController : ApiControllerBase
         return NoContent();
     }
 }
+```
+
 ### 5. Adicione o DbSet ao Context
 
+```csharp
 // src/Data/Context/ApplicationDbContext.cs
 public DbSet<Product> Products { get; set; }
+```
+
 ### 6. Crie a Migration
 
+```bash
 dotnet ef migrations add AddProduct --project src/Data --startup-project src/Api
 dotnet ef database update --project src/Data --startup-project src/Api
+```
+
 ---
 
 ## 📝 Boas Práticas
@@ -680,6 +642,7 @@ O template usa **Scrutor** com `.AsMatchingInterface()` para registro automátic
 
 Seus repositórios e services são **automaticamente registrados** sem necessidade de configuração manual:
 
+```csharp
 // src/Infrastructure/Extensions/DependencyInjectionExtensions.cs
 services.Scan(scan => scan
     .FromAssembliesOf(typeof(Repository<>))
@@ -687,6 +650,8 @@ services.Scan(scan => scan
     .AsMatchingInterface()  // ← Registra apenas interface correspondente
     .WithScopedLifetime()
 );
+```
+
 **Como funciona:**
 - `Repository<Product>` → registrado como `IRepository<Product>`
 - `ProductDapperRepository` → registrado como `IProductDapperRepository`
@@ -697,8 +662,6 @@ services.Scan(scan => scan
 
 **1. Crie a interface específica:**
 
-```
-
 ```csharp
 public interface IProductDapperRepository : IRepository<Product>
 {
@@ -706,11 +669,7 @@ public interface IProductDapperRepository : IRepository<Product>
 }
 ```
 
-```csharp
-
 **2. Implemente a classe:**
-
-```
 
 ```csharp
 public class ProductDapperRepository : IProductDapperRepository
@@ -719,11 +678,7 @@ public class ProductDapperRepository : IProductDapperRepository
 }
 ```
 
-```csharp
-
 **3. Pronto!** 🎉 O Scrutor registrará automaticamente. Basta injetar:
-
-```
 
 ```csharp
 public class ProductService
@@ -739,6 +694,8 @@ public class ProductService
         _dapperRepository = dapperRepository;
     }
 }
+```
+
 **Convenções necessárias:**
 - Interface: `IProductDapperRepository` (prefixo `I` + nome da classe)
 - Classe: `ProductDapperRepository` (implementa a interface)
@@ -748,33 +705,40 @@ public class ProductService
 
 Sempre use operações assíncronas:
 
+```csharp
 // ✅ Correto
 var result = await _service.GetByIdAsync(id, cancellationToken);
 
 // ❌ Errado
 var result = _service.GetByIdAsync(id).Result;
+```
+
 ### CancellationToken
 
 Sempre propague o CancellationToken em métodos assíncronos:
 
+```csharp
 public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
 {
     var items = await _service.GetAllAsync(cancellationToken);
     return Ok(items);
 }
+```
+
 ### Logging
 
 Use ILogger para logging estruturado:
 
+```csharp
 _logger.LogInformation("Processing request for {Id}", id);
 _logger.LogError(ex, "Error processing {Id}", id);
+```
+
 ---
 
 ## 🐳 Docker
 
 Para criar uma imagem Docker do seu projeto:
-
-```
 
 ```dockerfile
 # Dockerfile
@@ -802,6 +766,8 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "MeuProjeto.Api.dll"]
+```
+
 ---
 
 ## 🐳 Docker e Kubernetes
@@ -810,10 +776,15 @@ ENTRYPOINT ["dotnet", "MeuProjeto.Api.dll"]
 
 #### Build da imagem
 
+```bash
 docker build -t projecttemplate-api:latest .
+```
+
 #### Executar com docker-compose
 
+```bash
 docker-compose up -d
+```
 Acesse: `http://localhost:8080`
 
 ### Kubernetes
@@ -823,12 +794,20 @@ O template inclui manifestos Kubernetes prontos para deploy em Minikube (local) 
 #### Deploy Local (Minikube)
 
 **Windows (PowerShell):**
+
+```powershell
 cd scripts/windows
 .\minikube-deploy.ps1
+```
+
 **Linux/macOS:**
+
+```bash
 cd scripts/linux
 chmod +x minikube-deploy.sh
 ./minikube-deploy.sh
+```
+
 O script automaticamente:
 1. Verifica pré-requisitos (Docker, Minikube, kubectl)
 2. Inicia o Minikube
@@ -839,20 +818,31 @@ O script automaticamente:
 
 #### Acessar a aplicação no Minikube
 
+```bash
 # Port forward
 kubectl port-forward svc/projecttemplate-api 8080:80 -n projecttemplate
 
 # Ou usar Minikube tunnel
 minikube tunnel
+```
+
 #### Remover deploy do Minikube
 
 **Windows (PowerShell):**
+
+```powershell
 cd scripts/windows
 .\minikube-destroy.ps1
+```
+
 **Linux/macOS:**
+
+```bash
 cd scripts/linux
 chmod +x minikube-destroy.sh
 ./minikube-destroy.sh
+```
+
 #### Deploy em Produção
 
 Para deploy em clusters de produção (AKS, EKS, GKE, etc.), consulte o guia detalhado em [`docs/KUBERNETES.md`](docs/KUBERNETES.md).
@@ -865,18 +855,30 @@ O template inclui estrutura para testes:
 
 ### Testes de Integração
 
+```bash
 dotnet test tests/Integration/
+```
+
 ### Testes Unitários
 
-dotnet test tests/Infrastructure.UnitTests/
+```bash
+dotnet test tests/UnitTests/
+```
+
 ### Script Automatizado (Minikube)
 
 Execute testes de integração automaticamente no Minikube:
 
 **Windows (PowerShell):**
+
+```powershell
 cd scripts/windows
 .\run-integration-tests.ps1
+```
+
 **Linux/macOS:**
+
+```bash
 cd scripts/linux
 chmod +x run-integration-tests.sh
 ./run-integration-tests.sh

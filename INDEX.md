@@ -55,7 +55,15 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 | **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** | Visão detalhada da arquitetura                  | Entender Clean Architecture e padrões   |
 | **[docs/FEATURES.md](docs/FEATURES.md)**         | Recursos avançados (MongoDB, Queue, Jobs, etc.) | Usar MongoDB, RabbitMQ, Quartz, Storage |
 | **[docs/ORM-GUIDE.md](docs/ORM-GUIDE.md)**       | Guia de ORMs (EF Core, Dapper, etc.)            | Escolher ou alternar ORM                |
+| **[docs/CONFIGURATION-GUIDE.md](docs/CONFIGURATION-GUIDE.md)** | Configuração com IOptions\<T\>     | Acessar configurações no código         |
+| **[docs/AUTHENTICATION.md](docs/AUTHENTICATION.md)** | JWT & OAuth2 (Google, Microsoft, GitHub)   | Configurar autenticação                 |
+| **[docs/SECURITY.md](docs/SECURITY.md)**         | Headers, CORS, HTTPS, proteção contra ataques   | Revisar segurança da API                |
+| **[docs/RATE-LIMITING.md](docs/RATE-LIMITING.md)** | 4 estratégias de Rate Limiting                 | Controle de taxa de requisições         |
+| **[docs/EVENT-SOURCING.md](docs/EVENT-SOURCING.md)** | Event Sourcing com Marten + PostgreSQL       | Auditoria e time travel                 |
+| **[docs/TELEMETRY.md](docs/TELEMETRY.md)**       | OpenTelemetry, Jaeger, Prometheus, Grafana      | Configurar observabilidade              |
+| **[docs/TESTING-DATABASES.md](docs/TESTING-DATABASES.md)** | Testes multi-banco de dados            | Validar suporte a 4+ bancos            |
 | **[docs/KUBERNETES.md](docs/KUBERNETES.md)**     | Deploy no Kubernetes                            | Deploy em produção ou local             |
+| **[docs/CICD.md](docs/CICD.md)**                 | GitHub Actions, Azure DevOps, GitLab CI         | Configurar CI/CD                        |
 | **[docs/SONARCLOUD.md](docs/SONARCLOUD.md)**     | Configuração do SonarCloud                      | Implementar análise de qualidade        |
 
 ### Arquivos de Configuração
@@ -74,8 +82,8 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 ### "Quero criar um novo projeto"
 
 1. Leia: [QUICK-START.md](QUICK-START.md) - Seção "Criar Novo Projeto"
-2. Execute: `./scripts/new-project.sh MeuProjeto` (ou .ps1/.bat)
-3. Configure: `src/Api/appsettings.Development.json`
+2. Execute: `cd scripts && ./new-project.sh MeuProjeto` (ou `.ps1` / `.bat`)
+3. O script interativo configura banco, cache, mensageria, storage, telemetria e event sourcing
 4. Rode: `dotnet run --project src/Api/Api.csproj`
 
 ### "Quero usar outro banco de dados"
@@ -317,4 +325,4 @@ Este índice deve ajudá-lo a navegar pela documentação do template. Comece pe
 
 ---
 
-_Última atualização: Janeiro 2025 | Versão: 1.0.0_
+_Última atualização: Abril 2026 | Versão: 1.1.0_

@@ -54,13 +54,13 @@ Content-Type: application/json
 }
 
 ### 5. Fetch the full audit trail for this aggregate
-GET {{apiUrl}}/api/Audit/Order/{{orderId}}
+GET {{apiUrl}}/api/{{apiVersion}}/Audit/Order/{{orderId}}
 Accept: application/json
 
 ### 6. Travel back in time using the timestamp captured in step 3
-GET {{apiUrl}}/api/Audit/Order/{{orderId}}/at/{{timeTravelCutoff}}
+GET {{apiUrl}}/api/{{apiVersion}}/Audit/Order/{{orderId}}/at/{{timeTravelCutoff}}
 Accept: application/json
 
 ### 7. Replay every event to reconstruct the aggregate state
-POST {{apiUrl}}/api/Audit/Order/{{orderId}}/replay
+POST {{apiUrl}}/api/{{apiVersion}}/Audit/Order/{{orderId}}/replay
 Accept: application/json

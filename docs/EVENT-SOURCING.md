@@ -352,7 +352,7 @@ public override async Task UpdateAsync(TEntity entity)
 
 ```http
 
-GET /api/audit/Order/123
+GET /api/v1/Audit/Order/123
 
 ```
 
@@ -388,7 +388,7 @@ GET /api/audit/Order/123
 
 ```http
 
-GET /api/audit/Order/123/at/2026-01-11T12:00:00Z
+GET /api/v1/Audit/Order/123/at/2026-01-11T12:00:00Z
 
 ```
 
@@ -421,7 +421,7 @@ GET /api/audit/Order/123/at/2026-01-11T12:00:00Z
 
 ```http
 
-GET /api/audit/Order/123/versions/1/5
+GET /api/v1/Audit/Order/123/versions/1/5
 
 ```
 
@@ -431,7 +431,7 @@ Retorna eventos da versão 1 até a versão 5.
 
 ```http
 
-GET /api/audit/type/Order?from=2026-01-01&to=2026-01-31&limit=100
+GET /api/v1/Audit/type/Order?from=2026-01-01&to=2026-01-31&limit=100
 
 ```
 
@@ -439,7 +439,7 @@ GET /api/audit/type/Order?from=2026-01-01&to=2026-01-31&limit=100
 
 ```http
 
-GET /api/audit/user/user@email.com?limit=50
+GET /api/v1/Audit/user/user@email.com?limit=50
 
 ```
 
@@ -447,7 +447,7 @@ GET /api/audit/user/user@email.com?limit=50
 
 ```http
 
-GET /api/audit/statistics?from=2026-01-01&to=2026-01-31
+GET /api/v1/Audit/statistics?from=2026-01-01&to=2026-01-31
 
 ```
 
@@ -476,7 +476,7 @@ GET /api/audit/statistics?from=2026-01-01&to=2026-01-31
 
 ```http
 
-POST /api/audit/Order/123/replay
+POST /api/v1/Audit/Order/123/replay
 
 ```
 
@@ -541,7 +541,7 @@ Content-Type: application/json
 ### 3. Consultar histórico completo
 
 ```http
-GET /api/Audit/Order/42
+GET /api/v1/Audit/Order/42
 ```
 
 **Resposta truncada:**
@@ -576,7 +576,7 @@ GET /api/Audit/Order/42
 ### 4. Time travel com checkpoint
 
 1. Capture o timestamp *antes* de atualizar o pedido (por exemplo `2026-01-18T13:15:30Z`).
-2. Chame `GET /api/Audit/Order/42/at/2026-01-18T13:15:30Z`.
+2. Chame `GET /api/v1/Audit/Order/42/at/2026-01-18T13:15:30Z`.
 
 ```json
 {
@@ -605,7 +605,7 @@ API_URL=http://localhost:8080 ./scripts/event-sourcing/replay-order.sh 42 Order
 
 ### 6. Garantias automatizadas
 
-- Os testes de integração em [tests/Integration/Controllers/AuditControllerTests.cs](tests/Integration/Controllers/AuditControllerTests.cs) criam pedidos reais, modificam o status e validam os endpoints `/api/Audit/*` (histórico, time travel e replay) usando um `IEventStore` em memória.
+- Os testes de integração em [tests/Integration/Controllers/AuditControllerTests.cs](tests/Integration/Controllers/AuditControllerTests.cs) criam pedidos reais, modificam o status e validam os endpoints `/api/v1/Audit/*` (histórico, time travel e replay) usando um `IEventStore` em memória.
 - Rode `dotnet test` (ou `dotnet test tests/Integration/Integration.csproj --filter AuditController`) para garantir que regressões no AuditController sejam detectadas junto com o restante da suíte.
 
 ---

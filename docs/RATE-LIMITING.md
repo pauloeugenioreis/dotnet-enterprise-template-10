@@ -383,7 +383,7 @@ Content-Type: application/json
   "message": "Too many requests. Limit: 100 per window.",
   "clientIp": "192.168.1.100",
   "retryAfter": 45,
-  "resetAt": "2024-01-15T10:51:00.0000000Z"
+  "resetAt": "2026-04-08T10:51:00.0000000Z"
 }
 ```
 
@@ -774,5 +774,5 @@ public class ProductController : ControllerBase
 ---
 
 **Template Version:** 1.0.0
-**Last Updated:** 2024-01-15
+**Last Updated:** 2026-04-08
 **Author:** Enterprise Template Team
