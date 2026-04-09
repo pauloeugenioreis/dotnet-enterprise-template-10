@@ -1,7 +1,7 @@
 ﻿# Script interativo para criar novo projeto a partir do template
 # Modo interativo:     .\new-project.ps1
 # Com nome:            .\new-project.ps1 -ProjectName "MeuProjeto"
-# Modo não-interativo: .\new-project.ps1 -ProjectName "MeuProjeto" -Database PostgreSQL -Cache Redis -Queue Yes -Storage Azure -Telemetry Yes -EventSourcing No -GitInit Yes
+# Modo não-interativo: .\new-project.ps1 -ProjectName "MeuProjeto" -Database PostgreSQL -Cache Redis -MongoDB Yes -Queue Yes -Storage Azure -Telemetry Yes -EventSourcing No -GitInit Yes
 
 param(
     [string]$ProjectName,
@@ -11,6 +11,9 @@ param(
 
     [ValidateSet("Memory", "Redis")]
     [string]$Cache,
+
+    [ValidateSet("Yes", "No")]
+    [string]$MongoDB,
 
     [ValidateSet("Yes", "No")]
     [string]$Queue,
@@ -136,6 +139,7 @@ function Show-YesNo {
 
 $isInteractive = -not ($PSBoundParameters.ContainsKey('Database') -or
                         $PSBoundParameters.ContainsKey('Cache') -or
+                        $PSBoundParameters.ContainsKey('MongoDB') -or
                         $PSBoundParameters.ContainsKey('Queue') -or
                         $PSBoundParameters.ContainsKey('Storage') -or
                         $PSBoundParameters.ContainsKey('Telemetry') -or
@@ -169,6 +173,10 @@ if ($isInteractive) {
     Write-Section "Cache"
     $useRedis = Show-YesNo -Title "Habilitar cache Redis? (caso contrário, usa cache em memória)"
     $Cache = if ($useRedis) { "Redis" } else { "Memory" }
+
+    Write-Section "NoSQL"
+    $useMongo = Show-YesNo -Title "Habilitar MongoDB (document store)?"
+    $MongoDB = if ($useMongo) { "Yes" } else { "No" }
 
     Write-Section "Mensageria"
     $useQueue = Show-YesNo -Title "Habilitar RabbitMQ (fila de mensagens)?"
@@ -209,6 +217,7 @@ if ($isInteractive) {
     Write-Host "  ║  Projeto:        $($ProjectName.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Banco de Dados: $($Database.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Cache:          $($Cache.PadRight(38))║" -ForegroundColor Cyan
+    Write-Host "  ║  MongoDB:        $($MongoDB.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  RabbitMQ:       $($Queue.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Storage:        $($Storage.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Telemetria:     $($Telemetry.PadRight(38))║" -ForegroundColor Cyan
@@ -227,6 +236,7 @@ if ($isInteractive) {
     # Apply defaults for non-interactive mode
     if (-not $Database) { $Database = "InMemory" }
     if (-not $Cache) { $Cache = "Memory" }
+    if (-not $MongoDB) { $MongoDB = "No" }
     if (-not $Queue) { $Queue = "No" }
     if (-not $Storage) { $Storage = "None" }
     if (-not $Telemetry) { $Telemetry = "No" }
@@ -325,6 +335,11 @@ if ($Cache -eq "Redis") {
     $appSettings.AppSettings.Infrastructure.Cache.ConnectionString = "localhost:6379,password=RedisPass123,ssl=false,abortConnect=false"
 }
 
+# -- MongoDB --
+if ($MongoDB -eq "Yes") {
+    $appSettings.AppSettings.Infrastructure.MongoDB.ConnectionString = "mongodb://mongo:27017/$ProjectName"
+}
+
 # -- RabbitMQ --
 if ($Queue -eq "Yes") {
     $appSettings.AppSettings.Infrastructure.RabbitMQ.ConnectionString = "amqp://guest:guest@localhost:5672/"
@@ -351,14 +366,49 @@ if ($EventSourcing -eq "Yes") {
     $appSettings.AppSettings.Infrastructure.EventSourcing.Enabled = $false
 }
 
-# Save appsettings.json
-$appSettings | ConvertTo-Json -Depth 20 | Set-Content $appSettingsPath -Encoding UTF8
+# Save appsettings.json (ConvertTo-Json in PS 5.1 uses non-standard indentation; normalize to 2-space)
+$jsonContent = $appSettings | ConvertTo-Json -Depth 20
+$lines = $jsonContent -split '\r?\n'
+$depth = 0
+$result = @()
+foreach ($line in $lines) {
+    $trimmed = $line.TrimStart()
+    if ($trimmed -match '^[}\]]') { $depth-- }
+    $result += ('  ' * $depth) + ($trimmed -replace ':\s+', ': ')
+    if ($trimmed -match '[\[{]\s*$') { $depth++ }
+}
+$jsonContent = $result -join "`n"
+Set-Content $appSettingsPath $jsonContent -Encoding UTF8
+
+# ============================================================
+# Enable optional features in Program.cs
+# ============================================================
+
+$programPath = Join-Path $TargetDir "src/Api/Program.cs"
+$programContent = Get-Content $programPath -Raw
+
+if ($MongoDB -eq "Yes") {
+    Write-Step "🍃" "Habilitando MongoDB no Program.cs..."
+    $programContent = $programContent -replace '// (builder\.Services\.AddMongo<Program>\(\);)', '$1'
+}
+
+if ($Queue -eq "Yes") {
+    Write-Step "📨" "Habilitando RabbitMQ no Program.cs..."
+    $programContent = $programContent -replace '// (builder\.Services\.AddRabbitMq\(\);)', '$1'
+}
+
+if ($Storage -ne "None") {
+    Write-Step "☁️" "Habilitando Storage no Program.cs..."
+    $programContent = $programContent -replace '// (builder\.Services\.AddStorage<Program>\(\);)', '$1'
+}
+
+Set-Content $programPath $programContent -NoNewline
 
 # ============================================================
 # Generate docker-compose.yml
 # ============================================================
 
-$needsCompose = ($Database -ne "InMemory") -or ($Cache -eq "Redis") -or ($Queue -eq "Yes") -or ($Telemetry -eq "Yes") -or ($EventSourcing -eq "Yes")
+$needsCompose = ($Database -ne "InMemory") -or ($Cache -eq "Redis") -or ($MongoDB -eq "Yes") -or ($Queue -eq "Yes") -or ($Telemetry -eq "Yes") -or ($EventSourcing -eq "Yes")
 
 if ($needsCompose) {
     Write-Step "🐳" "Gerando docker-compose.yml..."
@@ -489,6 +539,28 @@ if ($needsCompose) {
       retries: 5
 "@)
         $volumes.Add("  redis-data:")
+    }
+
+    # ── MongoDB ──
+    if ($MongoDB -eq "Yes") {
+        [void]$services.AppendLine(@"
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+"@)
+        $volumes.Add("  mongo-data:")
     }
 
     # ── RabbitMQ ──
@@ -733,6 +805,11 @@ if ($Database -ne "InMemory") {
 Write-Host "    💾 Cache: $Cache" -ForegroundColor White
 if ($Cache -eq "Redis") {
     Write-Host "       Redis UI: não incluída (instale RedisInsight se desejar)" -ForegroundColor DarkGray
+}
+
+if ($MongoDB -eq "Yes") {
+    Write-Host "    🍃 MongoDB: habilitado" -ForegroundColor White
+    Write-Host "       Connection: mongodb://mongo:27017/$ProjectName" -ForegroundColor DarkGray
 }
 
 if ($Queue -eq "Yes") {
