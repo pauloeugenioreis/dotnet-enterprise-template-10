@@ -7,7 +7,7 @@ Visão geral da arquitetura Clean Architecture implementada neste template.
 ## 📐 Diagrama de Camadas
 
 ```text
-┌─────────────────────────────── API LAYER ───────────────────────────────┐
+┌─────────────────────────────── API LAYER ──────────────────────────────┐
 │ • Controllers, Program.cs, Middleware, Swagger                         │
 │ • Endpoints: GET / POST / PUT / DELETE                                 │
 │ • Authentication & Authorization (JWT, OAuth2)                         │
@@ -18,33 +18,33 @@ Visão geral da arquitetura Clean Architecture implementada neste template.
 │ • Extensions, Middleware, Filters, Notifications                        │
 │ • Cache (Memory/Redis/SQL), Health Checks, CORS                         │
 │ • Compression, Rate Limiting, OpenTelemetry                             │
-└────────────────────────────────────────────────────────────────────────┘
+└─────────────────────────────────────────────────────────────────────────┘
                           │ Cross-cutting │
                           ▼
 ┌────────────────────────── APPLICATION LAYER ────────────────────────────┐
 │ • Services (Business Logic), Orchestration, Workflows                   │
 │ • DTOs & AutoMapper Profiles                                            │
 │ • Validators (FluentValidation)                                         │
-└────────────────────────────────────────────────────────────────────────┘
+└─────────────────────────────────────────────────────────────────────────┘
                           │ Business Ops │
                           ▼
 ┌────────────────────────────── DATA LAYER ───────────────────────────────┐
 │ • Repositories (IRepository<T>)                                         │
 │ • DbContext (EF Core) / ADO (Dapper / SQL)                              │
 │ • EF Core Configurations (Mappings)                                     │
-└────────────────────────────────────────────────────────────────────────┘
+└─────────────────────────────────────────────────────────────────────────┘
                           │ Data Access │
                           ▼
 ┌────────────────────────────── DOMAIN LAYER ─────────────────────────────┐
 │ • Entities, Enums, Value Objects                                        │
 │ • Interfaces (IRepository, IService)                                    │
 │ • Domain Exceptions, Validators, AppSettings                            │
-└────────────────────────────────────────────────────────────────────────┘
+└─────────────────────────────────────────────────────────────────────────┘
                           │ Core Business │
                           ▼
 ┌────────────────────────────── DATABASE ─────────────────────────────────┐
 │ SQL Server │ PostgreSQL │ MySQL │ Oracle                                │
-└────────────────────────────────────────────────────────────────────────┘
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -413,40 +413,40 @@ Program.cs
 
 ```text
 ┌─────────────────────────────────────────────────────┐
-│                  Kubernetes Cluster                  │
-│                                                      │
-│  ┌────────────────────────────────────────────┐    │
-│  │           Ingress Controller               │    │
-│  │  (Nginx - TLS/SSL, Load Balancing)        │    │
-│  └──────────────┬─────────────────────────────┘    │
-│                 │                                    │
-│  ┌──────────────▼─────────────────────────────┐    │
-│  │            Service (ClusterIP)             │    │
-│  │         projecttemplate-api:80             │    │
-│  └──────────────┬─────────────────────────────┘    │
-│                 │                                    │
-│  ┌──────────────▼─────────────────────────────┐    │
-│  │          Deployment (Pods)                 │    │
-│  │  ┌──────────────┐  ┌──────────────┐       │    │
-│  │  │   Pod 1      │  │   Pod 2      │       │    │
-│  │  │  API:8080    │  │  API:8080    │       │    │
-│  │  │  256Mi-512Mi │  │  256Mi-512Mi │       │    │
-│  │  └──────────────┘  └──────────────┘       │    │
-│  └────────────────────────────────────────────┘    │
-│                                                      │
-│  ┌────────────────────────────────────────────┐    │
-│  │           ConfigMap / Secrets              │    │
-│  │  Environment Variables, Connection Strings │    │
-│  └────────────────────────────────────────────┘    │
+│                  Kubernetes Cluster                 │
+│                                                     │
+│  ┌────────────────────────────────────────────┐     │
+│  │           Ingress Controller               │     │
+│  │  (Nginx - TLS/SSL, Load Balancing)         │     │
+│  └──────────────┬─────────────────────────────┘     │
+│                 │                                   │
+│  ┌──────────────▼─────────────────────────────┐     │
+│  │            Service (ClusterIP)             │     │
+│  │         projecttemplate-api:80             │     │
+│  └──────────────┬─────────────────────────────┘     │
+│                 │                                   │
+│  ┌──────────────▼─────────────────────────────┐     │
+│  │          Deployment (Pods)                 │     │
+│  │  ┌──────────────┐  ┌──────────────┐        │     │
+│  │  │   Pod 1      │  │   Pod 2      │        │     │
+│  │  │  API:8080    │  │  API:8080    │        │     │
+│  │  │  256Mi-512Mi │  │  256Mi-512Mi │        │     │
+│  │  └──────────────┘  └──────────────┘        │     │
+│  └────────────────────────────────────────────┘     │
+│                                                     │
+│  ┌────────────────────────────────────────────┐     │
+│  │           ConfigMap / Secrets              │     │
+│  │  Environment Variables, Connection Strings │     │
+│  └────────────────────────────────────────────┘     │
 └─────────────────────────────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────┐
-│              External Services                       │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────┐ │
-│  │   Database   │  │    Redis     │  │  Others  │ │
-│  │  SQL Server  │  │    Cache     │  │   APIs   │ │
-│  └──────────────┘  └──────────────┘  └──────────┘ │
+│              External Services                      │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────┐   │
+│  │   Database   │  │    Redis     │  │  Others  │   │
+│  │  SQL Server  │  │    Cache     │  │   APIs   │   │
+│  └──────────────┘  └──────────────┘  └──────────┘   │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -485,34 +485,34 @@ User Response (JSON)
 ```text
 ┌─────────────────────────────────────────────┐
 │  1. Network Security                        │
-│     - HTTPS/TLS                            │
-│     - Network Policies (K8s)               │
-│     - Firewall rules                       │
+│     - HTTPS/TLS                             │
+│     - Network Policies (K8s)                │
+│     - Firewall rules                        │
 └─────────────────┬───────────────────────────┘
                   │
 ┌─────────────────▼───────────────────────────┐
 │  2. Application Security                    │
-│     - CORS policies                        │
-│     - Rate limiting                        │
-│     - Input validation                     │
-│     - Authentication (Future: JWT/OAuth)   │
-│     - Authorization (Future: Roles)        │
+│     - CORS policies                         │
+│     - Rate limiting                         │
+│     - Input validation                      │
+│     - Authentication (Future: JWT/OAuth)    │
+│     - Authorization (Future: Roles)         │
 └─────────────────┬───────────────────────────┘
                   │
 ┌─────────────────▼───────────────────────────┐
 │  3. Data Security                           │
-│     - Encrypted connections                │
-│     - SQL injection prevention             │
-│     - Parameterized queries                │
-│     - Secrets management (K8s Secrets)     │
+│     - Encrypted connections                 │
+│     - SQL injection prevention              │
+│     - Parameterized queries                 │
+│     - Secrets management (K8s Secrets)      │
 └─────────────────┬───────────────────────────┘
                   │
 ┌─────────────────▼───────────────────────────┐
 │  4. Container Security                      │
-│     - Non-root user                        │
-│     - Read-only filesystem                 │
-│     - Security context                     │
-│     - Resource limits                      │
+│     - Non-root user                         │
+│     - Read-only filesystem                  │
+│     - Security context                      │
+│     - Resource limits                       │
 └─────────────────────────────────────────────┘
 ```
 
@@ -587,7 +587,3 @@ Para entender melhor a arquitetura:
 - [⬆️ Voltar ao README](../README.md)
 - [📖 Ver Índice](../INDEX.md)
 - [🚀 Quick Start](../QUICK-START.md)
-
----
-
-_Última atualização: Abril 2026 | Versão: 1.1.0_

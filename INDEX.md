@@ -320,9 +320,3 @@ Depois de dominar o básico:
 ## 🎉 Conclusão
 
 Este índice deve ajudá-lo a navegar pela documentação do template. Comece pelo [QUICK-START.md](QUICK-START.md) e explore conforme necessário!
-
-**Happy Coding! 🚀**
-
----
-
-_Última atualização: Abril 2026 | Versão: 1.1.0_

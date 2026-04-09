@@ -256,7 +256,3 @@ Ao criar nova documentação:
 - [⬆️ Voltar ao README Principal](../README.md)
 - [📖 Ver Índice Completo](../INDEX.md)
 - [🚀 Quick Start](../QUICK-START.md)
-
----
-
-_Última atualização: Abril 2026 | Versão: 1.1.0_

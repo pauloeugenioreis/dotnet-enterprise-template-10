@@ -1522,7 +1522,3 @@ Sistema completo de autenticação/autorização com JWT, refresh tokens e OAuth
 - [⬆️ Voltar ao README](../README.md)
 - [📖 Ver Índice](../INDEX.md)
 - [🚀 Quick Start](../QUICK-START.md)
-
----
-
-_Última atualização: Abril 2026 | Versão: 1.1.0_
