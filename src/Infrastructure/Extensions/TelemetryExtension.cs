@@ -19,12 +19,11 @@ public static class TelemetryExtension
 {
     public static IServiceCollection AddTelemetry(
         this IServiceCollection services,
-        IOptions<AppSettings> appSettings,
-        IHostEnvironment environment)
+        IOptions<AppSettings> appSettings)
     {
-        var settings = appSettings.Value.Infrastructure.Telemetry;
+        var settings = appSettings.Value;
 
-        if (!settings.Enabled)
+        if (!appSettings.Value.Infrastructure.Telemetry.Enabled)
         {
             Console.WriteLine("⚠️  Telemetry is disabled");
             return services;
@@ -41,7 +40,7 @@ public static class TelemetryExtension
                 serviceInstanceId: Environment.MachineName)
             .AddAttributes(new Dictionary<string, object>
             {
-                ["deployment.environment"] = environment.EnvironmentName,
+                ["deployment.environment"] = settings.EnvironmentName,
                 ["host.name"] = Environment.MachineName,
                 ["telemetry.sdk.name"] = "opentelemetry",
                 ["telemetry.sdk.language"] = "dotnet",
@@ -86,7 +85,7 @@ public static class TelemetryExtension
                         };
                     });
 
-                if (settings.EnableSqlInstrumentation)
+                if (appSettings.Value.Infrastructure.Telemetry.EnableSqlInstrumentation)
                 {
                     tracerProvider.AddSqlClientInstrumentation(options =>
                     {
@@ -98,13 +97,13 @@ public static class TelemetryExtension
                     .AddEntityFrameworkCoreInstrumentation();
 
                 // Sampling (reduz volume em produção)
-                if (settings.SamplingRatio > 0 && settings.SamplingRatio < 1.0)
+                if (appSettings.Value.Infrastructure.Telemetry.SamplingRatio > 0 && appSettings.Value.Infrastructure.Telemetry.SamplingRatio < 1.0)
                 {
-                    tracerProvider.SetSampler(new TraceIdRatioBasedSampler(settings.SamplingRatio));
+                    tracerProvider.SetSampler(new TraceIdRatioBasedSampler(appSettings.Value.Infrastructure.Telemetry.SamplingRatio));
                 }
 
                 // Configurar exportadores baseado no provider
-                ConfigureTraceExporters(tracerProvider, settings, environment);
+                ConfigureTraceExporters(tracerProvider, appSettings);
             })
             .WithMetrics(meterProvider =>
             {
@@ -116,19 +115,20 @@ public static class TelemetryExtension
                     .AddRuntimeInstrumentation();
 
                 // Configurar exportadores de métricas
-                ConfigureMetricExporters(meterProvider, settings);
+                ConfigureMetricExporters(meterProvider, settings.Infrastructure.Telemetry);
             });
 
-        Console.WriteLine($"✅ Telemetry enabled: {string.Join(", ", settings.Providers)}");
+        Console.WriteLine($"✅ Telemetry enabled: {string.Join(", ", settings.Infrastructure.Telemetry.Providers)}");
         return services;
     }
 
     private static void ConfigureTraceExporters(
         TracerProviderBuilder builder,
-        TelemetrySettings settings,
-        IHostEnvironment environment)
+        IOptions<AppSettings> appSettings)
     {
-        foreach (var provider in settings.Providers)
+        var settings = appSettings.Value;
+
+        foreach (var provider in settings.Infrastructure.Telemetry.Providers)
         {
             switch (provider.ToLowerInvariant())
             {
@@ -140,14 +140,14 @@ public static class TelemetryExtension
                 case "jaeger":
                     // Jaeger now uses OTLP protocol (native exporter is deprecated)
                     // Configure OTLP exporter to send to Jaeger's OTLP endpoints
-                    var jaegerOtlpEndpoint = settings.Jaeger.UseGrpc
-                        ? $"http://{settings.Jaeger.Host}:4317"
-                        : $"http://{settings.Jaeger.Host}:4318";
+                    var jaegerOtlpEndpoint = settings.Infrastructure.Telemetry.Jaeger.UseGrpc
+                        ? $"http://{settings.Infrastructure.Telemetry.Jaeger.Host}:4317"
+                        : $"http://{settings.Infrastructure.Telemetry.Jaeger.Host}:4318";
 
                     builder.AddOtlpExporter(options =>
                     {
                         options.Endpoint = new Uri(jaegerOtlpEndpoint);
-                        options.Protocol = settings.Jaeger.UseGrpc
+                        options.Protocol = settings.Infrastructure.Telemetry.Jaeger.UseGrpc
                             ? OtlpExportProtocol.Grpc
                             : OtlpExportProtocol.HttpProtobuf;
                     });
@@ -157,26 +157,26 @@ public static class TelemetryExtension
                 case "zipkin":
                     builder.AddZipkinExporter(options =>
                     {
-                        options.Endpoint = new Uri(settings.Zipkin.Endpoint);
+                        options.Endpoint = new Uri(settings.Infrastructure.Telemetry.Zipkin.Endpoint);
                     });
-                    Console.WriteLine($"  📊 Zipkin exporter enabled: {settings.Zipkin.Endpoint}");
+                    Console.WriteLine($"  📊 Zipkin exporter enabled: {settings.Infrastructure.Telemetry.Zipkin.Endpoint}");
                     break;
 
                 case "otlp":
                 case "grafana":
                     builder.AddOtlpExporter(options =>
                     {
-                        options.Endpoint = new Uri(settings.Otlp.Endpoint);
-                        options.Protocol = settings.Otlp.Protocol == "grpc"
+                        options.Endpoint = new Uri(settings.Infrastructure.Telemetry.Otlp.Endpoint);
+                        options.Protocol = settings.Infrastructure.Telemetry.Otlp.Protocol == "grpc"
                             ? OtlpExportProtocol.Grpc
                             : OtlpExportProtocol.HttpProtobuf;
 
-                        if (!string.IsNullOrEmpty(settings.Otlp.Headers))
+                        if (!string.IsNullOrEmpty(settings.Infrastructure.Telemetry.Otlp.Headers))
                         {
-                            options.Headers = settings.Otlp.Headers;
+                            options.Headers = settings.Infrastructure.Telemetry.Otlp.Headers;
                         }
                     });
-                    Console.WriteLine($"  📊 OTLP/Grafana exporter enabled: {settings.Otlp.Endpoint}");
+                    Console.WriteLine($"  📊 OTLP/Grafana exporter enabled: {settings.Infrastructure.Telemetry.Otlp.Endpoint}");
                     break;
 
                 case "applicationinsights":
@@ -184,7 +184,7 @@ public static class TelemetryExtension
                     // TODO: Application Insights requires Azure.Monitor.OpenTelemetry.AspNetCore package
                     // builder.AddAzureMonitorTraceExporter(options =>
                     // {
-                    //     options.ConnectionString = settings.ApplicationInsights.ConnectionString;
+                    //     options.ConnectionString = settings.Infrastructure.Telemetry.ApplicationInsights.ConnectionString;
                     // });
                     Console.WriteLine($"  ⚠️  Application Insights not yet configured (requires Azure.Monitor.OpenTelemetry.AspNetCore)");
                     break;
@@ -193,22 +193,22 @@ public static class TelemetryExtension
                     // Datadog usa OTLP protocol
                     builder.AddOtlpExporter(options =>
                     {
-                        options.Endpoint = new Uri(settings.Datadog.Endpoint);
+                        options.Endpoint = new Uri(settings.Infrastructure.Telemetry.Datadog.Endpoint);
                         options.Protocol = OtlpExportProtocol.Grpc;
-                        options.Headers = $"DD-API-KEY={settings.Datadog.ApiKey}";
+                        options.Headers = $"DD-API-KEY={settings.Infrastructure.Telemetry.Datadog.ApiKey}";
                     });
-                    Console.WriteLine($"  📊 Datadog exporter enabled: {settings.Datadog.Endpoint}");
+                    Console.WriteLine($"  📊 Datadog exporter enabled: {settings.Infrastructure.Telemetry.Datadog.Endpoint}");
                     break;
 
                 case "dynatrace":
                     // Dynatrace usa OTLP protocol
                     builder.AddOtlpExporter(options =>
                     {
-                        options.Endpoint = new Uri(settings.Dynatrace.Endpoint);
+                        options.Endpoint = new Uri(settings.Infrastructure.Telemetry.Dynatrace.Endpoint);
                         options.Protocol = OtlpExportProtocol.HttpProtobuf;
-                        options.Headers = $"Authorization=Api-Token {settings.Dynatrace.ApiToken}";
+                        options.Headers = $"Authorization=Api-Token {settings.Infrastructure.Telemetry.Dynatrace.ApiToken}";
                     });
-                    Console.WriteLine($"  📊 Dynatrace exporter enabled: {settings.Dynatrace.Endpoint}");
+                    Console.WriteLine($"  📊 Dynatrace exporter enabled: {settings.Infrastructure.Telemetry.Dynatrace.Endpoint}");
                     break;
 
                 default:
@@ -218,7 +218,7 @@ public static class TelemetryExtension
         }
 
         // Console exporter sempre ativo em Development (para debug)
-        if (environment.IsDevelopment() && !settings.Providers.Contains("console", StringComparer.OrdinalIgnoreCase))
+        if (settings.IsDevelopment() && !settings.Infrastructure.Telemetry.Providers.Contains("console", StringComparer.OrdinalIgnoreCase))
         {
             builder.AddConsoleExporter();
             Console.WriteLine("  📊 Console exporter enabled (Development)");

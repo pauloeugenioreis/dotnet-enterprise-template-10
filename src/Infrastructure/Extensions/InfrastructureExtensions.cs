@@ -18,7 +18,7 @@ public static class InfrastructureExtensions
         IHostEnvironment environment)
     {
         // Core settings - MUST be registered first
-        services.AddAppSettingsConfiguration(configuration, environment);
+        services.AddAppSettingsConfiguration(configuration);
 
         // Build a service provider to resolve IOptions<AppSettings> for other extensions
         // This is done once here to avoid multiple BuildServiceProvider calls
@@ -35,7 +35,7 @@ public static class InfrastructureExtensions
         services.AddHealthChecksConfiguration(appSettings);
 
         // Telemetry (OpenTelemetry)
-        services.AddTelemetry(appSettings, environment);
+        services.AddTelemetry(appSettings);
 
         // Rate Limiting
         services.AddRateLimitingConfiguration(appSettings);
@@ -83,7 +83,7 @@ public static class InfrastructureExtensions
         return services;
     }
 
-    public static IApplicationBuilder UseInfrastructureMiddleware(this IApplicationBuilder app, IConfiguration configuration)
+    public static IApplicationBuilder UseInfrastructureMiddleware(this IApplicationBuilder app)
     {
         // CORS
         app.UseCors("DefaultCorsPolicy");

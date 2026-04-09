@@ -107,7 +107,7 @@ app.UseXfo(opts => opts.Deny());
 app.UseOutputCache();
 
 // Use infrastructure middleware
-app.UseInfrastructureMiddleware(app.Configuration);
+app.UseInfrastructureMiddleware();
 
 // Prometheus metrics endpoint (if telemetry is enabled)
 var telemetryEnabled = app.Configuration.GetValue<bool>("AppSettings:Infrastructure:Telemetry:Enabled");

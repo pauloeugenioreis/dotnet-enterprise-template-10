@@ -12,8 +12,7 @@ public static class AppSettingsExtension
 {
     public static IServiceCollection AddAppSettingsConfiguration(
         this IServiceCollection services,
-        IConfiguration configuration,
-        IHostEnvironment environment)
+        IConfiguration configuration)
     {
         // Bind and validate settings
         services.AddOptions<AppSettings>()

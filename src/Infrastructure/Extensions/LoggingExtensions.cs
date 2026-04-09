@@ -24,12 +24,11 @@ public static class LoggingExtensions
     {
         var tempProvider = builder.Services.BuildServiceProvider();
         var appSettings = tempProvider.GetRequiredService<IOptions<AppSettings>>().Value;
-        var isProduction = appSettings.Infrastructure?.Environment == "Production";
 
         // Configure structured and detailed logging
         builder.Logging.ClearProviders();
 
-        if (!isProduction)
+        if (!appSettings.IsProduction())
         {
             // Development: use JSON console formatter
             builder.Logging.AddConsole(options => options.FormatterName = ConsoleFormatterNames.Json);
