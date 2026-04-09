@@ -54,8 +54,8 @@ O script apresenta um menu com opções para configurar o projeto:
 ```powershell
 cd scripts
 
-# Modo interativo (menu)
-.\new-project.ps1 -ProjectName "MeuProjeto"
+# Modo interativo (menu — pergunta nome e configurações)
+.\new-project.ps1
 
 # Modo não-interativo (CI/CD)
 .\new-project.ps1 -ProjectName "MeuProjeto" -Database PostgreSQL -Cache Redis -Queue Yes -Storage Azure -Telemetry Yes -EventSourcing No -GitInit Yes
@@ -67,7 +67,7 @@ cd scripts
 cd scripts
 
 REM Wrapper que chama o script PowerShell
-new-project.bat MeuProjeto
+new-project.bat
 ```
 
 ### Linux/macOS
@@ -76,8 +76,8 @@ new-project.bat MeuProjeto
 cd scripts
 chmod +x new-project.sh
 
-# Modo interativo (menu)
-./new-project.sh MeuProjeto
+# Modo interativo (menu — pergunta nome e configurações)
+./new-project.sh
 
 # Modo não-interativo (CI/CD)
 ./new-project.sh MeuProjeto --database PostgreSQL --cache Redis --queue yes --storage Azure --telemetry yes --event-sourcing no --git-init yes

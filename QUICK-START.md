@@ -25,7 +25,7 @@ O script interativo configura banco de dados, cache, mensageria, storage, teleme
 
 ```powershell
 cd scripts
-.\new-project.ps1 -ProjectName "MeuProjeto"
+.\new-project.ps1
 cd ..\MeuProjeto
 ```
 
@@ -34,7 +34,7 @@ cd ..\MeuProjeto
 ```bash
 cd scripts
 chmod +x new-project.sh
-./new-project.sh MeuProjeto
+./new-project.sh
 cd ../MeuProjeto
 ```
 
@@ -42,7 +42,7 @@ cd ../MeuProjeto
 
 ```cmd
 cd scripts
-new-project.bat MeuProjeto
+new-project.bat
 cd ..\MeuProjeto
 ```
 

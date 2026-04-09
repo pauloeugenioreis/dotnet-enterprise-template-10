@@ -201,7 +201,7 @@ ProjectTemplate/
 
 ```powershell
 cd template/scripts
-.\new-project.ps1 -ProjectName "MeuProjeto"
+.\new-project.ps1
 ```
 
 ### Opção 2: Usando Script Bash (Linux/Mac)
@@ -209,14 +209,14 @@ cd template/scripts
 ```bash
 cd template/scripts
 chmod +x new-project.sh
-./new-project.sh MeuProjeto
+./new-project.sh
 ```
 
 ### Opção 3: Usando Script Batch (Windows CMD)
 
 ```cmd
 cd template\scripts
-new-project.bat MeuProjeto
+new-project.bat
 ```
 
 > 💡 Os scripts são interativos — apresentam menus para configurar banco de dados, cache, mensageria, cloud storage, telemetria e event sourcing. Para modo não-interativo (CI/CD), veja [scripts/README.md](scripts/README.md).
