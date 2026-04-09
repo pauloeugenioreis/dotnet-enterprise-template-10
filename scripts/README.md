@@ -98,7 +98,7 @@ chmod +x new-project.sh
 ### O que o script faz
 
 1. ✅ **Copia** - Template completo para novo diretório
-2. ✅ **Limpa** - Remove `.git`, `scripts`, `bin`, `obj`
+2. ✅ **Limpa** - Remove `.git`, `bin`, `obj` e scripts exclusivos do template
 3. ✅ **Renomeia** - Solution e namespaces para novo nome
 4. ✅ **Substitui** - Todas referências de "ProjectTemplate" para nome escolhido
 5. ✅ **Configura** - `appsettings.json` com banco, cache, storage, telemetria e event sourcing
