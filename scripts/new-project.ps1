@@ -40,7 +40,7 @@ $ErrorActionPreference = "Stop"
 if ([string]::IsNullOrWhiteSpace($ProjectName)) {
     Write-Host ""
     Write-Host "  ╔══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "  ║  Criar Novo Projeto a partir do Template                ║" -ForegroundColor Cyan
+    Write-Host "  ║  Criar Novo Projeto a partir do Template                 ║" -ForegroundColor Cyan
     Write-Host "  ╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
 
@@ -70,10 +70,11 @@ function Write-Step {
 
 function Write-Header {
     param([string]$Title)
+    $border = '═' * ($Title.Length + 4)
     Write-Host ""
-    Write-Host "  ╔══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "  ║  $($Title.PadRight(55))║" -ForegroundColor Cyan
-    Write-Host "  ╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host "  ╔${border}╗" -ForegroundColor Cyan
+    Write-Host "  ║  ${Title}  ║" -ForegroundColor Cyan
+    Write-Host "  ╚${border}╝" -ForegroundColor Cyan
     Write-Host ""
 }
 
@@ -212,7 +213,7 @@ if ($isInteractive) {
     # ── Summary ──
     Write-Host ""
     Write-Host "  ╔══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "  ║  Resumo das Configurações                               ║" -ForegroundColor Cyan
+    Write-Host "  ║  Resumo das Configurações                                ║" -ForegroundColor Cyan
     Write-Host "  ╠══════════════════════════════════════════════════════════╣" -ForegroundColor Cyan
     Write-Host "  ║  Projeto:        $($ProjectName.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Banco de Dados: $($Database.PadRight(38))║" -ForegroundColor Cyan
@@ -945,7 +946,7 @@ if ($GitInit -eq "Yes") {
 
 Write-Host ""
 Write-Host "  ╔══════════════════════════════════════════════════════════╗" -ForegroundColor Green
-Write-Host "  ║  ✅ Projeto criado com sucesso!                         ║" -ForegroundColor Green
+Write-Host "  ║  ✅ Projeto criado com sucesso!                          ║" -ForegroundColor Green
 Write-Host "  ╚══════════════════════════════════════════════════════════╝" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Próximos passos:" -ForegroundColor Cyan

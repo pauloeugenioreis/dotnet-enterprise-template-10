@@ -25,10 +25,14 @@ write_step() {
 }
 
 write_header() {
+    local text="$1"
+    local len=${#text}
+    local border
+    border=$(printf '═%.0s' $(seq 1 $((len + 4))))
     echo ""
-    echo -e "  ${CYAN}╔══════════════════════════════════════════════════════════╗${NC}"
-    printf "  ${CYAN}║  %-55s║${NC}\n" "$1"
-    echo -e "  ${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
+    echo -e "  ${CYAN}╔${border}╗${NC}"
+    echo -e "  ${CYAN}║  ${text}  ║${NC}"
+    echo -e "  ${CYAN}╚${border}╝${NC}"
     echo ""
 }
 
@@ -96,7 +100,7 @@ show_yesno() {
 if [ -z "$1" ]; then
     echo ""
     echo -e "  ${CYAN}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "  ${CYAN}║  Criar Novo Projeto a partir do Template                ║${NC}"
+    echo -e "  ${CYAN}║  Criar Novo Projeto a partir do Template                 ║${NC}"
     echo -e "  ${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
     echo ""
 
@@ -236,17 +240,17 @@ if [ "$IS_INTERACTIVE" = true ]; then
     # ── Summary ──
     echo ""
     echo -e "  ${CYAN}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "  ${CYAN}║  Resumo das Configurações                               ║${NC}"
+    echo -e "  ${CYAN}║  Resumo das Configurações                                ║${NC}"
     echo -e "  ${CYAN}╠══════════════════════════════════════════════════════════╣${NC}"
-    printf "  ${CYAN}║  Projeto:        %-38s║${NC}\n" "$PROJECT_NAME"
-    printf "  ${CYAN}║  Banco de Dados: %-38s║${NC}\n" "$DATABASE"
-    printf "  ${CYAN}║  Cache:          %-38s║${NC}\n" "$CACHE"
-    printf "  ${CYAN}║  MongoDB:        %-38s║${NC}\n" "$MONGODB"
-    printf "  ${CYAN}║  RabbitMQ:       %-38s║${NC}\n" "$QUEUE"
-    printf "  ${CYAN}║  Storage:        %-38s║${NC}\n" "$STORAGE"
-    printf "  ${CYAN}║  Telemetria:     %-38s║${NC}\n" "$TELEMETRY"
-    printf "  ${CYAN}║  Event Sourcing: %-38s║${NC}\n" "$EVENTSOURCING"
-    printf "  ${CYAN}║  Git Init:       %-38s║${NC}\n" "$GITINIT"
+    printf "  ${CYAN}  Projeto:        %-38s${NC}\n" "$PROJECT_NAME"
+    printf "  ${CYAN}  Banco de Dados: %-38s${NC}\n" "$DATABASE"
+    printf "  ${CYAN}  Cache:          %-38s${NC}\n" "$CACHE"
+    printf "  ${CYAN}  MongoDB:        %-38s${NC}\n" "$MONGODB"
+    printf "  ${CYAN}  RabbitMQ:       %-38s${NC}\n" "$QUEUE"
+    printf "  ${CYAN}  Storage:        %-38s${NC}\n" "$STORAGE"
+    printf "  ${CYAN}  Telemetria:     %-38s${NC}\n" "$TELEMETRY"
+    printf "  ${CYAN}  Event Sourcing: %-38s${NC}\n" "$EVENTSOURCING"
+    printf "  ${CYAN}  Git Init:       %-38s${NC}\n" "$GITINIT"
     echo -e "  ${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
     echo ""
 
@@ -1003,7 +1007,7 @@ fi
 
 echo ""
 echo -e "  ${GREEN}╔══════════════════════════════════════════════════════════╗${NC}"
-echo -e "  ${GREEN}║  ✅ Projeto criado com sucesso!                         ║${NC}"
+echo -e "  ${GREEN}║  ✅ Projeto criado com sucesso!                          ║${NC}"
 echo -e "  ${GREEN}╚══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "  ${CYAN}Próximos passos:${NC}"
