@@ -23,6 +23,32 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
         _dbContext = context;
     }
 
+    public async Task<(IEnumerable<Order> Items, int Total)> GetByFilterAsync(string? status = null, int? page = null, int? pageSize = null, CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.Orders
+            .AsNoTracking()
+            .Include(o => o.Items)
+                .ThenInclude(i => i.Product)
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(status))
+            query = query.Where(o => o.Status == status);
+
+        var total = await query.CountAsync(cancellationToken);
+
+        query = query.OrderByDescending(o => o.CreatedAt);
+
+        if (page.HasValue && pageSize.HasValue)
+        {
+            query = query
+                .Skip((page.Value - 1) * pageSize.Value)
+                .Take(pageSize.Value);
+        }
+
+        var items = await query.ToListAsync(cancellationToken);
+        return (items, total);
+    }
+
     public async Task<IEnumerable<Order>> GetByCustomerEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Orders

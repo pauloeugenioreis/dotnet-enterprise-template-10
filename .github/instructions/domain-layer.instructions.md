@@ -15,9 +15,13 @@ The Domain layer has NO external project references. It defines contracts (inter
 
 ## Interfaces
 - Place in `Domain/Interfaces/`
-- `IRepository<T>` — generic repository contract
-- `IService<T>` — generic service contract
-- Specialized interfaces for complex operations (e.g., `IOrderRepository`)
+- `IRepository<T>` — generic repository base contract (used as base, not injected directly)
+- `IService<T>` — generic service base contract (used as base, not injected directly)
+- Every entity MUST have its own `I{Name}Repository : IRepository<{Name}>` interface
+- Every entity MUST have its own `I{Name}Service : IService<{Name}>` interface
+- Services inject specialized interfaces (`I{Name}Repository`), never generic `IRepository<T>`
+- Controllers inject specialized interfaces (`I{Name}Service`), never generic `IService<T>`
+- Developers may choose to use generics manually, but scaffolding always creates concrete interfaces
 
 ## Validators
 - Use FluentValidation for all input DTOs

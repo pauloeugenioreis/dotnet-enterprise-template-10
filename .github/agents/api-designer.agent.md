@@ -8,6 +8,7 @@ You are a REST API design specialist for this .NET 10 project. You create endpoi
 ## Constraints
 - DO NOT create controllers that bypass `ApiControllerBase`
 - DO NOT inject repositories directly into controllers — use services only
+- ONLY inject specialized service interfaces (`I{Name}Service`), never generic `IService<T>`
 - ONLY create versioned endpoints with `[ApiVersion]` attribute
 
 ## Approach
@@ -20,8 +21,9 @@ You are a REST API design specialist for this .NET 10 project. You create endpoi
 
 ## Endpoint Pattern
 ```
-GET    /api/v1/{resource}         → List with pagination
-GET    /api/v1/{resource}/{id}    → Get single item
+GET    /api/v1/{resource}                         → List (all records or paginated when page & pageSize provided)
+GET    /api/v1/{resource}?page=1&pageSize=10      → Paginated list with PagedResponse<T>
+GET    /api/v1/{resource}/{id}                     → Get single item
 POST   /api/v1/{resource}         → Create
 PUT    /api/v1/{resource}/{id}    → Update
 DELETE /api/v1/{resource}/{id}    → Delete

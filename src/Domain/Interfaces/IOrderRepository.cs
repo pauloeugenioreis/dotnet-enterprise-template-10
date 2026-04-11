@@ -8,6 +8,12 @@ namespace ProjectTemplate.Domain.Interfaces;
 public interface IOrderRepository : IRepository<Order>, ITransactionalRepository
 {
     /// <summary>
+    /// Get orders filtered by status, with optional pagination.
+    /// When page/pageSize are null, returns all matching records.
+    /// </summary>
+    Task<(IEnumerable<Order> Items, int Total)> GetByFilterAsync(string? status = null, int? page = null, int? pageSize = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Get orders by customer email
     /// </summary>
     Task<IEnumerable<Order>> GetByCustomerEmailAsync(string email, CancellationToken cancellationToken = default);

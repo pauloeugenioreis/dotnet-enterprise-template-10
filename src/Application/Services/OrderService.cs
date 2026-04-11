@@ -14,13 +14,13 @@ namespace ProjectTemplate.Application.Services;
 public class OrderService : Service<Order>, IOrderService
 {
     private readonly IOrderRepository _orderRepository;
-    private readonly IRepository<Product> _productRepository;
+    private readonly IProductRepository _productRepository;
     private readonly ILogger<OrderService> _logger;
     private readonly OrderSettings _orderSettings;
 
     public OrderService(
         IOrderRepository orderRepository,
-        IRepository<Product> productRepository,
+        IProductRepository productRepository,
         ILogger<OrderService> logger,
         IOptions<AppSettings> appSettings)
         : base(orderRepository, logger)
@@ -174,10 +174,10 @@ public class OrderService : Service<Order>, IOrderService
         return orders.Select(MapToResponseDto).ToList();
     }
 
-    public async Task<IEnumerable<OrderResponseDto>> GetAllOrderDetailsAsync(CancellationToken cancellationToken = default)
+    public async Task<(IEnumerable<OrderResponseDto> Items, int Total)> GetAllOrderDetailsAsync(string? status = null, int? page = null, int? pageSize = null, CancellationToken cancellationToken = default)
     {
-        var orders = await _orderRepository.GetAllAsync(cancellationToken);
-        return orders.Select(MapToResponseDto).ToList();
+        var (orders, total) = await _orderRepository.GetByFilterAsync(status, page, pageSize, cancellationToken);
+        return (orders.Select(MapToResponseDto).ToList(), total);
     }
 
     public async Task<decimal> CalculateOrderTotalAsync(long orderId, CancellationToken cancellationToken = default)

@@ -24,25 +24,20 @@ public class ProductController(
     /// </summary>
     [HttpGet]
     [OutputCache(PolicyName = "Expire300")]
-    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-    public async Task<ActionResult<dynamic>> GetAllAsync(
+    [ProducesResponseType(typeof(PagedResponse<ProductResponseDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllAsync(
         [FromQuery] bool? isActive,
         [FromQuery] string? category,
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
         CancellationToken cancellationToken)
     {
-        var stopwatch = Stopwatch.StartNew();
+        var (items, total) = await productService.GetAllProductsAsync(isActive, category, page, pageSize, cancellationToken);
 
-        var items = await productService.GetAllProductsAsync(isActive, category, cancellationToken);
-        var result = items.ToList();
+        if (page.HasValue && pageSize.HasValue)
+            return HandlePagedResult(items, total, page.Value, pageSize.Value);
 
-        stopwatch.Stop();
-
-        return Ok(new
-        {
-            executionTime = $"{stopwatch.ElapsedMilliseconds}ms",
-            totalCount = result.Count,
-            items = result
-        });
+        return Ok(items);
     }
 
     /// <summary>
@@ -126,7 +121,7 @@ public class ProductController(
 
         var stopwatch = Stopwatch.StartNew();
 
-        var products = await productService.GetProductsForExportAsync(isActive, category, cancellationToken);
+        var (products, _) = await productService.GetAllProductsAsync(isActive, category, cancellationToken: cancellationToken);
         var productList = products.ToList();
 
         var config = new OpenXmlConfiguration

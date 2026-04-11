@@ -21,9 +21,10 @@ You are a database and ORM specialist for this .NET 10 Clean Architecture projec
 1. Understand the data requirement and affected entities
 2. Check existing patterns in `src/Data/`
 3. Use EF Core for standard CRUD, Dapper for performance-critical reads
-4. Create reversible migrations with proper `Down()` methods
-5. Test against the configured database provider
-6. Update seeders if new entities need sample data
+4. Always create specialized repository interface (`I{Name}Repository : IRepository<{Name}>`) and implementation (`{Name}Repository : Repository<{Name}>, I{Name}Repository`) — never rely on generic `IRepository<T>` alone
+5. Create reversible migrations with proper `Down()` methods
+6. Test against the configured database provider
+7. Update seeders if new entities need sample data
 
 ## Key Locations
 - Context: `src/Data/Context/ApplicationDbContext.cs`

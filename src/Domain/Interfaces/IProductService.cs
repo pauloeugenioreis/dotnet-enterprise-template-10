@@ -10,7 +10,7 @@ public interface IProductService : IService<Product>
 {
     Task<ProductResponseDto?> GetProductByIdAsync(long id, CancellationToken cancellationToken = default);
 
-    Task<IEnumerable<ProductResponseDto>> GetAllProductsAsync(bool? isActive, string? category, CancellationToken cancellationToken = default);
+    Task<(IEnumerable<ProductResponseDto> Items, int Total)> GetAllProductsAsync(bool? isActive, string? category, int? page = null, int? pageSize = null, CancellationToken cancellationToken = default);
 
     Task<ProductResponseDto> CreateProductAsync(CreateProductRequest dto, CancellationToken cancellationToken = default);
 
@@ -19,6 +19,4 @@ public interface IProductService : IService<Product>
     Task UpdateProductStatusAsync(long id, UpdateProductStatusRequest dto, CancellationToken cancellationToken = default);
 
     Task<ProductResponseDto> UpdateProductStockAsync(long id, UpdateProductStockRequest dto, CancellationToken cancellationToken = default);
-
-    Task<IEnumerable<ProductResponseDto>> GetProductsForExportAsync(bool? isActive, string? category, CancellationToken cancellationToken = default);
 }

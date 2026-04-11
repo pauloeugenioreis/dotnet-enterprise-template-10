@@ -18,7 +18,8 @@ public static class DependencyInjectionExtensions
         // Scan and register ALL repositories automatically using AsMatchingInterface()
         // AsMatchingInterface() registers only the interface that matches the class name:
         //
-        // ✅ Repository<Product> → IRepository<Product>
+        // ✅ ProductRepository → IProductRepository
+        // ✅ OrderRepository → IOrderRepository
         // ✅ ProductDapperRepository → IProductDapperRepository (NOT IRepository<Product>)
         // ✅ ProductAdoRepository → IProductAdoRepository (NOT IRepository<Product>)
         // ✅ OrderDapperRepository → IOrderDapperRepository (NOT IRepository<Order>)

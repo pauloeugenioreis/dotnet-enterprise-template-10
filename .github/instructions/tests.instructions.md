@@ -23,7 +23,7 @@ Example: `GetByIdAsync_WithValidId_ReturnsProduct`
 public async Task GetByIdAsync_WithValidId_ReturnsProduct()
 {
     // Arrange
-    var mockRepo = new Mock<IRepository<Product>>();
+    var mockRepo = new Mock<IProductRepository>();
     mockRepo.Setup(r => r.GetByIdAsync(1, default))
         .ReturnsAsync(new Product { Id = 1 });
 
@@ -38,6 +38,7 @@ public async Task GetByIdAsync_WithValidId_ReturnsProduct()
 
 ## Rules
 - One assertion concept per test (multiple FluentAssertions for the same concept is fine)
+- Mock specialized interfaces (`I{Name}Repository`, `I{Name}Service`), not generic `IRepository<T>` or `IService<T>`
 - Use `Mock<T>` — never hit real databases in unit tests
 - Integration tests use `WebApplicationFactoryFixture` with EF Core InMemory
 - Always test happy path, error cases, and edge cases

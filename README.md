@@ -543,7 +543,7 @@ public class Product : EntityBase
 }
 ```
 
-### 2. Crie o Repositório (se necessário customização)
+### 2. Crie o Repositório
 
 ```csharp
 // src/Data/Repository/ProductRepository.cs
@@ -559,7 +559,7 @@ public class ProductRepository : Repository<Product>, IProductRepository
 }
 ```
 
-### 3. Crie o Service (se necessário customização)
+### 3. Crie o Service
 
 ```csharp
 // src/Application/Services/ProductService.cs
@@ -567,7 +567,7 @@ namespace MeuProjeto.Application.Services;
 
 public class ProductService : Service<Product>, IProductService
 {
-    public ProductService(IRepository<Product> repository, ILogger<ProductService> logger)
+    public ProductService(IProductRepository repository, ILogger<ProductService> logger)
         : base(repository, logger)
     {
     }
@@ -584,45 +584,52 @@ namespace MeuProjeto.Api.Controllers;
 
 public class ProductController : ApiControllerBase
 {
-    private readonly IService<Product> _service;
+    private readonly IProductService _productService;
 
-    public ProductController(IService<Product> service)
+    public ProductController(IProductService productService)
     {
-        _service = service;
+        _productService = productService;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
+        CancellationToken cancellationToken)
     {
-        var products = await _service.GetAllAsync(cancellationToken);
-        return Ok(products);
+        var (items, total) = await _productService.GetAllAsync(page, pageSize, cancellationToken);
+
+        if (page.HasValue && pageSize.HasValue)
+            return HandlePagedResult(items, total, page.Value, pageSize.Value);
+
+        return Ok(items);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
     {
-        var product = await _service.GetByIdAsync(id, cancellationToken);
+        var product = await _productService.GetByIdAsync(id, cancellationToken);
         return HandleResult(product);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] Product product, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create([FromBody] CreateProductRequest dto, CancellationToken cancellationToken)
     {
-        var created = await _service.CreateAsync(product, cancellationToken);
+        var created = await _productService.CreateAsync(dto, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(long id, [FromBody] Product product, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(long id, [FromBody] UpdateProductRequest dto, CancellationToken cancellationToken)
     {
-        await _service.UpdateAsync(id, product, cancellationToken);
+        await _productService.UpdateAsync(id, dto, cancellationToken);
         return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
     {
-        await _service.DeleteAsync(id, cancellationToken);
+        await _productService.DeleteAsync(id, cancellationToken);
         return NoContent();
     }
 }
@@ -666,7 +673,8 @@ services.Scan(scan => scan
 
 **Como funciona:**
 
-- `Repository<Product>` → registrado como `IRepository<Product>`
+- `ProductRepository` → registrado como `IProductRepository`
+- `ProductService` → registrado como `IProductService`
 - `ProductDapperRepository` → registrado como `IProductDapperRepository`
 - `ProductAdoRepository` → registrado como `IProductAdoRepository`
 - **Sem conflitos** entre múltiplos ORMs! ✅
@@ -696,11 +704,11 @@ public class ProductDapperRepository : IProductDapperRepository
 ```csharp
 public class ProductService
 {
-    private readonly IRepository<Product> _efRepository;          // EF Core
+    private readonly IProductRepository _efRepository;            // EF Core
     private readonly IProductDapperRepository _dapperRepository;  // Dapper
 
     public ProductService(
-        IRepository<Product> efRepository,
+        IProductRepository efRepository,
         IProductDapperRepository dapperRepository)
     {
         _efRepository = efRepository;

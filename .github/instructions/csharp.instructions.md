@@ -26,6 +26,9 @@ applyTo: "**/*.cs"
 - Use constructor injection — never `new` up services
 - Register via Scrutor convention in `DependencyInjectionExtensions.cs`
 - Never reference Infrastructure or Api from Domain layer
+- Services inject specialized interfaces (`I{Name}Repository`), never generic `IRepository<T>`
+- Controllers inject specialized interfaces (`I{Name}Service`), never generic `IService<T>`
+- Generic interfaces exist as base contracts for developers to use manually if needed, but scaffolding always creates concrete specialized artifacts
 
 ## Error Handling
 - Throw domain-specific exceptions from `Domain/Exceptions/`

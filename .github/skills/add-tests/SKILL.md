@@ -18,7 +18,7 @@ Generates comprehensive unit and/or integration tests for existing code.
 ### 1. Analyze Target
 1. Read the source code to identify:
    - Public methods to test
-   - Dependencies to mock
+   - Dependencies to mock (use specialized interfaces: `I{Name}Repository`, `I{Name}Service` — never generic `IRepository<T>` or `IService<T>`)
    - Code paths (happy, error, edge cases)
    - Return types and expected behaviors
 

@@ -32,20 +32,22 @@ MethodName_Scenario_ExpectedResult
 ```csharp
 public class {ClassName}Tests
 {
-    private readonly Mock<IDependency> _mockDep;
-    private readonly ServiceUnderTest _sut;
+    private readonly Mock<I{Name}Repository> _mockRepo;
+    private readonly Mock<ILogger<{Name}Service>> _mockLogger;
+    private readonly {Name}Service _sut;
 
     public {ClassName}Tests()
     {
-        _mockDep = new Mock<IDependency>();
-        _sut = new ServiceUnderTest(_mockDep.Object);
+        _mockRepo = new Mock<I{Name}Repository>();
+        _mockLogger = new Mock<ILogger<{Name}Service>>();
+        _sut = new {Name}Service(_mockRepo.Object, _mockLogger.Object);
     }
 
     [Fact]
     public async Task MethodName_Scenario_ExpectedResult()
     {
         // Arrange
-        _mockDep.Setup(x => x.Method()).ReturnsAsync(expected);
+        _mockRepo.Setup(x => x.GetByIdAsync(1, default)).ReturnsAsync(expected);
 
         // Act
         var result = await _sut.MethodAsync(CancellationToken.None);
@@ -55,6 +57,8 @@ public class {ClassName}Tests
     }
 }
 ```
+
+> **IMPORTANT**: Always mock specialized interfaces (`I{Name}Repository`, `I{Name}Service`), never generic `IRepository<T>` or `IService<T>`.
 
 ## Integration Test Template
 ```csharp

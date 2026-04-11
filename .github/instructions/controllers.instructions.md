@@ -8,7 +8,8 @@ applyTo: "src/Api/Controllers/**"
 ## Base Controller
 - All controllers must inherit `ApiControllerBase`
 - Use `HandleResult<T>` for single-item responses
-- Use `HandlePagedResult<T>` for paginated list responses
+- Use `HandlePagedResult<T>` for paginated list responses — only when `page` and `pageSize` query params are provided
+- When pagination params are omitted, return all records with `Ok(items)`
 
 ## Routing & Versioning
 - Apply `[ApiVersion("1.0")]` attribute on every controller
@@ -20,8 +21,18 @@ applyTo: "src/Api/Controllers/**"
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
-public class ExampleController(IService<Example> service) : ApiControllerBase
+public class ExampleController(IExampleService service) : ApiControllerBase
 {
+    [HttpGet]
+    public async Task<IActionResult> GetAllAsync(
+        [FromQuery] int? page, [FromQuery] int? pageSize, CancellationToken ct)
+    {
+        var (items, total) = await service.GetAllAsync(page, pageSize, ct);
+        if (page.HasValue && pageSize.HasValue)
+            return HandlePagedResult(items, total, page.Value, pageSize.Value);
+        return Ok(items);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetByIdAsync(int id, CancellationToken ct)
         => HandleResult(await service.GetByIdAsync(id, ct));
@@ -29,7 +40,7 @@ public class ExampleController(IService<Example> service) : ApiControllerBase
 ```
 
 ## Rules
-- Inject `IService<T>` or specialized service interfaces — never repositories directly
+- Inject specialized service interfaces (`I{Name}Service`) — never generic `IService<T>` or repositories directly
 - Return `IActionResult` from all action methods
 - Include `CancellationToken` in all async endpoints
 - Use `[ProducesResponseType]` for Swagger documentation

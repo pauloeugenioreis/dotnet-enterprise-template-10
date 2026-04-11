@@ -31,9 +31,9 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed diagrams and princ
 
 ## Patterns
 
-- **Generic Repository**: `IRepository<T>` / `Repository<T>` with EF Core. Specialized repos for complex queries
-- **Generic Service**: `IService<T>` / `Service<T>` with CRUD + pagination. Specialized services for business logic
-- **Base Controller**: `ApiControllerBase` with `HandleResult<T>` and `HandlePagedResult<T>` helpers
+- **Repository**: `I{Name}Repository : IRepository<{Name}>` / `{Name}Repository : Repository<{Name}>, I{Name}Repository` — every entity gets its own concrete repository interface and implementation. Generic `IRepository<T>` exists as base contract for developers to use manually if needed, but scaffolding always creates concrete specialized artifacts
+- **Service**: `I{Name}Service : IService<{Name}>` / `{Name}Service : Service<{Name}>, I{Name}Service` — every entity gets its own concrete service interface and implementation. Services inject `I{Name}Repository`, never generic `IRepository<T>`. Generic `IService<T>` exists as base contract for manual use only
+- **Base Controller**: `ApiControllerBase` with `HandleResult<T>` and `HandlePagedResult<T>` helpers. Controllers inject `I{Name}Service`, never generic `IService<T>`. GET list endpoints support optional pagination: when `page` and `pageSize` query params are provided, return `PagedResponse<T>` via `HandlePagedResult`; when omitted, return all records
 - **Modular Extensions**: Each infrastructure concern is a separate extension method in `Infrastructure/Extensions/`
 - **Hybrid ORM**: EF Core (default) + Dapper (performance). See [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md)
 

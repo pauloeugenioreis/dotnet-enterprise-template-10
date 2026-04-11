@@ -279,7 +279,62 @@ dotnet ef migrations add AddProduct --project ../Data/Data.csproj
 dotnet ef database update
 ```
 
-### 4. Criar o Controller
+### 4. Criar Interface e Repositório concreto
+
+`src/Domain/Interfaces/IProductRepository.cs`:
+
+```csharp
+namespace MeuProjeto.Domain.Interfaces;
+
+public interface IProductRepository : IRepository<Product>
+{
+    // Métodos específicos do Product aqui
+}
+```
+
+`src/Data/Repository/ProductRepository.cs`:
+
+```csharp
+namespace MeuProjeto.Data.Repository;
+
+public class ProductRepository : Repository<Product>, IProductRepository
+{
+    public ProductRepository(ApplicationDbContext context) : base(context)
+    {
+    }
+}
+```
+
+### 5. Criar Interface e Service concreto
+
+`src/Domain/Interfaces/IProductService.cs`:
+
+```csharp
+namespace MeuProjeto.Domain.Interfaces;
+
+public interface IProductService : IService<Product>
+{
+    // Métodos específicos do Product aqui
+}
+```
+
+`src/Application/Services/ProductService.cs`:
+
+```csharp
+namespace MeuProjeto.Application.Services;
+
+public class ProductService : Service<Product>, IProductService
+{
+    public ProductService(IProductRepository repository, ILogger<ProductService> logger)
+        : base(repository, logger)
+    {
+    }
+}
+```
+
+> 💡 O **Scrutor** registra automaticamente `ProductRepository → IProductRepository` e `ProductService → IProductService` via `AsMatchingInterface()`.
+
+### 6. Criar o Controller
 
 `src/Api/Controllers/ProductController.cs`:
 
@@ -289,37 +344,44 @@ namespace MeuProjeto.Api.Controllers;
 [Route("api/[controller]")]
 public class ProductController : ApiControllerBase
 {
-    private readonly IRepository<Product> _repository;
+    private readonly IProductService _productService;
 
-    public ProductController(IRepository<Product> repository)
+    public ProductController(IProductService productService)
     {
-        _repository = repository;
+        _productService = productService;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
+        CancellationToken cancellationToken)
     {
-        var products = await _repository.GetAllAsync(cancellationToken);
-        return Ok(products);
+        var (items, total) = await _productService.GetAllAsync(page, pageSize, cancellationToken);
+
+        if (page.HasValue && pageSize.HasValue)
+            return HandlePagedResult(items, total, page.Value, pageSize.Value);
+
+        return Ok(items);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(long id, CancellationToken cancellationToken)
     {
-        var product = await _repository.GetByIdAsync(id, cancellationToken);
+        var product = await _productService.GetByIdAsync(id, cancellationToken);
         return product == null ? NotFound() : Ok(product);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] Product product, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create([FromBody] CreateProductRequest dto, CancellationToken cancellationToken)
     {
-        var created = await _repository.CreateAsync(product, cancellationToken);
+        var created = await _productService.CreateAsync(dto, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 }
 ```
 
-### 5. Testar
+### 7. Testar
 
 Execute a aplicação e acesse: `https://localhost:3060/swagger`
 

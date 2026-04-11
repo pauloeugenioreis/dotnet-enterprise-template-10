@@ -45,13 +45,13 @@ public class ProductControllerTests
             new() { Id = 1, Name = "Product 1", Price = 10.99m, Stock = 100, Category = "Electronics", IsActive = true },
             new() { Id = 2, Name = "Product 2", Price = 20.99m, Stock = 50, Category = "Books", IsActive = true }
         };
-        _mockService.Setup(s => s.GetAllProductsAsync(null, null, It.IsAny<CancellationToken>())).ReturnsAsync(products);
+        _mockService.Setup(s => s.GetAllProductsAsync(null, null, null, null, It.IsAny<CancellationToken>())).ReturnsAsync((products, products.Count));
 
         // Act
-        var result = await _controller.GetAllAsync(null, null, CancellationToken.None);
+        var result = await _controller.GetAllAsync(null, null, null, null, CancellationToken.None);
 
         // Assert
-        result.Result.Should().BeOfType<OkObjectResult>();
+        result.Should().BeOfType<OkObjectResult>();
     }
 
     [Fact]

@@ -10,7 +10,7 @@ namespace ProjectTemplate.Application.Services;
 /// Product service with business logic, filtering and mapping
 /// </summary>
 public class ProductService(
-    IRepository<Product> repository,
+    IProductRepository repository,
     ILogger<ProductService> logger) : Service<Product>(repository, logger), IProductService
 {
     public async Task<ProductResponseDto?> GetProductByIdAsync(long id, CancellationToken cancellationToken = default)
@@ -20,14 +20,15 @@ public class ProductService(
         return product is not null ? MapToResponse(product) : null;
     }
 
-    public async Task<IEnumerable<ProductResponseDto>> GetAllProductsAsync(
+    public async Task<(IEnumerable<ProductResponseDto> Items, int Total)> GetAllProductsAsync(
         bool? isActive,
         string? category,
+        int? page = null,
+        int? pageSize = null,
         CancellationToken cancellationToken = default)
     {
-        var products = await repository.GetAllAsync(cancellationToken);
-        var filtered = ApplyFilters(products, isActive, category);
-        return filtered.Select(MapToResponse).ToList();
+        var (products, total) = await repository.GetByFilterAsync(isActive, category, page, pageSize, cancellationToken);
+        return (products.Select(MapToResponse).ToList(), total);
     }
 
     public async Task<ProductResponseDto> CreateProductAsync(CreateProductRequest dto, CancellationToken cancellationToken = default)
@@ -109,29 +110,6 @@ public class ProductService(
             dto.Quantity > 0 ? $"+{dto.Quantity}" : dto.Quantity.ToString());
 
         return MapToResponse(product);
-    }
-
-    public async Task<IEnumerable<ProductResponseDto>> GetProductsForExportAsync(
-        bool? isActive,
-        string? category,
-        CancellationToken cancellationToken = default)
-    {
-        var products = await repository.GetAllAsync(cancellationToken);
-        var filtered = ApplyFilters(products, isActive, category);
-        return filtered.Select(MapToResponse).ToList();
-    }
-
-    private static IEnumerable<Product> ApplyFilters(IEnumerable<Product> products, bool? isActive, string? category)
-    {
-        var query = products.AsQueryable();
-
-        if (isActive.HasValue)
-            query = query.Where(p => p.IsActive == isActive.Value);
-
-        if (!string.IsNullOrEmpty(category))
-            query = query.Where(p => p.Category.Contains(category, StringComparison.OrdinalIgnoreCase));
-
-        return query;
     }
 
     private static ProductResponseDto MapToResponse(Product product) => new()

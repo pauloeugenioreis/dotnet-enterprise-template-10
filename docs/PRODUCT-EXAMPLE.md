@@ -98,7 +98,7 @@ public DbSet<Product> Products { get; set; }
 
 | Método | Rota | Descrição | Cache |
 |--------|------|-----------|-------|
-| `GET` | `/api/v1/product` | Lista todos os produtos com filtros e métricas de performance | `Expire300` |
+| `GET` | `/api/v1/product` | Lista produtos com filtros opcionais (`isActive`, `category`) e paginação opcional (`page`, `pageSize`) | `Expire300` |
 | `GET` | `/api/v1/product/{id}` | Busca produto por ID (retorna `ProductResponseDto`) | `Expire300` |
 | `POST` | `/api/v1/product` | Cria novo produto a partir de `CreateProductRequest` | — |
 | `PUT` | `/api/v1/product/{id}` | Atualiza detalhes via `UpdateProductRequest` | — |
@@ -122,7 +122,7 @@ public async Task<ActionResult> ExportToExcelAsync(
   [FromQuery] string? category,
   CancellationToken cancellationToken)
 {
-  var products = await productService.GetProductsForExportAsync(isActive, category, cancellationToken);
+  var (products, _) = await productService.GetAllProductsAsync(isActive, category, cancellationToken: cancellationToken);
   var productList = products.ToList();
 
   var config = new OpenXmlConfiguration
@@ -199,6 +199,26 @@ Content-Type: application/json
 ```http
 GET /api/v1/product?isActive=true&category=Electronics
 ```
+
+#### Listar Produtos com Paginação
+
+```http
+GET /api/v1/product?isActive=true&category=Electronics&page=1&pageSize=10
+```
+
+Quando `page` e `pageSize` são informados, retorna `PagedResponse<T>`:
+
+```json
+{
+  "items": [...],
+  "totalCount": 42,
+  "page": 1,
+  "pageSize": 10,
+  "totalPages": 5
+}
+```
+
+Quando omitidos, retorna todos os registros como array simples.
 
 #### Gerar Excel
 

@@ -31,34 +31,19 @@ public class OrderController : ApiControllerBase
     /// </summary>
     [HttpGet]
     [OutputCache(PolicyName = "Expire300")]
-    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-    public async Task<ActionResult<dynamic>> GetAllAsync(
+    [ProducesResponseType(typeof(PagedResponse<OrderResponseDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllAsync(
         [FromQuery] string? status,
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
         CancellationToken cancellationToken)
     {
-        var stopwatch = Stopwatch.StartNew();
+        var (items, total) = await _orderService.GetAllOrderDetailsAsync(status, page, pageSize, cancellationToken);
 
-        IEnumerable<OrderResponseDto> orders;
+        if (page.HasValue && pageSize.HasValue)
+            return HandlePagedResult(items, total, page.Value, pageSize.Value);
 
-        if (!string.IsNullOrEmpty(status))
-        {
-            orders = await _orderService.GetOrdersByStatusAsync(status, cancellationToken);
-        }
-        else
-        {
-            orders = await _orderService.GetAllOrderDetailsAsync(cancellationToken);
-        }
-
-        var results = orders.ToList();
-        stopwatch.Stop();
-
-        return Ok(new
-        {
-            executionTime = $"{stopwatch.ElapsedMilliseconds}ms",
-            totalCount = results.Count,
-            totalRevenue = results.Sum(o => o.Total),
-            items = results
-        });
+        return Ok(items);
     }
 
     /// <summary>
@@ -170,16 +155,7 @@ public class OrderController : ApiControllerBase
 
         var stopwatch = Stopwatch.StartNew();
 
-        IEnumerable<OrderResponseDto> orders;
-
-        if (!string.IsNullOrEmpty(status))
-        {
-            orders = await _orderService.GetOrdersByStatusAsync(status, cancellationToken);
-        }
-        else
-        {
-            orders = await _orderService.GetAllOrderDetailsAsync(cancellationToken);
-        }
+        var (orders, _) = await _orderService.GetAllOrderDetailsAsync(status, cancellationToken: cancellationToken);
 
         var results = orders.ToList();
 
@@ -235,7 +211,8 @@ public class OrderController : ApiControllerBase
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetStatisticsAsync(CancellationToken cancellationToken)
     {
-        var orders = (await _orderService.GetAllOrderDetailsAsync(cancellationToken)).ToList();
+        var (orderItems, _) = await _orderService.GetAllOrderDetailsAsync(cancellationToken: cancellationToken);
+        var orders = orderItems.ToList();
 
         var stats = new
         {
