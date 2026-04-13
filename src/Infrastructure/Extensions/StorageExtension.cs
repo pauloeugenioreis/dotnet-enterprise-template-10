@@ -9,6 +9,7 @@ using Google.Cloud.Storage.V1;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using ProjectTemplate.Application.Services;
 using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Interfaces;
 using ProjectTemplate.Infrastructure.Services;
@@ -50,6 +51,8 @@ public static class StorageExtension
                 _ => throw new NotSupportedException($"Storage provider '{storageSettings.Provider}' is not supported.")
             };
         });
+
+        services.AddScoped<IDocumentService, DocumentService>();
 
         return services;
     }
