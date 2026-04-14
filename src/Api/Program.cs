@@ -82,6 +82,9 @@ if (app.Environment.IsDevelopment())
     // Run seeder
     var seeder = new DbSeeder(context);
     await seeder.SeedAsync();
+
+    // Run MongoDB seeder (optional - enabled by scripts when MongoDB is selected)
+    // await MongoDbSeeder.SeedAsync(scope.ServiceProvider);
 }
 
 // Configure HTTP request pipeline

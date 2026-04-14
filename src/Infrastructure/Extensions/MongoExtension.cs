@@ -3,7 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using ProjectTemplate.Data.Repository.Mongo;
 using ProjectTemplate.Domain;
+using ProjectTemplate.Domain.Entities;
+using ProjectTemplate.Domain.Interfaces;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
 
@@ -41,8 +44,25 @@ public static class MongoExtension
             return client.GetDatabase(databaseName);
         });
 
-        // Register your MongoDB-based services here
-        // Example: services.AddScoped<IYourMongoService, YourMongoService>();
+        // Register MongoDB repositories and services via Scrutor
+        // Scans for all IMongoRepository<T> implementations and registers them
+        services.Scan(scan => scan
+            .FromAssembliesOf(typeof(MongoRepository<>))
+            .AddClasses(classes => classes.AssignableTo(typeof(IMongoRepository<>)))
+            .AsMatchingInterface()
+            .WithScopedLifetime()
+        );
+
+        // Register generic fallback for IMongoRepository<T>
+        services.AddScoped(typeof(IMongoRepository<>), typeof(MongoRepository<>));
+
+        // Register MongoDB-backed services (e.g., CustomerReviewService → ICustomerReviewService)
+        services.Scan(scan => scan
+            .FromAssembliesOf(typeof(Application.Services.CustomerReviewService))
+            .AddClasses(classes => classes.AssignableTo<ICustomerReviewService>())
+            .AsImplementedInterfaces()
+            .WithScopedLifetime()
+        );
 
         return services;
     }

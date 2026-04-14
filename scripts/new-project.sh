@@ -377,7 +377,7 @@ if '$CACHE' == 'Redis':
 if '$QUEUE' == 'yes':
     infra['RabbitMQ']['ConnectionString'] = 'amqp://guest:guest@localhost:5672/'
 if '$MONGODB' == 'yes':
-    infra['MongoDB']['ConnectionString'] = 'mongodb://mongo:27017/$PROJECT_NAME'
+  infra['MongoDB']['ConnectionString'] = 'mongodb://admin:admin@localhost:27017/$PROJECT_NAME'
 if '$STORAGE' != 'None':
     infra['Storage']['Provider'] = '$STORAGE'
 if '$TELEMETRY' == 'yes':
@@ -414,7 +414,7 @@ else
 
     # MongoDB
     if [ "$MONGODB" = "yes" ]; then
-        json_set "ConnectionString" "mongodb://mongo:27017/$PROJECT_NAME" "$APPSETTINGS"
+      json_set "ConnectionString" "mongodb://admin:admin@localhost:27017/$PROJECT_NAME" "$APPSETTINGS"
     fi
 
     # Storage
@@ -461,6 +461,9 @@ PROGRAM_CS="$TARGET_DIR/src/Api/Program.cs"
 if [ "$MONGODB" = "yes" ]; then
     write_step "🍃" "Habilitando MongoDB no Program.cs..."
     sed -i 's|^// \(builder\.Services\.AddMongo<Program>();\)|\1|' "$PROGRAM_CS"
+
+  write_step "🌱" "Habilitando seed inicial do MongoDB no Program.cs..."
+  sed -i 's|^\([[:space:]]*\)// \(await MongoDbSeeder\.SeedAsync(scope\.ServiceProvider);\)|\1\2|' "$PROGRAM_CS"
 fi
 
 if [ "$QUEUE" = "yes" ]; then
@@ -629,14 +632,21 @@ COMPOSE_REDIS
   mongo:
     image: mongo:7
     container_name: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=MongoRootPass123
+      - MONGO_INITDB_DATABASE=$PROJECT_NAME
+      - MONGO_APP_USERNAME=appuser
+      - MONGO_APP_PASSWORD=AppPass123
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+      - ./scripts/mongo-init:/docker-entrypoint-initdb.d
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "mongodb://admin:MongoRootPass123@localhost:27017/admin", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -1058,7 +1068,7 @@ fi
 
 if [ "$MONGODB" = "yes" ]; then
     echo -e "    🍃 MongoDB: habilitado"
-    echo -e "       ${GRAY}Connection: mongodb://mongo:27017/$PROJECT_NAME${NC}"
+  echo -e "       ${GRAY}Connection: mongodb://admin:admin@localhost:27017/$PROJECT_NAME${NC}"
 fi
 
 if [ "$QUEUE" = "yes" ]; then

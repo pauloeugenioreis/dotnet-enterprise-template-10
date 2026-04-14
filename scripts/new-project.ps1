@@ -352,7 +352,7 @@ if ($Cache -eq "Redis") {
 
 # -- MongoDB --
 if ($MongoDB -eq "Yes") {
-    $appSettings.AppSettings.Infrastructure.MongoDB.ConnectionString = "mongodb://mongo:27017/$ProjectName"
+  $appSettings.AppSettings.Infrastructure.MongoDB.ConnectionString = "mongodb://admin:admin@localhost:27017/$ProjectName"
 }
 
 # -- RabbitMQ --
@@ -405,6 +405,9 @@ $programContent = Get-Content $programPath -Raw
 if ($MongoDB -eq "Yes") {
     Write-Step "🍃" "Habilitando MongoDB no Program.cs..."
     $programContent = $programContent -replace '// (builder\.Services\.AddMongo<Program>\(\);)', '$1'
+
+  Write-Step "🌱" "Habilitando seed inicial do MongoDB no Program.cs..."
+  $programContent = $programContent -replace '// (await MongoDbSeeder\.SeedAsync\(scope\.ServiceProvider\);)', '$1'
 }
 
 if ($Queue -eq "Yes") {
@@ -562,14 +565,21 @@ if ($needsCompose) {
   mongo:
     image: mongo:7
     container_name: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+      - MONGO_INITDB_DATABASE=$ProjectName
+      - MONGO_APP_USERNAME=admin
+      - MONGO_APP_PASSWORD=admin
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+      - ./scripts/mongo-init:/docker-entrypoint-initdb.d
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "mongodb://admin:admin@localhost:27017/admin", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -997,7 +1007,7 @@ if ($Cache -eq "Redis") {
 
 if ($MongoDB -eq "Yes") {
     Write-Host "    🍃 MongoDB: habilitado" -ForegroundColor White
-    Write-Host "       Connection: mongodb://mongo:27017/$ProjectName" -ForegroundColor DarkGray
+  Write-Host "       Connection: mongodb://admin:admin@localhost:27017/$ProjectName" -ForegroundColor DarkGray
 }
 
 if ($Queue -eq "Yes") {

@@ -40,6 +40,9 @@
 
     <!-- AutoMapper for object mapping -->
     <PackageReference Include="AutoMapper" Version="16.1.1" />
+
+    <!-- MongoDB Driver (used by MongoRepository) -->
+    <PackageReference Include="MongoDB.Driver" Version="3.7.1" />
   </ItemGroup>
 
   <ItemGroup>
