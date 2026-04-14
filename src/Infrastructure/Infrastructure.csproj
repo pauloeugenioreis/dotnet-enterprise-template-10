@@ -44,8 +44,8 @@
     <PackageReference Include="AspNetCoreRateLimit" Version="5.0.0" />
 
     <!-- Job Scheduling (Commented - uncomment to enable) -->
-    <PackageReference Include="Quartz" Version="3.17.1" />
-    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.17.1" />
+    <PackageReference Include="Quartz" Version="3.18.0" />
+    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.18.0" />
 
     <!-- Message Queue (Commented - uncomment to enable) -->
     <PackageReference Include="RabbitMQ.Client" Version="7.2.1" />
@@ -53,16 +53,16 @@
     <!-- Cloud Storage -->
     <PackageReference Include="Google.Cloud.Storage.V1" Version="4.14.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.27.0" />
-    <PackageReference Include="Azure.Identity" Version="1.20.0" />
-    <PackageReference Include="AWSSDK.S3" Version="4.0.21" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.21.1" />
 
     <!-- NoSQL Databases (Commented - uncomment to enable) -->
     <PackageReference Include="MongoDB.Driver" Version="3.7.1" />
 
     <!-- Observability (OpenTelemetry) -->
-    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.15.1" />
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.1" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.1" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.15.2" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.2" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.2" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.1" />
     <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.10" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0" />
@@ -72,14 +72,14 @@
     <!-- Telemetry Exporters -->
     <!-- OpenTelemetry.Exporter.Jaeger REMOVED - Deprecated/Legacy -->
     <!-- Use OpenTelemetry.Exporter.OpenTelemetryProtocol instead (already included above) -->
-    <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.15.1" />
+    <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.15.2" />
     <!-- Using latest available version (1.14.0-beta.1 - no stable version yet) -->
     <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.14.0-beta.1" />
     <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.7.0" />
 
     <!-- Event Sourcing -->
-    <PackageReference Include="Marten" Version="8.29.2" />
-    <PackageReference Include="Marten.AspNetCore" Version="8.29.2" />
+    <PackageReference Include="Marten" Version="8.29.3" />
+    <PackageReference Include="Marten.AspNetCore" Version="8.29.3" />
     <PackageReference Include="Npgsql" Version="10.0.2" />
 
     <!-- Authentication -->
@@ -108,7 +108,7 @@
 
   <ItemGroup>
     <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.201" />
-    <PackageReference Update="SonarAnalyzer.CSharp" Version="10.22.0.136894" />
+    <PackageReference Update="SonarAnalyzer.CSharp" Version="10.23.0.137933" />
   </ItemGroup>
 
 </Project>
