@@ -28,6 +28,7 @@
 - **[🧪 Testando Bancos de Dados](docs/TESTING-DATABASES.md)** - Teste com SQL Server, Oracle, PostgreSQL e MySQL
 - **[📚 Guia Completo](README.md)** - Este documento
 - **[🎛️ Recursos Avançados](docs/FEATURES.md)** - MongoDB, Quartz, RabbitMQ, Storage, etc.
+- **[🗄️ Guia MongoDB](docs/MONGODB-GUIDE.md)** - Configuração, seed automático e troubleshooting
 - **[🔄 Guia de ORMs](docs/ORM-GUIDE.md)** - Como alternar entre ORMs (EF Core, Dapper, ADO.NET)
 - **[📊 Guia de Telemetria](docs/TELEMETRY.md)** - Observabilidade com OpenTelemetry
 - **[🚦 Guia de Rate Limiting](docs/RATE-LIMITING.md)** - Controle de taxa de requisições
@@ -65,7 +66,7 @@ Este template fornece uma estrutura completa e moderna para desenvolvimento de A
 - **Exception notifications** (extensível para email/Slack)
 - **Kubernetes ready** com manifests e scripts de deploy
 - **Docker e Docker Compose** pré-configurados com stack completa de observabilidade
-- **MongoDB support** (NoSQL opcional)
+- **MongoDB support** (NoSQL opcional, com seed automático e script de criação do container)
 - **Background jobs** com Quartz.NET
 - **Message queue** com RabbitMQ
 - **Cloud storage** (Google Cloud, Azure, AWS)

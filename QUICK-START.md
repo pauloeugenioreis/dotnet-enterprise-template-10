@@ -71,6 +71,19 @@ Edite `src/Api/appsettings.json` e ajuste a connection string para seu ambiente:
 
 > Para PostgreSQL, MySQL e Oracle, veja [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md).
 
+### MongoDB (opcional)
+
+Se você escolher MongoDB no script de criação, o template também gera o container, a connection string e o seed inicial.
+
+- **Connection string padrão de desenvolvimento**: `mongodb://admin:admin@localhost:27017/<SeuProjeto>`
+- **Usuário do container**: `admin`
+- **Senha do container**: `admin`
+- **Seed automático**: `MongoDbSeeder` insere exemplos na coleção `customerreviews` quando o Mongo estiver disponível
+
+Se o container ainda estiver subindo, o seed faz retry automático antes de tentar gravar os documentos.
+
+Mais detalhes em [docs/MONGODB-GUIDE.md](docs/MONGODB-GUIDE.md).
+
 ---
 
 ## 🏃 3. Executar a Aplicação

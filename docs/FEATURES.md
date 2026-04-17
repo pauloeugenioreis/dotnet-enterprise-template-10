@@ -38,12 +38,53 @@ MongoDB é um banco de dados NoSQL orientado a documentos, ideal para dados não
 - Catálogos de produtos com atributos variáveis
 - Dados de sessão de usuário
 
+### O que o template entrega
+
+- `MongoDB.Driver` já está referenciado em `Data.csproj` e `Infrastructure.csproj`.
+- `MongoExtension` registra `IMongoClient`, `IMongoDatabase` e os repositórios Mongo automaticamente.
+- `MongoDbSeeder` inicializa a coleção `customerreviews` com dados de exemplo quando o banco estiver disponível.
+- Os scripts `new-project.ps1` e `new-project.sh` criam o container com autenticação e configuram a connection string.
+
+### Credenciais de desenvolvimento
+
+Quando você gera um projeto com MongoDB, o template usa credenciais simples para desenvolvimento:
+
+```text
+Usuário: admin
+Senha:   admin
+```
+
+Connection string gerada:
+
+```text
+mongodb://admin:admin@localhost:27017/<NomeDoProjeto>
+```
+
+### Seed automático
+
+O `MongoDbSeeder` é executado no ambiente de desenvolvimento e:
+
+- faz retry com backoff exponencial antes de acessar o banco;
+- evita quebrar a inicialização da API se o Mongo ainda não estiver pronto;
+- grava documentos de exemplo apenas quando a coleção está vazia.
+
+Exemplo de documento usado pelo template:
+
+```csharp
+public class CustomerReview : MongoEntityBase
+{
+    public string ProductName { get; set; } = string.Empty;
+    public int Rating { get; set; }
+    public string Comment { get; set; } = string.Empty;
+}
+```
+
 ### Como Habilitar
 
 **1. Descomente no Infrastructure.csproj:**
 
 ```xml
-<PackageReference Include="MongoDB.Driver" Version="3.5.2" />
+<PackageReference Include="MongoDB.Driver" Version="3.7.1" />
 ```
 
 **2. Configure no appsettings.json:**
@@ -53,7 +94,7 @@ MongoDB é um banco de dados NoSQL orientado a documentos, ideal para dados não
     "AppSettings": {
         "Infrastructure": {
             "MongoDB": {
-                "ConnectionString": "mongodb://username:password@localhost:27017/projecttemplate"
+                "ConnectionString": "mongodb://admin:admin@localhost:27017/projecttemplate"
             }
         }
     }
@@ -65,6 +106,9 @@ MongoDB é um banco de dados NoSQL orientado a documentos, ideal para dados não
 ```csharp
 // Add MongoDB (OPTIONAL)
 builder.Services.AddMongo<Program>();
+
+// Seed inicial do MongoDB (ativado pelos scripts quando MongoDB é selecionado)
+// await MongoDbSeeder.SeedAsync(scope.ServiceProvider);
 ```
 
 **4. Use no código:**
@@ -86,6 +130,20 @@ public class MyService
     }
 }
 ```
+
+### Estrutura de implementação
+
+- `src/Domain/Entities/MongoEntityBase.cs` define a base para documentos Mongo.
+- `src/Domain/Interfaces/IMongoRepository.cs` define o contrato genérico.
+- `src/Data/Repository/Mongo/MongoRepository.cs` implementa o repositório base.
+- `src/Data/Repository/Mongo/CustomerReviewRepository.cs` mostra um repositório concreto.
+- `src/Data/Seeders/MongoDbSeeder.cs` adiciona o seed de desenvolvimento.
+
+### Troubleshooting
+
+- **Authentication failed**: confirme se o container foi recriado após alterar as credenciais.
+- **Timeout na primeira chamada**: o seed tenta novamente antes de falhar.
+- **Banco vazio após recriação**: pare os containers, remova o volume e suba novamente para executar o init script.
 
 ---
 

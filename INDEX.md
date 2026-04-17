@@ -30,7 +30,12 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
     - Como alternar entre EF Core, Dapper, NHibernate, Linq2Db
     - Comparações e casos de uso
 
-3. **[docs/KUBERNETES.md](docs/KUBERNETES.md)** ☸️
+3. **[docs/MONGODB-GUIDE.md](docs/MONGODB-GUIDE.md)** 🗄️
+    - Guia dedicado para MongoDB no template
+    - Seed automático, autenticação do container e troubleshooting
+    - Exemplos com `CustomerReview` e `MongoDbSeeder`
+
+4. **[docs/KUBERNETES.md](docs/KUBERNETES.md)** ☸️
     - Deploy completo no Kubernetes
     - Minikube (local) e clusters de produção
     - Troubleshooting, monitoramento, segurança
@@ -54,6 +59,7 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 | ------------------------------------------------ | ----------------------------------------------- | --------------------------------------- |
 | **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** | Visão detalhada da arquitetura                  | Entender Clean Architecture e padrões   |
 | **[docs/FEATURES.md](docs/FEATURES.md)**         | Recursos avançados (MongoDB, Queue, Jobs, etc.) | Usar MongoDB, RabbitMQ, Quartz, Storage |
+| **[docs/MONGODB-GUIDE.md](docs/MONGODB-GUIDE.md)** | Guia prático de MongoDB no template         | Configurar seed, auth e troubleshooting  |
 | **[docs/ORM-GUIDE.md](docs/ORM-GUIDE.md)**       | Guia de ORMs (EF Core, Dapper, etc.)            | Escolher ou alternar ORM                |
 | **[docs/CONFIGURATION-GUIDE.md](docs/CONFIGURATION-GUIDE.md)** | Configuração com IOptions\<T\>     | Acessar configurações no código         |
 | **[docs/AUTHENTICATION.md](docs/AUTHENTICATION.md)** | JWT & OAuth2 (Google, Microsoft, GitHub)   | Configurar autenticação                 |
