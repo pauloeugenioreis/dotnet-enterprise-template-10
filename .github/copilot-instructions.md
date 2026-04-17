@@ -8,7 +8,7 @@ Enterprise .NET 10 API template using **Clean Architecture** with multi-database
 
 Five-layer Clean Architecture — dependencies flow inward only:
 
-```
+```text
 Api → Infrastructure → Application → Data → Domain
 ```
 
@@ -65,4 +65,5 @@ docker-compose up -d
 - Database seeders go in `Data/Seeders/` and are called from `Program.cs` in Development
 - All controllers use API versioning via `[ApiVersion]` attribute
 - Configuration is typed via `AppSettings` class tree — never use `IConfiguration` directly in services
+- When creating or updating any markdown documentation, validate the result with the checks defined in `.github/workflows/docs-check.yml` before finishing the task
 - Respond in **Portuguese (Brazil)** when communicating with users
