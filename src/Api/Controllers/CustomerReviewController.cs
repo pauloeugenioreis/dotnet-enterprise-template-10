@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using ProjectTemplate.Domain.Dtos;
@@ -10,6 +11,7 @@ namespace ProjectTemplate.Api.Controllers;
 /// Demonstrates the complete MongoDB integration pattern for this template.
 /// </summary>
 [ApiController]
+[ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
 public class CustomerReviewController(
     ICustomerReviewService reviewService,
@@ -20,6 +22,7 @@ public class CustomerReviewController(
     /// </summary>
     [HttpGet]
     [OutputCache(PolicyName = "Expire300")]
+    [ProducesResponseType(typeof(PagedResponse<CustomerReviewResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(IEnumerable<CustomerReviewResponseDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllAsync(
         [FromQuery] string? productName,
@@ -33,7 +36,9 @@ public class CustomerReviewController(
             productName, minRating, isApproved, page, pageSize, cancellationToken);
 
         if (page.HasValue && pageSize.HasValue)
+        {
             return HandlePagedResult(items, total, page.Value, pageSize.Value);
+        }
 
         return Ok(items);
     }
@@ -70,11 +75,10 @@ public class CustomerReviewController(
     {
         var created = await reviewService.CreateReviewAsync(dto, cancellationToken);
 
-        var location = Url.Action(
+        return CreatedAtAction(
             nameof(GetByIdAsync),
-            values: new { id = created.Id }) ?? $"/api/v1/customerreview/{created.Id}";
-
-        return Created(location, created);
+            new { version = "1.0", id = created.Id },
+            created);
     }
 
     /// <summary>
@@ -117,22 +121,5 @@ public class CustomerReviewController(
     {
         await reviewService.DeleteReviewAsync(id, cancellationToken);
         return NoContent();
-    }
-
-    /// <summary>
-    /// Overload to support long Total from MongoDB (CountDocumentsAsync returns long).
-    /// </summary>
-    protected IActionResult HandlePagedResult<T>(IEnumerable<T> items, long total, int page, int pageSize)
-    {
-        var response = new PagedResponse<T>
-        {
-            Items = items,
-            Total = (int)total,
-            Page = page,
-            PageSize = pageSize,
-            TotalPages = (int)Math.Ceiling(total / (double)pageSize)
-        };
-
-        return Ok(response);
     }
 }

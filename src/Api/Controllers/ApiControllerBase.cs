@@ -20,15 +20,40 @@ public abstract class ApiControllerBase : ControllerBase
         return Ok(result);
     }
 
-    protected IActionResult HandlePagedResult<T>(IEnumerable<T> items, int total, int page, int pageSize)
+    protected IActionResult HandlePagedResult<T>(IEnumerable<T> items, long total, int page, int pageSize)
     {
+        var safeTotal = total;
+
+        if (safeTotal < 0)
+        {
+            safeTotal = 0;
+        }
+
+        long totalPages = 0;
+
+        if (pageSize > 0)
+        {
+            totalPages = (long)Math.Ceiling(safeTotal / (double)pageSize);
+        }
+
+        int safeTotalPages;
+
+        if (totalPages > int.MaxValue)
+        {
+            safeTotalPages = int.MaxValue;
+        }
+        else
+        {
+            safeTotalPages = (int)totalPages;
+        }
+
         var response = new PagedResponse<T>
         {
             Items = items,
-            Total = total,
+            Total = safeTotal,
             Page = page,
             PageSize = pageSize,
-            TotalPages = (int)Math.Ceiling(total / (double)pageSize)
+            TotalPages = safeTotalPages
         };
 
         return Ok(response);
@@ -38,7 +63,7 @@ public abstract class ApiControllerBase : ControllerBase
 public class PagedResponse<T>
 {
     public IEnumerable<T> Items { get; set; } = Enumerable.Empty<T>();
-    public int Total { get; set; }
+    public long Total { get; set; }
     public int Page { get; set; }
     public int PageSize { get; set; }
     public int TotalPages { get; set; }
