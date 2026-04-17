@@ -80,115 +80,139 @@ Este template fornece uma estrutura completa e moderna para desenvolvimento de A
 
 ```text
 ProjectTemplate/
+├── .devcontainer/                                # Ambiente Dev Container e Codespaces
+│   ├── devcontainer.json
+│   ├── docker-compose.devcontainer.yml
+│   └── Dockerfile
+├── .github/                                      # Automações, instruções e skills do projeto
+│   ├── workflows/
+│   │   ├── ci.yml
+│   │   └── docs-check.yml
+│   ├── instructions/
+│   ├── skills/
+│   └── prompts/
+├── .k8s/                                         # Kubernetes manifests
+│   ├── namespace.yaml
+│   ├── configmap.yaml
+│   ├── deployment.yaml
+│   ├── service.yaml
+│   ├── ingress.yaml
+│   └── kustomization.yaml
 ├── src/
-│   ├── Api/                          # Camada de apresentação (Controllers, Program.cs)
-│   │   ├── Controllers/              # Controllers da API
-│   │   │   └── ApiControllerBase.cs # Base controller com métodos helper
-│   │   ├── appsettings.json          # Configurações base
-│   │   └── Program.cs                # Entry point da aplicação (com seeding automático)
+│   ├── Api/                                      # Camada de apresentação (Controllers, Program.cs)
+│   │   ├── Controllers/                          # Controllers da API
+│   │   │   └── ApiControllerBase.cs              # Base controller com métodos helper
+│   │   ├── appsettings.json                      # Configurações base
+│   │   ├── appsettings.*.json                    # Configurações por ambiente/provider
+│   │   └── Program.cs                            # Entry point da aplicação (com seeding automático)
 │   │
-│   ├── Application/                  # Camada de aplicação (Services, Business Logic)
-│   │   └── Services/                 # Application services
+│   ├── Application/                              # Camada de aplicação (Services, Business Logic)
+│   │   └── Services/                             # Application services
 │   │
-│   ├── Domain/                       # Camada de domínio (Entities, Interfaces)
-│   │   ├── Entities/                 # Entidades de negócio
-│   │   ├── Interfaces/               # Contratos e interfaces
-│   │   │   ├── IRepository.cs        # Interface genérica de repositório
-│   │   │   ├── IService.cs           # Interface genérica de serviço
-│   │   │   ├── IQueueService.cs      # Interface para message queue
-│   │   │   ├── IStorageService.cs    # Interface para cloud storage
+│   ├── Domain/                                   # Camada de domínio (Entities, Interfaces)
+│   │   ├── Entities/                             # Entidades de negócio
+│   │   ├── Interfaces/                           # Contratos e interfaces
+│   │   │   ├── IRepository.cs                    # Interface genérica de repositório
+│   │   │   ├── IService.cs                       # Interface genérica de serviço
+│   │   │   ├── IQueueService.cs                  # Interface para message queue
+│   │   │   ├── IStorageService.cs                # Interface para cloud storage
 │   │   │   └── IExceptionNotificationService.cs  # Interface para notificações
-│   │   ├── Exceptions/               # Exceções customizadas
-│   │   │   └── DomainExceptions.cs   # BusinessException, NotFoundException, ValidationException
-│   │   └── AppSettings.cs            # Configurações fortemente tipadas
+│   │   ├── Exceptions/                           # Exceções customizadas
+│   │   │   └── DomainExceptions.cs               # BusinessException, NotFoundException, ValidationException
+│   │   └── AppSettings.cs                        # Configurações fortemente tipadas
 │   │
-│   ├── Data/                         # Camada de dados (Repositories, Context, Seeders)
-│   │   ├── Context/                  # DbContext do EF Core
+│   ├── Data/                                     # Camada de dados (Repositories, Context, Seeders)
+│   │   ├── Context/                              # DbContext do EF Core
 │   │   │   └── ApplicationDbContext.cs
-│   │   ├── Repository/               # Implementação dos repositórios
-│   │   │   └── Repository.cs         # Repositório genérico base
-│   │   └── Seeders/                  # Database seeders
-│   │       └── DbSeeder.cs           # Seed de dados iniciais (150 produtos, 120 pedidos)
+│   │   ├── Repository/                           # Implementação dos repositórios
+│   │   │   └── Repository.cs                     # Repositório genérico base
+│   │   └── Seeders/                              # Database seeders
+│   │       └── DbSeeder.cs                       # Seed de dados iniciais (150 produtos, 120 pedidos)
 │   │
-│   └── Infrastructure/               # Camada de infraestrutura (Extensions, Middleware, Services)
-│       ├── Extensions/               # Extension methods modulares
-│       │   ├── InfrastructureExtensions.cs      # Orquestrador principal
-│       │   ├── AppSettingsExtension.cs          # Validação de configurações
-│       │   ├── DatabaseExtension.cs             # Configuração de banco de dados
-│       │   ├── CacheExtension.cs                # Memory/Redis/SQL Server cache
-│       │   ├── HealthChecksExtension.cs         # Health checks
-│       │   ├── DependencyInjectionExtension.cs  # Scrutor auto-registration
-│       │   ├── MongoExtension.cs                # MongoDB support
-│       │   ├── QuartzExtension.cs               # Background jobs (Quartz.NET)
-│       │   ├── RabbitMqExtension.cs             # Message queue (RabbitMQ)
-│       │   ├── StorageExtension.cs              # Cloud storage (Google/Azure/AWS)
-│       │   ├── AuthenticationExtension.cs       # JWT Authentication
-│       │   ├── ApiVersioningExtension.cs        # API Versioning
-│       │   ├── LoggingExtensions.cs             # Google Cloud Logging
-│       │   ├── SwaggerExtension.cs              # Swagger customizado
-│       │   └── ExceptionHandlerExtension.cs     # Exception handler registration
+│   └── Infrastructure/                           # Camada de infraestrutura (Extensions, Middleware, Services)
+│       ├── Extensions/                           # Extension methods modulares
+│       │   ├── InfrastructureExtensions.cs       # Orquestrador principal
+│       │   ├── AppSettingsExtension.cs           # Validação de configurações
+│       │   ├── DatabaseExtension.cs              # Configuração de banco de dados
+│       │   ├── CacheExtension.cs                 # Memory/Redis/SQL Server cache
+│       │   ├── HealthChecksExtension.cs          # Health checks
+│       │   ├── DependencyInjectionExtension.cs   # Scrutor auto-registration
+│       │   ├── MongoExtension.cs                 # MongoDB support
+│       │   ├── QuartzExtension.cs                # Background jobs (Quartz.NET)
+│       │   ├── RabbitMqExtension.cs              # Message queue (RabbitMQ)
+│       │   ├── StorageExtension.cs               # Cloud storage (Google/Azure/AWS)
+│       │   ├── AuthenticationExtension.cs        # JWT Authentication
+│       │   ├── ApiVersioningExtension.cs         # API Versioning
+│       │   ├── LoggingExtensions.cs              # Google Cloud Logging
+│       │   ├── SwaggerExtension.cs               # Swagger customizado
+│       │   └── ExceptionHandlerExtension.cs      # Exception handler registration
 │       │
-│       ├── Middleware/               # Middleware customizado
-│       │   └── GlobalExceptionHandler.cs        # Tratamento global de exceções
+│       ├── Middleware/                           # Middleware customizado
+│       │   └── GlobalExceptionHandler.cs         # Tratamento global de exceções
 │       │
-│       ├── Filters/                  # Action filters
-│       │   └── ValidationFilter.cs   # Validação automática com FluentValidation
+│       ├── Filters/                              # Action filters
+│       │   └── ValidationFilter.cs               # Validação automática com FluentValidation
 │       │
-│       ├── Services/                 # Serviços de infraestrutura
-│       │   ├── QueueService.cs                 # Implementação RabbitMQ
-│       │   ├── GoogleCloudStorageService.cs    # Implementação Google Cloud Storage
-│       │   ├── AzureBlobStorageService.cs      # Implementação Azure Blob Storage
-│       │   ├── AwsS3StorageService.cs          # Implementação AWS S3
-│       │   └── ExceptionNotificationService.cs # Notificações de exceção
-│       │
-│       └── Swagger/                  # Configurações Swagger/OpenAPI
-│           └── SwaggerGroupByController.cs      # Agrupamento por controller
+│       ├── Services/                             # Serviços de infraestrutura
+│       │   ├── QueueService.cs                   # Implementação RabbitMQ
+│       │   ├── GoogleCloudStorageService.cs      # Implementação Google Cloud Storage
+│       │   ├── AzureBlobStorageService.cs        # Implementação Azure Blob Storage
+│       │   ├── AwsS3StorageService.cs            # Implementação AWS S3
+│       │   └── ExceptionNotificationService.cs   # Notificações de exceção
 │
 ├── tests/
 │   ├── UnitTests/                    # Testes unitários (xUnit + Moq + FluentAssertions)
 │   │   ├── Controllers/              # Testes de controllers
+│   │   ├── Services/                 # Testes de serviços
+│   │   ├── EventSourcing/            # Testes de event sourcing
 │   │   ├── UnitTests.csproj          # Projeto de testes unitários
 │   │   └── README.md                 # Documentação dos testes
 │   │
 │   └── Integration/                  # Testes de integração
 │       ├── Controllers/              # Testes de integração dos controllers
-│       ├── Infrastructure/           # Configuração de testes
-│       ├── Examples/                 # Exemplos de payloads
+│       ├── Support/                  # Configuração e utilitários de testes
+│       ├── Properties/
 │       ├── Integration.csproj        # Projeto de testes de integração
 │       └── README.md                 # Documentação de testes de integração
 │
-├── scripts/                          # Scripts de automação
-│   ├── linux/                        # Scripts bash (Minikube deploy/destroy/tests)
-│   ├── windows/                      # Scripts PowerShell e Batch
-│   ├── new-project.sh               # Script Linux/Mac de inicialização
-│   ├── new-project.ps1              # Script PowerShell de inicialização
-│   └── new-project.bat              # Script Windows CMD de inicialização
-│
-├── .k8s/                             # Kubernetes manifests
-│   ├── namespace.yaml               # Namespace definition
-│   ├── configmap.yaml               # Environment configuration
-│   ├── deployment.yaml              # Deployment specification
-│   ├── service.yaml                 # Service definition
-│   ├── ingress.yaml                 # Ingress rules
-│   └── kustomization.yaml           # Kustomize configuration
-│
 ├── docs/                             # Documentação adicional
-│   ├── ARCHITECTURE.md              # Arquitetura Clean Architecture
-│   ├── FEATURES.md                  # Recursos avançados (MongoDB, Queue, Jobs, etc.)
-│   ├── ORM-GUIDE.md                 # Guia de ORMs
-│   ├── CONFIGURATION-GUIDE.md       # Guia de Configuração (IOptions<T>)
-│   ├── AUTHENTICATION.md            # Autenticação JWT & OAuth2
-│   ├── SECURITY.md                  # Segurança da API
-│   ├── RATE-LIMITING.md             # Rate Limiting
-│   ├── EVENT-SOURCING.md            # Event Sourcing
-│   ├── TELEMETRY.md                 # Observabilidade
-│   ├── TESTING-DATABASES.md         # Testes multi-banco
-│   ├── KUBERNETES.md                # Guia de deploy Kubernetes
-│   ├── CICD.md                      # CI/CD
-│   └── SONARCLOUD.md               # SonarCloud
+│   ├── examples/                     # Arquivos de exemplo (.http e cenários)
+│   ├── ARCHITECTURE.md               # Arquitetura Clean Architecture
+│   ├── README.md                     # Índice da documentação
+│   ├── FEATURES.md                   # Recursos avançados (MongoDB, Queue, Jobs, etc.)
+│   ├── ORM-GUIDE.md                  # Guia de ORMs
+│   ├── MONGODB-GUIDE.md              # Guia de uso do MongoDB
+│   ├── DATA-ANNOTATIONS-GUIDE.md     # Guia de Data Annotations e Swagger
+│   ├── PRODUCT-EXAMPLE.md            # Exemplo completo de produto
+│   ├── CONFIGURATION-GUIDE.md        # Guia de Configuração (IOptions<T>)
+│   ├── AUTHENTICATION.md             # Autenticação JWT & OAuth2
+│   ├── SECURITY.md                   # Segurança da API
+│   ├── RATE-LIMITING.md              # Rate Limiting
+│   ├── EVENT-SOURCING.md             # Event Sourcing
+│   ├── TELEMETRY.md                  # Observabilidade
+│   ├── TESTING-DATABASES.md          # Testes multi-banco
+│   ├── KUBERNETES.md                 # Guia de deploy Kubernetes
+│   ├── CICD.md                       # CI/CD
+│   └── SONARCLOUD.md                 # SonarCloud
 │
+├── monitoring/                       # Stack de observabilidade local
+│   ├── grafana/
+│   └── prometheus/
+├── scripts/                          # Scripts de automação
+│   ├── event-sourcing/
+│   ├── linux/                        # Scripts bash (Minikube deploy/destroy/tests)
+│   ├── mongo-init/
+│   ├── windows/                      # Scripts PowerShell e Batch
+│   ├── new-project.sh                # Script Linux/Mac de inicialização
+│   ├── new-project.ps1               # Script PowerShell de inicialização
+│   ├── new-project.bat               # Script Windows CMD de inicialização
+│   └── README.md
+│
+├── compose-observability.yml         # Compose da stack de observabilidade
 ├── Dockerfile                        # Multi-stage build
 ├── docker-compose.yml                # Compose para desenvolvimento
+├── cspell.config.yaml                # Configuração do cspell
+├── package.json                      # Dependências de tooling de documentação
 ├── global.json                       # Versão do .NET SDK
 ├── ProjectTemplate.sln               # Solution file
 └── .gitignore                        # Git ignore configurado
