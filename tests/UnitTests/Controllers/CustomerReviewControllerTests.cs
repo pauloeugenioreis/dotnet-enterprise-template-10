@@ -148,7 +148,10 @@ public class CustomerReviewControllerTests
         var result = await _controller.CreateAsync(request, CancellationToken.None);
 
         // Assert
-        result.Should().BeOfType<CreatedResult>();
+        var createdResult = result.Should().BeOfType<CreatedAtActionResult>().Subject;
+        createdResult.ActionName.Should().Be(nameof(CustomerReviewController.GetByIdAsync));
+        createdResult.RouteValues.Should().ContainKey("version").WhoseValue.Should().Be("1.0");
+        createdResult.RouteValues.Should().ContainKey("id").WhoseValue.Should().Be(created.Id);
     }
 
     [Fact]
