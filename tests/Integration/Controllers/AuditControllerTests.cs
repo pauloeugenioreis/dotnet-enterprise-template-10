@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Threading.Tasks;
 using FluentAssertions;
 using ProjectTemplate.Domain.Dtos;
 using ProjectTemplate.Domain.Entities;
+using ProjectTemplate.Domain.Interfaces;
 using Xunit;
 
 namespace ProjectTemplate.Integration.Tests.Controllers;
@@ -82,6 +84,75 @@ public class AuditControllerTests : IClassFixture<WebApplicationFactoryFixture>
         payload!.EventCount.Should().Be(payload.Events.Count);
         payload.Events.Should().BeInAscendingOrder(e => e.Version);
         payload.Events.Select(e => e.EventType).Should().Contain(new[] { "OrderCreatedEvent", "OrderUpdatedEvent" });
+    }
+
+    [Fact]
+    public async Task GetEventsByVersion_ReturnsFilteredRange()
+    {
+        // Arrange
+        var orderId = await SeedOrderLifecycleAsync(additionalUpdates: 2);
+
+        // Act
+        var response = await _client.GetAsync($"/api/v1/Audit/Order/{orderId}/versions/1/1");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var events = await response.Content.ReadFromJsonAsync<List<DomainEvent>>();
+        events.Should().NotBeNull();
+        events!.Should().ContainSingle();
+        events[0].Version.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetEventsByType_ReturnsOrderEvents()
+    {
+        // Arrange
+        await SeedOrderLifecycleAsync(additionalUpdates: 1);
+
+        // Act
+        var response = await _client.GetAsync("/api/v1/Audit/type/Order?limit=50");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var events = await response.Content.ReadFromJsonAsync<List<DomainEvent>>();
+        events.Should().NotBeNull();
+        events!.Should().NotBeEmpty();
+        events.Should().OnlyContain(e => e.AggregateType == "Order");
+    }
+
+    [Fact]
+    public async Task GetEventsByUser_ReturnsOkPayload()
+    {
+        // Arrange
+        await SeedOrderLifecycleAsync(additionalUpdates: 1);
+
+        // Act
+        var response = await _client.GetAsync("/api/v1/Audit/user/integration-user?limit=10");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<AuditUserResponse>();
+        payload.Should().NotBeNull();
+        payload!.UserId.Should().Be("integration-user");
+        payload.EventCount.Should().BeGreaterThanOrEqualTo(0);
+        payload.Events.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetStatistics_ReturnsAggregatedMetrics()
+    {
+        // Arrange
+        await SeedOrderLifecycleAsync(additionalUpdates: 1);
+
+        // Act
+        var response = await _client.GetAsync("/api/v1/Audit/statistics");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<EventStatistics>();
+        payload.Should().NotBeNull();
+        payload!.TotalEvents.Should().BeGreaterThan(0);
+        payload.EventsByAggregateType.Should().ContainKey("Order");
     }
 
     private async Task<long> SeedOrderLifecycleAsync(int additionalUpdates)
@@ -167,4 +238,9 @@ public class AuditControllerTests : IClassFixture<WebApplicationFactoryFixture>
         string EventType,
         int Version,
         DateTime OccurredOn);
+
+    private sealed record AuditUserResponse(
+        string UserId,
+        int EventCount,
+        List<JsonElement> Events);
 }

@@ -74,11 +74,7 @@ public class CustomerReviewController(
         CancellationToken cancellationToken)
     {
         var created = await reviewService.CreateReviewAsync(dto, cancellationToken);
-
-        return CreatedAtAction(
-            nameof(GetByIdAsync),
-            new { version = "1.0", id = created.Id },
-            created);
+        return Created($"/api/v1/CustomerReview/{created.Id}", created);
     }
 
     /// <summary>

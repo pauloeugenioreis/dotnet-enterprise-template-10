@@ -190,4 +190,78 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
         var content = await response.Content.ReadAsByteArrayAsync();
         content.Should().NotBeEmpty();
     }
+
+    [Fact]
+    public async Task GetById_ExistingOrder_ReturnsOrder()
+    {
+        // Arrange
+        var product = new Product
+        {
+            Name = "Product for GetById order",
+            Price = 33.00m,
+            Stock = 15,
+            IsActive = true
+        };
+
+        var productResponse = await _client.PostAsJsonAsync("/api/v1/Product", product);
+        var createdProduct = await productResponse.Content.ReadFromJsonAsync<Product>();
+
+        var createOrder = new CreateOrderRequest
+        {
+            CustomerName = "Order By Id",
+            CustomerEmail = "orderbyid@example.com",
+            ShippingAddress = "Street 1",
+            Items = new List<OrderItemDto> { new(createdProduct!.Id, 1, 33.00m) }
+        };
+
+        var createOrderResponse = await _client.PostAsJsonAsync("/api/v1/Order", createOrder);
+        var createdOrder = await createOrderResponse.Content.ReadFromJsonAsync<OrderResponseDto>();
+
+        // Act
+        var response = await _client.GetAsync($"/api/v1/Order/{createdOrder!.Id}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<OrderResponseDto>();
+        payload.Should().NotBeNull();
+        payload!.Id.Should().Be(createdOrder.Id);
+    }
+
+    [Fact]
+    public async Task CancelOrder_ExistingOrder_ReturnsCancelledOrder()
+    {
+        // Arrange
+        var product = new Product
+        {
+            Name = "Product for cancel",
+            Price = 60.00m,
+            Stock = 20,
+            IsActive = true
+        };
+
+        var productResponse = await _client.PostAsJsonAsync("/api/v1/Product", product);
+        var createdProduct = await productResponse.Content.ReadFromJsonAsync<Product>();
+
+        var createOrder = new CreateOrderRequest
+        {
+            CustomerName = "Cancel Customer",
+            CustomerEmail = "cancel@example.com",
+            ShippingAddress = "Street 2",
+            Items = new List<OrderItemDto> { new(createdProduct!.Id, 1, 60.00m) }
+        };
+
+        var createOrderResponse = await _client.PostAsJsonAsync("/api/v1/Order", createOrder);
+        var createdOrder = await createOrderResponse.Content.ReadFromJsonAsync<OrderResponseDto>();
+
+        // Act
+        var response = await _client.PostAsJsonAsync(
+            $"/api/v1/Order/{createdOrder!.Id}/cancel",
+            "Cancelled by integration test");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<OrderResponseDto>();
+        payload.Should().NotBeNull();
+        payload!.Status.Should().Be("Cancelled");
+    }
 }

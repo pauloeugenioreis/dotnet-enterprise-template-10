@@ -148,10 +148,8 @@ public class CustomerReviewControllerTests
         var result = await _controller.CreateAsync(request, CancellationToken.None);
 
         // Assert
-        var createdResult = result.Should().BeOfType<CreatedAtActionResult>().Subject;
-        createdResult.ActionName.Should().Be(nameof(CustomerReviewController.GetByIdAsync));
-        createdResult.RouteValues.Should().ContainKey("version").WhoseValue.Should().Be("1.0");
-        createdResult.RouteValues.Should().ContainKey("id").WhoseValue.Should().Be(created.Id);
+        var createdResult = result.Should().BeOfType<CreatedResult>().Subject;
+        createdResult.Location.Should().Be($"/api/v1/CustomerReview/{created.Id}");
     }
 
     [Fact]

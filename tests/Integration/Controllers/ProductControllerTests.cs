@@ -186,4 +186,69 @@ public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture
         var content = await response.Content.ReadAsByteArrayAsync();
         content.Should().NotBeEmpty();
     }
+
+    [Fact]
+    public async Task UpdateStatus_ExistingProduct_ReturnsNoContent()
+    {
+        // Arrange
+        var createRequest = new CreateProductRequest
+        {
+            Name = "Status Product",
+            Description = "Status test",
+            Price = 17.50m,
+            Stock = 25,
+            Category = "Status",
+            IsActive = true
+        };
+
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/Product", createRequest);
+        var created = await createResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
+
+        var statusRequest = new UpdateProductStatusRequest
+        {
+            IsActive = false
+        };
+
+        // Act
+        var response = await _client.PatchAsJsonAsync($"/api/v1/Product/{created!.Id}/status", statusRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var getResponse = await _client.GetAsync($"/api/v1/Product/{created.Id}");
+        var updated = await getResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
+        updated!.IsActive.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task UpdateStock_ExistingProduct_ReturnsUpdatedProduct()
+    {
+        // Arrange
+        var createRequest = new CreateProductRequest
+        {
+            Name = "Stock Product",
+            Description = "Stock test",
+            Price = 42.00m,
+            Stock = 10,
+            Category = "Stock",
+            IsActive = true
+        };
+
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/Product", createRequest);
+        var created = await createResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
+
+        var stockRequest = new UpdateProductStockRequest
+        {
+            Quantity = 5
+        };
+
+        // Act
+        var response = await _client.PatchAsJsonAsync($"/api/v1/Product/{created!.Id}/stock", stockRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<ProductResponseDto>();
+        payload.Should().NotBeNull();
+        payload!.Stock.Should().Be(15);
+    }
 }
