@@ -16,6 +16,7 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
 
     public OrderControllerTests(WebApplicationFactoryFixture factory)
     {
+        factory.ClearEventStore();
         _factory = factory;
         _client = factory.CreateClient();
     }
@@ -70,6 +71,30 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
         createdOrder!.CustomerName.Should().Be("John Doe");
         createdOrder.Items.Should().HaveCount(1);
         createdOrder.Total.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
+    public async Task Create_InvalidOrder_ReturnsBadRequest()
+    {
+        // Arrange - empty email and empty items list
+        var orderDto = new CreateOrderRequest
+        {
+            CustomerName = "John Doe",
+            CustomerEmail = "", // Invalid
+            Phone = "+1234567890",
+            ShippingAddress = "123 Main St, City, State 12345",
+            Items = new List<OrderItemDto>(), // Invalid - requires at least 1
+            Notes = "Test order"
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/Order", orderDto);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response.Content.ReadAsStringAsync();
+        content.Should().Contain("CustomerEmail");
+        content.Should().Contain("Items");
     }
 
     [Fact]

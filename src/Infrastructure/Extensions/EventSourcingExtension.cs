@@ -24,6 +24,10 @@ public static class EventSourcingExtension
         // Register settings so repositories/controllers can resolve even when disabled
         services.AddSingleton(settings);
 
+        // Register payload factories
+        services.AddTransient<IEventPayloadFactory<Order>, OrderEventPayloadFactory>();
+        services.AddTransient<IEventPayloadFactory<Product>, ProductEventPayloadFactory>();
+
         if (!settings.Enabled)
         {
             // Event Sourcing disabled - register empty implementation

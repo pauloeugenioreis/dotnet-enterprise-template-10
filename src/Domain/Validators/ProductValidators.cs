@@ -4,11 +4,11 @@ using ProjectTemplate.Domain.Dtos;
 namespace ProjectTemplate.Domain.Validators;
 
 /// <summary>
-/// Validation rules for creating products.
+/// Validation rules for saving products (create or update).
 /// </summary>
-public class CreateProductValidator : AbstractValidator<CreateProductRequest>
+public class SaveProductValidator : AbstractValidator<SaveProductRequest>
 {
-    public CreateProductValidator()
+    public SaveProductValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Product name is required")
@@ -31,29 +31,24 @@ public class CreateProductValidator : AbstractValidator<CreateProductRequest>
 }
 
 /// <summary>
-/// Validation rules for updating products.
+/// Validator alias for CreateProductRequest (inherits all rules from SaveProductValidator).
+/// </summary>
+public class CreateProductValidator : AbstractValidator<CreateProductRequest>
+{
+    public CreateProductValidator()
+    {
+        Include(new SaveProductValidator());
+    }
+}
+
+/// <summary>
+/// Validator alias for UpdateProductRequest (inherits all rules from SaveProductValidator).
 /// </summary>
 public class UpdateProductValidator : AbstractValidator<UpdateProductRequest>
 {
     public UpdateProductValidator()
     {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("Product name is required")
-            .MaximumLength(200).WithMessage("Product name must not exceed 200 characters");
-
-        RuleFor(x => x.Description)
-            .MaximumLength(2000).WithMessage("Description must not exceed 2000 characters")
-            .When(x => x.Description != null);
-
-        RuleFor(x => x.Price)
-            .GreaterThan(0).WithMessage("Price must be greater than zero");
-
-        RuleFor(x => x.Stock)
-            .GreaterThanOrEqualTo(0).WithMessage("Stock cannot be negative");
-
-        RuleFor(x => x.Category)
-            .NotEmpty().WithMessage("Category is required")
-            .MaximumLength(120).WithMessage("Category must not exceed 120 characters");
+        Include(new SaveProductValidator());
     }
 }
 

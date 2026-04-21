@@ -16,6 +16,7 @@ public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture
 
     public ProductControllerTests(WebApplicationFactoryFixture factory)
     {
+        factory.ClearEventStore();
         _factory = factory;
         _client = factory.CreateClient();
     }
@@ -54,6 +55,30 @@ public class ProductControllerTests : IClassFixture<WebApplicationFactoryFixture
         createdProduct.Should().NotBeNull();
         createdProduct!.Name.Should().Be("Test Product");
         createdProduct.Price.Should().Be(29.99m);
+    }
+
+    [Fact]
+    public async Task Create_InvalidProduct_ReturnsBadRequest()
+    {
+        // Arrange - empty name should trigger ValidationFilter
+        var product = new CreateProductRequest
+        {
+            Name = "",
+            Description = "Test Description",
+            Price = -10m, // Invalid price
+            Stock = 100,
+            Category = "Electronics",
+            IsActive = true
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/Product", product);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response.Content.ReadAsStringAsync();
+        content.Should().Contain("Name");
+        content.Should().Contain("Price");
     }
 
     [Fact]

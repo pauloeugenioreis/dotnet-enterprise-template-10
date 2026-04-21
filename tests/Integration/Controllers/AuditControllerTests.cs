@@ -23,6 +23,7 @@ public class AuditControllerTests : IClassFixture<WebApplicationFactoryFixture>
 
     public AuditControllerTests(WebApplicationFactoryFixture factory)
     {
+        factory.ClearEventStore();
         _client = factory.CreateClient();
     }
 

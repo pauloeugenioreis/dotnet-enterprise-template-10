@@ -17,8 +17,9 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
         ApplicationDbContext context,
         IEventStore eventStore,
         EventSourcingSettings settings,
-        IExecutionContextService? executionContextService = null)
-        : base(context, eventStore, settings, executionContextService)
+        IExecutionContextService? executionContextService = null,
+        IEventPayloadFactory<Order>? payloadFactory = null)
+        : base(context, eventStore, settings, executionContextService, payloadFactory)
     {
         _dbContext = context;
     }

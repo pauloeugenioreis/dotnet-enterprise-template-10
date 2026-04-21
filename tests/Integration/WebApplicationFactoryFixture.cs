@@ -142,6 +142,12 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
         });
     }
 
+    public void ClearEventStore()
+    {
+        var eventStore = Services.GetService<IEventStore>() as InMemoryEventStore;
+        eventStore?.Clear();
+    }
+
     private static void SeedTestData(ApplicationDbContext context)
     {
         // Add seed data for tests

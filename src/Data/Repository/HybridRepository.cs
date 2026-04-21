@@ -16,6 +16,7 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
 {
     private readonly IEventStore _eventStore;
     private readonly EventSourcingSettings _settings;
+    private readonly IEventPayloadFactory<TEntity>? _payloadFactory;
     private readonly IExecutionContextService? _executionContextService;
     private readonly List<Func<CancellationToken, Task>> _pendingEventDispatchers = new();
 
@@ -23,12 +24,14 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         DbContext context,
         IEventStore eventStore,
         EventSourcingSettings settings,
-        IExecutionContextService? executionContextService = null)
+        IExecutionContextService? executionContextService = null,
+        IEventPayloadFactory<TEntity>? payloadFactory = null)
         : base(context)
     {
         _eventStore = eventStore;
         _settings = settings;
         _executionContextService = executionContextService;
+        _payloadFactory = payloadFactory;
     }
 
     public override async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
@@ -66,17 +69,17 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
 
     public override async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        // Detect changes before update
+        // 1. Update in EF Core (this will attach and track changes)
+        await base.UpdateAsync(entity, cancellationToken);
+
+        // 2. Detect changes from ChangeTracker
         Dictionary<string, object>? changes = null;
         if (ShouldAuditEntity(typeof(TEntity).Name))
         {
-            changes = await DetectChangesAsync(entity, cancellationToken);
+            changes = DetectChanges(entity);
         }
 
-        // 1. Update in EF Core
-        await base.UpdateAsync(entity, cancellationToken);
-
-        // 2. Record event
+        // 3. Record event
         if (changes != null && changes.Count > 0)
         {
             var changesSnapshot = new Dictionary<string, object>(changes);
@@ -151,12 +154,11 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         var entityType = typeof(TEntity).Name;
         var entityId = entity.Id.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-        return entity switch
-        {
-            Order order => AppendDomainEventAsync(entityType, entityId, CreateOrderCreatedEvent(order), cancellationToken),
-            Product product => AppendDomainEventAsync(entityType, entityId, CreateProductCreatedEvent(product), cancellationToken),
-            _ => AppendDomainEventAsync(entityType, entityId, entity, cancellationToken)
-        };
+        object payload = _payloadFactory != null 
+            ? _payloadFactory.CreateCreatedEvent(entity) 
+            : entity;
+
+        return AppendDomainEventAsync(entityType, entityId, payload, cancellationToken);
     }
 
     private Task RecordUpdatedEvent(
@@ -167,20 +169,11 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         var entityType = typeof(TEntity).Name;
         var entityId = entity.Id.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-        return entity switch
-        {
-            Order => AppendDomainEventAsync(entityType, entityId, new OrderUpdatedEvent
-            {
-                OrderId = entity.Id,
-                Changes = changes
-            }, cancellationToken),
-            Product => AppendDomainEventAsync(entityType, entityId, new ProductUpdatedEvent
-            {
-                ProductId = entity.Id,
-                Changes = changes
-            }, cancellationToken),
-            _ => AppendDomainEventAsync(entityType, entityId, new { EntityId = entity.Id, Changes = changes }, cancellationToken)
-        };
+        object payload = _payloadFactory != null
+            ? _payloadFactory.CreateUpdatedEvent(entity, changes)
+            : new { EntityId = entity.Id, Changes = changes };
+
+        return AppendDomainEventAsync(entityType, entityId, payload, cancellationToken);
     }
 
     private Task RecordDeletedEvent(TEntity entity, CancellationToken cancellationToken)
@@ -188,12 +181,11 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
         var entityType = typeof(TEntity).Name;
         var entityId = entity.Id.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-        return entity switch
-        {
-            Order => AppendDomainEventAsync(entityType, entityId, new OrderDeletedEvent { OrderId = entity.Id }, cancellationToken),
-            Product => AppendDomainEventAsync(entityType, entityId, new ProductDeletedEvent { ProductId = entity.Id }, cancellationToken),
-            _ => AppendDomainEventAsync(entityType, entityId, new { EntityId = entity.Id }, cancellationToken)
-        };
+        object payload = _payloadFactory != null
+            ? _payloadFactory.CreateDeletedEvent(entity)
+            : new { EntityId = entity.Id };
+
+        return AppendDomainEventAsync(entityType, entityId, payload, cancellationToken);
     }
 
     private Task AppendDomainEventAsync<TEvent>(
@@ -213,36 +205,23 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
             cancellationToken: cancellationToken);
     }
 
-    private async Task<Dictionary<string, object>> DetectChangesAsync(
-        TEntity entity,
-        CancellationToken cancellationToken)
+    private Dictionary<string, object> DetectChanges(TEntity entity)
     {
         var changes = new Dictionary<string, object>();
-        var entry = Context.Entry(entity);
+        var idValue = Context.Entry(entity).Property(nameof(EntityBase.Id)).CurrentValue;
 
-        // Detached entities don't have original values tracked, so fall back to the database snapshot
-        Microsoft.EntityFrameworkCore.ChangeTracking.PropertyValues? databaseValues = null;
+        var trackedEntry = Context.ChangeTracker.Entries<TEntity>()
+            .FirstOrDefault(e => Equals(e.Property(nameof(EntityBase.Id)).CurrentValue, idValue));
 
-        foreach (var property in entry.Properties)
+        if (trackedEntry == null)
+        {
+            return changes;
+        }
+
+        foreach (var property in trackedEntry.Properties.Where(p => p.IsModified))
         {
             var currentValue = property.CurrentValue;
-            object? originalValue;
-
-            if (entry.State == EntityState.Detached)
-            {
-                databaseValues ??= await entry.GetDatabaseValuesAsync(cancellationToken);
-
-                if (databaseValues == null)
-                {
-                    return changes;
-                }
-
-                originalValue = databaseValues[property.Metadata.Name];
-            }
-            else
-            {
-                originalValue = property.OriginalValue;
-            }
+            var originalValue = property.OriginalValue;
 
             if (!Equals(currentValue, originalValue))
             {
@@ -254,47 +233,14 @@ public class HybridRepository<TEntity> : Repository<TEntity> where TEntity : Ent
             }
         }
 
+        // If no changes were detected because it was attached as Modified,
+        // we can at least return a marker indicating an update occurred.
+        if (changes.Count == 0 && trackedEntry.State == EntityState.Modified)
+        {
+            changes["_State"] = new { Status = "Updated (No explicit delta)" };
+        }
+
         return changes;
-    }
-
-    private OrderCreatedEvent CreateOrderCreatedEvent(Order order)
-    {
-        return new OrderCreatedEvent
-        {
-            OrderId = order.Id,
-            OrderNumber = order.OrderNumber,
-            CustomerName = order.CustomerName,
-            CustomerEmail = order.CustomerEmail,
-            CustomerPhone = order.CustomerPhone,
-            ShippingAddress = order.ShippingAddress,
-            Subtotal = order.Subtotal,
-            Tax = order.Tax,
-            ShippingCost = order.ShippingCost,
-            Total = order.Total,
-            Notes = order.Notes,
-            Items = order.Items?.Select(i => new OrderItemData
-            {
-                ProductId = i.ProductId,
-                ProductName = i.ProductName,
-                Quantity = i.Quantity,
-                UnitPrice = i.UnitPrice,
-                Subtotal = i.Subtotal
-            }).ToList() ?? new List<OrderItemData>()
-        };
-    }
-
-    private ProductCreatedEvent CreateProductCreatedEvent(Product product)
-    {
-        return new ProductCreatedEvent
-        {
-            ProductId = product.Id,
-            Name = product.Name,
-            Description = product.Description,
-            Price = product.Price,
-            Stock = product.Stock,  // Changed from StockQuantity
-            Category = product.Category,
-            IsActive = product.IsActive
-        };
     }
 
     private string? GetCurrentUserId()

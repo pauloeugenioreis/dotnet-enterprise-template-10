@@ -47,7 +47,7 @@ public class Repository<TEntity>(DbContext context) : IRepository<TEntity>, ITra
         return entityList;
     }
 
-    public virtual async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public virtual Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         // Get the ID from the incoming entity via reflection-free property access
         var idValue = context.Entry(entity).Property(nameof(EntityBase.Id)).CurrentValue
@@ -69,7 +69,7 @@ public class Repository<TEntity>(DbContext context) : IRepository<TEntity>, ITra
             context.Entry(entity).State = EntityState.Modified;
         }
 
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     public virtual Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)

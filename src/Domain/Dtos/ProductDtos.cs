@@ -3,10 +3,15 @@ using System;
 namespace ProjectTemplate.Domain.Dtos;
 
 /// <summary>
-/// Request payload for creating a product.
+/// Unified request payload for creating or updating a product.
+/// When Id is null, a new product is created. When Id has a value, the product is updated.
 /// </summary>
-public record CreateProductRequest
+public record SaveProductRequest
 {
+    /// <summary>
+    /// Product Id — null for creation, set for update.
+    /// </summary>
+    public long? Id { get; init; }
     public required string Name { get; init; }
     public string? Description { get; init; }
     public decimal Price { get; init; }
@@ -16,17 +21,14 @@ public record CreateProductRequest
 }
 
 /// <summary>
-/// Request payload for updating a product.
+/// Backward-compatible alias for creating a product.
 /// </summary>
-public record UpdateProductRequest
-{
-    public required string Name { get; init; }
-    public string? Description { get; init; }
-    public decimal Price { get; init; }
-    public int Stock { get; init; }
-    public required string Category { get; init; }
-    public bool IsActive { get; init; } = true;
-}
+public record CreateProductRequest : SaveProductRequest;
+
+/// <summary>
+/// Backward-compatible alias for updating a product.
+/// </summary>
+public record UpdateProductRequest : SaveProductRequest;
 
 /// <summary>
 /// DTO returned by the API when interacting with products.

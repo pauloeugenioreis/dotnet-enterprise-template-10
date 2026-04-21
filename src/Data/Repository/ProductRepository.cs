@@ -17,8 +17,9 @@ public class ProductRepository : HybridRepository<Product>, IProductRepository
         ApplicationDbContext context,
         IEventStore eventStore,
         EventSourcingSettings settings,
-        IExecutionContextService? executionContextService = null)
-        : base(context, eventStore, settings, executionContextService)
+        IExecutionContextService? executionContextService = null,
+        IEventPayloadFactory<Product>? payloadFactory = null)
+        : base(context, eventStore, settings, executionContextService, payloadFactory)
     {
         _dbContext = context;
     }

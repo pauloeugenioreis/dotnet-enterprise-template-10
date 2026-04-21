@@ -20,6 +20,16 @@ internal sealed class InMemoryEventStore : IEventStore
     private readonly object _lock = new();
     private long _eventSequence;
 
+    public void Clear()
+    {
+        lock (_lock)
+        {
+            _events.Clear();
+            _snapshots.Clear();
+            _eventSequence = 0;
+        }
+    }
+
     public Task AppendEventAsync<TEvent>(
         string aggregateType,
         string aggregateId,
@@ -45,7 +55,7 @@ internal sealed class InMemoryEventStore : IEventStore
                 EventId = Guid.NewGuid(),
                 AggregateType = aggregateType,
                 AggregateId = aggregateId,
-                EventType = typeof(TEvent).Name,
+                EventType = eventData?.GetType().Name ?? typeof(TEvent).Name,
                 EventData = JsonSerializer.Serialize(eventData),
                 Timestamp = timestamp,
                 OccurredOn = timestamp,
