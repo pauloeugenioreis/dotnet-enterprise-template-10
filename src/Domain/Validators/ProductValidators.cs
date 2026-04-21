@@ -15,7 +15,8 @@ public class CreateProductValidator : AbstractValidator<CreateProductRequest>
             .MaximumLength(200).WithMessage("Product name must not exceed 200 characters");
 
         RuleFor(x => x.Description)
-            .MaximumLength(2000).WithMessage("Description must not exceed 2000 characters");
+            .MaximumLength(2000).WithMessage("Description must not exceed 2000 characters")
+            .When(x => x.Description != null);
 
         RuleFor(x => x.Price)
             .GreaterThan(0).WithMessage("Price must be greater than zero");
@@ -41,7 +42,8 @@ public class UpdateProductValidator : AbstractValidator<UpdateProductRequest>
             .MaximumLength(200).WithMessage("Product name must not exceed 200 characters");
 
         RuleFor(x => x.Description)
-            .MaximumLength(2000).WithMessage("Description must not exceed 2000 characters");
+            .MaximumLength(2000).WithMessage("Description must not exceed 2000 characters")
+            .When(x => x.Description != null);
 
         RuleFor(x => x.Price)
             .GreaterThan(0).WithMessage("Price must be greater than zero");

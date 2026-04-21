@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using ProjectTemplate.Application.Services;
 using ProjectTemplate.Data.Repository;
@@ -59,6 +60,11 @@ public static class DependencyInjectionExtensions
 
         // Register execution context service (provides user/metadata without HTTP coupling)
         services.AddScoped<IExecutionContextService, ExecutionContextService>();
+
+        // Register ALL FluentValidation validators from the Domain assembly.
+        // DomainAssemblyMarker is used as an anchor — it does NOT limit scanning to a single class.
+        // Every AbstractValidator<T> found in the Domain project will be registered automatically.
+        services.AddValidatorsFromAssemblyContaining<DomainAssemblyMarker>();
 
         return services;
     }

@@ -35,11 +35,9 @@ public class MartenEventStore : IEventStore
     {
         await using var session = _documentStore.LightweightSession();
 
-        // Create stream ID combining type and ID
         var streamId = $"{aggregateType}-{aggregateId}";
 
-        // Append to Marten event stream
-        session.Events.Append(streamId, eventData);
+        session.Events.Append(streamId, new object[] { eventData });
 
         await session.SaveChangesAsync(cancellationToken);
     }
@@ -55,9 +53,33 @@ public class MartenEventStore : IEventStore
         var events = await session.Events.FetchStreamAsync(streamId, token: cancellationToken);
 
         return events
-            .Select(e => ConvertToTypedEvent(e.Data))
+            .Select(e => ConvertToTypedEvent(e.Data, e))
             .OfType<DomainEvent>()
             .ToList();
+    }
+
+    public async Task<(List<DomainEvent> Items, long TotalCount)> GetEventsPagedAsync(
+        string aggregateType,
+        string aggregateId,
+        int? limit = null,
+        int? offset = null,
+        CancellationToken cancellationToken = default)
+    {
+        await using var session = _documentStore.QuerySession();
+        var streamId = $"{aggregateType}-{aggregateId}";
+
+        // Fetch all stream events then slice — aggregate streams are typically small
+        var allEvents = await session.Events.FetchStreamAsync(streamId, token: cancellationToken);
+        var totalCount = allEvents.Count;
+
+        var items = allEvents
+            .Skip(offset ?? 0)
+            .Take(limit ?? 100)
+            .Select(e => ConvertToTypedEvent(e.Data, e))
+            .OfType<DomainEvent>()
+            .ToList();
+
+        return (items, totalCount);
     }
 
     public async Task<List<DomainEvent>> GetEventsAsync(
@@ -73,7 +95,7 @@ public class MartenEventStore : IEventStore
 
         return events
             .Where(e => e.Timestamp <= until)
-            .Select(e => ConvertToTypedEvent(e.Data))
+            .Select(e => ConvertToTypedEvent(e.Data, e))
             .OfType<DomainEvent>()
             .ToList();
     }
@@ -92,54 +114,57 @@ public class MartenEventStore : IEventStore
 
         return events
             .Where(e => e.Version >= fromVersion && e.Version <= toVersion)
-            .Select(e => ConvertToTypedEvent(e.Data))
+            .Select(e => ConvertToTypedEvent(e.Data, e))
             .OfType<DomainEvent>()
             .ToList();
     }
 
-    public async Task<List<DomainEvent>> GetEventsByTypeAsync(
+    public async Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByTypeAsync(
         string aggregateType,
         DateTime? from = null,
-        DateTime? to = null,
+        DateTime? toDate = null,
         int? limit = null,
+        int? offset = null,
         CancellationToken cancellationToken = default)
     {
         await using var session = _documentStore.QuerySession();
 
         var query = session.Events.QueryAllRawEvents()
-            .Where(e => ((DomainEvent)e.Data).AggregateType == aggregateType)
+            .Where(e => e.StreamKey != null && e.StreamKey.StartsWith(aggregateType + "-"))
             .AsQueryable();
 
         if (from.HasValue)
-        {
             query = query.Where(e => e.Timestamp >= from.Value);
-        }
 
-        if (to.HasValue)
-        {
-            query = query.Where(e => e.Timestamp <= to.Value);
-        }
+        if (toDate.HasValue)
+            query = query.Where(e => e.Timestamp <= toDate.Value);
 
         query = query.OrderByDescending(e => e.Timestamp);
 
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        if (offset.HasValue && offset.Value > 0)
+            query = query.Skip(offset.Value);
+
         if (limit.HasValue)
-        {
             query = query.Take(limit.Value);
-        }
 
         var events = await query.ToListAsync(cancellationToken);
 
-        return events
-            .Select(e => ConvertToTypedEvent(e.Data))
+        var items = events
+            .Select(e => ConvertToTypedEvent(e.Data, e))
             .OfType<DomainEvent>()
             .ToList();
+
+        return (items, totalCount);
     }
 
-    public async Task<List<DomainEvent>> GetEventsByUserAsync(
+    public async Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByUserAsync(
         string userId,
         DateTime? from = null,
-        DateTime? to = null,
+        DateTime? toDate = null,
         int? limit = null,
+        int? offset = null,
         CancellationToken cancellationToken = default)
     {
         await using var session = _documentStore.QuerySession();
@@ -149,28 +174,29 @@ public class MartenEventStore : IEventStore
             .AsQueryable();
 
         if (from.HasValue)
-        {
             query = query.Where(e => e.Timestamp >= from.Value);
-        }
 
-        if (to.HasValue)
-        {
-            query = query.Where(e => e.Timestamp <= to.Value);
-        }
+        if (toDate.HasValue)
+            query = query.Where(e => e.Timestamp <= toDate.Value);
 
         query = query.OrderByDescending(e => e.Timestamp);
 
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        if (offset.HasValue && offset.Value > 0)
+            query = query.Skip(offset.Value);
+
         if (limit.HasValue)
-        {
             query = query.Take(limit.Value);
-        }
 
         var events = await query.ToListAsync(cancellationToken);
 
-        return events
-            .Select(e => ConvertToTypedEvent(e.Data))
+        var items = events
+            .Select(e => ConvertToTypedEvent(e.Data, e))
             .OfType<DomainEvent>()
             .ToList();
+
+        return (items, totalCount);
     }
 
     public async Task<int> GetLatestVersionAsync(
@@ -194,9 +220,7 @@ public class MartenEventStore : IEventStore
         CancellationToken cancellationToken = default) where TSnapshot : class
     {
         if (!_settings.StoreSnapshots)
-        {
             return;
-        }
 
         await using var session = _documentStore.LightweightSession();
 
@@ -220,9 +244,7 @@ public class MartenEventStore : IEventStore
         CancellationToken cancellationToken = default) where TSnapshot : class
     {
         if (!_settings.StoreSnapshots)
-        {
             return (null, 0);
-        }
 
         await using var session = _documentStore.QuerySession();
         var id = $"{aggregateType}-{aggregateId}";
@@ -230,16 +252,14 @@ public class MartenEventStore : IEventStore
         var snapshot = await session.LoadAsync<SnapshotDocument<TSnapshot>>(id, cancellationToken);
 
         if (snapshot == null)
-        {
             return (null, 0);
-        }
 
         return (snapshot.Snapshot, snapshot.Version);
     }
 
     public async Task<EventStatistics> GetStatisticsAsync(
         DateTime? from = null,
-        DateTime? to = null,
+        DateTime? toDate = null,
         CancellationToken cancellationToken = default)
     {
         await using var session = _documentStore.QuerySession();
@@ -247,14 +267,10 @@ public class MartenEventStore : IEventStore
         var query = session.Events.QueryAllRawEvents().AsQueryable();
 
         if (from.HasValue)
-        {
             query = query.Where(e => e.Timestamp >= from.Value);
-        }
 
-        if (to.HasValue)
-        {
-            query = query.Where(e => e.Timestamp <= to.Value);
-        }
+        if (toDate.HasValue)
+            query = query.Where(e => e.Timestamp <= toDate.Value);
 
         var events = await query.ToListAsync(cancellationToken);
 
@@ -268,16 +284,14 @@ public class MartenEventStore : IEventStore
             stats.OldestEvent = events.Min(e => e.Timestamp).DateTime;
             stats.LatestEvent = events.Max(e => e.Timestamp).DateTime;
 
-            // Group by event type
             stats.EventsByType = events
-                .Select(e => ConvertToTypedEvent(e.Data))
+                .Select(e => ConvertToTypedEvent(e.Data, e))
                 .Where(e => e != null)
                 .GroupBy(e => e!.EventType)
                 .ToDictionary(g => g.Key, g => (long)g.Count());
 
-            // Group by aggregate type
             stats.EventsByAggregateType = events
-                .Select(e => ConvertToTypedEvent(e.Data))
+                .Select(e => ConvertToTypedEvent(e.Data, e))
                 .Where(e => e != null)
                 .GroupBy(e => e!.AggregateType)
                 .ToDictionary(g => g.Key, g => (long)g.Count());
@@ -286,24 +300,39 @@ public class MartenEventStore : IEventStore
         return stats;
     }
 
-    private DomainEvent? ConvertToTypedEvent(object eventData)
+    private DomainEvent? ConvertToTypedEvent(object eventData, dynamic envelope)
     {
-        if (eventData == null)
-        {
-            return null;
-        }
-
-        // If it's already a DomainEvent, return it
-        if (eventData is DomainEvent domainEvent)
-        {
-            return domainEvent;
-        }
-
-        // Otherwise, try to convert it
         try
         {
             var json = JsonSerializer.Serialize(eventData);
-            return JsonSerializer.Deserialize<DomainEvent>(json);
+            var dto = JsonSerializer.Deserialize<DomainEvent>(json);
+
+            if (dto != null)
+            {
+                dto.EventId = envelope.Id;
+                dto.Version = (int)envelope.Version;
+                dto.EventType = envelope.EventTypeName;
+                dto.Timestamp = envelope.Timestamp.UtcDateTime;
+                dto.OccurredOn = envelope.Timestamp.UtcDateTime;
+
+                if (!string.IsNullOrEmpty(envelope.StreamKey))
+                {
+                    var firstDash = ((string)envelope.StreamKey).IndexOf('-');
+                    if (firstDash > 0)
+                    {
+                        dto.AggregateType = ((string)envelope.StreamKey).Substring(0, firstDash);
+                        dto.AggregateId = ((string)envelope.StreamKey).Substring(firstDash + 1);
+                    }
+                    else
+                    {
+                        dto.AggregateId = envelope.StreamKey;
+                    }
+                }
+
+                dto.EventData = JsonSerializer.Deserialize<object>(json);
+            }
+
+            return dto;
         }
         catch (Exception ex)
         {

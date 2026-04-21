@@ -111,24 +111,36 @@ internal class NoOpEventStore : IEventStore
         return Task.FromResult(new List<DomainEvent>());
     }
 
-    public Task<List<DomainEvent>> GetEventsByTypeAsync(
+    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsPagedAsync(
         string aggregateType,
-        DateTime? from = null,
-        DateTime? to = null,
+        string aggregateId,
         int? limit = null,
+        int? offset = null,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(new List<DomainEvent>());
+        return Task.FromResult<(List<DomainEvent>, long)>((new List<DomainEvent>(), 0L));
     }
 
-    public Task<List<DomainEvent>> GetEventsByUserAsync(
-        string userId,
+    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByTypeAsync(
+        string aggregateType,
         DateTime? from = null,
-        DateTime? to = null,
+        DateTime? toDate = null,
         int? limit = null,
+        int? offset = null,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(new List<DomainEvent>());
+        return Task.FromResult<(List<DomainEvent>, long)>((new List<DomainEvent>(), 0L));
+    }
+
+    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByUserAsync(
+        string userId,
+        DateTime? from = null,
+        DateTime? toDate = null,
+        int? limit = null,
+        int? offset = null,
+        CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult<(List<DomainEvent>, long)>((new List<DomainEvent>(), 0L));
     }
 
     public Task<int> GetLatestVersionAsync(
@@ -159,7 +171,7 @@ internal class NoOpEventStore : IEventStore
 
     public Task<EventStatistics> GetStatisticsAsync(
         DateTime? from = null,
-        DateTime? to = null,
+        DateTime? toDate = null,
         CancellationToken cancellationToken = default)
     {
         return Task.FromResult(new EventStatistics());

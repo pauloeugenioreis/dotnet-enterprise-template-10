@@ -51,9 +51,7 @@ internal sealed class InMemoryEventStore : IEventStore
                 OccurredOn = timestamp,
                 Version = nextVersion,
                 UserId = userId,
-                Metadata = metadata is { Count: > 0 }
-                    ? JsonSerializer.Serialize(metadata)
-                    : null
+                Metadata = metadata ?? new()
             };
 
             _events.Add(domainEvent);
@@ -68,6 +66,19 @@ internal sealed class InMemoryEventStore : IEventStore
         CancellationToken cancellationToken = default)
     {
         return Task.FromResult(FilterByAggregate(aggregateType, aggregateId));
+    }
+
+    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsPagedAsync(
+        string aggregateType,
+        string aggregateId,
+        int? limit = null,
+        int? offset = null,
+        CancellationToken cancellationToken = default)
+    {
+        var all = FilterByAggregate(aggregateType, aggregateId);
+        var total = (long)all.Count;
+        var items = all.Skip(offset ?? 0).Take(limit ?? 100).ToList();
+        return Task.FromResult((items, total));
     }
 
     public Task<List<DomainEvent>> GetEventsAsync(
@@ -97,46 +108,46 @@ internal sealed class InMemoryEventStore : IEventStore
         return Task.FromResult(events);
     }
 
-    public Task<List<DomainEvent>> GetEventsByTypeAsync(
+    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByTypeAsync(
         string aggregateType,
         DateTime? from = null,
-        DateTime? to = null,
+        DateTime? toDate = null,
         int? limit = null,
+        int? offset = null,
         CancellationToken cancellationToken = default)
     {
-        IEnumerable<DomainEvent> events = SnapshotEvents()
+        var query = SnapshotEvents()
             .Where(e => e.AggregateType == aggregateType)
             .Where(e => !from.HasValue || e.OccurredOn >= from.Value)
-            .Where(e => !to.HasValue || e.OccurredOn <= to.Value)
-            .OrderByDescending(e => e.OccurredOn);
+            .Where(e => !toDate.HasValue || e.OccurredOn <= toDate.Value)
+            .OrderByDescending(e => e.OccurredOn)
+            .ToList();
 
-        if (limit.HasValue)
-        {
-            events = events.Take(limit.Value);
-        }
+        var total = (long)query.Count;
+        var items = query.Skip(offset ?? 0).Take(limit ?? query.Count).ToList();
 
-        return Task.FromResult(events.ToList());
+        return Task.FromResult((items, total));
     }
 
-    public Task<List<DomainEvent>> GetEventsByUserAsync(
+    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByUserAsync(
         string userId,
         DateTime? from = null,
-        DateTime? to = null,
+        DateTime? toDate = null,
         int? limit = null,
+        int? offset = null,
         CancellationToken cancellationToken = default)
     {
-        IEnumerable<DomainEvent> events = SnapshotEvents()
+        var query = SnapshotEvents()
             .Where(e => string.Equals(e.UserId, userId, StringComparison.OrdinalIgnoreCase))
             .Where(e => !from.HasValue || e.OccurredOn >= from.Value)
-            .Where(e => !to.HasValue || e.OccurredOn <= to.Value)
-            .OrderByDescending(e => e.OccurredOn);
+            .Where(e => !toDate.HasValue || e.OccurredOn <= toDate.Value)
+            .OrderByDescending(e => e.OccurredOn)
+            .ToList();
 
-        if (limit.HasValue)
-        {
-            events = events.Take(limit.Value);
-        }
+        var total = (long)query.Count;
+        var items = query.Skip(offset ?? 0).Take(limit ?? query.Count).ToList();
 
-        return Task.FromResult(events.ToList());
+        return Task.FromResult((items, total));
     }
 
     public Task<int> GetLatestVersionAsync(
@@ -180,12 +191,12 @@ internal sealed class InMemoryEventStore : IEventStore
 
     public Task<EventStatistics> GetStatisticsAsync(
         DateTime? from = null,
-        DateTime? to = null,
+        DateTime? toDate = null,
         CancellationToken cancellationToken = default)
     {
         var events = SnapshotEvents()
             .Where(e => !from.HasValue || e.OccurredOn >= from.Value)
-            .Where(e => !to.HasValue || e.OccurredOn <= to.Value)
+            .Where(e => !toDate.HasValue || e.OccurredOn <= toDate.Value)
             .ToList();
 
         var stats = new EventStatistics

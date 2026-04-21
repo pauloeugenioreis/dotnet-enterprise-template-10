@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using ProjectTemplate.Data.Context;
 using ProjectTemplate.Data.Seeders;
 using ProjectTemplate.Infrastructure.Extensions;
+using ProjectTemplate.Infrastructure.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,10 @@ builder.Configuration
     .AddEnvironmentVariables();
 
 // Add services
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationFilter>();
+});
 
 // Add Output Cache (.NET 10)
 builder.Services.AddOutputCache(options =>
@@ -122,6 +126,7 @@ if (telemetryEnabled && telemetryProviders.Contains("prometheus", StringComparer
 
 app.UseAuthorization();
 
+app.MapHealthChecks("/health");
 app.MapControllers();
 
 await app.RunAsync().ConfigureAwait(false);

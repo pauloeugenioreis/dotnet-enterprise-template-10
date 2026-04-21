@@ -27,6 +27,16 @@ public interface IEventStore
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Get events for a specific aggregate (paginated)
+    /// </summary>
+    Task<(List<DomainEvent> Items, long TotalCount)> GetEventsPagedAsync(
+        string aggregateType,
+        string aggregateId,
+        int? limit = null,
+        int? offset = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Get events for an aggregate up to a specific timestamp (time travel)
     /// </summary>
     Task<List<DomainEvent>> GetEventsAsync(
@@ -46,23 +56,25 @@ public interface IEventStore
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Get all events for a specific entity type
+    /// Get all events for a specific entity type (paginated)
     /// </summary>
-    Task<List<DomainEvent>> GetEventsByTypeAsync(
+    Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByTypeAsync(
         string aggregateType,
         DateTime? from = null,
-        DateTime? to = null,
+        DateTime? toDate = null,
         int? limit = null,
+        int? offset = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get events by user who triggered them
     /// </summary>
-    Task<List<DomainEvent>> GetEventsByUserAsync(
+    Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByUserAsync(
         string userId,
         DateTime? from = null,
-        DateTime? to = null,
+        DateTime? toDate = null,
         int? limit = null,
+        int? offset = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -96,7 +108,7 @@ public interface IEventStore
     /// </summary>
     Task<EventStatistics> GetStatisticsAsync(
         DateTime? from = null,
-        DateTime? to = null,
+        DateTime? toDate = null,
         CancellationToken cancellationToken = default);
 }
 

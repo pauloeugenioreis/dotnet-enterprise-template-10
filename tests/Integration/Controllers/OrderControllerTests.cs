@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using ProjectTemplate.Domain.Dtos;
-using ProjectTemplate.Domain.Entities;
 using Xunit;
 
 namespace ProjectTemplate.Integration.Tests.Controllers;
@@ -35,7 +34,7 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
     public async Task Create_ValidOrder_ReturnsCreated()
     {
         // Arrange - Create a product first
-        var product = new Product
+        var product = new CreateProductRequest
         {
             Name = "Test Product for Order",
             Description = "Test",
@@ -45,7 +44,7 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
             IsActive = true
         };
         var productResponse = await _client.PostAsJsonAsync("/api/v1/Product", product);
-        var createdProduct = await productResponse.Content.ReadFromJsonAsync<Product>();
+        var createdProduct = await productResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
 
         var orderDto = new CreateOrderRequest
         {
@@ -77,15 +76,16 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
     public async Task GetByCustomer_ReturnsOrders()
     {
         // Arrange - Create order first
-        var product = new Product
+        var product = new CreateProductRequest
         {
             Name = "Product for Customer Test",
             Price = 30.00m,
             Stock = 50,
+            Category = "test",
             IsActive = true
         };
         var productResponse = await _client.PostAsJsonAsync("/api/v1/Product", product);
-        var createdProduct = await productResponse.Content.ReadFromJsonAsync<Product>();
+        var createdProduct = await productResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
 
         var orderDto = new CreateOrderRequest
         {
@@ -112,15 +112,17 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
     public async Task UpdateStatus_ValidOrder_ReturnsSuccess()
     {
         // Arrange - Create order first
-        var product = new Product
+        var product = new CreateProductRequest
         {
             Name = "Product for Status Test",
             Price = 40.00m,
             Stock = 50,
+            Category = "test",
             IsActive = true
         };
         var productResponse = await _client.PostAsJsonAsync("/api/v1/Product", product);
-        var createdProduct = await productResponse.Content.ReadFromJsonAsync<Product>();
+        productResponse.StatusCode.Should().Be(HttpStatusCode.Created, $"product creation should succeed, but got: {await productResponse.Content.ReadAsStringAsync()}");
+        var createdProduct = await productResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
 
         var orderDto = new CreateOrderRequest
         {
@@ -195,16 +197,17 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
     public async Task GetById_ExistingOrder_ReturnsOrder()
     {
         // Arrange
-        var product = new Product
+        var product = new CreateProductRequest
         {
             Name = "Product for GetById order",
             Price = 33.00m,
             Stock = 15,
+            Category = "test",
             IsActive = true
         };
 
         var productResponse = await _client.PostAsJsonAsync("/api/v1/Product", product);
-        var createdProduct = await productResponse.Content.ReadFromJsonAsync<Product>();
+        var createdProduct = await productResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
 
         var createOrder = new CreateOrderRequest
         {
@@ -231,16 +234,17 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
     public async Task CancelOrder_ExistingOrder_ReturnsCancelledOrder()
     {
         // Arrange
-        var product = new Product
+        var product = new CreateProductRequest
         {
             Name = "Product for cancel",
             Price = 60.00m,
             Stock = 20,
+            Category = "test",
             IsActive = true
         };
 
         var productResponse = await _client.PostAsJsonAsync("/api/v1/Product", product);
-        var createdProduct = await productResponse.Content.ReadFromJsonAsync<Product>();
+        var createdProduct = await productResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
 
         var createOrder = new CreateOrderRequest
         {

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using ProjectTemplate.Domain;
-using ProjectTemplate.Domain.Events;
+using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 
 namespace ProjectTemplate.Api.Controllers;
@@ -13,6 +13,8 @@ namespace ProjectTemplate.Api.Controllers;
 [Route("api/v{version:apiVersion}/[controller]")]
 public class AuditController : ApiControllerBase
 {
+    private const string EventSourcingDisabledMessage = "Event Sourcing or Audit API is disabled";
+
     private readonly IEventStore _eventStore;
     private readonly EventSourcingSettings _settings;
 
@@ -23,28 +25,91 @@ public class AuditController : ApiControllerBase
     }
 
     /// <summary>
-    /// Get full history of events for a specific entity
+    /// Get history of events for an entity type (paginated)
     /// </summary>
-    [HttpGet("{entityType}/{entityId}")]
-    [ProducesResponseType(typeof(List<DomainEvent>), StatusCodes.Status200OK)]
+    [HttpGet("{entityType}")]
+    [ProducesResponseType(typeof(IEnumerable<DomainEvent>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResponse<DomainEvent>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<List<DomainEvent>>> GetEntityHistory(
+    public async Task<IActionResult> GetEntitiesHistory(
         string entityType,
-        string entityId,
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(entityType) || string.IsNullOrWhiteSpace(entityId))
-        {
-            return BadRequest("entityType and entityId are required");
-        }
+        return await GetHistoryInternal(entityType, null, page, pageSize, cancellationToken);
+    }
+
+    /// <summary>
+    /// Get history of events for a specific entity instance (paginated)
+    /// </summary>
+    [HttpGet("{entityType}/{entityId}")]
+    [ProducesResponseType(typeof(IEnumerable<DomainEvent>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResponse<DomainEvent>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetEntityHistory(
+        string entityType,
+        string entityId,
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        return await GetHistoryInternal(entityType, entityId, page, pageSize, cancellationToken);
+    }
+
+    private async Task<IActionResult> GetHistoryInternal(
+        string entityType,
+        string? entityId,
+        int? page,
+        int? pageSize,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(entityType))
+            return BadRequest("entityType is required");
 
         if (!_settings.Enabled || !_settings.EnableAuditApi)
+            return BadRequest(EventSourcingDisabledMessage);
+
+        var usePagination = page.HasValue && pageSize.HasValue;
+        int? limit = null;
+        int? offset = null;
+
+        if (usePagination)
         {
-            return BadRequest("Event Sourcing or Audit API is disabled");
+            var safePage = Math.Max(1, page!.Value);
+            var safePageSize = Math.Max(1, pageSize!.Value);
+            limit = safePageSize;
+            offset = (safePage - 1) * safePageSize;
+            page = safePage;
+            pageSize = safePageSize;
         }
 
-        var events = await _eventStore.GetEventsAsync(entityType, entityId, cancellationToken);
-        return Ok(events);
+        List<DomainEvent> items;
+        long total;
+
+        if (string.IsNullOrWhiteSpace(entityId))
+        {
+            (items, total) = await _eventStore.GetEventsByTypeAsync(
+                entityType, null, null, limit, offset, cancellationToken);
+        }
+        else
+        {
+            if (usePagination)
+            {
+                (items, total) = await _eventStore.GetEventsPagedAsync(
+                    entityType, entityId, limit, offset, cancellationToken);
+            }
+            else
+            {
+                items = await _eventStore.GetEventsAsync(entityType, entityId, cancellationToken);
+                total = items.Count;
+            }
+        }
+
+        if (usePagination)
+            return HandlePagedResult(items, total, page!.Value, pageSize!.Value);
+
+        return Ok(items);
     }
 
     /// <summary>
@@ -62,21 +127,15 @@ public class AuditController : ApiControllerBase
         CancellationToken cancellationToken = default)
     {
         if (!_settings.Enabled)
-        {
-            return BadRequest("Event Sourcing is disabled");
-        }
+            return BadRequest(EventSourcingDisabledMessage);
 
         if (!_settings.EnableAuditApi)
-        {
-            return StatusCode(403, "Audit API is disabled");
-        }
+            return StatusCode(403, EventSourcingDisabledMessage);
 
         var events = await _eventStore.GetEventsAsync(entityType, entityId, timestamp, cancellationToken);
 
         if (events.Count == 0)
-        {
             return NotFound($"No events found for {entityType} with ID {entityId}");
-        }
 
         return Ok(new
         {
@@ -108,36 +167,10 @@ public class AuditController : ApiControllerBase
         CancellationToken cancellationToken = default)
     {
         if (!_settings.Enabled || !_settings.EnableAuditApi)
-        {
-            return BadRequest("Event Sourcing or Audit API is disabled");
-        }
+            return BadRequest(EventSourcingDisabledMessage);
 
         var events = await _eventStore.GetEventsByVersionAsync(
             entityType, entityId, fromVersion, toVersion, cancellationToken);
-
-        return Ok(events);
-    }
-
-    /// <summary>
-    /// Get all events for an entity type within a date range
-    /// </summary>
-    [HttpGet("type/{entityType}")]
-    [ProducesResponseType(typeof(List<DomainEvent>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<List<DomainEvent>>> GetEventsByType(
-        string entityType,
-        [FromQuery] DateTime? from = null,
-        [FromQuery] DateTime? to = null,
-        [FromQuery] int? limit = 100,
-        CancellationToken cancellationToken = default)
-    {
-        if (!_settings.Enabled || !_settings.EnableAuditApi)
-        {
-            return BadRequest("Event Sourcing or Audit API is disabled");
-        }
-
-        var events = await _eventStore.GetEventsByTypeAsync(
-            entityType, from, to, limit, cancellationToken);
 
         return Ok(events);
     }
@@ -151,22 +184,20 @@ public class AuditController : ApiControllerBase
     public async Task<ActionResult> GetEventsByUser(
         string userId,
         [FromQuery] DateTime? from = null,
-        [FromQuery] DateTime? to = null,
+        [FromQuery(Name = "to")] DateTime? toDate = null,
         [FromQuery] int limit = 100,
         CancellationToken cancellationToken = default)
     {
         if (!_settings.Enabled || !_settings.EnableAuditApi)
-        {
-            return BadRequest("Event Sourcing or Audit API is disabled");
-        }
+            return BadRequest(EventSourcingDisabledMessage);
 
-        var events = await _eventStore.GetEventsByUserAsync(userId, from, to, limit, cancellationToken);
+        var (items, total) = await _eventStore.GetEventsByUserAsync(userId, from, toDate, limit, 0, cancellationToken);
 
         return Ok(new
         {
             UserId = userId,
-            EventCount = events.Count,
-            Events = events.OrderByDescending(e => e.OccurredOn).Select(e => new
+            EventCount = total,
+            Events = items.OrderByDescending(e => e.OccurredOn).Select(e => new
             {
                 e.EventId,
                 e.EventType,
@@ -187,15 +218,13 @@ public class AuditController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> GetStatistics(
         [FromQuery] DateTime? from = null,
-        [FromQuery] DateTime? to = null,
+        [FromQuery(Name = "to")] DateTime? toDate = null,
         CancellationToken cancellationToken = default)
     {
         if (!_settings.Enabled || !_settings.EnableAuditApi)
-        {
-            return BadRequest("Event Sourcing or Audit API is disabled");
-        }
+            return BadRequest(EventSourcingDisabledMessage);
 
-        var stats = await _eventStore.GetStatisticsAsync(from, to, cancellationToken);
+        var stats = await _eventStore.GetStatisticsAsync(from, toDate, cancellationToken);
 
         return Ok(stats);
     }
@@ -213,16 +242,12 @@ public class AuditController : ApiControllerBase
         CancellationToken cancellationToken = default)
     {
         if (!_settings.Enabled || !_settings.EnableAuditApi)
-        {
-            return BadRequest("Event Sourcing or Audit API is disabled");
-        }
+            return BadRequest(EventSourcingDisabledMessage);
 
         var events = await _eventStore.GetEventsAsync(entityType, entityId, cancellationToken);
 
         if (!events.Any())
-        {
             return NotFound($"No events found for {entityType} with ID {entityId}");
-        }
 
         return Ok(new
         {
