@@ -89,3 +89,18 @@ public record OrderItemResponseDto
     public decimal UnitPrice { get; init; }
     public decimal Subtotal { get; init; }
 }
+
+/// <summary>
+/// DTO for order statistics computed at the database level.
+/// </summary>
+public record OrderStatisticsDto
+{
+    public int TotalOrders { get; init; }
+    public decimal TotalRevenue { get; init; }
+    public decimal AverageOrderValue { get; init; }
+    public List<OrderStatusStatDto> OrdersByStatus { get; init; } = new();
+    public List<TopProductStatDto> TopProducts { get; init; } = new();
+}
+
+public record OrderStatusStatDto(string Status, int Count, decimal Revenue);
+public record TopProductStatDto(long ProductId, string ProductName, int QuantitySold, decimal Revenue);

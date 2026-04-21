@@ -159,9 +159,9 @@ public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadAsStringAsync();
-        content.Should().NotBeNullOrEmpty();
-        content.Should().Contain("totalOrders");
+        var stats = await response.Content.ReadFromJsonAsync<OrderStatisticsDto>();
+        stats.Should().NotBeNull();
+        stats!.TotalOrders.Should().BeGreaterThanOrEqualTo(0);
     }
 
     [Fact]

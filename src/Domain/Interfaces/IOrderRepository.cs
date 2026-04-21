@@ -32,4 +32,10 @@ public interface IOrderRepository : IRepository<Order>, ITransactionalRepository
     /// Get order with items by order number
     /// </summary>
     Task<Order?> GetByOrderNumberAsync(string orderNumber, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get aggregated order statistics computed at the database level.
+    /// Avoids loading all orders into memory.
+    /// </summary>
+    Task<Dtos.OrderStatisticsDto> GetStatisticsAsync(CancellationToken cancellationToken = default);
 }

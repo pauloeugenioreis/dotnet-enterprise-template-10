@@ -192,6 +192,11 @@ public class OrderService : Service<Order>, IOrderService
         return order.Total;
     }
 
+    public async Task<OrderStatisticsDto> GetStatisticsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _orderRepository.GetStatisticsAsync(cancellationToken);
+    }
+
     private static OrderResponseDto MapToResponseDto(Order order)
     {
         return new OrderResponseDto

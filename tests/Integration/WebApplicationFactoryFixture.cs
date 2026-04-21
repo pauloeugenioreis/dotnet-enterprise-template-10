@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -55,7 +56,8 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
                 services.Remove(descriptor);
             }
 
-            // Remove ALL Authentication services to avoid JWT configuration issues
+            // Replace authentication with a test handler that always succeeds.
+            // This supports [Authorize] on controllers without real JWT tokens.
             var authDescriptors = services
                 .Where(d => d.ServiceType.Namespace != null &&
                            (d.ServiceType.Namespace.StartsWith("Microsoft.AspNetCore.Authentication") ||
@@ -66,6 +68,15 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
             {
                 services.Remove(descriptor);
             }
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
+                options.DefaultChallengeScheme = TestAuthHandler.SchemeName;
+            }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+                TestAuthHandler.SchemeName, _ => { });
+
+            services.AddAuthorization();
 
             // Remove the existing DbContext registration
             services.RemoveAll(typeof(DbContextOptions<ApplicationDbContext>));

@@ -1,10 +1,15 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProjectTemplate.Domain.Dtos;
 
 namespace ProjectTemplate.Api.Controllers;
 
 /// <summary>
-/// Base controller with common functionality
+/// Base controller with common functionality.
+/// All controllers require authorization by default.
+/// Use [AllowAnonymous] on specific endpoints to opt out.
 /// </summary>
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
@@ -58,13 +63,4 @@ public abstract class ApiControllerBase : ControllerBase
 
         return Ok(response);
     }
-}
-
-public class PagedResponse<T>
-{
-    public IEnumerable<T> Items { get; set; } = Enumerable.Empty<T>();
-    public long Total { get; set; }
-    public int Page { get; set; }
-    public int PageSize { get; set; }
-    public int TotalPages { get; set; }
 }

@@ -87,16 +87,6 @@ public class OrderController : ApiControllerBase
         [FromBody] CreateOrderRequest dto,
         CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState.Values
-                .SelectMany(v => v.Errors)
-                .Select(e => e.ErrorMessage)
-                .ToList();
-
-            return BadRequest(new { error = true, messages = errors });
-        }
-
         var order = await _orderService.CreateOrderAsync(dto, cancellationToken);
 
         _logger.LogInformation("Order {OrderNumber} created", order.OrderNumber);
@@ -205,36 +195,13 @@ public class OrderController : ApiControllerBase
     }
 
     /// <summary>
-    /// Get order statistics
+    /// Get order statistics (computed at the database level)
     /// </summary>
     [HttpGet("statistics")]
-    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(OrderStatisticsDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetStatisticsAsync(CancellationToken cancellationToken)
     {
-        var (orderItems, _) = await _orderService.GetAllOrderDetailsAsync(cancellationToken: cancellationToken);
-        var orders = orderItems.ToList();
-
-        var stats = new
-        {
-            totalOrders = orders.Count,
-            totalRevenue = orders.Sum(o => o.Total),
-            averageOrderValue = orders.Any() ? orders.Average(o => o.Total) : 0,
-            ordersByStatus = orders.GroupBy(o => o.Status)
-                .Select(g => new { status = g.Key, count = g.Count(), revenue = g.Sum(o => o.Total) }),
-            topProducts = orders
-                .SelectMany(o => o.Items)
-                .GroupBy(i => new { i.ProductId, i.ProductName })
-                .Select(g => new
-                {
-                    productId = g.Key.ProductId,
-                    productName = g.Key.ProductName,
-                    quantitySold = g.Sum(i => i.Quantity),
-                    revenue = g.Sum(i => i.Subtotal)
-                })
-                .OrderByDescending(x => x.revenue)
-                .Take(10)
-        };
-
+        var stats = await _orderService.GetStatisticsAsync(cancellationToken);
         return Ok(stats);
     }
 }

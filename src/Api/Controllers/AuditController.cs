@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using ProjectTemplate.Domain;
+using ProjectTemplate.Domain.Dtos;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 

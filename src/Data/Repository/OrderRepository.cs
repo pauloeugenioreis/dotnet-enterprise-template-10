@@ -109,4 +109,55 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<Domain.Dtos.OrderStatisticsDto> GetStatisticsAsync(CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.Orders.AsNoTracking();
+
+        var totalOrders = await query.CountAsync(cancellationToken);
+
+        if (totalOrders == 0)
+        {
+            return new Domain.Dtos.OrderStatisticsDto();
+        }
+
+        var totalRevenue = await query.SumAsync(o => o.Total, cancellationToken);
+        var avgOrderValue = await query.AverageAsync(o => o.Total, cancellationToken);
+
+        // Fetch lightweight projections and aggregate client-side
+        // (InMemory provider doesn't support GroupBy with constructor projections)
+        var orderStatusData = await query
+            .Select(o => new { o.Status, o.Total })
+            .ToListAsync(cancellationToken);
+
+        var ordersByStatus = orderStatusData
+            .GroupBy(o => o.Status)
+            .Select(g => new Domain.Dtos.OrderStatusStatDto(g.Key, g.Count(), g.Sum(o => o.Total)))
+            .ToList();
+
+        var orderItemData = await _dbContext.Set<OrderItem>()
+            .AsNoTracking()
+            .Select(i => new { i.ProductId, i.ProductName, i.Quantity, i.Subtotal })
+            .ToListAsync(cancellationToken);
+
+        var topProducts = orderItemData
+            .GroupBy(i => new { i.ProductId, i.ProductName })
+            .Select(g => new Domain.Dtos.TopProductStatDto(
+                g.Key.ProductId,
+                g.Key.ProductName,
+                g.Sum(i => i.Quantity),
+                g.Sum(i => i.Subtotal)))
+            .OrderByDescending(x => x.Revenue)
+            .Take(10)
+            .ToList();
+
+        return new Domain.Dtos.OrderStatisticsDto
+        {
+            TotalOrders = totalOrders,
+            TotalRevenue = totalRevenue,
+            AverageOrderValue = avgOrderValue,
+            OrdersByStatus = ordersByStatus,
+            TopProducts = topProducts
+        };
+    }
 }

@@ -43,4 +43,9 @@ public interface IOrderService : IService<Order>
     /// Calculate order totals
     /// </summary>
     Task<decimal> CalculateOrderTotalAsync(long orderId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get aggregated order statistics computed at the database level.
+    /// </summary>
+    Task<OrderStatisticsDto> GetStatisticsAsync(CancellationToken cancellationToken = default);
 }

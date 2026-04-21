@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using ProjectTemplate.Domain.Dtos;
 using ProjectTemplate.Domain.Exceptions;
 using ProjectTemplate.Domain.Interfaces;
+using ProjectTemplate.Integration.Tests.Support;
 using Xunit;
 
 namespace ProjectTemplate.Integration.Tests.Controllers;
@@ -31,16 +32,6 @@ public class AuthControllerTests : IClassFixture<WebApplicationFactoryFixture>
             {
                 services.RemoveAll<IAuthService>();
                 services.AddSingleton<IAuthService, InMemoryAuthService>();
-
-                services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
-                    options.DefaultChallengeScheme = TestAuthHandler.SchemeName;
-                }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
-                    TestAuthHandler.SchemeName,
-                    _ => { });
-
-                services.AddAuthorization();
             });
         });
 
@@ -307,34 +298,6 @@ public class AuthControllerTests : IClassFixture<WebApplicationFactoryFixture>
                 ExpiresAt = DateTime.UtcNow.AddHours(1),
                 User = user
             };
-        }
-    }
-
-    private sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
-    {
-        public const string SchemeName = "Test";
-
-        public TestAuthHandler(
-            IOptionsMonitor<AuthenticationSchemeOptions> options,
-            ILoggerFactory logger,
-            UrlEncoder encoder)
-            : base(options, logger, encoder)
-        {
-        }
-
-        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
-        {
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, "123"),
-                new Claim(ClaimTypes.Name, "integration_user")
-            };
-
-            var identity = new ClaimsIdentity(claims, SchemeName);
-            var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, SchemeName);
-
-            return Task.FromResult(AuthenticateResult.Success(ticket));
         }
     }
 }
