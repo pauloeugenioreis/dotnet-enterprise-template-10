@@ -179,6 +179,19 @@ foreach ($db in $databases) {
 
             $env:ASPNETCORE_ENVIRONMENT = $db
 
+            # Ensure dotnet ef is available
+            $efCheck = & dotnet tool list -g | Out-String
+            if ($efCheck -notmatch "dotnet-ef") {
+                Write-Host "  Installing dotnet-ef globally..." -ForegroundColor Yellow
+                & dotnet tool install -g dotnet-ef | Out-Null
+                
+                # Update PATH in current session if needed
+                $toolsPath = Join-Path $env:USERPROFILE ".dotnet\tools"
+                if ($env:PATH -notmatch [regex]::Escape($toolsPath)) {
+                    $env:PATH += ";$toolsPath"
+                }
+            }
+
             # Drop database if exists (clean state)
             $ErrorActionPreference = 'Continue'
             & dotnet ef database drop --project $dataProject --startup-project $apiProject --force --no-build 2>&1 | Out-Null
