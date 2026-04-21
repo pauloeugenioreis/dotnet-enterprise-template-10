@@ -16,8 +16,9 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
         // Use SQL Server with a placeholder connection string for design-time
-        // This allows migrations to be generated without a real database
-        optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=ProjectTemplate;Trusted_Connection=True;");
+        // This allows migrations to be generated without a real database.
+        // We use localhost instead of LocalDB so it works on Linux/Mac too.
+        optionsBuilder.UseSqlServer("Server=localhost,1433;Database=ProjectTemplate;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;");
 
         return new ApplicationDbContext(optionsBuilder.Options);
     }

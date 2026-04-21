@@ -222,11 +222,22 @@ for DB in "${DATABASES[@]}"; do
 
         export ASPNETCORE_ENVIRONMENT=$DB
 
+        # Ensure dotnet ef is available
+        if ! command -v dotnet-ef &> /dev/null && ! dotnet tool list -g | grep -q dotnet-ef; then
+            echo -e "${YELLOW}  Installing dotnet-ef globally...${NC}"
+            dotnet tool install -g dotnet-ef || true
+        fi
+        
+        EF_CMD="dotnet ef"
+        if ! command -v dotnet-ef &> /dev/null && [ -f "$HOME/.dotnet/tools/dotnet-ef" ]; then
+            export PATH="$PATH:$HOME/.dotnet/tools"
+        fi
+
         # Drop database if exists (clean state)
         dotnet ef database drop --project "$DATA_PROJECT" --startup-project "$API_PROJECT" --force --no-build 2>&1 > /dev/null || true
 
         # Apply migrations
-        MIGRATION_OUTPUT=$(dotnet ef database update --project "$DATA_PROJECT" --startup-project "$API_PROJECT" --no-build 2>&1)
+        MIGRATION_OUTPUT=$(dotnet ef database update --project "$DATA_PROJECT" --startup-project "$API_PROJECT" --no-build 2>&1) || true
 
         # Check if migration succeeded (look for "Done." in output)
         if echo "$MIGRATION_OUTPUT" | grep -q "Done\.\|No migrations were applied"; then
