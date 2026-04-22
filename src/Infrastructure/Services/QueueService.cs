@@ -53,7 +53,7 @@ public class QueueService : IQueueService
         var retryPolicy = Policy
             .Handle<BrokerUnreachableException>()
             .Or<AlreadyClosedException>()
-            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+            .WaitAndRetry(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                 (exception, timeSpan, retryCount, context) =>
                 {
                     _logger.LogWarning(exception,
@@ -61,13 +61,13 @@ public class QueueService : IQueueService
                         retryCount, timeSpan.TotalSeconds);
                 });
 
-        await retryPolicy.ExecuteAsync(async (ct) =>
+        await Task.Run(() => retryPolicy.Execute(() =>
         {
-            using var connection = await factory.CreateConnectionAsync(ct);
-            using var channel = await connection.CreateChannelAsync(cancellationToken: ct);
+            using var connection = factory.CreateConnection();
+            using var channel = connection.CreateModel();
 
             // Declare queue (idempotent operation)
-            await channel.QueueDeclareAsync(
+            channel.QueueDeclare(
                 queue: queueName,
                 durable: true,
                 exclusive: false,
@@ -77,12 +77,13 @@ public class QueueService : IQueueService
             var body = Encoding.UTF8.GetBytes(message);
 
             // Publish message
-            await channel.BasicPublishAsync(
+            channel.BasicPublish(
                 exchange: string.Empty,
                 routingKey: queueName,
+                basicProperties: null,
                 body: body);
 
             _logger.LogInformation("Message published to queue {Queue}", queueName);
-        }, cancellationToken);
+        }), cancellationToken);
     }
 }

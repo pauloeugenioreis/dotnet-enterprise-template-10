@@ -35,6 +35,29 @@ O script irá:
 
 ---
 
+## 🐳 Testcontainers (Integração Moderna)
+
+A partir da versão .NET 10, este template utiliza **Testcontainers** para os testes de integração. Isso significa que você não precisa se preocupar em configurar bancos de dados manuais para rodar os testes — o sistema faz isso para você!
+
+### Como funciona
+
+Quando você executa os testes de integração (`tests/Integration`), o template:
+
+1. Sobe automaticamente um container **PostgreSQL** oficial.
+2. Executa todas as migrations automaticamente.
+3. Roda os testes contra este banco real e isolado.
+4. Remove o container ao final dos testes.
+
+### Executar os testes
+
+```bash
+dotnet test tests/Integration/Integration.csproj
+```
+
+> 💡 **Dica:** Esta é a forma mais confiável de testar sua aplicação, pois garante que o código se comporta exatamente como em produção, mas em um ambiente totalmente efêmero.
+
+---
+
 ## 🎯 Teste Manual (Passo a Passo)
 
 ### 1. Subir os Bancos de Dados

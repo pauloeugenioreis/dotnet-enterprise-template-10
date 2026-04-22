@@ -22,6 +22,9 @@ Este guia explica como habilitar e configurar os recursos avançados incluídos 
 14. [Event Sourcing](#event-sourcing)
 15. [CI/CD](#cicd)
 16. [Authentication](#authentication)
+17. [.NET Aspire (Orquestração)](#net-aspire-orquestracao)
+18. [Resiliência com Polly v8](#resiliencia-com-polly-v8)
+19. [Testcontainers](#testcontainers)
 
 ---
 
@@ -1579,3 +1582,63 @@ Sistema completo de autenticação/autorização com JWT, refresh tokens e OAuth
 - [⬆️ Voltar ao README](../README.md)
 - [📖 Ver Índice](../INDEX.md)
 - [🚀 Quick Start](../QUICK-START.md)
+
+---
+
+## .NET Aspire (Orquestração) {#net-aspire-orquestracao}
+
+### O que é?
+
+.NET Aspire é uma stack opinativa e pronta para nuvem para a construção de aplicações distribuídas observáveis e prontas para produção.
+
+### O que o template entrega
+
+- **AppHost**: Orquestração local de containers (Postgres, Redis, RabbitMQ, MongoDB).
+- **ServiceDefaults**: Configuração centralizada de OpenTelemetry, Health Checks e Service Discovery.
+- **Dashboard**: Interface visual para monitorar logs estruturados e métricas em tempo real.
+
+### Como usar
+
+Basta executar o projeto `src/AppHost`. Ele subirá toda a infraestrutura necessária automaticamente.
+
+---
+
+## Resiliência com Polly v8 {#resiliencia-com-polly-v8}
+
+### O que é?
+
+Polly é uma biblioteca de tratamento de falhas transitórias que permite que os desenvolvedores expressem políticas como Retry, Circuit Breaker, Timeout, Bulkhead Isolation, e Fallback de uma forma fluente e segura para threads.
+
+### O que o template entrega
+
+Implementamos a **Resiliência Nativa** do .NET 10, que utiliza o Polly v8 por baixo dos panos.
+
+- **AddStandardResilience**: Extensão pronta para ser usada em qualquer `IHttpClientBuilder`.
+- **Configuração Centralizada**: Políticas de Retry com backoff exponencial, Circuit Breaker e Timeouts configurados conforme as melhores práticas.
+
+### Exemplo de Uso
+
+```csharp
+services.AddHttpClient<IMyService, MyService>()
+    .AddStandardResilience();
+```
+
+---
+
+## Testcontainers
+
+### O que é?
+
+Testcontainers é uma biblioteca que permite usar containers Docker reais para testes de integração, em vez de fakes ou bancos em memória.
+
+### O que o template entrega
+
+- Integração nativa no projeto de `tests/Integration`.
+- Subida automática de container PostgreSQL para cada execução de teste.
+- Limpeza automática (Cleanup) após os testes.
+
+### Vantagens
+
+- **Fidelidade**: Teste contra o mesmo motor de banco de dados usado em produção.
+- **Isolamento**: Cada execução de teste pode ter seu próprio banco limpo.
+- **Zero Config**: Não é necessário ter o Postgres instalado na máquina do desenvolvedor, apenas o Docker.

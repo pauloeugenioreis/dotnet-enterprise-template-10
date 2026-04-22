@@ -40,6 +40,9 @@ public static class InfrastructureExtensions
         // Event Sourcing
         services.AddEventSourcing(appSettings);
 
+        // Resilience (Polly v8)
+        services.AddResilienceConfiguration();
+
         // Authentication (JWT + OAuth2)
         services.AddJwtAuthentication();
 

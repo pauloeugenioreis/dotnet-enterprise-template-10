@@ -554,6 +554,27 @@ Max:    1Gi memory, 2000m CPU
 
 ---
 
+## 🛡️ Testes de Arquitetura (ArchUnitNET)
+
+Para garantir que a integridade da Clean Architecture seja mantida ao longo do tempo, implementamos testes automatizados de arquitetura no projeto `tests/ArchitectureTests`.
+
+### Regras Validadas
+
+1. Isolamento do Domínio: A camada de Domínio não pode ter dependências de nenhuma outra camada do projeto.
+2. Isolamento da Aplicação: A camada de Aplicação não pode depender da Infraestrutura ou dos Dados.
+3. Independência de Dados/Infra: A camada de Dados e Infraestrutura não podem depender da API.
+4. Padrões de Nomes: DTOs devem terminar com o sufixo "Dto" ou "Request/Response".
+5. Padrões de Herança: Entidades devem herdar de `EntityBase` e Controllers de `ApiControllerBase`.
+
+```csharp
+// Exemplo de teste de arquitetura
+var result = Types().InAssembly(domainAssembly)
+    .ShouldNot().HaveDependencyOnAny(infraAssembly, dataAssembly, apiAssembly)
+    .GetResult();
+```
+
+---
+
 ## 🎓 Melhores Práticas Implementadas
 
 - ✅ **Clean Architecture** - Separação clara de responsabilidades

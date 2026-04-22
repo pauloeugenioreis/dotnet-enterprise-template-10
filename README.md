@@ -4,6 +4,9 @@
 
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![C#](https://img.shields.io/badge/C%23-latest-239120?logo=csharp&logoColor=white)](https://learn.microsoft.com/dotnet/csharp/)
+[![Aspire](https://img.shields.io/badge/.NET_Aspire-9.0-512BD4?logo=dotnet&logoColor=white)](QUICK-START.md)
+[![Testcontainers](https://img.shields.io/badge/Testcontainers-Latest-2496ED?logo=docker&logoColor=white)](docs/TESTING-DATABASES.md)
+[![Polly](https://img.shields.io/badge/Polly-v8-9B4F96?logo=polly&logoColor=white)](docs/FEATURES.md)
 [![RabbitMQ](https://img.shields.io/badge/RabbitMQ-7-FF6600?logo=rabbitmq&logoColor=white)](docs/FEATURES.md)
 [![SQL Server](https://img.shields.io/badge/SQL_Server-2022-CC2927?logo=microsoftsqlserver&logoColor=white)](docs/ORM-GUIDE.md)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)](docs/ORM-GUIDE.md)
@@ -23,8 +26,8 @@
 
 ## 📖 Documentação
 
-- **[🚀 Início Rápido](QUICK-START.md)** - Comece em 5 minutos
-- **[🧪 Testando Bancos de Dados](docs/TESTING-DATABASES.md)** - Teste com SQL Server, Oracle, PostgreSQL e MySQL
+- **[🚀 Início Rápido](QUICK-START.md)** - Comece em 5 minutos (Agora com .NET Aspire!)
+- **[🧪 Testando Bancos de Dados](docs/TESTING-DATABASES.md)** - Teste com SQL Server, Oracle, PostgreSQL, MySQL e Testcontainers
 - **[📚 Guia Completo](README.md)** - Este documento
 - **[🎛️ Recursos Avançados](docs/FEATURES.md)** - MongoDB, Quartz, RabbitMQ, Storage, etc.
 - **[🗄️ Guia MongoDB](docs/MONGODB-GUIDE.md)** - Configuração, seed automático e troubleshooting
@@ -45,7 +48,10 @@ Este template fornece uma estrutura completa e moderna para desenvolvimento de A
 
 ### ✨ Características Principais
 
-- **Clean Architecture** com separação clara de responsabilidades
+- **Clean Architecture** com separação clara de responsabilidades e **Testes de Arquitetura (ArchUnitNET)**
+- **Orquestração com .NET Aspire** para gerenciamento simplificado de infraestrutura e observabilidade
+- **Testes de Integração Modernos** com **Testcontainers** e PostgreSQL real
+- **Resiliência Nativa com Polly v8** (AddStandardResilience) para comunicações HTTP
 - **Suporte a múltiplos ORMs** (Entity Framework Core, Dapper, ADO.NET, NHibernate, Linq2Db)
 - **Telemetria completa** com OpenTelemetry (Jaeger, Prometheus, Grafana, Application Insights, Datadog, Dynatrace)
 - **Rate Limiting** com 4 estratégias (Fixed Window, Sliding Window, Token Bucket, Concurrency)
@@ -104,6 +110,12 @@ ProjectTemplate/
 │   │   ├── appsettings.*.json                    # Configurações por ambiente/provider
 │   │   └── Program.cs                            # Entry point da aplicação (com seeding automático)
 │   │
+│   ├── AppHost/                                  # Orquestrador .NET Aspire (Containers e Infra)
+│   │   └── Program.cs                            # Definição de recursos (Postgres, Redis, etc.)
+│   │
+│   ├── ServiceDefaults/                          # Configurações padrão Aspire (OTel, HealthChecks)
+│   │   └── Extensions.cs                         # Extensões compartilhadas para todos os serviços
+│   │
 │   ├── Application/                              # Camada de aplicação (Services, Business Logic)
 │   │   └── Services/                             # Application services
 │   │
@@ -134,6 +146,7 @@ ProjectTemplate/
 │       │   ├── DatabaseExtension.cs              # Configuração de banco de dados
 │       │   ├── HealthChecksExtension.cs          # Health checks
 │       │   ├── DependencyInjectionExtension.cs   # Scrutor auto-registration
+│       │   ├── ResilienceExtension.cs            # Resiliência com Polly v8
 │       │   ├── MongoExtension.cs                 # MongoDB support
 │       │   ├── QuartzExtension.cs                # Background jobs (Quartz.NET)
 │       │   ├── RabbitMqExtension.cs              # Message queue (RabbitMQ)
@@ -165,12 +178,16 @@ ProjectTemplate/
 │   │   ├── UnitTests.csproj          # Projeto de testes unitários
 │   │   └── README.md                 # Documentação dos testes
 │   │
-│   └── Integration/                  # Testes de integração
-│       ├── Controllers/              # Testes de integração dos controllers
-│       ├── Support/                  # Configuração e utilitários de testes
-│       ├── Properties/
-│       ├── Integration.csproj        # Projeto de testes de integração
-│       └── README.md                 # Documentação de testes de integração
+│   ├── Integration/                  # Testes de integração com Testcontainers (Postgres Real)
+│   │   ├── Controllers/              # Testes de integração dos controllers
+│   │   ├── Support/                  # Configuração e utilitários de testes
+│   │   ├── Integration.csproj        # Projeto de testes de integração
+│   │   └── README.md                 # Documentação de testes de integração
+│   │
+│   └── ArchitectureTests/            # Testes de arquitetura (ArchUnitNET / NetArchTest)
+│       ├── LayerTests.cs             # Validação de isolamento de camadas
+│       ├── DesignRulesTests.cs       # Validação de padrões e nomes
+│       └── ArchitectureTests.csproj  # Projeto de testes de arquitetura
 │
 ├── docs/                             # Documentação adicional
 │   ├── examples/                     # Arquivos de exemplo (.http e cenários)

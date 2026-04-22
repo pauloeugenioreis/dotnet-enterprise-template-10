@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
@@ -12,14 +13,39 @@ using ProjectTemplate.Data.Context;
 using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Interfaces;
 using ProjectTemplate.Integration.Tests.Support;
+using Testcontainers.PostgreSql;
+using Xunit;
 
 namespace ProjectTemplate.Integration.Tests;
 
 /// <summary>
-/// Custom WebApplicationFactory for integration tests with in-memory database
+/// Custom WebApplicationFactory for integration tests with real PostgreSQL via Testcontainers
 /// </summary>
-public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
+public class WebApplicationFactoryFixture : WebApplicationFactory<Program>, IAsyncLifetime
 {
+    private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
+        .WithImage("postgres:latest")
+        .WithDatabase("ProjectTemplateTests")
+        .WithUsername("postgres")
+        .WithPassword("postgres")
+        .Build();
+
+    public async ValueTask InitializeAsync()
+    {
+        await _dbContainer.StartAsync();
+        
+        // Trigger host creation and ensure database is created
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await db.Database.EnsureCreatedAsync();
+        SeedTestData(db);
+    }
+
+    public new async ValueTask DisposeAsync()
+    {
+        await _dbContainer.StopAsync();
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         // Set environment to Testing to disable Swagger in Program.cs
@@ -30,8 +56,10 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
         {
             config.AddInMemoryCollection(new Dictionary<string, string>
             {
-                ["Authentication:Enabled"] = "false", // Backward compatibility with legacy key
+                ["Authentication:Enabled"] = "false",
                 ["AppSettings:Authentication:Enabled"] = "false",
+                ["AppSettings:Infrastructure:Database:DatabaseType"] = "PostgreSQL",
+                ["AppSettings:Infrastructure:Database:ConnectionString"] = _dbContainer.GetConnectionString(),
                 ["AppSettings:Infrastructure:EventSourcing:Enabled"] = "true",
                 ["AppSettings:Infrastructure:EventSourcing:Mode"] = "Hybrid",
                 ["AppSettings:Infrastructure:EventSourcing:Provider"] = "Custom",
@@ -44,7 +72,7 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
 
         builder.ConfigureServices(services =>
         {
-            // Remove ALL Swagger-related services to avoid OpenAPI version conflicts
+            // Remove ALL Swagger-related services
             var swaggerDescriptors = services
                 .Where(d => d.ServiceType.Namespace != null &&
                            (d.ServiceType.Namespace.StartsWith("Swashbuckle") ||
@@ -56,8 +84,7 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
                 services.Remove(descriptor);
             }
 
-            // Replace authentication with a test handler that always succeeds.
-            // This supports [Authorize] on controllers without real JWT tokens.
+            // Replace authentication with a test handler
             var authDescriptors = services
                 .Where(d => d.ServiceType.Namespace != null &&
                            (d.ServiceType.Namespace.StartsWith("Microsoft.AspNetCore.Authentication") ||
@@ -78,26 +105,11 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
 
             services.AddAuthorization();
 
-            // Remove the existing DbContext registration
-            services.RemoveAll(typeof(DbContextOptions<ApplicationDbContext>));
-            services.RemoveAll(typeof(ApplicationDbContext));
-            services.RemoveAll(typeof(DbContext));
-
-            // Add in-memory database for testing (unique per fixture instance for isolation)
-            var databaseName = $"TestDb_{Guid.NewGuid()}";
-            services.AddDbContext<ApplicationDbContext>(options =>
-            {
-                options.UseInMemoryDatabase(databaseName);
-            });
-
-            // Register DbContext as ApplicationDbContext for Repository<T> that expects DbContext
-            services.AddScoped<DbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
-
             // Replace Marten-based event store with an in-memory implementation for tests
             services.RemoveAll(typeof(IEventStore));
             services.AddSingleton<IEventStore, InMemoryEventStore>();
 
-            // Ensure EventSourcing settings are available for controllers
+            // Ensure EventSourcing settings are available
             services.RemoveAll<EventSourcingSettings>();
             services.AddSingleton(new EventSourcingSettings
             {
@@ -126,33 +138,20 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>
                 options.GroupNameFormat = "'v'VVV";
                 options.SubstituteApiVersionInUrl = true;
             });
-
-            // Build service provider
-            var serviceProvider = services.BuildServiceProvider();
-
-            // Create a scope to obtain a reference to the database context
-            using var scope = serviceProvider.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-            // Ensure the database is created
-            db.Database.EnsureCreated();
-
-            // Seed test data if needed
-            SeedTestData(db);
         });
     }
 
     public void ClearEventStore()
     {
+        // For xUnit v3, we can't easily access Services before the first client is created
+        // if we are in the constructor. However, we can use a lazy initialization.
         var eventStore = Services.GetService<IEventStore>() as InMemoryEventStore;
         eventStore?.Clear();
     }
 
     private static void SeedTestData(ApplicationDbContext context)
     {
-        // Add seed data for tests
-        // Example:
-        // context.Products.Add(new Product { Name = "Test Product", Price = 10.00m });
-        // context.SaveChanges();
+        // Add seed data if needed
     }
 }
+

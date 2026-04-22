@@ -1,0 +1,23 @@
+var builder = DistributedApplication.CreateBuilder(args);
+
+// Infrastructure Resources
+var postgres = builder.AddPostgres("postgres")
+    .WithDataVolume()
+    .AddDatabase("ProjectTemplateDb");
+
+var redis = builder.AddRedis("redis");
+
+var rabbitmq = builder.AddRabbitMQ("rabbitmq");
+
+var mongodb = builder.AddMongoDB("mongodb")
+    .AddDatabase("ProjectTemplateMongo");
+
+// Api Project
+builder.AddProject<Projects.Api>("api")
+    .WithReference(postgres)
+    .WithReference(redis)
+    .WithReference(rabbitmq)
+    .WithReference(mongodb)
+    .WithExternalHttpEndpoints();
+
+builder.Build().Run();

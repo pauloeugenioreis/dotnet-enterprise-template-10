@@ -142,6 +142,20 @@ Swagger: `https://localhost:3060/swagger`
 2. Pressione F5 (debug)
 3. Ou use terminal: `dotnet run --project src/Api/Api.csproj`
 
+### Opção D: .NET Aspire (Orquestração Moderna) 🚀
+
+Esta é a forma recomendada para desenvolvimento local. O Aspire irá subir automaticamente todos os containers necessários (PostgreSQL, Redis, RabbitMQ, MongoDB) e fornecer um dashboard de observabilidade.
+
+1. Navegue até o projeto AppHost:
+
+   ```bash
+   cd src/AppHost
+   dotnet run
+   ```
+
+2. Abra o dashboard no link que aparecerá no terminal (geralmente `http://localhost:18888`).
+3. No dashboard, você verá os logs, métricas e o status de todos os containers e da API.
+
 ---
 
 ## 🐳 4. Executar com Docker (Opcional)

@@ -58,7 +58,11 @@ builder.Services.AddInfrastructureServices(builder.Configuration, builder.Enviro
 // Add Cloud Storage (Google Cloud Storage / Azure Blob / AWS S3)
 // builder.Services.AddStorage<Program>();
 
+builder.AddServiceDefaults();
+
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 // Seed database on startup (Development only)
 if (app.Environment.IsDevelopment())

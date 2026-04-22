@@ -46,31 +46,31 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 
 ### Documentação Principal
 
-| Documento                                        | Descrição                                       | Quando Usar                             |
-| ------------------------------------------------ | ----------------------------------------------- | --------------------------------------- |
-| **[README.md](README.md)**                       | Documentação principal e overview completo      | Entender o projeto como um todo         |
-| **[QUICK-START.md](QUICK-START.md)**             | Início rápido em 5 minutos                      | Primeira vez usando o template          |
-| **[LICENSE](LICENSE)**                           | Licença do projeto (MIT)                        | Entender termos de uso                  |
-| **[sonar-project.properties](sonar-project.properties)** | Configuração do SonarCloud            | Configurar análise de qualidade         |
+| Documento                                                      | Descrição                                       | Quando Usar                             |
+| -------------------------------------------------------------- | ----------------------------------------------- | --------------------------------------- |
+| **[README.md](README.md)**                                     | Documentação principal e overview completo      | Entender o projeto como um todo         |
+| **[QUICK-START.md](QUICK-START.md)**                           | Início rápido em 5 minutos                      | Primeira vez usando o template          |
+| **[LICENSE](LICENSE)**                                         | Licença do projeto (MIT)                        | Entender termos de uso                  |
+| **[sonar-project.properties](sonar-project.properties)**       | Configuração do SonarCloud                      | Configurar análise de qualidade         |
 
 ### Guias Técnicos
 
-| Documento                                        | Descrição                                       | Quando Usar                             |
-| ------------------------------------------------ | ----------------------------------------------- | --------------------------------------- |
-| **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** | Visão detalhada da arquitetura                  | Entender Clean Architecture e padrões   |
-| **[docs/FEATURES.md](docs/FEATURES.md)**         | Recursos avançados (MongoDB, Queue, Jobs, etc.) | Usar MongoDB, RabbitMQ, Quartz, Storage |
-| **[docs/MONGODB-GUIDE.md](docs/MONGODB-GUIDE.md)** | Guia prático de MongoDB no template         | Configurar seed, auth e troubleshooting  |
-| **[docs/ORM-GUIDE.md](docs/ORM-GUIDE.md)**       | Guia de ORMs (EF Core, Dapper, etc.)            | Escolher ou alternar ORM                |
-| **[docs/CONFIGURATION-GUIDE.md](docs/CONFIGURATION-GUIDE.md)** | Configuração com IOptions\<T\>     | Acessar configurações no código         |
-| **[docs/AUTHENTICATION.md](docs/AUTHENTICATION.md)** | JWT & OAuth2 (Google, Microsoft, GitHub)   | Configurar autenticação                 |
-| **[docs/SECURITY.md](docs/SECURITY.md)**         | Headers, CORS, HTTPS, proteção contra ataques   | Revisar segurança da API                |
-| **[docs/RATE-LIMITING.md](docs/RATE-LIMITING.md)** | 4 estratégias de Rate Limiting                 | Controle de taxa de requisições         |
-| **[docs/EVENT-SOURCING.md](docs/EVENT-SOURCING.md)** | Event Sourcing com Marten + PostgreSQL       | Auditoria e time travel                 |
-| **[docs/TELEMETRY.md](docs/TELEMETRY.md)**       | OpenTelemetry, Jaeger, Prometheus, Grafana      | Configurar observabilidade              |
-| **[docs/TESTING-DATABASES.md](docs/TESTING-DATABASES.md)** | Testes multi-banco de dados            | Validar suporte a 4+ bancos            |
-| **[docs/KUBERNETES.md](docs/KUBERNETES.md)**     | Deploy no Kubernetes                            | Deploy em produção ou local             |
-| **[docs/CICD.md](docs/CICD.md)**                 | GitHub Actions, Azure DevOps, GitLab CI         | Configurar CI/CD                        |
-| **[docs/SONARCLOUD.md](docs/SONARCLOUD.md)**     | Configuração do SonarCloud                      | Implementar análise de qualidade        |
+| Documento                                                      | Descrição                                       | Quando Usar                             |
+| -------------------------------------------------------------- | ----------------------------------------------- | --------------------------------------- |
+| **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**               | Visão detalhada da arquitetura                  | Entender Clean Architecture e padrões   |
+| **[docs/FEATURES.md](docs/FEATURES.md)**                       | Recursos avançados (MongoDB, Queue, Jobs, etc.) | Usar MongoDB, RabbitMQ, Quartz, Storage |
+| **[docs/MONGODB-GUIDE.md](docs/MONGODB-GUIDE.md)**             | Guia prático de MongoDB no template             | Configurar seed, auth e troubleshooting |
+| **[docs/ORM-GUIDE.md](docs/ORM-GUIDE.md)**                     | Guia de ORMs (EF Core, Dapper, etc.)            | Escolher ou alternar ORM                |
+| **[docs/CONFIGURATION-GUIDE.md](docs/CONFIGURATION-GUIDE.md)** | Configuração com IOptions\<T\>                  | Acessar configurações no código         |
+| **[docs/AUTHENTICATION.md](docs/AUTHENTICATION.md)**           | JWT & OAuth2 (Google, Microsoft, GitHub)        | Configurar autenticação                 |
+| **[docs/SECURITY.md](docs/SECURITY.md)**                       | Headers, CORS, HTTPS, proteção contra ataques   | Revisar segurança da API                |
+| **[docs/RATE-LIMITING.md](docs/RATE-LIMITING.md)**             | 4 estratégias de Rate Limiting                 | Controle de taxa de requisições         |
+| **[docs/EVENT-SOURCING.md](docs/EVENT-SOURCING.md)**           | Event Sourcing com Marten + PostgreSQL          | Auditoria e time travel                 |
+| **[docs/TELEMETRY.md](docs/TELEMETRY.md)**                     | OpenTelemetry, Jaeger, Prometheus, Grafana      | Configurar observabilidade              |
+| **[docs/TESTING-DATABASES.md](docs/TESTING-DATABASES.md)**     | Testes multi-banco de dados                     | Validar suporte a 4+ bancos             |
+| **[docs/KUBERNETES.md](docs/KUBERNETES.md)**                   | Deploy no Kubernetes                            | Deploy em produção ou local             |
+| **[docs/CICD.md](docs/CICD.md)**                               | GitHub Actions, Azure DevOps, GitLab CI         | Configurar CI/CD                        |
+| **[docs/SONARCLOUD.md](docs/SONARCLOUD.md)**                   | Configuração do SonarCloud                      | Implementar análise de qualidade        |
 
 ### Arquivos de Configuração
 
@@ -161,18 +161,18 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 
 ```text
 template/
-├── 📄 README.md                     # Documentação principal
-├── 📄 QUICK-START.md                # Início rápido
-├── 📄 LICENSE                       # Licença MIT
-├── 📄 INDEX.md                      # Este arquivo
-├── 📄 .env.example                  # Exemplo de variáveis de ambiente
-├── 📄 .gitignore                    # Git ignore
-├── 📄 global.json                   # SDK do .NET
-├── 📄 ProjectTemplate.sln           # Solution file
-├── 📄 Dockerfile                    # Docker image
-├── 📄 docker-compose.yml            # Docker compose
+├── 📄 README.md               # Documentação principal
+├── 📄 QUICK-START.md               # Início rápido
+├── 📄 LICENSE                      # Licença MIT
+├── 📄 INDEX.md                     # Este arquivo
+├── 📄 .env.example                 # Exemplo de variáveis de ambiente
+├── 📄 .gitignore                   # Git ignore
+├── 📄 global.json                  # SDK do .NET
+├── 📄 ProjectTemplate.sln          # Solution file
+├── 📄 Dockerfile                   # Docker image
+├── 📄 docker-compose.yml           # Docker compose
 │
-├── 📁 docs/                         # Documentação adicional
+├── 📁 docs/                   # Documentação adicional
 │   ├── 📄 ARCHITECTURE.md          # Arquitetura detalhada
 │   ├── 📄 FEATURES.md              # Recursos avançados
 │   ├── 📄 ORM-GUIDE.md             # Guia de ORMs
@@ -184,18 +184,21 @@ template/
 │   ├── 📄 KUBERNETES.md            # Guia Kubernetes
 │   └── 📁 examples/                # Exemplos práticos
 │
-├── 📁 src/                          # Código fonte
+├── 📁 src/                    # Código fonte
 │   ├── 📁 Api/                     # Camada de apresentação
+│   ├── 📁 AppHost/                 # Orquestrador .NET Aspire
+│   ├── 📁 ServiceDefaults/         # Configurações padrão Aspire
 │   ├── 📁 Application/             # Camada de aplicação
 │   ├── 📁 Domain/                  # Camada de domínio
 │   ├── 📁 Data/                    # Camada de dados
 │   └── 📁 Infrastructure/          # Camada de infraestrutura
 │
-├── 📁 tests/                        # Testes
-│   ├── 📁 Integration/             # Testes de integração
-│   └── 📁 Infrastructure.UnitTests/ # Testes unitários
+├── 📁 tests/                  # Testes
+│   ├── 📁 Integration/             # Testes de integração (Testcontainers)
+│   ├── 📁 UnitTests/               # Testes unitários
+│   └── 📁 ArchitectureTests/       # Testes de arquitetura
 │
-├── 📁 .k8s/                         # Kubernetes manifests
+├── 📁 .k8s/                   # Kubernetes manifests
 │   ├── 📄 namespace.yaml
 │   ├── 📄 configmap.yaml
 │   ├── 📄 deployment.yaml
@@ -203,7 +206,7 @@ template/
 │   ├── 📄 ingress.yaml
 │   └── 📄 kustomization.yaml
 │
-└── 📁 scripts/                      # Scripts de automação
+└── 📁 scripts/                # Scripts de automação
     ├── 📁 linux/                   # Scripts bash
     ├── 📁 windows/                 # Scripts PowerShell/Batch
     ├── 📄 new-project.sh
