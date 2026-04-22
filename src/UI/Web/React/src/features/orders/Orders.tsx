@@ -27,6 +27,17 @@ export default function Orders() {
     }
   };
 
+  const handleEdit = (order: any) => {
+    setEditingId(order.id);
+    setFormData({
+      customerName: order.customerName || '',
+      customerEmail: order.customerEmail || '',
+      shippingAddress: order.shippingAddress || '',
+      items: order.items || []
+    });
+    setIsModalOpen(true);
+  };
+
   const totalPages = data?.totalPages || 1;
 
   const handleAddItem = () => {
@@ -121,8 +132,12 @@ export default function Orders() {
                 </td>
                 <td className="px-10 py-8">
                   <div className="flex gap-2">
-                    <button className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors" title="Ver Detalhes">
-                      👁️
+                    <button 
+                      onClick={() => handleEdit(order)}
+                      className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors" 
+                      title="Editar"
+                    >
+                      ✏️
                     </button>
                     <button 
                       onClick={() => handleCancel(order.id)}
@@ -165,7 +180,7 @@ export default function Orders() {
       <Modal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        title="Novo Pedido"
+        title={editingId ? 'Editar Pedido' : 'Novo Pedido'}
       >
         <div className="space-y-6 max-h-[70vh] overflow-y-auto px-2">
           <div className="grid grid-cols-2 gap-4">
