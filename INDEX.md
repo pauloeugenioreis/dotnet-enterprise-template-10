@@ -89,7 +89,7 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 
 1. Leia: [QUICK-START.md](QUICK-START.md) - Seção "Criar Novo Projeto"
 2. Execute: `cd scripts && ./new-project.sh MeuProjeto` (ou `.ps1` / `.bat`)
-3. O script interativo configura banco, cache, mensageria, storage, telemetria e event sourcing
+3. O script interativo configura banco, mensageria, storage, telemetria e event sourcing
 4. Rode: `dotnet run --project src/Api/Api.csproj`
 
 ### "Quero usar outro banco de dados"
@@ -119,13 +119,6 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 2. Build: `docker build -t myapp:latest .`
 3. Run: `docker-compose up -d`
 4. Acesse: `http://localhost:8080`
-
-### "Quero configurar cache Redis"
-
-1. Leia: [README.md](README.md) - Seção "Configuração de Cache"
-2. Configure: `AppSettings.Infrastructure.Cache.Provider = "Redis"`
-3. Defina: Connection string do Redis
-4. Teste: Verifique health check
 
 ### "Quero adicionar autenticação"
 

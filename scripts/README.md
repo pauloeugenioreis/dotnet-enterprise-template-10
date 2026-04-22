@@ -15,7 +15,7 @@ Scripts utilitários para facilitar o desenvolvimento e testes do projeto.
 
 ## 🐳 new-project
 
-Script interativo para criar um novo projeto a partir do template com configuração automática de banco de dados, cache, mensageria, storage, telemetria e event sourcing.
+Script interativo para criar um novo projeto a partir do template com configuração automática de banco de dados, mensageria, storage, telemetria e event sourcing.
 
 ### Modo Interativo
 
@@ -29,9 +29,6 @@ O script apresenta um menu com opções para configurar o projeto:
 ── Banco de Dados ──
   [1] InMemory (padrão)   [2] SQL Server   [3] Oracle
   [4] PostgreSQL          [5] MySQL
-
-── Cache ──
-  [1] Sim (Redis)   [2] Não (memória - padrão)
 
 ── Mensageria ──
   [1] Sim (RabbitMQ)   [2] Não (padrão)
@@ -58,7 +55,7 @@ cd scripts
 .\new-project.ps1
 
 # Modo não-interativo (CI/CD)
-.\new-project.ps1 -ProjectName "MeuProjeto" -Database PostgreSQL -Cache Redis -Queue Yes -Storage Azure -Telemetry Yes -EventSourcing No -GitInit Yes
+.\new-project.ps1 -ProjectName "MeuProjeto" -Database PostgreSQL -Queue Yes -Storage Azure -Telemetry Yes -EventSourcing No -GitInit Yes
 ```
 
 ### Windows (Batch)
@@ -80,7 +77,7 @@ chmod +x new-project.sh
 ./new-project.sh
 
 # Modo não-interativo (CI/CD)
-./new-project.sh MeuProjeto --database PostgreSQL --cache Redis --queue yes --storage Azure --telemetry yes --event-sourcing no --git-init yes
+./new-project.sh MeuProjeto --database PostgreSQL --queue yes --storage Azure --telemetry yes --event-sourcing no --git-init yes
 ```
 
 ### Parâmetros (modo não-interativo)
@@ -88,7 +85,6 @@ chmod +x new-project.sh
 | Parâmetro | Valores | Padrão |
 |-----------|---------|--------|
 | Database | `InMemory`, `SqlServer`, `Oracle`, `PostgreSQL`, `MySQL` | `InMemory` |
-| Cache | `Memory`, `Redis` | `Memory` |
 | Queue | `Yes`, `No` | `No` |
 | Storage | `None`, `Azure`, `Aws`, `Google` | `None` |
 | Telemetry | `Yes`, `No` | `No` |
@@ -101,7 +97,7 @@ chmod +x new-project.sh
 2. ✅ **Limpa** - Remove `.git`, `bin`, `obj` e scripts exclusivos do template
 3. ✅ **Renomeia** - Solution e namespaces para novo nome
 4. ✅ **Substitui** - Todas referências de "ProjectTemplate" para nome escolhido
-5. ✅ **Configura** - `appsettings.json` com banco, cache, storage, telemetria e event sourcing
+5. ✅ **Configura** - `appsettings.json` com banco, storage, telemetria e event sourcing
 6. ✅ **Gera** - `docker-compose.yml` customizado com apenas os containers necessários
 7. ✅ **Remove** - Arquivos `appsettings.{Banco}.json` dos bancos não selecionados
 8. ✅ **Git** - Inicializa repositório com `.gitignore` (opcional)

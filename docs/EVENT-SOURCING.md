@@ -726,7 +726,6 @@ var allEvents = await _eventStore.GetEventsAsync("Order", orderId);
 
 3. **Não Use Event Sourcing para Dados Efêmeros**
    - Logs de acesso
-   - Cache temporário
 
 ---
 

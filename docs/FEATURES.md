@@ -1407,7 +1407,6 @@ Pipelines prontos para GitHub Actions, Azure DevOps e GitLab CI.
 | Security Scan     | ✅             | ✅           | ✅          |
 | Docker Build      | ✅             | ✅           | ✅          |
 | Deploy            | ✅ Manual      | ✅ Approval  | ✅ Manual   |
-| Cache             | ✅             | ✅           | ✅          |
 
 ### Quick Start - GitHub Actions
 

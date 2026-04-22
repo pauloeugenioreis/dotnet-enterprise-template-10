@@ -9,7 +9,7 @@ argument-hint: "Extension name (e.g., Redis Streams)"
 Creates a modular infrastructure extension following the project's established pattern of 17+ extensions.
 
 ## When to Use
-- Adding a new infrastructure feature (cache provider, message broker, etc.)
+- Adding a new infrastructure feature (message broker, etc.)
 - Integrating a new third-party service
 - Adding new middleware or cross-cutting concerns
 
@@ -61,5 +61,4 @@ public static class MyFeatureExtension
 6. Add unit test for the extension registration
 
 ## Reference
-- Check existing extension: `src/Infrastructure/Extensions/CacheExtension.cs`
 - Orchestrator: `src/Infrastructure/Extensions/InfrastructureExtensions.cs`

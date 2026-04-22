@@ -19,7 +19,7 @@ Guia rápido para começar a usar o template em menos de 5 minutos!
 
 ## 📦 1. Criar Novo Projeto
 
-O script interativo configura banco de dados, cache, mensageria, storage, telemetria e event sourcing automaticamente.
+O script interativo configura banco de dados, mensageria, storage, telemetria e event sourcing automaticamente.
 
 ### Windows (PowerShell)
 
@@ -46,7 +46,7 @@ new-project.bat
 cd ..\MeuProjeto
 ```
 
-> 💡 O script apresenta menus interativos para escolher banco de dados, cache (Redis), mensageria (RabbitMQ), cloud storage, telemetria e event sourcing. Também suporta modo não-interativo para CI/CD — veja [scripts/README.md](scripts/README.md) para detalhes.
+> 💡 O script apresenta menus interativos para escolher banco de dados, mensageria (RabbitMQ), cloud storage, telemetria e event sourcing. Também suporta modo não-interativo para CI/CD — veja [scripts/README.md](scripts/README.md) para detalhes.
 
 ---
 
@@ -401,45 +401,6 @@ Execute a aplicação e acesse: `https://localhost:3060/swagger`
 Teste os endpoints criados!
 
 ---
-
-## 🔧 8. Configurações Importantes
-
-### Cache (Development = Memory)
-
-`appsettings.Development.json`:
-
-```json
-{
-  "AppSettings": {
-    "Infrastructure": {
-      "Cache": {
-        "Enabled": true,
-        "Provider": "Memory"
-      }
-    }
-  }
-}
-```
-
-### Cache (Production = Redis)
-
-`appsettings.Production.json`:
-
-```json
-{
-  "AppSettings": {
-    "Infrastructure": {
-      "Cache": {
-        "Enabled": true,
-        "Provider": "Redis",
-        "Redis": {
-          "ConnectionString": "localhost:6379"
-        }
-      }
-    }
-  }
-}
-```
 
 ### Alternar ORM
 

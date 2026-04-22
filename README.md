@@ -10,7 +10,6 @@
 [![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white)](docs/ORM-GUIDE.md)
 [![Oracle](https://img.shields.io/badge/Oracle-Free-F80000?logo=oracle&logoColor=white)](docs/ORM-GUIDE.md)
 [![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?logo=mongodb&logoColor=white)](docs/FEATURES.md)
-[![Redis](https://img.shields.io/badge/Redis-Cache-DC382D?logo=redis&logoColor=white)](docs/FEATURES.md)
 [![Azure](https://img.shields.io/badge/Azure-Storage%20%7C%20AppInsights-0078D4?logo=microsoftazure&logoColor=white)](docs/FEATURES.md)
 [![AWS](https://img.shields.io/badge/AWS-S3-FF9900?logo=amazonaws&logoColor=white)](docs/FEATURES.md)
 [![Google Cloud](https://img.shields.io/badge/GCP-Storage%20%7C%20Logging-4285F4?logo=googlecloud&logoColor=white)](docs/FEATURES.md)
@@ -56,7 +55,6 @@ Este template fornece uma estrutura completa e moderna para desenvolvimento de A
 - **Infraestrutura modular** com extension methods
 - **Configurações validadas** em tempo de startup
 - **Health checks** prontos para produção
-- **Cache distribuído** (Memory, Redis, SQL Server)
 - **Logging estruturado** e observabilidade (Google Cloud Logging)
 - **CORS configurável** por ambiente
 - **Response compression** (Brotli/Gzip)
@@ -134,7 +132,6 @@ ProjectTemplate/
 │       │   ├── InfrastructureExtensions.cs       # Orquestrador principal
 │       │   ├── AppSettingsExtension.cs           # Validação de configurações
 │       │   ├── DatabaseExtension.cs              # Configuração de banco de dados
-│       │   ├── CacheExtension.cs                 # Memory/Redis/SQL Server cache
 │       │   ├── HealthChecksExtension.cs          # Health checks
 │       │   ├── DependencyInjectionExtension.cs   # Scrutor auto-registration
 │       │   ├── MongoExtension.cs                 # MongoDB support
@@ -244,7 +241,7 @@ cd template\scripts
 new-project.bat
 ```
 
-> 💡 Os scripts são interativos — apresentam menus para configurar banco de dados, cache, mensageria, cloud storage, telemetria e event sourcing. Para modo não-interativo (CI/CD), veja [scripts/README.md](scripts/README.md).
+> 💡 Os scripts são interativos — apresentam menus para configurar banco de dados, mensageria, cloud storage, telemetria e event sourcing. Para modo não-interativo (CI/CD), veja [scripts/README.md](scripts/README.md).
 
 ---
 
@@ -466,60 +463,6 @@ Já está habilitado. Não precisa fazer nada!
 2. Comente a linha do EF Core (linha ~26)
 3. Descomente a linha do ORM desejado
 4. Veja [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md) para implementação completa
-
-### Configuração de Cache
-
-#### Memory Cache (Padrão para desenvolvimento)
-
-```json
-{
-  "AppSettings": {
-    "Infrastructure": {
-      "Cache": {
-        "Enabled": true,
-        "Provider": "Memory",
-        "DefaultExpirationMinutes": 60
-      }
-    }
-  }
-}
-```
-
-#### Redis (Recomendado para produção)
-
-```json
-{
-  "AppSettings": {
-    "Infrastructure": {
-      "Cache": {
-        "Enabled": true,
-        "Provider": "Redis",
-        "ConnectionString": "localhost:6379",
-        "DefaultExpirationMinutes": 60
-      }
-    }
-  }
-}
-```
-
-#### SQL Server Cache
-
-```json
-{
-  "AppSettings": {
-    "Infrastructure": {
-      "Cache": {
-        "Enabled": true,
-        "Provider": "SqlServer",
-        "ConnectionString": "Server=localhost;Database=CacheDb;...",
-        "DefaultExpirationMinutes": 60
-      }
-    }
-  }
-}
-```
-
----
 
 ## 📊 Health Checks
 

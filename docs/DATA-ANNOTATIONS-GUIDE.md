@@ -139,108 +139,6 @@ public string BucketName { get; set; } = string.Empty;
 
 ## 🔧 Validadores Customizados
 
-### RequiredIf - Requer campo quando condição é verdadeira
-
-```csharp
-// Validators/RequiredIfAttribute.cs
-public class RequiredIfAttribute : ValidationAttribute
-{
-    private readonly string _propertyName;
-    private readonly object _propertyValue;
-
-    public RequiredIfAttribute(string propertyName, object propertyValue)
-    {
-        _propertyName = propertyName;
-        _propertyValue = propertyValue;
-    }
-
-    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
-    {
-        var instance = validationContext.ObjectInstance;
-        var propertyInfo = instance.GetType().GetProperty(_propertyName);
-
-        if (propertyInfo == null)
-        {
-            return new ValidationResult($"Property {_propertyName} not found");
-        }
-
-        var propertyValue = propertyInfo.GetValue(instance);
-
-        // Se a condição for verdadeira, o campo é obrigatório
-        if (Equals(propertyValue, _propertyValue))
-        {
-            if (value == null || (value is string str && string.IsNullOrWhiteSpace(str)))
-            {
-                return new ValidationResult(
-                    ErrorMessage ??
-                    $"{validationContext.DisplayName} is required when {_propertyName} is {_propertyValue}");
-            }
-        }
-
-        return ValidationResult.Success;
-    }
-}
-```
-
-**Uso:**
-
-```csharp
-public class CacheSettings
-{
-    public string Provider { get; set; } = "Memory";
-    public RedisSettings? Redis { get; set; }
-}
-
-public class RedisSettings
-{
-    [RequiredIf(nameof(CacheSettings.Provider), "Redis",
-        ErrorMessage = "Redis ConnectionString is required when Provider is Redis")]
-    public string ConnectionString { get; set; } = string.Empty;
-}
-```
-
-### RedisConnectionString - Valida formato de connection string Redis
-
-```csharp
-// Validators/RedisConnectionStringAttribute.cs
-public class RedisConnectionStringAttribute : ValidationAttribute
-{
-    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
-    {
-        if (value is not string connectionString)
-        {
-            return ValidationResult.Success;
-        }
-
-        if (string.IsNullOrWhiteSpace(connectionString))
-        {
-            return new ValidationResult("Redis connection string cannot be empty");
-        }
-
-        // Validar formato básico: host:port
-        if (!connectionString.Contains(':'))
-        {
-            return new ValidationResult(
-                "Redis connection string must contain host and port (e.g., 'localhost:6379')");
-        }
-
-        return ValidationResult.Success;
-    }
-}
-```
-
-**Uso:**
-
-```csharp
-public class RedisSettings
-{
-    [RedisConnectionString(ErrorMessage = "Invalid Redis connection string format")]
-    public string ConnectionString { get; set; } = string.Empty;
-}
-```
-
----
-
 <a id="exemplos-praticos"></a>
 
 ## 🎓 Exemplos Práticos
@@ -278,34 +176,7 @@ public class JwtSettings
 }
 ```
 
-### Exemplo 2: Configurações de Cache
-
-```csharp
-public class CacheSettings
-{
-    public bool Enabled { get; set; } = true;
-
-    [Required(ErrorMessage = "Cache Provider is required")]
-    [AllowedValues("Memory", "Redis", "SqlServer",
-        ErrorMessage = "Provider must be Memory, Redis, or SqlServer")]
-    public string Provider { get; set; } = "Memory";
-
-    public RedisSettings? Redis { get; set; }
-
-    [Range(1, 1440, ErrorMessage = "DefaultExpirationMinutes must be between 1 and 1440")]
-    public int DefaultExpirationMinutes { get; set; } = 60;
-}
-
-public class RedisSettings
-{
-    [RequiredIf(nameof(CacheSettings.Provider), "Redis",
-        ErrorMessage = "Redis ConnectionString is required when Provider is Redis")]
-    [RedisConnectionString(ErrorMessage = "Invalid Redis connection string format")]
-    public string ConnectionString { get; set; } = string.Empty;
-}
-```
-
-### Exemplo 3: Configurações de Banco de Dados
+### Exemplo 2: Configurações de Banco de Dados
 
 ```csharp
 public class DatabaseSettings
@@ -323,7 +194,7 @@ public class DatabaseSettings
 }
 ```
 
-### Exemplo 4: Configurações de Password Policy
+### Exemplo 3: Configurações de Password Policy
 
 ```csharp
 public class PasswordPolicySettings
@@ -344,7 +215,7 @@ public class PasswordPolicySettings
 }
 ```
 
-### Exemplo 5: Configurações de Telemetry
+### Exemplo 4: Configurações de Telemetry
 
 ```csharp
 public class TelemetrySettings

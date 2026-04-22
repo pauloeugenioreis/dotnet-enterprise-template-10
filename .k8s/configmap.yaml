@@ -19,12 +19,6 @@ data:
   AppSettings__Infrastructure__Database__CommandTimeout: "30"
   AppSettings__Infrastructure__Database__EnableSensitiveDataLogging: "false"
 
-  # Cache Configuration
-  AppSettings__Infrastructure__Cache__Enabled: "true"
-  AppSettings__Infrastructure__Cache__Provider: "Redis"
-  AppSettings__Infrastructure__Cache__ConnectionString: "redis-service:6379"
-  AppSettings__Infrastructure__Cache__DefaultExpirationMinutes: "60"
-
   # Database Settings
   AppSettings__Infrastructure__Database__Provider: "EntityFramework"
 

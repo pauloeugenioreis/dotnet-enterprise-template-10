@@ -973,11 +973,6 @@ Se você está migrando da autenticação básica:
 - Não é necessário consultar o banco de dados para access tokens
 - Refresh tokens requerem consulta ao banco de dados
 
-### Cache
-
-- Faça cache das roles do usuário para reduzir consultas ao banco
-- Implemente cache distribuído para escalabilidade
-
 ### Indexação do Banco de Dados
 
 ```sql

@@ -44,4 +44,4 @@ public static class MyFeatureExtension
 - Feature must be opt-in (disabled by default unless core functionality)
 
 ## Existing Extensions (17)
-AppSettings, Database, Cache, HealthChecks, Swagger, DependencyInjection, Authentication, ApiVersioning, Telemetry, RateLimiting, EventSourcing, Quartz, RabbitMQ, MongoDB, Storage, Logging
+AppSettings, Database, HealthChecks, Swagger, DependencyInjection, Authentication, ApiVersioning, Telemetry, RateLimiting, EventSourcing, Quartz, RabbitMQ, MongoDB, Storage, Logging
