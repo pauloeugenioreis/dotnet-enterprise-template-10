@@ -517,7 +517,6 @@ public class AuthenticationSettingsValidator : IValidateOptions<AppSettings>
 services.AddSingleton<IValidateOptions<AppSettings>, AuthenticationSettingsValidator>();
 ```
 
-
 ---
 
 ## 🌍 Sobrescrita de Configurações
