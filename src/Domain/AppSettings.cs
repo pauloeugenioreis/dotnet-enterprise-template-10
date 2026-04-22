@@ -28,7 +28,6 @@ public class AppSettings
 public class InfrastructureSettings
 {
     public string Environment { get; set; } = "Development";
-    public CacheSettings Cache { get; set; } = new();
     public DatabaseSettings Database { get; set; } = new();
     public MongoDbSettings MongoDB { get; set; } = new();
     public RabbitMqSettings RabbitMQ { get; set; } = new();
@@ -52,28 +51,6 @@ public class OrderSettings
     public decimal DefaultShippingCost { get; set; } = 10.00m;
 }
 
-public class CacheSettings
-{
-    public bool Enabled { get; set; } = true;
-
-    [Required(ErrorMessage = "Cache Provider is required")]
-    [AllowedValues("Memory", "Redis", "SqlServer",
-        ErrorMessage = "Provider must be Memory, Redis, or SqlServer")]
-    public string Provider { get; set; } = "Memory"; // Memory, Redis, SqlServer
-
-    public RedisSettings? Redis { get; set; }
-
-    [Range(1, 1440, ErrorMessage = "DefaultExpirationMinutes must be between 1 and 1440 (24 hours)")]
-    public int DefaultExpirationMinutes { get; set; } = 60;
-}
-
-public class RedisSettings
-{
-    [RequiredIf(nameof(CacheSettings.Provider), "Redis",
-        ErrorMessage = "Redis ConnectionString is required when Provider is Redis")]
-    [RedisConnectionString(ErrorMessage = "Invalid Redis connection string format")]
-    public string ConnectionString { get; set; } = string.Empty;
-}
 
 public class DatabaseSettings
 {

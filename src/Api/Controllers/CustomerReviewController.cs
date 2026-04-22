@@ -1,6 +1,6 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OutputCaching;
+
 using ProjectTemplate.Domain.Dtos;
 using ProjectTemplate.Domain.Interfaces;
 
@@ -21,7 +21,7 @@ public class CustomerReviewController(
     /// Get all reviews with optional filters and pagination.
     /// </summary>
     [HttpGet]
-    [OutputCache(PolicyName = "Expire300")]
+
     [ProducesResponseType(typeof(PagedResponse<CustomerReviewResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(IEnumerable<CustomerReviewResponseDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllAsync(
@@ -47,7 +47,7 @@ public class CustomerReviewController(
     /// Get a review by its MongoDB ObjectId.
     /// </summary>
     [HttpGet("{id}")]
-    [OutputCache(PolicyName = "Expire300")]
+
     [ProducesResponseType(typeof(CustomerReviewResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetByIdAsync(string id, CancellationToken cancellationToken)

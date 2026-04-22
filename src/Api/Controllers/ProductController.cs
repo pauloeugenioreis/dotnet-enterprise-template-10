@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OutputCaching;
+
 using MiniExcelLibs;
 using MiniExcelLibs.OpenXml;
 using ProjectTemplate.Domain.Dtos;
@@ -23,7 +23,7 @@ public class ProductController(
     /// Get all products with performance metrics
     /// </summary>
     [HttpGet]
-    [OutputCache(PolicyName = "Expire300")]
+
     [ProducesResponseType(typeof(PagedResponse<ProductResponseDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllAsync(
         [FromQuery] bool? isActive,
@@ -44,7 +44,7 @@ public class ProductController(
     /// Get product by ID
     /// </summary>
     [HttpGet("{id}")]
-    [OutputCache(PolicyName = "Expire300")]
+
     [ProducesResponseType(typeof(ProductResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetByIdAsync(long id, CancellationToken cancellationToken)

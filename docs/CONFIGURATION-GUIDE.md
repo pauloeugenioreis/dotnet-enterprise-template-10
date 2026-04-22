@@ -62,10 +62,6 @@ public class AppSettings
       "Database": {
         "DatabaseType": "InMemory",
         "ConnectionString": ""
-      },
-      "Cache": {
-        "Enabled": true,
-        "Provider": "Memory"
       }
     }
   }
@@ -282,7 +278,7 @@ public class MyService
 {
     public MyService(IConfiguration config)
     {
-        var value = config.GetSection("AppSettings:Infrastructure:Cache:Enabled"); // ❌
+        var value = config.GetSection("AppSettings:Infrastructure:Telemetry:Enabled"); // ❌
     }
 }
 
@@ -324,10 +320,7 @@ public class ProductController : ApiControllerBase
   [HttpGet]
   public async Task<IActionResult> GetAll()
   {
-    if (_settings.Infrastructure.Cache.Enabled)
-    {
-      _logger.LogInformation("Cache is enabled, checking cache first");
-    }
+
 
     var products = await _productService.GetAllAsync();
     return Ok(products);
@@ -524,29 +517,6 @@ public class AuthenticationSettingsValidator : IValidateOptions<AppSettings>
 services.AddSingleton<IValidateOptions<AppSettings>, AuthenticationSettingsValidator>();
 ```
 
-### Criando Seu Próprio Validador
-
-```csharp
-public class CacheSettingsValidator : IValidateOptions<AppSettings>
-{
-  public ValidateOptionsResult Validate(string? name, AppSettings options)
-  {
-    var cacheSettings = options.Infrastructure.Cache;
-
-    if (!cacheSettings.Enabled)
-      return ValidateOptionsResult.Success;
-
-    if (cacheSettings.Provider == "Redis" &&
-      string.IsNullOrWhiteSpace(cacheSettings.Redis?.ConnectionString))
-    {
-      return ValidateOptionsResult.Fail(
-        "Redis connection string is required when Redis provider is selected");
-    }
-
-    return ValidateOptionsResult.Success;
-  }
-}
-```
 
 ---
 
@@ -604,10 +574,6 @@ AppSettings__Propriedade__SubPropriedade
           "Profile": "",
           "ServiceUrl": ""
         }
-      },
-      "Cache": {
-        "Enabled": true,
-        "Provider": "Memory"
       }
     }
   }
@@ -630,10 +596,6 @@ AppSettings__Authentication__Jwt__Issuer=https://api.production.com
 AppSettings__Authentication__Jwt__Audience=https://app.production.com
 AppSettings__Authentication__Jwt__ExpirationMinutes=60
 
-# Cache Settings
-AppSettings__Infrastructure__Cache__Enabled=true
-AppSettings__Infrastructure__Cache__Provider=Redis
-AppSettings__Infrastructure__Cache__Redis__ConnectionString=redis-prod.cache.windows.net:6380,ssl=true
 
 # Database Settings
 AppSettings__Infrastructure__Database__Provider=SqlServer
@@ -681,9 +643,6 @@ services:
       - AppSettings__Authentication__Jwt__Issuer=https://api.mycompany.com
       - AppSettings__Authentication__Jwt__Audience=https://app.mycompany.com
       - AppSettings__Authentication__Jwt__ExpirationMinutes=120
-      - AppSettings__Infrastructure__Cache__Enabled=true
-      - AppSettings__Infrastructure__Cache__Provider=Redis
-      - AppSettings__Infrastructure__Cache__Redis__ConnectionString=redis:6379
       - AppSettings__Infrastructure__Telemetry__Enabled=true
       - AppSettings__Infrastructure__Telemetry__Provider=Console
     depends_on:
@@ -713,7 +672,6 @@ Crie um arquivo `.env` na raiz do projeto:
 ENVIRONMENT_NAME=Production
 JWT_SECRET=my-super-secret-key-for-production-with-64-characters-minimum
 JWT_ISSUER=https://api.mycompany.com
-REDIS_CONNECTION=redis:6379
 SQL_CONNECTION=Server=sqlserver;Database=MyDb;User Id=sa;Password=YourPassword123!;TrustServerCertificate=true
 ```
 
@@ -731,7 +689,7 @@ services:
       - AppSettings__EnvironmentName=${ENVIRONMENT_NAME}
       - AppSettings__Authentication__Jwt__Secret=${JWT_SECRET}
       - AppSettings__Authentication__Jwt__Issuer=${JWT_ISSUER}
-      - AppSettings__Infrastructure__Cache__Redis__ConnectionString=${REDIS_CONNECTION}
+
       - AppSettings__Infrastructure__Database__ConnectionString=${SQL_CONNECTION}
 ```
 
@@ -753,8 +711,6 @@ data:
   AppSettings__Authentication__Jwt__Issuer: "https://api.mycompany.com"
   AppSettings__Authentication__Jwt__Audience: "https://app.mycompany.com"
   AppSettings__Authentication__Jwt__ExpirationMinutes: "120"
-  AppSettings__Infrastructure__Cache__Enabled: "true"
-  AppSettings__Infrastructure__Cache__Provider: "Redis"
   AppSettings__Infrastructure__Database__Provider: "SqlServer"
   AppSettings__Infrastructure__Database__CommandTimeoutSeconds: "60"
   AppSettings__Infrastructure__Telemetry__Enabled: "true"
@@ -774,7 +730,7 @@ type: Opaque
 stringData:
   AppSettings__Authentication__Jwt__Secret: "my-super-secret-key-for-production-with-64-characters-minimum"
   AppSettings__Infrastructure__Database__ConnectionString: "Server=prod-sql.database.windows.net;Database=MyDb;User Id=admin;Password=SecurePass123!"
-  AppSettings__Infrastructure__Cache__Redis__ConnectionString: "prod-redis.redis.cache.windows.net:6380,password=xxx,ssl=True"
+
   AppSettings__Infrastructure__Telemetry__ApplicationInsights__ConnectionString: "InstrumentationKey=xxxxx-xxxx-xxxx-xxxx-xxxxx"
   AppSettings__Infrastructure__MongoDB__ConnectionString: "mongodb://username:password@prod-mongodb:27017/mydb"
   AppSettings__Infrastructure__RabbitMQ__ConnectionString: "amqp://username:password@prod-rabbitmq:5672/"
@@ -876,8 +832,7 @@ az webapp config appsettings set \
   --settings \
     "AppSettings__EnvironmentName=Production" \
     "AppSettings__Authentication__Jwt__Secret=my-super-secret-key" \
-    "AppSettings__Infrastructure__Database__ConnectionString=Server=xxx" \
-    "AppSettings__Infrastructure__Cache__Provider=Redis"
+    "AppSettings__Infrastructure__Database__ConnectionString=Server=xxx"
 
 # Listar configurações
 az webapp config appsettings list \
@@ -908,8 +863,7 @@ option_settings:
     AppSettings__EnvironmentName: "Production"
     AppSettings__Authentication__Jwt__Secret: "my-super-secret-key-for-production"
     AppSettings__Authentication__Jwt__Issuer: "https://api.mycompany.com"
-    AppSettings__Infrastructure__Cache__Provider: "Redis"
-    AppSettings__Infrastructure__Cache__Redis__ConnectionString: "prod-redis.cache.amazonaws.com:6379"
+
 ```
 
 ### AWS CLI
@@ -999,7 +953,7 @@ Crie `launchSettings.json`:
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "AppSettings__Authentication__Jwt__Secret": "test-secret-key-with-at-least-32-characters",
-        "AppSettings__Infrastructure__Cache__Provider": "Memory"
+
       }
     }
   }
@@ -1016,7 +970,7 @@ Antes de fazer deploy, verifique:
 - ✅ **Connection Strings** corretas para o ambiente
 - ✅ **JWT Secret** tem pelo menos 32 caracteres
 - ✅ **Issuer/Audience** apontam para URLs corretas
-- ✅ **Cache Provider** configurado (Memory/Redis)
+
 - ✅ **Telemetry** habilitado para produção
 - ✅ **EnvironmentName** correto (Production/Staging)
 - ✅ **Variáveis de ambiente** testadas localmente

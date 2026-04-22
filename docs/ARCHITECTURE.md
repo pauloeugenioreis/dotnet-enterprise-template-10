@@ -16,7 +16,7 @@ Visão geral da arquitetura Clean Architecture implementada neste template.
                           ▼
 ┌──────────────────────── INFRASTRUCTURE LAYER ───────────────────────────┐
 │ • Extensions, Middleware, Filters, Notifications                        │
-│ • Cache (Memory/Redis/SQL), Health Checks, CORS                         │
+│ • Health Checks, CORS                                                     │
 │ • Compression, Rate Limiting, OpenTelemetry                             │
 └─────────────────────────────────────────────────────────────────────────┘
                           │ Cross-cutting │
@@ -248,7 +248,7 @@ public class ProductService : Service<Product>
 
 **Contém:**
 
-- `Extensions/` - Extension methods (DI, Cache, DB)
+- `Extensions/` - Extension methods (DI, DB)
 - `Middleware/` - Middlewares customizados
 - `Filters/` - Action filters
 - `Notifications/` - Sistema de notificações
@@ -369,7 +369,7 @@ services.Scan(scan => scan
 ### 5. Factory Pattern
 
 - Database provider factory
-- Cache provider factory
+
 - Extensible para novos providers
 
 ---
@@ -387,7 +387,7 @@ Program.cs
     │   ├── NHibernate
     │   └── Linq2Db
     │
-    ├── AddCache()                // Multi-provider cache
+
     │   ├── Memory
     │   ├── Redis
     │   └── SqlServer
@@ -445,7 +445,7 @@ Program.cs
 │              External Services                      │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────┐   │
 │  │   Database   │  │    Redis     │  │  Others  │   │
-│  │  SQL Server  │  │    Cache     │  │   APIs   │   │
+│  │  SQL Server  │  │   APIs   │   │
 │  └──────────────┘  └──────────────┘  └──────────┘   │
 └─────────────────────────────────────────────────────┘
 ```

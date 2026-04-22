@@ -41,21 +41,6 @@ public static class HealthChecksExtension
             // }
         }
 
-        // Add Redis health check if configured
-        // Requires: AspNetCore.HealthChecks.Redis package
-        // var cacheSettings = appSettings?.Infrastructure?.Cache;
-        // if (cacheSettings?.Enabled == true &&
-        //     cacheSettings.Provider.Equals("Redis", StringComparison.OrdinalIgnoreCase) &&
-        //     cacheSettings.Redis != null &&
-        //     !string.IsNullOrEmpty(cacheSettings.Redis.ConnectionString))
-        // {
-        //     healthChecksBuilder.AddRedis(
-        //         cacheSettings.Redis.ConnectionString,
-        //         name: "redis",
-        //         failureStatus: HealthStatus.Degraded,
-        //         tags: new[] { "ready", "cache" });
-        // }
-
         return services;
     }
 }

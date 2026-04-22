@@ -73,7 +73,7 @@ docs/
 Planejamos adicionar:
 
 - **AUTHENTICATION.md** - Guia de autenticação (JWT, OAuth2)
-- **CACHING.md** - Estratégias avançadas de cache
+
 - **MONITORING.md** - Monitoramento e observabilidade
 - **TESTING.md** - Estratégias de testes
 - **PERFORMANCE.md** - Otimização de performance
@@ -140,7 +140,7 @@ Foco principal:
 
 - **Configurações**: [CONFIGURATION-GUIDE.md](CONFIGURATION-GUIDE.md) ⭐ **IMPORTANTE**
 - ORMs: [ORM-GUIDE.md](ORM-GUIDE.md#como-alternar-entre-orms)
-- Cache: ../[README.md](../README.md#configuracao-de-cache)
+
 - Health Checks: [KUBERNETES.md](KUBERNETES.md#health-checks)
 
 ---

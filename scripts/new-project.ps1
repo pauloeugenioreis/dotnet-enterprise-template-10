@@ -1,7 +1,7 @@
-﻿# Script interativo para criar novo projeto a partir do template
+# Script interativo para criar novo projeto a partir do template
 # Modo interativo:     .\new-project.ps1
 # Com nome:            .\new-project.ps1 -ProjectName "MeuProjeto"
-# Modo não-interativo: .\new-project.ps1 -ProjectName "MeuProjeto" -Database PostgreSQL -Cache Redis -MongoDB Yes -Queue Yes -Storage Azure -Telemetry Yes -EventSourcing No -GitInit Yes
+# Modo não-interativo: .\new-project.ps1 -ProjectName "MeuProjeto" -Database PostgreSQL -MongoDB Yes -Queue Yes -Storage Azure -Telemetry Yes -EventSourcing No -GitInit Yes
 
 param(
     [string]$ProjectName,
@@ -9,8 +9,6 @@ param(
     [ValidateSet("InMemory", "SqlServer", "Oracle", "PostgreSQL", "MySQL")]
     [string]$Database,
 
-    [ValidateSet("Memory", "Redis")]
-    [string]$Cache,
 
     [ValidateSet("Yes", "No")]
     [string]$MongoDB,
@@ -139,7 +137,6 @@ function Show-YesNo {
 # ============================================================
 
 $isInteractive = -not ($PSBoundParameters.ContainsKey('Database') -or
-                        $PSBoundParameters.ContainsKey('Cache') -or
                         $PSBoundParameters.ContainsKey('MongoDB') -or
                         $PSBoundParameters.ContainsKey('Queue') -or
                         $PSBoundParameters.ContainsKey('Storage') -or
@@ -171,9 +168,6 @@ if ($isInteractive) {
         5 { "MySQL" }
     }
 
-    Write-Section "Cache"
-    $useRedis = Show-YesNo -Title "Habilitar cache Redis? (caso contrário, usa cache em memória)"
-    $Cache = if ($useRedis) { "Redis" } else { "Memory" }
 
     Write-Section "NoSQL"
     $useMongo = Show-YesNo -Title "Habilitar MongoDB (document store)?"
@@ -217,7 +211,7 @@ if ($isInteractive) {
     Write-Host "  ╠══════════════════════════════════════════════════════════╣" -ForegroundColor Cyan
     Write-Host "  ║  Projeto:        $($ProjectName.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Banco de Dados: $($Database.PadRight(38))║" -ForegroundColor Cyan
-    Write-Host "  ║  Cache:          $($Cache.PadRight(38))║" -ForegroundColor Cyan
+
     Write-Host "  ║  MongoDB:        $($MongoDB.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  RabbitMQ:       $($Queue.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Storage:        $($Storage.PadRight(38))║" -ForegroundColor Cyan
@@ -236,7 +230,7 @@ if ($isInteractive) {
 } else {
     # Apply defaults for non-interactive mode
     if (-not $Database) { $Database = "InMemory" }
-    if (-not $Cache) { $Cache = "Memory" }
+
     if (-not $MongoDB) { $MongoDB = "No" }
     if (-not $Queue) { $Queue = "No" }
     if (-not $Storage) { $Storage = "None" }
@@ -344,11 +338,6 @@ foreach ($db in $dbFileMap.Keys) {
     }
 }
 
-# -- Cache --
-$appSettings.AppSettings.Infrastructure.Cache.Provider = $Cache
-if ($Cache -eq "Redis") {
-    $appSettings.AppSettings.Infrastructure.Cache.ConnectionString = "localhost:6379,password=RedisPass123,ssl=false,abortConnect=false"
-}
 
 # -- MongoDB --
 if ($MongoDB -eq "Yes") {
@@ -426,7 +415,7 @@ Set-Content $programPath $programContent -NoNewline
 # Generate docker-compose.yml
 # ============================================================
 
-$needsCompose = ($Database -ne "InMemory") -or ($Cache -eq "Redis") -or ($MongoDB -eq "Yes") -or ($Queue -eq "Yes") -or ($Telemetry -eq "Yes") -or ($EventSourcing -eq "Yes")
+$needsCompose = ($Database -ne "InMemory") -or ($MongoDB -eq "Yes") -or ($Queue -eq "Yes") -or ($Telemetry -eq "Yes") -or ($EventSourcing -eq "Yes")
 
 if ($needsCompose) {
     Write-Step "🐳" "Gerando docker-compose.yml..."
@@ -537,27 +526,6 @@ if ($needsCompose) {
         }
     }
 
-    # ── Redis ──
-    if ($Cache -eq "Redis") {
-        [void]$services.AppendLine(@"
-  redis:
-    image: redis:7-alpine
-    container_name: redis
-    command: redis-server --requirepass RedisPass123
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    networks:
-      - app-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-a", "RedisPass123", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-"@)
-        $volumes.Add("  redis-data:")
-    }
 
     # ── MongoDB ──
     if ($MongoDB -eq "Yes") {
@@ -1000,10 +968,8 @@ if ($Database -ne "InMemory") {
     Write-Host "       Connection String configurada em appsettings.json" -ForegroundColor DarkGray
 }
 
-Write-Host "    💾 Cache: $Cache" -ForegroundColor White
-if ($Cache -eq "Redis") {
-    Write-Host "       Redis UI: não incluída (instale RedisInsight se desejar)" -ForegroundColor DarkGray
-}
+
+
 
 if ($MongoDB -eq "Yes") {
     Write-Host "    🍃 MongoDB: habilitado" -ForegroundColor White

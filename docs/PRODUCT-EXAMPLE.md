@@ -96,16 +96,16 @@ public DbSet<Product> Products { get; set; }
 
 #### Endpoints Disponíveis
 
-| Método | Rota | Descrição | Cache |
-|--------|------|-----------|-------|
-| `GET` | `/api/v1/product` | Lista produtos com filtros opcionais (`isActive`, `category`) e paginação opcional (`page`, `pageSize`) | `Expire300` |
-| `GET` | `/api/v1/product/{id}` | Busca produto por ID (retorna `ProductResponseDto`) | `Expire300` |
-| `POST` | `/api/v1/product` | Cria novo produto a partir de `CreateProductRequest` | — |
-| `PUT` | `/api/v1/product/{id}` | Atualiza detalhes via `UpdateProductRequest` | — |
-| `DELETE` | `/api/v1/product/{id}` | Remove produto | — |
-| `GET` | `/api/v1/product/ExportToExcel` | Gera arquivo Excel com DTOs filtrados | — |
-| `PATCH` | `/api/v1/product/{id}/status` | Ativa/desativa produto com `UpdateProductStatusRequest` | — |
-| `PATCH` | `/api/v1/product/{id}/stock` | Ajusta estoque com `UpdateProductStockRequest` | — |
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `GET` | `/api/v1/product` | Lista produtos com filtros opcionais (`isActive`, `category`) e paginação opcional (`page`, `pageSize`) |
+| `GET` | `/api/v1/product/{id}` | Busca produto por ID (retorna `ProductResponseDto`) |
+| `POST` | `/api/v1/product` | Cria novo produto a partir de `CreateProductRequest` |
+| `PUT` | `/api/v1/product/{id}` | Atualiza detalhes via `UpdateProductRequest` |
+| `DELETE` | `/api/v1/product/{id}` | Remove produto |
+| `GET` | `/api/v1/product/ExportToExcel` | Gera arquivo Excel com DTOs filtrados |
+| `PATCH` | `/api/v1/product/{id}/status` | Ativa/desativa produto com `UpdateProductStatusRequest` |
+| `PATCH` | `/api/v1/product/{id}/stock` | Ajusta estoque com `UpdateProductStockRequest` |
 
 ---
 
@@ -290,7 +290,7 @@ Desativa o produto ID 1 utilizando o `UpdateProductStatusRequest`.
 - **ModelState validation** com mensagens de erro
 - **HTTP status codes** apropriados (200, 201, 204, 400, 404)
 - **`Created(location, dto)`** retornando URI via `Url.Action`
-- **OutputCache** nos endpoints GET (política `Expire300` = 300 s)
+
 - **XML Documentation** para Swagger
 
 ### Funcionalidades
@@ -333,9 +333,8 @@ Para estender este exemplo:
 
 1. **Adicionar Paginação/Ordenação** nos endpoints de listagem
 2. **Criar filtros avançados** (preço, categoria, busca textual)
-3. **Adicionar Cache** nos endpoints de leitura
-4. **Implementar Busca** com índices full-text ou Elastic
-5. **Publicar eventos de domínio** (por exemplo, quando estoque atinge nível crítico)
+3. **Implementar Busca** com índices full-text ou Elastic
+4. **Publicar eventos de domínio** (por exemplo, quando estoque atinge nível crítico)
 
 ---
 

@@ -28,9 +28,6 @@ public static class InfrastructureExtensions
         // Database
         services.AddDatabaseConfiguration(appSettings);
 
-        // Cache
-        services.AddCacheConfiguration(appSettings);
-
         // Health checks
         services.AddHealthChecksConfiguration(appSettings);
 

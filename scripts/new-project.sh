@@ -3,7 +3,7 @@
 # Script interativo para criar novo projeto a partir do template
 # Modo interativo:     ./new-project.sh
 # Com nome:            ./new-project.sh MeuProjeto
-# Modo não-interativo: ./new-project.sh MeuProjeto --database PostgreSQL --cache Redis --mongodb yes --queue yes --storage Azure --telemetry yes --event-sourcing no --git-init yes
+# Modo não-interativo: ./new-project.sh MeuProjeto --database PostgreSQL --mongodb yes --queue yes --storage Azure --telemetry yes --event-sourcing no --git-init yes
 
 set -e
 
@@ -124,7 +124,7 @@ fi
 
 # Parse optional arguments
 OPT_DATABASE=""
-OPT_CACHE=""
+
 OPT_QUEUE=""
 OPT_MONGODB=""
 OPT_STORAGE=""
@@ -135,7 +135,7 @@ OPT_GITINIT=""
 while [[ $# -gt 0 ]]; do
     case $1 in
         --database) OPT_DATABASE="$2"; shift 2 ;;
-        --cache) OPT_CACHE="$2"; shift 2 ;;
+
         --queue) OPT_QUEUE="$2"; shift 2 ;;
         --mongodb) OPT_MONGODB="$2"; shift 2 ;;
         --storage) OPT_STORAGE="$2"; shift 2 ;;
@@ -152,7 +152,7 @@ TARGET_DIR="$(dirname "$TEMPLATE_DIR")/$PROJECT_NAME"
 
 # Detect interactive mode
 IS_INTERACTIVE=true
-if [ -n "$OPT_DATABASE" ] || [ -n "$OPT_CACHE" ] || [ -n "$OPT_MONGODB" ] || [ -n "$OPT_QUEUE" ] || \
+if [ -n "$OPT_DATABASE" ] || [ -n "$OPT_MONGODB" ] || [ -n "$OPT_QUEUE" ] || \
    [ -n "$OPT_STORAGE" ] || [ -n "$OPT_TELEMETRY" ] || [ -n "$OPT_EVENTSOURCING" ] || \
    [ -n "$OPT_GITINIT" ]; then
     IS_INTERACTIVE=false
@@ -181,12 +181,6 @@ if [ "$IS_INTERACTIVE" = true ]; then
         5) DATABASE="MySQL" ;;
     esac
 
-    write_section "Cache"
-    if show_yesno "Habilitar cache Redis? (caso contrário, usa cache em memória)"; then
-        CACHE="Redis"
-    else
-        CACHE="Memory"
-    fi
 
     write_section "NoSQL"
     if show_yesno "Habilitar MongoDB (document store)?"; then
@@ -244,7 +238,7 @@ if [ "$IS_INTERACTIVE" = true ]; then
     echo -e "  ${CYAN}╠══════════════════════════════════════════════════════════╣${NC}"
     printf "  ${CYAN}  Projeto:        %-38s${NC}\n" "$PROJECT_NAME"
     printf "  ${CYAN}  Banco de Dados: %-38s${NC}\n" "$DATABASE"
-    printf "  ${CYAN}  Cache:          %-38s${NC}\n" "$CACHE"
+
     printf "  ${CYAN}  MongoDB:        %-38s${NC}\n" "$MONGODB"
     printf "  ${CYAN}  RabbitMQ:       %-38s${NC}\n" "$QUEUE"
     printf "  ${CYAN}  Storage:        %-38s${NC}\n" "$STORAGE"
@@ -263,7 +257,7 @@ if [ "$IS_INTERACTIVE" = true ]; then
 else
     # Apply defaults for non-interactive mode
     DATABASE="${OPT_DATABASE:-InMemory}"
-    CACHE="${OPT_CACHE:-Memory}"
+
     MONGODB="${OPT_MONGODB:-no}"
     QUEUE="${OPT_QUEUE:-no}"
     STORAGE="${OPT_STORAGE:-None}"
@@ -371,9 +365,7 @@ with open('$APPSETTINGS', 'r') as f:
 infra = data['AppSettings']['Infrastructure']
 infra['Database']['DatabaseType'] = '$DATABASE'
 infra['Database']['ConnectionString'] = '$DB_CONN'
-infra['Cache']['Provider'] = '$CACHE'
-if '$CACHE' == 'Redis':
-    infra['Cache']['ConnectionString'] = 'localhost:6379,password=RedisPass123,ssl=false,abortConnect=false'
+
 if '$QUEUE' == 'yes':
     infra['RabbitMQ']['ConnectionString'] = 'amqp://guest:guest@localhost:5672/'
 if '$MONGODB' == 'yes':
@@ -400,12 +392,7 @@ else
     # Database ConnectionString — target the first occurrence (Database section)
     sed -i "0,/\"ConnectionString\": *\"[^\"]*\"/s|\"ConnectionString\": *\"[^\"]*\"|\"ConnectionString\": \"$DB_CONN\"|" "$APPSETTINGS"
 
-    # Cache
-    json_set "Provider" "$CACHE" "$APPSETTINGS"
-    if [ "$CACHE" = "Redis" ]; then
-        # Target Cache ConnectionString (second occurrence)
-        sed -i "0,/\"ConnectionString\": *\"[^\"]*\"/{ /\"ConnectionString\": *\"[^\"]*\"/{ n; }; s|\"ConnectionString\": *\"[^\"]*\"|\"ConnectionString\": \"localhost:6379,password=RedisPass123,ssl=false,abortConnect=false\"|}" "$APPSETTINGS"
-    fi
+
 
     # RabbitMQ
     if [ "$QUEUE" = "yes" ]; then
@@ -481,7 +468,7 @@ fi
 # ============================================================
 
 NEEDS_COMPOSE=false
-if [ "$DATABASE" != "InMemory" ] || [ "$CACHE" = "Redis" ] || [ "$MONGODB" = "yes" ] || [ "$QUEUE" = "yes" ] || \
+if [ "$DATABASE" != "InMemory" ] || [ "$MONGODB" = "yes" ] || [ "$QUEUE" = "yes" ] || \
    [ "$TELEMETRY" = "yes" ] || [ "$EVENTSOURCING" = "yes" ]; then
     NEEDS_COMPOSE=true
 fi
@@ -602,29 +589,7 @@ COMPOSE_DB
             ;;
     esac
 
-    # ── Redis ──
-    if [ "$CACHE" = "Redis" ]; then
-        cat >> "$COMPOSE_FILE" << 'COMPOSE_REDIS'
-  redis:
-    image: redis:7-alpine
-    container_name: redis
-    command: redis-server --requirepass RedisPass123
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    networks:
-      - app-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-a", "RedisPass123", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
-COMPOSE_REDIS
-        VOLUMES_LIST="$VOLUMES_LIST
-  redis-data:"
-    fi
 
     # ── MongoDB ──
     if [ "$MONGODB" = "yes" ]; then
@@ -1061,10 +1026,8 @@ if [ "$DATABASE" != "InMemory" ]; then
     echo -e "       ${GRAY}Connection String configurada em appsettings.json${NC}"
 fi
 
-echo -e "    💾 Cache: $CACHE"
-if [ "$CACHE" = "Redis" ]; then
-    echo -e "       ${GRAY}Redis UI: não incluída (instale RedisInsight se desejar)${NC}"
-fi
+
+
 
 if [ "$MONGODB" = "yes" ]; then
     echo -e "    🍃 MongoDB: habilitado"

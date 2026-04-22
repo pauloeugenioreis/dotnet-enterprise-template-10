@@ -19,20 +19,6 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<ValidationFilter>();
 });
 
-// Add Output Cache (.NET 10)
-builder.Services.AddOutputCache(options =>
-{
-    // Default policy: 10 seconds cache
-    options.AddBasePolicy(builder => builder.Expire(TimeSpan.FromSeconds(10)));
-
-    // Policy for GET endpoints: 5 minutes cache
-    options.AddPolicy("Expire300", builder => builder.Expire(TimeSpan.FromSeconds(300)));
-
-    // Policy for products: 10 minutes cache, vary by id
-    options.AddPolicy("ProductCache", builder => builder
-        .Expire(TimeSpan.FromMinutes(10))
-        .SetVaryByQuery("id"));
-});
 
 // Add Swagger with JWT authentication (skip in Testing environment to avoid version conflicts)
 if (!builder.Environment.IsEnvironment("Testing"))
@@ -110,8 +96,6 @@ app.UseReferrerPolicy(opts => opts.NoReferrer());
 app.UseXXssProtection(opts => opts.EnabledWithBlockMode());
 app.UseXfo(opts => opts.Deny());
 
-// Output Cache
-app.UseOutputCache();
 
 // Use infrastructure middleware
 app.UseInfrastructureMiddleware();
