@@ -1,0 +1,29 @@
+<div class="p-10 max-w-7xl mx-auto space-y-10 animate-fade-in">
+  <header>
+    <h1 class="text-5xl font-black text-gray-900 tracking-tighter">Dashboard</h1>
+    <p class="text-gray-500 mt-3 font-medium text-lg">Ecossistema Vue 3 Enterprise.</p>
+  </header>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div v-for="stat in stats" :key="stat.label" className="bg-white p-10 rounded-[2.5rem] border border-gray-50 shadow-sm hover:shadow-2xl transition-all group cursor-default">
+      <div :class="[stat.color, 'w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-3xl group-hover:scale-110 transition-transform']">
+        {{ stat.icon }}
+      </div>
+      <p class="text-gray-400 text-xs font-black uppercase tracking-[0.2em] mb-2">{{ stat.label }}</p>
+      <h2 class="text-4xl font-black text-gray-900">{{ stat.value }}</h2>
+    </div>
+  </div>
+
+  <div class="bg-primary-600 rounded-[3rem] p-16 text-white shadow-2xl relative overflow-hidden group">
+    <div class="relative z-10">
+      <h3 class="text-4xl font-black mb-4">Event Store Conectado</h3>
+      <p class="text-primary-100 max-w-xl text-lg font-medium leading-relaxed mb-10">
+        Monitoramento de auditoria em tempo real habilitado para todos os módulos.
+      </p>
+      <router-link to="/audit" class="bg-white text-primary-600 font-black px-10 py-5 rounded-2xl hover:bg-primary-50 transition-colors shadow-xl inline-block">
+        Ver Logs de Auditoria
+      </router-link>
+    </div>
+    <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-primary-400/20 rounded-full blur-3xl group-hover:scale-110 transition-transform"></div>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+@typeparam T
+
+<div class="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
+    <p class="text-sm text-gray-500">
+        Página <span class="font-semibold text-gray-800">@CurrentPage</span> de <span class="font-semibold text-gray-800">@TotalPages</span>
+    </p>
+    <div class="flex gap-2">
+        <button @onclick="() => OnPageChanged.InvokeAsync(CurrentPage - 1)" 
+                disabled="@(!HasPreviousPage)" 
+                class="px-3 py-1 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+            Anterior
+        </button>
+        <button @onclick="() => OnPageChanged.InvokeAsync(CurrentPage + 1)" 
+                disabled="@(!HasNextPage)" 
+                class="px-3 py-1 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+            Próxima
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int CurrentPage { get; set; }
+    [Parameter] public int TotalPages { get; set; }
+    [Parameter] public bool HasPreviousPage { get; set; }
+    [Parameter] public bool HasNextPage { get; set; }
+    [Parameter] public EventCallback<int> OnPageChanged { get; set; }
+}

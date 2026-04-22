@@ -1,0 +1,34 @@
+name: enterprise_template
+description: Enterprise Template - Flutter App (UI Premium)
+version: 1.0.0+1
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # HTTP Client com Interceptors (equivalente ao AuthTokenHandler/.NET)
+  dio: ^5.4.3
+
+  # Armazenamento seguro de JWT (equivalente ao SecureStorage/.NET MAUI)
+  flutter_secure_storage: ^9.0.0
+
+  # Gerenciamento de estado (equivalente ao AuthenticationStateProvider/Blazor)
+  provider: ^6.1.2
+
+  # Navegação declarativa
+  go_router: ^14.2.7
+
+  # UI: ícones premium
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

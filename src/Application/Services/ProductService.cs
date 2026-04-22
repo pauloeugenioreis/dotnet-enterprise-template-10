@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using ProjectTemplate.Domain.Dtos;
+using ProjectTemplate.SharedModels;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Exceptions;
 using ProjectTemplate.Domain.Interfaces;

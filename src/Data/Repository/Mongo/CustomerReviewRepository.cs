@@ -1,3 +1,4 @@
+using ProjectTemplate.SharedModels;
 using MongoDB.Driver;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;

@@ -1,0 +1,115 @@
+@inherits LayoutComponentBase
+@using BlazorApp.Components.UI
+@using Microsoft.AspNetCore.Components.Authorization
+
+<div class="flex h-screen bg-gray-50 font-sans">
+    <LoadingBar />
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col">
+        <div class="flex-1 overflow-y-auto">
+            <NavMenu />
+        </div>
+
+        <AuthorizeView>
+            <Authorized>
+                <div class="p-4 border-t border-gray-100">
+                    <div class="flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
+                        <div class="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 font-bold">
+                            @context.User.Identity?.Name?[0]
+                        </div>
+                        <div class="flex-1 overflow-hidden">
+                            <p class="text-sm font-bold text-gray-800 truncate">@context.User.Identity?.Name</p>
+                            <p class="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Administrador</p>
+                        </div>
+                    </div>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="p-4 border-t border-gray-100">
+                    <a href="/login" class="flex items-center gap-3 px-4 py-3 bg-primary-600 text-white rounded-2xl text-sm font-bold shadow-lg shadow-primary-200 hover:bg-primary-700 transition-all">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Acessar Conta
+                    </a>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <!-- Topbar -->
+        <header class="h-20 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-10 sticky top-0 z-10">
+            <div class="flex items-center gap-4">
+                <div class="relative w-80">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <input type="text" placeholder="Pesquisar em tudo..." class="block w-full pl-12 pr-4 py-3 border-none rounded-2xl text-sm bg-gray-50 focus:ring-4 focus:ring-primary-500/10 focus:bg-white transition-all outline-none" />
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <button class="relative p-2 text-gray-400 hover:text-primary-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-6 0v-1m6 0H9" />
+                    </svg>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
+                </button>
+                <div class="h-8 w-px bg-gray-100"></div>
+                <AuthorizeView>
+                    <Authorized>
+                        <span class="text-sm font-bold text-gray-700">Olá, @context.User.Identity?.Name</span>
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="flex-1 overflow-y-auto p-10 bg-gray-50/50">
+            <div class="max-w-7xl mx-auto">
+                <AuthorizeView>
+                    <Authorized>
+                        @Body
+                    </Authorized>
+                    <NotAuthorized>
+                        @if (IsLoginOrRegisterPage())
+                        {
+                            @Body
+                        }
+                        else
+                        {
+                            <div class="flex flex-col items-center justify-center h-[60vh] text-center">
+                                <div class="w-24 h-24 bg-primary-50 rounded-3xl flex items-center justify-center text-primary-600 mb-6">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                </div>
+                                <h2 class="text-2xl font-black text-gray-900 mb-2">Acesso Restrito</h2>
+                                <p class="text-gray-500 max-w-sm mb-8 font-medium">Você precisa estar logado para acessar esta área da plataforma corporativa.</p>
+                                <a href="/login" class="px-8 py-4 bg-primary-600 text-white rounded-2xl font-bold shadow-xl shadow-primary-200 hover:bg-primary-700 transition-all">
+                                    Ir para o Login
+                                </a>
+                            </div>
+                        }
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </main>
+</div>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private bool IsLoginOrRegisterPage()
+    {
+        var relativePath = Navigation.ToBaseRelativePath(Navigation.Uri);
+        return relativePath.StartsWith("login", StringComparison.OrdinalIgnoreCase) || 
+               relativePath.StartsWith("register", StringComparison.OrdinalIgnoreCase);
+    }
+}

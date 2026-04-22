@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProjectTemplate.Domain.Dtos;
+using ProjectTemplate.SharedModels;
 using ProjectTemplate.Domain.Interfaces;
 
 namespace ProjectTemplate.Api.Controllers;

@@ -1,0 +1,35 @@
+@using Microsoft.AspNetCore.Components.Authorization
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(BlazorApp.Pages.Dashboard).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(BlazorApp.Layout.MainLayout)">
+                <NotAuthorized>
+                    <div class="flex flex-col items-center justify-center h-[60vh] text-center p-10">
+                        <div class="w-24 h-24 bg-primary-50 rounded-3xl flex items-center justify-center text-primary-600 mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-black text-gray-900 mb-2">Acesso Restrito</h2>
+                        <p class="text-gray-500 max-w-sm mb-8 font-medium">Você precisa estar logado para acessar esta área da plataforma.</p>
+                        <a href="/login" class="px-8 py-4 bg-primary-600 text-white rounded-2xl font-bold shadow-xl shadow-primary-200 hover:bg-primary-700 transition-all">
+                            Ir para o Login
+                        </a>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </Found>
+        <NotFound>
+            <PageTitle>Página não encontrada</PageTitle>
+            <LayoutView Layout="@typeof(BlazorApp.Layout.MainLayout)">
+                <div class="flex flex-col items-center justify-center h-[60vh] text-center">
+                    <h1 class="text-6xl font-black text-gray-200 mb-4">404</h1>
+                    <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">Desculpe, não há nada neste endereço.</p>
+                    <a href="/" class="mt-8 text-primary-600 font-bold hover:underline">Voltar ao Início</a>
+                </div>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>

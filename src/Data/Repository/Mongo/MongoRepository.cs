@@ -1,3 +1,4 @@
+using ProjectTemplate.SharedModels;
 using System.Linq.Expressions;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProjectTemplate.Domain.Dtos;
+using ProjectTemplate.SharedModels;
 
 namespace ProjectTemplate.Api.Controllers;
 
@@ -27,37 +27,16 @@ public abstract class ApiControllerBase : ControllerBase
 
     protected IActionResult HandlePagedResult<T>(IEnumerable<T> items, long total, int page, int pageSize)
     {
-        var safeTotal = total;
-
-        if (safeTotal < 0)
-        {
-            safeTotal = 0;
-        }
-
-        long totalPages = 0;
-
-        if (pageSize > 0)
-        {
-            totalPages = (long)Math.Ceiling(safeTotal / (double)pageSize);
-        }
-
-        int safeTotalPages;
-
-        if (totalPages > int.MaxValue)
-        {
-            safeTotalPages = int.MaxValue;
-        }
-        else
-        {
-            safeTotalPages = (int)totalPages;
-        }
+        long safeTotal = total < 0 ? 0 : total;
+        int safePageSize = pageSize <= 0 ? 10 : pageSize;
+        int safeTotalPages = (int)Math.Ceiling(safeTotal / (double)safePageSize);
 
         var response = new PagedResponse<T>
         {
             Items = items,
-            Total = safeTotal,
-            Page = page,
-            PageSize = pageSize,
+            TotalCount = safeTotal,
+            PageNumber = page,
+            PageSize = safePageSize,
             TotalPages = safeTotalPages
         };
 

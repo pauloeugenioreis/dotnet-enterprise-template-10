@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using MiniExcelLibs;
 using MiniExcelLibs.OpenXml;
-using ProjectTemplate.Domain.Dtos;
+using ProjectTemplate.SharedModels;
 using ProjectTemplate.Domain.Interfaces;
 
 namespace ProjectTemplate.Api.Controllers;

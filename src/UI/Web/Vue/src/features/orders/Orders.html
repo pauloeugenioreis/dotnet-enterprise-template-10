@@ -1,0 +1,36 @@
+<div class="p-10 max-w-7xl mx-auto space-y-10 animate-fade-in">
+  <header>
+    <h1 class="text-5xl font-black text-gray-900 tracking-tighter">Pedidos</h1>
+    <p class="text-gray-500 mt-3 font-medium text-lg">Gerenciamento de vendas.</p>
+  </header>
+
+  <div class="bg-white rounded-[3rem] border border-gray-50 shadow-2xl overflow-hidden">
+    <table class="w-full text-left border-collapse">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400"># Número</th>
+          <th class="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Cliente</th>
+          <th class="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Status</th>
+          <th class="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Total</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        <tr v-if="loading"><td colSpan="4" class="p-20 text-center font-bold text-gray-300">Carregando...</td></tr>
+        <tr v-for="order in orders" :key="order.id" class="hover:bg-gray-50/50 transition-colors group cursor-pointer">
+          <td class="px-10 py-8 font-black text-gray-900 group-hover:text-primary-600 transition-colors">
+            {{ order.orderNumber }}
+          </td>
+          <td class="px-10 py-8 text-gray-500 font-bold">{{ order.customerName }}</td>
+          <td class="px-10 py-8">
+            <span :class="[getStatusColor(order.status), 'px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest']">
+              {{ order.status }}
+            </span>
+          </td>
+          <td class="px-10 py-8 text-xl font-black text-gray-900">
+            R$ {{ order.total.toLocaleString() }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

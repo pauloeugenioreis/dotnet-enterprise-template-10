@@ -1,3 +1,4 @@
+using ProjectTemplate.SharedModels;
 using Microsoft.EntityFrameworkCore;
 using ProjectTemplate.Data.Context;
 using ProjectTemplate.Domain;
@@ -111,7 +112,7 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<Domain.Dtos.OrderStatisticsDto> GetStatisticsAsync(CancellationToken cancellationToken = default)
+    public async Task<OrderStatisticsDto> GetStatisticsAsync(CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Orders.AsNoTracking();
 
@@ -119,7 +120,7 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
 
         if (totalOrders == 0)
         {
-            return new Domain.Dtos.OrderStatisticsDto();
+            return new OrderStatisticsDto();
         }
 
         var totalRevenue = await query.SumAsync(o => o.Total, cancellationToken);
@@ -133,7 +134,7 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
 
         var ordersByStatus = orderStatusData
             .GroupBy(o => o.Status)
-            .Select(g => new Domain.Dtos.OrderStatusStatDto(g.Key, g.Count(), g.Sum(o => o.Total)))
+            .Select(g => new OrderStatusStatDto(g.Key, g.Count(), g.Sum(o => o.Total)))
             .ToList();
 
         var orderItemData = await _dbContext.Set<OrderItem>()
@@ -143,7 +144,7 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
 
         var topProducts = orderItemData
             .GroupBy(i => new { i.ProductId, i.ProductName })
-            .Select(g => new Domain.Dtos.TopProductStatDto(
+            .Select(g => new TopProductStatDto(
                 g.Key.ProductId,
                 g.Key.ProductName,
                 g.Sum(i => i.Quantity),
@@ -152,7 +153,7 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
             .Take(10)
             .ToList();
 
-        return new Domain.Dtos.OrderStatisticsDto
+        return new OrderStatisticsDto
         {
             TotalOrders = totalOrders,
             TotalRevenue = totalRevenue,

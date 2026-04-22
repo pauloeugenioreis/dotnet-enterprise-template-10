@@ -1,3 +1,4 @@
+using ProjectTemplate.SharedModels;
 using ProjectTemplate.Domain.Entities;
 
 namespace ProjectTemplate.Domain.Interfaces;
@@ -37,5 +38,5 @@ public interface IOrderRepository : IRepository<Order>, ITransactionalRepository
     /// Get aggregated order statistics computed at the database level.
     /// Avoids loading all orders into memory.
     /// </summary>
-    Task<Dtos.OrderStatisticsDto> GetStatisticsAsync(CancellationToken cancellationToken = default);
+    Task<OrderStatisticsDto> GetStatisticsAsync(CancellationToken cancellationToken = default);
 }

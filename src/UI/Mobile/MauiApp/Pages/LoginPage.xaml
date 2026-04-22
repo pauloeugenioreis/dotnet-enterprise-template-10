@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EnterpriseTemplate.MauiApp.Pages.LoginPage"
+             Title="Login"
+             BackgroundColor="#F0F9FF"
+             Shell.NavBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="32" Spacing="0" VerticalOptions="Center">
+
+            <!-- Logo / Brand -->
+            <Frame BackgroundColor="#0284c7" CornerRadius="24" WidthRequest="80" HeightRequest="80"
+                   HorizontalOptions="Center" Padding="0" HasShadow="True"
+                   Margin="0,60,0,24">
+                <Label Text="ET" FontSize="32" FontAttributes="Bold"
+                       TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Frame>
+
+            <Label Text="Enterprise Template"
+                   FontSize="28" FontAttributes="Bold"
+                   TextColor="#0C4A6E"
+                   HorizontalOptions="Center"
+                   Margin="0,0,0,8" />
+
+            <Label Text="Acesse sua conta corporativa"
+                   FontSize="14" TextColor="#64748B"
+                   HorizontalOptions="Center"
+                   Margin="0,0,0,40" />
+
+            <!-- Email -->
+            <Label Text="E-mail" FontSize="12" FontAttributes="Bold"
+                   TextColor="#475569" Margin="0,0,0,6" />
+            <Frame BackgroundColor="White" CornerRadius="16" Padding="0" HasShadow="False"
+                   BorderColor="#E2E8F0" Margin="0,0,0,16">
+                <Entry x:Name="EmailEntry"
+                       Placeholder="seu@email.com"
+                       Keyboard="Email"
+                       ReturnType="Next"
+                       BackgroundColor="Transparent"
+                       Margin="16,12" />
+            </Frame>
+
+            <!-- Password -->
+            <Label Text="Senha" FontSize="12" FontAttributes="Bold"
+                   TextColor="#475569" Margin="0,0,0,6" />
+            <Frame BackgroundColor="White" CornerRadius="16" Padding="0" HasShadow="False"
+                   BorderColor="#E2E8F0" Margin="0,0,0,32">
+                <Entry x:Name="PasswordEntry"
+                       Placeholder="••••••••"
+                       IsPassword="True"
+                       ReturnType="Done"
+                       BackgroundColor="Transparent"
+                       Margin="16,12" />
+            </Frame>
+
+            <!-- Error Message -->
+            <Label x:Name="ErrorLabel"
+                   TextColor="#E11D48" FontSize="13"
+                   HorizontalOptions="Center"
+                   IsVisible="False"
+                   Margin="0,0,0,16" />
+
+            <!-- Loading Indicator -->
+            <ActivityIndicator x:Name="LoadingIndicator"
+                               Color="#0284c7" IsRunning="False" IsVisible="False"
+                               Margin="0,0,0,16" HorizontalOptions="Center" />
+
+            <!-- Login Button -->
+            <Button Text="Entrar na Plataforma"
+                    BackgroundColor="#0284c7"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    FontSize="16"
+                    CornerRadius="16"
+                    HeightRequest="56"
+                    Clicked="OnLoginClicked" />
+
+            <!-- Register Link -->
+            <HorizontalStackLayout HorizontalOptions="Center" Margin="0,24,0,0" Spacing="4">
+                <Label Text="Não tem conta?" TextColor="#64748B" FontSize="14" />
+                <Label Text="Registrar-se" TextColor="#0284c7" FontSize="14" FontAttributes="Bold">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnRegisterTapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </HorizontalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

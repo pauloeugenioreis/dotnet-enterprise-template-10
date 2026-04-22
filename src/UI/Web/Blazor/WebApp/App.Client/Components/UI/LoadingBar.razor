@@ -1,0 +1,42 @@
+@using BlazorApp.Client.Services.Base
+@inject LoadingService LoadingService
+@implements IDisposable
+
+@if (isVisible)
+{
+    <div class="fixed top-0 left-0 right-0 z-[9999]">
+        <div class="h-[3px] bg-primary-600 shadow-[0_0_10px_#2563eb] animate-loading-bar transition-all duration-500 ease-out"></div>
+    </div>
+}
+
+<style>
+    @@keyframes loading-bar {
+        0% { width: 0%; }
+        50% { width: 70%; }
+        100% { width: 90%; }
+    }
+    .animate-loading-bar {
+        animation: loading-bar 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+</style>
+
+@code {
+    private bool isVisible;
+
+    protected override void OnInitialized()
+    {
+        LoadingService.OnLoadingStateChanged += HandleLoadingStateChanged;
+        isVisible = LoadingService.IsLoading;
+    }
+
+    private void HandleLoadingStateChanged(bool isLoading)
+    {
+        isVisible = isLoading;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        LoadingService.OnLoadingStateChanged -= HandleLoadingStateChanged;
+    }
+}

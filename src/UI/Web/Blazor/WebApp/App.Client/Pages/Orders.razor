@@ -1,0 +1,187 @@
+@page "/orders"
+@using BlazorApp.Client.Services
+@using BlazorApp.Components.UI
+@using ProjectTemplate.SharedModels
+@inject IOrderService OrderService
+@rendermode InteractiveAuto
+
+<div class="mb-8 flex justify-between items-end">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Pedidos</h1>
+        <p class="text-gray-500 mt-2">Acompanhe e gerencie as vendas da sua plataforma.</p>
+    </div>
+    <div class="flex gap-3">
+        <button class="bg-white text-gray-600 px-5 py-2.5 rounded-xl text-sm font-bold border border-gray-200 hover:bg-gray-50 transition-all flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Exportar
+        </button>
+        <button class="bg-primary-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Novo Pedido
+        </button>
+    </div>
+</div>
+
+<div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+    <div class="p-6 border-b border-gray-100 bg-gray-50/30 flex justify-between items-center">
+        <div class="flex gap-4">
+            <button class="text-sm font-bold text-primary-600 px-4 py-2 bg-primary-50 rounded-xl">Todos</button>
+            <button class="text-sm font-medium text-gray-500 px-4 py-2 hover:bg-gray-100 rounded-xl transition-all">Pendentes</button>
+            <button class="text-sm font-medium text-gray-500 px-4 py-2 hover:bg-gray-100 rounded-xl transition-all">Pagos</button>
+            <button class="text-sm font-medium text-gray-500 px-4 py-2 hover:bg-gray-100 rounded-xl transition-all">Cancelados</button>
+        </div>
+        <div class="relative">
+             <input type="text" placeholder="Buscar pedido..." class="bg-gray-50 border-none rounded-xl text-sm px-10 py-2.5 w-64 outline-none focus:ring-2 focus:ring-primary-500/20 transition-all" />
+             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+             </svg>
+        </div>
+    </div>
+
+    @if (orders == null)
+    {
+        <div class="p-20 flex flex-col items-center justify-center gap-4">
+            <div class="w-12 h-12 border-4 border-primary-100 border-t-primary-600 rounded-full animate-spin"></div>
+            <p class="text-gray-400 text-sm font-medium">Carregando pedidos...</p>
+        </div>
+    }
+    else
+    {
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-[11px] uppercase tracking-wider text-gray-400 border-b border-gray-100">
+                        <th class="px-8 py-5 font-bold">Pedido</th>
+                        <th class="px-8 py-5 font-bold">Cliente</th>
+                        <th class="px-8 py-5 font-bold">Data</th>
+                        <th class="px-8 py-5 font-bold text-right">Total</th>
+                        <th class="px-8 py-5 font-bold text-center">Status</th>
+                        <th class="px-8 py-5 font-bold"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @foreach (var order in orders.Items)
+                    {
+                        <tr class="hover:bg-gray-50/50 transition-all group">
+                            <td class="px-8 py-5">
+                                <span class="font-mono text-xs font-bold text-gray-800 uppercase">#@order.OrderNumber</span>
+                            </td>
+                            <td class="px-8 py-5">
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-gray-800 text-sm">@order.CustomerName</span>
+                                    <span class="text-[10px] text-gray-400">@order.CustomerEmail</span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-5">
+                                <span class="text-sm text-gray-600">@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                            </td>
+                            <td class="px-8 py-5 text-right">
+                                <span class="font-bold text-gray-900 text-sm">@order.Total.ToString("C")</span>
+                            </td>
+                            <td class="px-8 py-5 text-center">
+                                <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest @GetStatusClass(order.Status)">
+                                    @order.Status
+                                </span>
+                            </td>
+                            <td class="px-8 py-5 text-right">
+                                <button @onclick="() => ViewDetails(order)" class="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <Pagination 
+            T="OrderResponseDto"
+            CurrentPage="@currentPage"
+            TotalPages="@orders.TotalPages"
+            HasNextPage="@orders.HasNextPage"
+            HasPreviousPage="@orders.HasPreviousPage"
+            OnPageChanged="ChangePage" />
+    }
+</div>
+
+<OrderDetailsModal 
+    Order="@selectedOrder" 
+    IsOpen="@isModalOpen" 
+    OnClose="CloseModal" />
+
+@code {
+    private PagedResponse<OrderResponseDto>? orders;
+    private int currentPage = 1;
+    private OrderResponseDto? selectedOrder;
+    private bool isModalOpen;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrders();
+    }
+
+    private void ViewDetails(OrderResponseDto order)
+    {
+        selectedOrder = order;
+        isModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
+        selectedOrder = null;
+    }
+
+    private async Task LoadOrders()
+    {
+        orders = null;
+        try 
+        {
+            orders = await OrderService.GetPagedAsync(currentPage, 10);
+        }
+        catch (Exception)
+        {
+            orders = GetMockOrders();
+        }
+    }
+
+    private async Task ChangePage(int newPage)
+    {
+        currentPage = newPage;
+        await LoadOrders();
+    }
+
+    private string GetStatusClass(string status) => status?.ToLower() switch
+    {
+        "pending" => "bg-amber-50 text-amber-600",
+        "completed" => "bg-emerald-50 text-emerald-600",
+        "cancelled" => "bg-rose-50 text-rose-600",
+        "shipped" => "bg-indigo-50 text-indigo-600",
+        _ => "bg-gray-50 text-gray-600"
+    };
+
+    private PagedResponse<OrderResponseDto> GetMockOrders()
+    {
+        var rnd = new Random();
+        return new PagedResponse<OrderResponseDto>
+        {
+            Items = new List<OrderResponseDto>
+            {
+                new() { Id = 1, OrderNumber = "ORD-1001", CustomerName = "João Silva", CustomerEmail = "joao@example.com", Total = 150.50m, Status = "Completed", CreatedAt = DateTime.Now.AddHours(-2) },
+                new() { Id = 2, OrderNumber = "ORD-1002", CustomerName = "Maria Souza", CustomerEmail = "maria@example.com", Total = 89.90m, Status = "Pending", CreatedAt = DateTime.Now.AddHours(-5) },
+                new() { Id = 3, OrderNumber = "ORD-1003", CustomerName = "Carlos Lima", CustomerEmail = "carlos@example.com", Total = 450.00m, Status = "Shipped", CreatedAt = DateTime.Now.AddDays(-1) }
+            },
+            TotalCount = 3,
+            TotalPages = 1,
+            PageNumber = 1,
+            PageSize = 10
+        };
+    }
+}

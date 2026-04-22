@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EnterpriseTemplate.MauiApp.Pages.OrdersPage"
+             Title="Pedidos"
+             BackgroundColor="#F8FAFC">
+
+    <RefreshView x:Name="RefreshView" Refreshing="OnRefreshing" RefreshColor="#0284c7">
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <!-- Header -->
+            <Label Text="Gestão de Pedidos"
+                   FontSize="22" FontAttributes="Bold" TextColor="#0F172A" />
+
+            <!-- Loading -->
+            <ActivityIndicator x:Name="LoadingIndicator" Color="#0284c7"
+                               IsRunning="True" IsVisible="True" />
+
+            <!-- Orders List -->
+            <CollectionView x:Name="OrdersList" IsVisible="False">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="0,4" BackgroundColor="White" CornerRadius="20"
+                               Padding="20" HasShadow="True">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+
+                                <!-- Order Number -->
+                                <Label Grid.Row="0" Grid.Column="0"
+                                       Text="{Binding OrderNumber, StringFormat='Pedido #{0}'}"
+                                       FontSize="15" FontAttributes="Bold" TextColor="#0F172A" />
+
+                                <!-- Status Badge -->
+                                <Frame Grid.Row="0" Grid.Column="1" CornerRadius="10"
+                                       Padding="10,4" HasShadow="False" BackgroundColor="#EFF6FF">
+                                    <Label Text="{Binding Status}" FontSize="11"
+                                           FontAttributes="Bold" TextColor="#0284c7" />
+                                </Frame>
+
+                                <!-- Customer -->
+                                <Label Grid.Row="1" Grid.ColumnSpan="2"
+                                       Text="{Binding CustomerName}"
+                                       FontSize="13" TextColor="#64748B" Margin="0,4,0,0" />
+
+                                <!-- Total -->
+                                <Label Grid.Row="2" Grid.Column="0"
+                                       Text="{Binding Total, StringFormat='R$ {0:N2}'}"
+                                       FontSize="18" FontAttributes="Bold" TextColor="#0284c7"
+                                       Margin="0,8,0,0" />
+
+                                <!-- Date -->
+                                <Label Grid.Row="2" Grid.Column="1"
+                                       Text="{Binding CreatedAt, StringFormat='{0:dd/MM/yy}'}"
+                                       FontSize="12" TextColor="#94A3B8"
+                                       VerticalOptions="End" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Empty State -->
+            <VerticalStackLayout x:Name="EmptyState" IsVisible="False"
+                                 HorizontalOptions="Center" Spacing="12" Margin="0,60,0,0">
+                <Label Text="📭" FontSize="64" HorizontalOptions="Center" />
+                <Label Text="Nenhum pedido encontrado"
+                       FontSize="16" FontAttributes="Bold" TextColor="#64748B"
+                       HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <!-- Error -->
+            <Frame x:Name="ErrorFrame" IsVisible="False"
+                   BackgroundColor="#FFF1F2" CornerRadius="16" Padding="20" HasShadow="False">
+                <Label x:Name="ErrorLabel" TextColor="#E11D48" HorizontalOptions="Center" />
+            </Frame>
+
+        </VerticalStackLayout>
+    </RefreshView>
+</ContentPage>

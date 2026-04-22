@@ -1,10 +1,11 @@
+using ProjectTemplate.SharedModels;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using ProjectTemplate.Domain.Dtos;
+using ProjectTemplate.SharedModels;
 using ProjectTemplate.Domain.Exceptions;
 using ProjectTemplate.Domain.Interfaces;
 using Xunit;

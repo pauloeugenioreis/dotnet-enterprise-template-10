@@ -1,3 +1,4 @@
+using ProjectTemplate.SharedModels;
 using ProjectTemplate.Domain.Entities;
 
 namespace ProjectTemplate.Domain.Interfaces;

@@ -1,5 +1,5 @@
 using FluentValidation;
-using ProjectTemplate.Domain.Dtos;
+using ProjectTemplate.SharedModels;
 
 namespace ProjectTemplate.Domain.Validators;
 

@@ -1,3 +1,4 @@
+using ProjectTemplate.SharedModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using FluentAssertions;
 using ProjectTemplate.Api.Controllers;
-using ProjectTemplate.Domain.Dtos;
+using ProjectTemplate.SharedModels;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 using Xunit;
@@ -284,9 +285,9 @@ public class AuditControllerTests : IClassFixture<WebApplicationFactoryFixture>
         var result = await response.Content.ReadFromJsonAsync<PagedResponse<DomainEvent>>();
         result.Should().NotBeNull();
         result!.Items.Should().HaveCount(1, "pageSize=1 must return exactly one event");
-        result.Total.Should().BeGreaterThanOrEqualTo(3,
+        result.TotalCount.Should().BeGreaterThanOrEqualTo(3,
             because: "create + 2 updates = at least 3 total events");
-        result.Page.Should().Be(1);
+        result.PageNumber.Should().Be(1);
         result.PageSize.Should().Be(1);
     }
 
@@ -331,7 +332,7 @@ public class AuditControllerTests : IClassFixture<WebApplicationFactoryFixture>
         result.Should().NotBeNull();
         result!.Items.Count().Should().BeLessThanOrEqualTo(2,
             because: "pageSize=2 must never return more than 2 items");
-        result.Total.Should().BeGreaterThan(2,
+        result.TotalCount.Should().BeGreaterThan(2,
             because: "two order lifecycles must produce more than 2 events in total");
     }
 

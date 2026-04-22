@@ -1,4 +1,5 @@
-using ProjectTemplate.Domain.Dtos;
+using ProjectTemplate.SharedModels;
+using ProjectTemplate.SharedModels;
 
 namespace ProjectTemplate.Domain.Interfaces;
 

@@ -1,0 +1,27 @@
+<div class="p-8 max-w-7xl mx-auto animate-fade-in">
+  <header class="mb-10">
+    <h1 class="text-4xl font-black text-gray-900 tracking-tight">Documentos</h1>
+    <p class="text-gray-500 mt-2 font-medium">Repositório de arquivos e contratos.</p>
+  </header>
+
+  <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+    <div class="grid grid-cols-1 divide-y divide-gray-50">
+      @for (doc of mockDocs; track doc.name) {
+        <div class="p-6 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
+          <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center">
+              <span class="text-red-600 text-xl font-bold">PDF</span>
+            </div>
+            <div>
+              <h4 class="text-sm font-black text-gray-900">{{ doc.name }}</h4>
+              <p class="text-xs text-gray-400 font-medium">{{ doc.size }} • {{ doc.date }}</p>
+            </div>
+          </div>
+          <button class="bg-primary-50 text-primary-600 hover:bg-primary-600 hover:text-white font-bold px-4 py-2 rounded-xl transition-all text-xs">
+            Download
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,3 +1,4 @@
+using ProjectTemplate.SharedModels;
 using System.Linq.Expressions;
 
 namespace ProjectTemplate.Domain.Interfaces;

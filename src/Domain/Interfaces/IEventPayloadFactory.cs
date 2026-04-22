@@ -1,3 +1,4 @@
+using ProjectTemplate.SharedModels;
 using System.Collections.Generic;
 using ProjectTemplate.Domain.Entities;
 

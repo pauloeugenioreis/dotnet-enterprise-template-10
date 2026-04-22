@@ -1,3 +1,4 @@
+using ProjectTemplate.SharedModels;
 using System.Threading.Tasks;
 
 namespace ProjectTemplate.Domain.Interfaces;

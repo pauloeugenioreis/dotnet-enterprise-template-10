@@ -1,0 +1,162 @@
+@page "/login"
+@layout AuthLayout
+@using BlazorApp.Client.Services
+@using BlazorApp.Client.Services.Base
+@using BlazorApp.Client.Auth
+@using ProjectTemplate.SharedModels
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject LocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthStateProvider
+@rendermode InteractiveAuto
+
+<div class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-primary-600 via-primary-700 to-indigo-900">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div class="absolute top-1/2 -right-24 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+    </div>
+
+    <div class="w-full max-w-md">
+        <!-- Logo/Brand -->
+        <div class="text-center mb-10">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl mb-6 transform hover:scale-110 transition-transform duration-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <h1 class="text-4xl font-extrabold text-white tracking-tight">Enterprise</h1>
+            <p class="text-primary-100/70 mt-3 font-medium">Faça login para gerenciar sua plataforma.</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="bg-white/95 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl border border-white/20 p-10 relative overflow-hidden">
+            <EditForm Model="@loginRequest" OnValidSubmit="HandleLogin" FormName="loginForm">
+                <DataAnnotationsValidator />
+
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2 ml-1">Usuário</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </span>
+                            <InputText @bind-Value="loginRequest.Username" 
+                                      class="block w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-gray-900 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 focus:bg-white transition-all outline-none" 
+                                      placeholder="Seu usuário" />
+                        </div>
+                        <ValidationMessage For="@(() => loginRequest.Username)" class="text-rose-500 text-xs mt-2 ml-1" />
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-2 ml-1">
+                            <label class="text-sm font-bold text-gray-700">Senha</label>
+                            <a href="#" class="text-xs font-bold text-primary-600 hover:text-primary-700 transition-colors">Esqueceu a senha?</a>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </span>
+                            <InputText @bind-Value="loginRequest.Password" type="password" 
+                                      class="block w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-gray-900 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 focus:bg-white transition-all outline-none" 
+                                      placeholder="••••••••" />
+                        </div>
+                        <ValidationMessage For="@(() => loginRequest.Password)" class="text-rose-500 text-xs mt-2 ml-1" />
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 animate-shake">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="text-sm text-rose-700 font-medium">@errorMessage</span>
+                        </div>
+                    }
+
+                    <button type="submit" disabled="@isSubmitting"
+                            class="w-full bg-primary-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:bg-primary-700 active:scale-95 transition-all shadow-xl shadow-primary-500/25 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed">
+                        @if (isSubmitting)
+                        {
+                            <div class="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        }
+                        else
+                        {
+                            <span>Entrar na Conta</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+
+        <p class="text-center mt-10 text-primary-100/60 font-medium">
+            Ainda não tem conta? 
+            <a href="/register" class="text-white font-bold hover:underline decoration-2 underline-offset-4">Crie uma agora</a>
+        </p>
+    </div>
+</div>
+
+<style>
+    @@keyframes blob {
+        0% { transform: translate(0px, 0px) scale(1); }
+        33% { transform: translate(30px, -50px) scale(1.1); }
+        66% { transform: translate(-20px, 20px) scale(0.9); }
+        100% { transform: translate(0px, 0px) scale(1); }
+    }
+    .animate-blob {
+        animation: blob 7s infinite;
+    }
+    .animation-delay-2000 {
+        animation-delay: 2s;
+    }
+    @@keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+        20%, 40%, 60%, 80% { transform: translateX(2px); }
+    }
+    .animate-shake {
+        animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+</style>
+
+@code {
+    private LoginDto loginRequest = new();
+    private string? errorMessage;
+    private bool isSubmitting;
+
+    private async Task HandleLogin()
+    {
+        errorMessage = null;
+        isSubmitting = true;
+
+        try
+        {
+            var result = await AuthService.LoginAsync(loginRequest);
+            if (result != null && !string.IsNullOrEmpty(result.AccessToken))
+            {
+                await LocalStorage.SetItemAsync("authToken", result.AccessToken);
+                ((CustomAuthenticationStateProvider)AuthStateProvider).NotifyUserAuthentication(result.AccessToken);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                errorMessage = "Usuário ou senha incorretos.";
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "Ocorreu um erro ao tentar entrar. Tente novamente.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

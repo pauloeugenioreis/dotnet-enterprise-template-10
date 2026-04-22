@@ -1,3 +1,4 @@
+using ProjectTemplate.SharedModels;
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -52,7 +53,7 @@ public class GlobalExceptionHandler
             if (notificationService != null)
             {
                 // Create exception context DTO (decoupled from HttpContext)
-                var exceptionContext = new Domain.Dtos.ExceptionContext
+                var exceptionContext = new ExceptionContext
                 {
                     User = context.User.Identity?.Name ?? "Anonymous",
                     Path = context.Request.Path,

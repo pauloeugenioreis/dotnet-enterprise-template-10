@@ -1,6 +1,7 @@
+using ProjectTemplate.SharedModels;
 using System;
 using System.Threading.Tasks;
-using ProjectTemplate.Domain.Dtos;
+using ProjectTemplate.SharedModels;
 
 namespace ProjectTemplate.Domain.Interfaces;
 

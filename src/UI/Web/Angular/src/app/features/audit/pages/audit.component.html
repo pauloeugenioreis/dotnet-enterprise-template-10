@@ -1,0 +1,39 @@
+<div class="p-8 max-w-7xl mx-auto animate-fade-in">
+  <header class="mb-10">
+    <h1 class="text-4xl font-black text-gray-900 tracking-tight">Auditoria</h1>
+    <p class="text-gray-500 mt-2 font-medium">Logs de eventos processados pelo Event Store.</p>
+  </header>
+
+  @if (loading()) {
+    <div class="flex justify-center py-20">
+      <div class="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  } @else {
+    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-gray-50/50">
+          <tr>
+            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Evento</th>
+            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Entidade</th>
+            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Usuário</th>
+            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Data</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          @for (log of logs(); track log.eventId) {
+            <tr class="hover:bg-gray-50/30 transition-colors">
+              <td class="px-6 py-4">
+                <span class="px-3 py-1 bg-primary-50 text-primary-600 rounded-full text-[10px] font-black uppercase tracking-tighter">
+                  {{ log.eventType }}
+                </span>
+              </td>
+              <td class="px-6 py-4 font-bold text-gray-900 text-sm">{{ log.aggregateType }}</td>
+              <td class="px-6 py-4 text-gray-500 text-sm">{{ log.userId }}</td>
+              <td class="px-6 py-4 text-gray-400 text-xs">{{ log.occurredOn | date:'dd/MM/yyyy HH:mm' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

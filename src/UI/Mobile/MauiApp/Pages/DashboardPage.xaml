@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EnterpriseTemplate.MauiApp.Pages.DashboardPage"
+             Title="Dashboard"
+             BackgroundColor="#F8FAFC">
+
+    <Shell.TitleView>
+        <HorizontalStackLayout Padding="16,0" Spacing="12" VerticalOptions="Center">
+            <Label Text="Enterprise Template" FontSize="18" FontAttributes="Bold"
+                   TextColor="#0C4A6E" VerticalOptions="Center" />
+        </HorizontalStackLayout>
+    </Shell.TitleView>
+
+    <RefreshView x:Name="RefreshView" Refreshing="OnRefreshing" RefreshColor="#0284c7">
+        <ScrollView>
+            <VerticalStackLayout Padding="20" Spacing="20">
+
+                <!-- Header -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Bem-vindo de volta! 👋"
+                           FontSize="22" FontAttributes="Bold" TextColor="#0F172A" />
+                    <Label Text="Aqui está o resumo do seu negócio"
+                           FontSize="14" TextColor="#64748B" />
+                </VerticalStackLayout>
+
+                <!-- Loading skeleton -->
+                <VerticalStackLayout x:Name="SkeletonLayout" Spacing="16">
+                    <Frame BackgroundColor="#E2E8F0" CornerRadius="20" HeightRequest="100" HasShadow="False" />
+                    <Frame BackgroundColor="#E2E8F0" CornerRadius="20" HeightRequest="100" HasShadow="False" />
+                    <Frame BackgroundColor="#E2E8F0" CornerRadius="20" HeightRequest="200" HasShadow="False" />
+                </VerticalStackLayout>
+
+                <!-- Stats Cards -->
+                <VerticalStackLayout x:Name="StatsLayout" IsVisible="False" Spacing="16">
+
+                    <!-- Row 1: Revenue + Orders -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <!-- Receita -->
+                        <Frame Grid.Column="0" BackgroundColor="White" CornerRadius="20"
+                               Padding="20" HasShadow="True">
+                            <VerticalStackLayout Spacing="8">
+                                <Frame BackgroundColor="#EFF6FF" CornerRadius="12" Padding="10"
+                                       HasShadow="False" WidthRequest="44" HeightRequest="44">
+                                    <Label Text="💰" FontSize="20" HorizontalOptions="Center" />
+                                </Frame>
+                                <Label Text="Receita Total" FontSize="11" TextColor="#64748B" FontAttributes="Bold" />
+                                <Label x:Name="RevenueLabel" Text="—" FontSize="20" FontAttributes="Bold" TextColor="#0F172A" />
+                            </VerticalStackLayout>
+                        </Frame>
+
+                        <!-- Pedidos -->
+                        <Frame Grid.Column="1" BackgroundColor="White" CornerRadius="20"
+                               Padding="20" HasShadow="True">
+                            <VerticalStackLayout Spacing="8">
+                                <Frame BackgroundColor="#F0FDF4" CornerRadius="12" Padding="10"
+                                       HasShadow="False" WidthRequest="44" HeightRequest="44">
+                                    <Label Text="📦" FontSize="20" HorizontalOptions="Center" />
+                                </Frame>
+                                <Label Text="Total Pedidos" FontSize="11" TextColor="#64748B" FontAttributes="Bold" />
+                                <Label x:Name="OrdersLabel" Text="—" FontSize="20" FontAttributes="Bold" TextColor="#0F172A" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </Grid>
+
+                    <!-- Row 2: Ticket Médio -->
+                    <Frame BackgroundColor="#0284c7" CornerRadius="24" Padding="24" HasShadow="True">
+                        <HorizontalStackLayout Spacing="16">
+                            <Label Text="📈" FontSize="36" VerticalOptions="Center" />
+                            <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                                <Label Text="Ticket Médio" FontSize="12" TextColor="#BAE6FD" FontAttributes="Bold" />
+                                <Label x:Name="AvgLabel" Text="—" FontSize="28" FontAttributes="Bold" TextColor="White" />
+                                <Label Text="por pedido" FontSize="11" TextColor="#7DD3FC" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+                    </Frame>
+
+                    <!-- Top Products -->
+                    <Frame BackgroundColor="White" CornerRadius="24" Padding="20" HasShadow="True">
+                        <VerticalStackLayout Spacing="16">
+                            <Label Text="Produtos em Destaque"
+                                   FontSize="16" FontAttributes="Bold" TextColor="#0F172A" />
+                            <CollectionView x:Name="TopProductsList" HeightRequest="200">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Padding="0,8" ColumnDefinitions="44,*,Auto">
+                                            <Frame Grid.Column="0" BackgroundColor="#F0F9FF"
+                                                   CornerRadius="12" Padding="0" HasShadow="False"
+                                                   WidthRequest="44" HeightRequest="44">
+                                                <Label Text="{Binding ProductName[0]}"
+                                                       FontSize="18" FontAttributes="Bold"
+                                                       TextColor="#0284c7"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center" />
+                                            </Frame>
+                                            <VerticalStackLayout Grid.Column="1" Padding="12,0" VerticalOptions="Center">
+                                                <Label Text="{Binding ProductName}"
+                                                       FontSize="14" FontAttributes="Bold" TextColor="#0F172A" />
+                                                <Label Text="{Binding QuantitySold, StringFormat='{0} vendidos'}"
+                                                       FontSize="12" TextColor="#64748B" />
+                                            </VerticalStackLayout>
+                                            <Label Grid.Column="2"
+                                                   Text="{Binding Revenue, StringFormat='R$ {0:N0}'}"
+                                                   FontSize="14" FontAttributes="Bold"
+                                                   TextColor="#0284c7" VerticalOptions="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                </VerticalStackLayout>
+
+                <!-- Error -->
+                <Frame x:Name="ErrorFrame" IsVisible="False"
+                       BackgroundColor="#FFF1F2" CornerRadius="16" Padding="20" HasShadow="False">
+                    <Label x:Name="ErrorLabel" TextColor="#E11D48" HorizontalOptions="Center" />
+                </Frame>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>

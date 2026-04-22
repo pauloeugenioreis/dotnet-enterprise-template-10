@@ -1,3 +1,4 @@
+using ProjectTemplate.SharedModels;
 using Microsoft.EntityFrameworkCore;
 using ProjectTemplate.Data.Context;
 using ProjectTemplate.Domain;

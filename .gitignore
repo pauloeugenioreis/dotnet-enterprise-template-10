@@ -96,3 +96,13 @@ secrets.json
 .sonarqube/
 .sonar/
 .scannerwork/
+node_modules/
+dist/
+build/
+.expo/
+.next/
+.idea/
+.vscode/
+*.log
+.env*
+.DS_Store

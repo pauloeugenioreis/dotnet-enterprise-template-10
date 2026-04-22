@@ -1,7 +1,8 @@
+using ProjectTemplate.SharedModels;
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using ProjectTemplate.Domain.Dtos;
+using ProjectTemplate.SharedModels;
 using Xunit;
 
 namespace ProjectTemplate.Integration.Tests.Controllers;
