@@ -15,7 +15,8 @@ const authStore = useAuthStore();
 const handleLogin = async () => {
   loading.value = true;
   try {
-    const { data } = await axios.post('https://localhost:7196/api/auth/login', {
+    const apiBase = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7196';
+    const { data } = await axios.post(`${apiBase}/api/auth/login`, {
       email: email.value,
       password: password.value
     });

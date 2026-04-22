@@ -15,7 +15,7 @@ export function useLogin() {
     setLoading(true);
     try {
       const { data } = await authService.login({ email, password });
-      setAuth(data, data.token);
+      setAuth(data.user, data.accessToken);
       navigate('/dashboard');
     } catch (error) {
       alert('Erro ao entrar');

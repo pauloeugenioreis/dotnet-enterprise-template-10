@@ -46,7 +46,6 @@ public class AuthControllerTests : IClassFixture<WebApplicationFactoryFixture>
         // Arrange
         var request = new RegisterDto
         {
-            Username = "integration_user",
             Email = "integration_user@example.com",
             Password = "Test@123",
             FirstName = "Integration",
@@ -71,7 +70,7 @@ public class AuthControllerTests : IClassFixture<WebApplicationFactoryFixture>
         // Arrange
         var request = new LoginDto
         {
-            Username = "integration_user",
+            Email = "integration_user@example.com",
             Password = "Test@123"
         };
 
@@ -82,7 +81,7 @@ public class AuthControllerTests : IClassFixture<WebApplicationFactoryFixture>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var payload = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
         payload.Should().NotBeNull();
-        payload!.User.Username.Should().Be("integration_user");
+        payload!.User.Email.Should().Be("integration_user@example.com");
     }
 
     [Fact]
@@ -102,7 +101,7 @@ public class AuthControllerTests : IClassFixture<WebApplicationFactoryFixture>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var payload = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
         payload.Should().NotBeNull();
-        payload!.User.Username.Should().Be("oauth_google");
+        payload!.User.Email.Should().Be("oauth_google@example.com");
     }
 
     [Fact]
@@ -151,7 +150,7 @@ public class AuthControllerTests : IClassFixture<WebApplicationFactoryFixture>
         var payload = await response.Content.ReadFromJsonAsync<UserDto>();
         payload.Should().NotBeNull();
         payload!.Id.Should().Be(123);
-        payload.Username.Should().Be("integration_user");
+        payload.Email.Should().Be("integration_user@example.com");
     }
 
     [Fact]
@@ -199,7 +198,6 @@ public class AuthControllerTests : IClassFixture<WebApplicationFactoryFixture>
         private readonly UserDto _defaultUser = new()
         {
             Id = 123,
-            Username = "integration_user",
             Email = "integration_user@example.com",
             FirstName = "Integration",
             LastName = "User",
@@ -211,7 +209,6 @@ public class AuthControllerTests : IClassFixture<WebApplicationFactoryFixture>
         public Task<AuthResponseDto> RegisterAsync(RegisterDto dto, CancellationToken cancellationToken = default)
         {
             var user = CloneUser(_defaultUser);
-            user.Username = dto.Username;
             user.Email = dto.Email;
             user.FirstName = dto.FirstName;
             user.LastName = dto.LastName;
@@ -223,14 +220,13 @@ public class AuthControllerTests : IClassFixture<WebApplicationFactoryFixture>
         public Task<AuthResponseDto> LoginAsync(LoginDto dto, string? ipAddress = null, CancellationToken cancellationToken = default)
         {
             var user = CloneUser(_defaultUser);
-            user.Username = dto.Username;
+            user.Email = dto.Email;
             return Task.FromResult(CreateAuthResponse(user));
         }
 
         public Task<AuthResponseDto> OAuth2LoginAsync(OAuth2LoginDto dto, string? ipAddress = null, CancellationToken cancellationToken = default)
         {
             var user = CloneUser(_defaultUser);
-            user.Username = $"oauth_{dto.Provider.ToLowerInvariant()}";
             user.Email = $"oauth_{dto.Provider.ToLowerInvariant()}@example.com";
 
             return Task.FromResult(CreateAuthResponse(user));
@@ -279,7 +275,6 @@ public class AuthControllerTests : IClassFixture<WebApplicationFactoryFixture>
             return new UserDto
             {
                 Id = source.Id,
-                Username = source.Username,
                 Email = source.Email,
                 FirstName = source.FirstName,
                 LastName = source.LastName,

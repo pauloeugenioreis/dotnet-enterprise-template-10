@@ -11,6 +11,7 @@ namespace ProjectTemplate.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
+[Route("api/[controller]")]
 public class AuthController : ApiControllerBase
 {
     private readonly IAuthService _authService;
@@ -39,7 +40,7 @@ public class AuthController : ApiControllerBase
     }
 
     /// <summary>
-    /// Login with username/email and password
+    /// Login with email and password
     /// </summary>
     /// <param name="dto">Login credentials</param>
     /// <param name="cancellationToken">Cancellation token</param>

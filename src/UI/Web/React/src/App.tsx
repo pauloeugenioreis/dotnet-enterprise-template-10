@@ -7,13 +7,14 @@ import Audit from './features/audit/Audit';
 import Products from './features/products/Products';
 import Orders from './features/orders/Orders';
 import Documents from './features/documents/Documents';
+import MainLayout from './layouts/MainLayout';
 import { useAuthStore } from './store/useAuthStore';
 
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((state) => state.token);
-  return token ? <>{children}</> : <Navigate to="/login" />;
+  return token ? <MainLayout>{children}</MainLayout> : <Navigate to="/login" />;
 }
 
 export default function App() {

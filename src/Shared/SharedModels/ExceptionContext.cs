@@ -7,7 +7,7 @@ namespace ProjectTemplate.SharedModels;
 public class ExceptionContext
 {
     /// <summary>
-    /// User identifier (username, email, or "Anonymous")
+    /// User identifier (email or "Anonymous")
     /// </summary>
     public string User { get; set; } = "Anonymous";
 

@@ -1,6 +1,8 @@
 @page "/audit"
 @using BlazorApp.Client.Services
 @using ProjectTemplate.SharedModels
+@using ProjectTemplate.Domain.Entities
+@using Microsoft.AspNetCore.Authorization
 @inject IAuditService AuditService
 @attribute [Authorize]
 

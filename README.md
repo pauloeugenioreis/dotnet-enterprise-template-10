@@ -429,9 +429,8 @@ dotnet run --project src/Api
 O sistema cria automaticamente um usuário administrador na primeira execução:
 
 ```text
-Username: admin
-Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com
+Password: Admin@2026!Secure
 Role:     Admin
 ```
 

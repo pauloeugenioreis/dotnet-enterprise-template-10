@@ -14,8 +14,8 @@ public static class HealthChecksExtension
     {
         var healthChecksBuilder = services.AddHealthChecks();
 
-        // Application self-check
-        healthChecksBuilder.AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "ready" });
+        // Application self-check (Handled by Aspire ServiceDefaults)
+        // healthChecksBuilder.AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "ready" });
 
         // Database health check
         var connectionString = appSettings.Value.Infrastructure.Database.ConnectionString;

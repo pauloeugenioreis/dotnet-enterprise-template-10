@@ -36,12 +36,11 @@ public interface ITokenService
 public interface IUserRepository
 {
     Task<User?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
-    Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default);
     Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
     Task<User?> GetByExternalProviderAsync(string provider, string externalId, CancellationToken cancellationToken = default);
     Task<User> CreateAsync(User user, CancellationToken cancellationToken = default);
     Task UpdateAsync(User user, CancellationToken cancellationToken = default);
-    Task<bool> ExistsAsync(string username, string email, CancellationToken cancellationToken = default);
+    Task<bool> ExistsAsync(string email, CancellationToken cancellationToken = default);
     Task<List<string>> GetUserRolesAsync(long userId, CancellationToken cancellationToken = default);
     Task AddToRoleAsync(long userId, string roleName, CancellationToken cancellationToken = default);
     Task<RefreshToken?> GetRefreshTokenAsync(string token, CancellationToken cancellationToken = default);

@@ -9,7 +9,8 @@ const loading = ref(true);
 
 onMounted(async () => {
   try {
-    const { data } = await axios.get('https://localhost:7196/api/v1/audit/Order?page=1&pageSize=10');
+    const apiBase = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7196';
+    const { data } = await axios.get(`${apiBase}/api/v1/audit/Order?page=1&pageSize=10`);
     logs.value = data.items;
   } catch (error) {
     console.error('Erro ao buscar logs');

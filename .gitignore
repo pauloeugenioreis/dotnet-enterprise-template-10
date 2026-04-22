@@ -106,3 +106,11 @@ build/
 *.log
 .env*
 .DS_Store
+
+# Frameworks Caches
+.angular/
+.vite/
+**/node_modules/
+**/dist/
+**/build/
+.cache/

@@ -36,9 +36,8 @@ Este template oferece um sistema de autenticação completo com suporte a JWT (J
 Para desenvolvimento e testes, um usuário admin padrão é criado automaticamente ao popular o banco de dados:
 
 ```text
-Username: admin
-Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com
+Password: Admin@2026!Secure
 Role:     Admin
 ```
 
@@ -209,7 +208,7 @@ Use as credenciais padrão do admin para obter um token JWT:
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "usernameOrEmail": "admin",
+    "email": "admin@projecttemplate.com",
     "password": "Admin@2026!Secure"
   }'
 ```

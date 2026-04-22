@@ -36,18 +36,18 @@
 
                 <div class="space-y-6">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2 ml-1">Usuário</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2 ml-1">E-mail</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                             </span>
-                            <InputText @bind-Value="loginRequest.Username" 
+                            <InputText @bind-Value="loginRequest.Email" 
                                       class="block w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-gray-900 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 focus:bg-white transition-all outline-none" 
-                                      placeholder="Seu usuário" />
+                                      placeholder="seu@email.com" />
                         </div>
-                        <ValidationMessage For="@(() => loginRequest.Username)" class="text-rose-500 text-xs mt-2 ml-1" />
+                        <ValidationMessage For="@(() => loginRequest.Email)" class="text-rose-500 text-xs mt-2 ml-1" />
                     </div>
 
                     <div>
@@ -147,7 +147,7 @@
             }
             else
             {
-                errorMessage = "Usuário ou senha incorretos.";
+                errorMessage = "E-mail ou senha incorretos.";
             }
         }
         catch (Exception)

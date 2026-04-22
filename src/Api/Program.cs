@@ -19,6 +19,24 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<ValidationFilter>();
 });
 
+// Configure CORS for multi-platform UIs
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("EnterpriseCorsPolicy", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:4200", // Angular
+                "http://localhost:5173", // React
+                "http://localhost:5174", // Vue
+                "https://localhost:7196", // Self
+                "http://localhost:5000"  // Generic/Local
+            )
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+});
+
 
 // Add Swagger with JWT authentication (skip in Testing environment to avoid version conflicts)
 if (!builder.Environment.IsEnvironment("Testing"))
@@ -112,9 +130,9 @@ if (telemetryEnabled && telemetryProviders.Contains("prometheus", StringComparer
     app.MapPrometheusScrapingEndpoint();
 }
 
+app.UseCors("EnterpriseCorsPolicy");
 app.UseAuthorization();
 
-app.MapHealthChecks("/health");
 app.MapControllers();
 
 await app.RunAsync().ConfigureAwait(false);

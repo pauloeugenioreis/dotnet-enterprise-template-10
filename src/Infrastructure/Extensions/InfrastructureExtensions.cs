@@ -44,7 +44,7 @@ public static class InfrastructureExtensions
         services.AddResilienceConfiguration();
 
         // Authentication (JWT + OAuth2)
-        services.AddJwtAuthentication();
+        services.AddJwtAuthentication(appSettings);
 
         // CORS
         services.AddCors(options =>

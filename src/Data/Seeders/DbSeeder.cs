@@ -61,7 +61,7 @@ public class DbSeeder
 
     /// <summary>
     /// Seeds roles and creates the default admin user
-    /// Default Credentials: admin / Admin@2026!Secure
+    /// Default Credentials: admin@projecttemplate.com / Admin@2026!Secure
     /// </summary>
     private async Task SeedRolesAndAdminUserAsync()
     {
@@ -108,7 +108,6 @@ public class DbSeeder
 
             var adminUser = new User
             {
-                Username = "admin",
                 Email = "admin@projecttemplate.com",
                 PasswordHash = passwordHash,
                 FirstName = "System",
@@ -138,9 +137,8 @@ public class DbSeeder
             Console.WriteLine("═══════════════════════════════════════════════════════");
             Console.WriteLine("   DEFAULT ADMIN CREDENTIALS");
             Console.WriteLine("═══════════════════════════════════════════════════════");
-            Console.WriteLine("   Username: admin");
-            Console.WriteLine("   Password: Admin@2026!Secure");
             Console.WriteLine("   Email:    admin@projecttemplate.com");
+            Console.WriteLine("   Password: Admin@2026!Secure");
             Console.WriteLine("═══════════════════════════════════════════════════════");
             Console.WriteLine("   ⚠️  CHANGE THIS PASSWORD IN PRODUCTION!");
             Console.WriteLine("═══════════════════════════════════════════════════════");

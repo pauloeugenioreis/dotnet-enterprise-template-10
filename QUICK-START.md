@@ -105,9 +105,8 @@ Acesse:
 O sistema cria automaticamente um usuário administrador:
 
 ```text
-Username: admin
+Email: admin@projecttemplate.com
 Password: Admin@2026!Secure
-Email:    admin@projecttemplate.com
 ```
 
 > ⚠️ **IMPORTANTE**: Altere esta senha em produção!
@@ -119,7 +118,7 @@ Email:    admin@projecttemplate.com
 curl -X POST https://localhost:3060/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "usernameOrEmail": "admin",
+    "email": "admin@projecttemplate.com",
     "password": "Admin@2026!Secure"
   }'
 

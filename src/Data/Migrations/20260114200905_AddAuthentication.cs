@@ -81,7 +81,6 @@ public partial class AddAuthentication : Migration
             {
                 Id = table.Column<long>(type: "bigint", nullable: false)
                     .Annotation("SqlServer:Identity", "1, 1"),
-                Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
                 Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                 PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                 FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),

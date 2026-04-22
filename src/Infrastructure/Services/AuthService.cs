@@ -36,16 +36,15 @@ public class AuthService : IAuthService
         // Validate password policy
         ValidatePassword(dto.Password);
 
-        // Check if user already exists
-        if (await _userRepository.ExistsAsync(dto.Username, dto.Email, cancellationToken))
+        // Check if user already exists (only by email now)
+        if (await _userRepository.ExistsAsync(dto.Email, cancellationToken))
         {
-            throw new DomainException("Username or email already exists");
+            throw new DomainException("Email already exists");
         }
 
         // Create user
         var user = new User
         {
-            Username = dto.Username,
             Email = dto.Email,
             PasswordHash = HashPassword(dto.Password),
             FirstName = dto.FirstName,
@@ -78,11 +77,11 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDto> LoginAsync(LoginDto dto, string? ipAddress = null, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetByUsernameAsync(dto.Username, cancellationToken);
+        var user = await _userRepository.GetByEmailAsync(dto.Email, cancellationToken);
 
         if (user == null || !VerifyPassword(dto.Password, user.PasswordHash))
         {
-            throw new UnauthorizedAccessException("Invalid username or password");
+            throw new UnauthorizedAccessException("Invalid email or password");
         }
 
         if (!user.IsActive)
@@ -295,7 +294,6 @@ public class AuthService : IAuthService
         return new UserDto
         {
             Id = user.Id,
-            Username = user.Username,
             Email = user.Email,
             FirstName = user.FirstName,
             LastName = user.LastName,
