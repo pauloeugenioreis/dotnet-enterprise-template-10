@@ -7,6 +7,8 @@ import Audit from '../features/audit/Audit.vue';
 import MainLayout from '../layouts/MainLayout.vue';
 import { useAuthStore } from '../store/auth';
 
+import { authGuard } from './guards/authGuard';
+
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -20,25 +22,16 @@ const router = createRouter({
       component: MainLayout,
       meta: { requiresAuth: true },
       children: [
-        { path: 'dashboard', component: Dashboard },
-        { path: 'products', component: Products },
-        { path: 'orders', component: Orders },
-        { path: 'audit', component: Audit },
+        { path: 'dashboard', name: 'Dashboard', component: Dashboard },
+        { path: 'products', name: 'Products', component: Products },
+        { path: 'orders', name: 'Orders', component: Orders },
+        { path: 'audit', name: 'Audit', component: Audit },
         { path: '', redirect: '/dashboard' }
       ]
     }
   ]
 });
 
-router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore();
-  if (to.meta.requiresAuth && !authStore.token) {
-    next('/login');
-  } else if (to.name === 'Login' && authStore.token) {
-    next('/dashboard');
-  } else {
-    next();
-  }
-});
+router.beforeEach(authGuard);
 
 export default router;

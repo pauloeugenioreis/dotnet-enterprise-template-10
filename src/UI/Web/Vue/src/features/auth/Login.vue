@@ -5,6 +5,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../store/auth';
 import axios from 'axios';
+import { config } from '../../config';
 
 const email = ref('admin@projecttemplate.com');
 const password = ref('Admin@2026!Secure');
@@ -15,8 +16,7 @@ const authStore = useAuthStore();
 const handleLogin = async () => {
   loading.value = true;
   try {
-    const apiBase = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7196';
-    const { data } = await axios.post(`${apiBase}/api/auth/login`, {
+    const { data } = await axios.post(`${config.apiBaseUrl}/api/auth/login`, {
       email: email.value,
       password: password.value
     });
