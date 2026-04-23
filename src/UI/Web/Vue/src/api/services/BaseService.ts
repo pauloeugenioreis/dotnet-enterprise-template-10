@@ -34,4 +34,14 @@ export abstract class BaseService<T> {
   async patch(id: number | string, data: any): Promise<void> {
     await api.patch(`${this.resourcePath}/${id}`, data);
   }
+
+  protected async downloadFile(url: string, fileName: string): Promise<void> {
+    const response = await api.get(url, { responseType: 'blob' });
+    const blob = new Blob([response.data], { type: response.headers['content-type'] });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+    window.URL.revokeObjectURL(link.href);
+  }
 }

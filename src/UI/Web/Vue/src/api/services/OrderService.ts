@@ -11,7 +11,7 @@ export class OrderService extends BaseService<any> {
   }
 
   async exportToExcel(): Promise<void> {
-    window.open(`${import.meta.env.VITE_API_BASE_URL || 'https://localhost:7196'}${this.resourcePath}/export`, '_blank');
+    await this.downloadFile(`${this.resourcePath}/ExportToExcel`, `Pedidos_${new Date().getTime()}.xlsx`);
   }
 }
 
