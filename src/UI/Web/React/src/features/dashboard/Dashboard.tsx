@@ -6,14 +6,14 @@ export default function Dashboard() {
   const { orders, isLoading, stats } = useDashboard();
 
   return (
-    <div className="w-full space-y-10 animate-in fade-in duration-500">
-      <header>
-        <h1 className="text-6xl font-extrabold text-slate-900 tracking-tight">Dashboard</h1>
-        <p className="text-gray-500 mt-3 font-medium text-xl">Performance em tempo real.</p>
-      </header>
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="mb-16">
+        <h1 className="text-6xl font-black text-gray-900 tracking-tighter">Dashboard</h1>
+        <p className="text-gray-500 mt-4 font-medium text-xl">Performance em tempo real.</p>
+      </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-16">
         {stats.map((stat, i) => (
           <div key={i} className="bg-white p-10 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-50 flex flex-col gap-6 group cursor-default">
             <div className={`${stat.color} w-16 h-16 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform`}>
@@ -31,7 +31,7 @@ export default function Dashboard() {
       <div className="bg-white rounded-[3.5rem] shadow-2xl shadow-gray-200/60 border border-gray-50 overflow-hidden">
         <div className="p-12 border-b border-gray-50 flex justify-between items-center">
           <h3 className="text-3xl font-black text-gray-900 tracking-tight">Últimos Pedidos</h3>
-          <button 
+          <button
             onClick={() => navigate('/orders')}
             className="text-[10px] font-black text-primary-600 uppercase tracking-[0.2em] hover:bg-primary-50 px-6 py-3 rounded-xl transition-all"
           >

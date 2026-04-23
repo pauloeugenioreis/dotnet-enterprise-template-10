@@ -24,11 +24,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const userName = user?.firstName ? `${user.firstName} ${user.lastName}` : 'Usuário';
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-gray-100 overflow-hidden font-sans">
       {/* Sidebar */}
       <div className="w-72 bg-white shadow-2xl relative flex flex-col z-20">
         <div className="p-10 border-b border-gray-50 flex items-center gap-4">
-          <div className="w-12 h-12 bg-primary-600 rounded-[1.25rem] flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-primary-600/20 tracking-tighter">
+          <div className="w-12 h-12 bg-primary-600 rounded-[1.25rem] flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-primary-600/20">
             ET
           </div>
           <div className="flex flex-col">
@@ -36,7 +36,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             <span className="text-[10px] font-bold text-primary-600 uppercase tracking-[0.3em] -mt-1">React Edition</span>
           </div>
         </div>
-        
+
         <nav className="mt-10 px-6 space-y-3 flex-1">
           {menuItems.map((item) => (
             <Link
