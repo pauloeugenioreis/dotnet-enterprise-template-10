@@ -21,6 +21,10 @@ export class OrderService extends BaseService {
     return this.http.put(`${this.baseUrl}/api/v1/Order/${id}`, order);
   }
 
+  updateStatus(id: string, status: string, reason: string = 'Atualizado via Dashboard') {
+    return this.http.patch(`${this.baseUrl}/api/v1/Order/${id}/status`, { status, reason });
+  }
+
   exportToExcel(search = '', status = '', from?: Date, to?: Date) {
     let url = `${this.baseUrl}/api/v1/Order/ExportToExcel?`;
     if (search) url += `&searchTerm=${encodeURIComponent(search)}`;

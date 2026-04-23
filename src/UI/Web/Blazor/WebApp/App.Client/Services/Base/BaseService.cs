@@ -70,4 +70,11 @@ public abstract class BaseService(IHttpClientFactory httpClientFactory, LocalSto
         var response = await Http.DeleteAsync(url, ct);
         response.EnsureSuccessStatusCode();
     }
+
+    protected async Task PatchAsync<TRequest>(string url, TRequest request, CancellationToken ct = default)
+    {
+        await AddAuthHeaderAsync();
+        var response = await Http.PatchAsJsonAsync(url, request, ct);
+        response.EnsureSuccessStatusCode();
+    }
 }

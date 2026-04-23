@@ -10,6 +10,7 @@ public interface IOrderService
     Task DeleteAsync(long id, CancellationToken ct = default);
     Task CreateAsync(CreateOrderRequest dto, CancellationToken ct = default);
     Task UpdateAsync(long id, UpdateOrderRequest dto, CancellationToken ct = default);
+    Task UpdateStatusAsync(long id, UpdateOrderStatusDto dto, CancellationToken ct = default);
 }
 
 public class OrderService(IHttpClientFactory httpClientFactory, LocalStorageService localStorage) 
@@ -38,5 +39,10 @@ public class OrderService(IHttpClientFactory httpClientFactory, LocalStorageServ
     public Task UpdateAsync(long id, UpdateOrderRequest dto, CancellationToken ct = default)
     {
         return PutAsync($"{ResourcePath}/{id}", dto, ct);
+    }
+
+    public Task UpdateStatusAsync(long id, UpdateOrderStatusDto dto, CancellationToken ct = default)
+    {
+        return PatchAsync($"{ResourcePath}/{id}/status", dto, ct);
     }
 }

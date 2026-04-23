@@ -16,8 +16,10 @@ export class DropdownComponent {
   @Input() options: DropdownOption[] = [];
   @Input() value: any;
   @Input() placeholder: string = 'Selecionar...';
-  @Input() variant: 'filter' | 'form' = 'filter';
+  @Input() variant: 'filter' | 'form' | 'primary' = 'filter';
   @Input() className: string = '';
+  @Input() labelOverride: string | null = null;
+  @Input() direction: 'up' | 'down' = 'down';
   
   @Output() valueChange = new EventEmitter<any>();
 
@@ -45,8 +47,11 @@ export class DropdownComponent {
     }
   }
 
-  get paddingClass() { return this.variant === 'filter' ? 'py-5' : 'py-3'; }
+  get paddingClass() { return (this.variant === 'filter' || this.variant === 'primary') ? 'py-4' : 'py-3'; }
   get roundedClass() { return this.variant === 'filter' ? 'rounded-3xl' : 'rounded-2xl'; }
-  get bgClass() { return this.variant === 'filter' ? 'bg-white' : 'bg-gray-50'; }
-  get shadowClass() { return this.variant === 'filter' ? 'shadow-xl shadow-gray-100/50' : ''; }
+  get bgClass() { return this.variant === 'primary' ? 'bg-primary-600' : (this.variant === 'filter' ? 'bg-white' : 'bg-gray-50'); }
+  get textClass() { return this.variant === 'primary' ? 'text-white' : 'text-gray-900'; }
+  get hoverClass() { return this.variant === 'primary' ? 'hover:bg-primary-700' : 'hover:bg-gray-50'; }
+  get shadowClass() { return this.variant === 'primary' ? 'shadow-xl shadow-primary-200' : (this.variant === 'filter' ? 'shadow-xl shadow-gray-100/50' : ''); }
+  get iconClass() { return this.variant === 'primary' ? 'text-white/80' : 'text-gray-300'; }
 }

@@ -1,3 +1,4 @@
+@using BlazorApp.Client.Services
 @using ProjectTemplate.SharedModels
 
 <div class="fixed inset-0 z-50 @(IsOpen ? "block" : "hidden")">
@@ -5,7 +6,7 @@
     <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" @onclick="Close"></div>
 
     <!-- Modal Content -->
-    <div class="absolute right-0 top-0 h-full w-full max-w-2xl bg-white shadow-2xl flex flex-col animate-slide-in">
+    <div class="absolute right-0 top-0 h-full w-full max-w-2xl bg-white shadow-2xl flex flex-col animate-slide-in print-area">
         @if (Order != null)
         {
             <!-- Header -->
@@ -103,9 +104,22 @@
                     </div>
                 </div>
                 
-                <div class="mt-8 flex gap-3">
-                    <button class="flex-1 bg-white border border-gray-200 py-3 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">Imprimir Pedido</button>
-                    <button class="flex-1 bg-primary-600 py-3 rounded-xl text-sm font-bold text-white shadow-lg shadow-primary-200 hover:bg-primary-700 transition-all">Atualizar Status</button>
+                <div class="mt-10 flex gap-4 no-print">
+                    <button @onclick="Print" class="flex-1 bg-gradient-to-br from-gray-50 to-white border border-gray-200 py-3 rounded-xl text-sm font-bold text-gray-600 hover:bg-white hover:border-gray-300 hover:shadow-lg hover:shadow-gray-100 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        Imprimir Pedido
+                    </button>
+                    <div class="flex-1">
+                        <Dropdown Options="statusOptions" 
+                                  Value="@Order.Status" 
+                                  ValueChanged="HandleStatusChange" 
+                                  Variant="primary"
+                                  Placeholder="Atualizar Status"
+                                  LabelOverride="Atualizar Status"
+                                  Direction="up" />
+                    </div>
                 </div>
             </div>
         }
@@ -126,8 +140,45 @@
     [Parameter] public OrderResponseDto? Order { get; set; }
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnStatusUpdated { get; set; }
+    [Inject] private IJSRuntime JS { get; set; } = null!;
+    [Inject] private IOrderService OrderService { get; set; } = null!;
+
+    private bool isUpdating = false;
+
+    private List<DropdownOption> statusOptions = new()
+    {
+        new("Pendente", "Pending"),
+        new("Enviado", "Shipped"),
+        new("Entregue", "Delivered"),
+        new("Cancelado", "Cancelled")
+    };
 
     private async Task Close() => await OnClose.InvokeAsync();
+
+    private async Task Print()
+    {
+        await JS.InvokeVoidAsync("window.print");
+    }
+
+    private async Task HandleStatusChange(object? newValue)
+    {
+        if (Order == null || newValue == null) return;
+        
+        var newStatus = newValue.ToString()!;
+        if (newStatus == Order.Status) return;
+
+        isUpdating = true;
+        try
+        {
+            await OrderService.UpdateStatusAsync(Order.Id, new UpdateOrderStatusDto(newStatus, "Atualizado via Dashboard"));
+            await OnStatusUpdated.InvokeAsync();
+        }
+        finally
+        {
+            isUpdating = false;
+        }
+    }
 
     private string GetStatusClass(string status) => status?.ToLower() switch
     {

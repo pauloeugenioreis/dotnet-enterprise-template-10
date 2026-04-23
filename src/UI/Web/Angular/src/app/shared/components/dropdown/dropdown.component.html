@@ -2,11 +2,11 @@
   <button
     type="button"
     (click)="toggle()"
-    [class]="'w-full pl-8 pr-12 ' + paddingClass + ' ' + bgClass + ' border-none ' + roundedClass + ' ' + shadowClass + ' outline-none font-black text-xs uppercase tracking-widest text-gray-900 flex justify-between items-center hover:bg-gray-50 transition-all active:scale-[0.98]'"
+    [class]="'w-full pl-8 pr-12 ' + paddingClass + ' ' + bgClass + ' ' + textClass + ' border-none ' + roundedClass + ' ' + shadowClass + ' outline-none font-bold text-xs uppercase tracking-widest flex justify-between items-center ' + hoverClass + ' transition-all active:scale-[0.98]'"
   >
-    <span class="truncate">{{ selectedOption ? selectedOption.label : placeholder }}</span>
+    <span class="truncate">{{ labelOverride ?? (selectedOption ? selectedOption.label : placeholder) }}</span>
     <svg 
-      [class]="'w-5 h-5 text-gray-300 transition-transform duration-300 ' + (isOpen() ? 'rotate-180' : '')" 
+      [class]="'w-5 h-5 ' + iconClass + ' transition-transform duration-300 ' + (isOpen() ? 'rotate-180' : '')" 
       fill="none" 
       stroke="currentColor" 
       viewBox="0 0 24 24"
@@ -16,7 +16,7 @@
   </button>
 
   <div *ngIf="isOpen()" 
-       class="absolute z-50 w-full mt-3 bg-white border border-gray-50 rounded-[2rem] shadow-2xl shadow-gray-200/50 py-3 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+       [class]="'absolute z-50 w-full ' + (direction === 'up' ? 'bottom-full mb-3' : 'mt-3') + ' bg-white border border-gray-50 rounded-[2rem] shadow-2xl shadow-gray-200/50 py-3 overflow-hidden animate-in fade-in zoom-in-95 duration-200'">
     <div class="max-h-60 overflow-y-auto">
       <button
         *ngFor="let option of options"

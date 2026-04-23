@@ -1,5 +1,28 @@
 import apiClient from './apiClient';
 
+export interface OrderItemDto {
+  productId: number;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+}
+
+export interface OrderResponseDto {
+  id: number;
+  orderNumber: string;
+  customerName: string;
+  customerEmail: string;
+  shippingAddress: string;
+  status: string;
+  subtotal: number;
+  shippingCost: number;
+  tax: number;
+  total: number;
+  createdAt: string;
+  items: OrderItemDto[];
+}
+
 export const authService = {
   login: (credentials: any) => apiClient.post('/api/auth/login', credentials),
 };
@@ -14,7 +37,7 @@ export const orderService = {
     return apiClient.get(url).then(res => res.data);
   },
   createOrder: (order: any) => apiClient.post('/api/v1/Order', order),
-  updateStatus: (id: number, status: string) => apiClient.patch(`/api/v1/Order/${id}/status`, { status }),
+  updateStatus: (id: number, status: string, reason: string = 'Atualizado via Dashboard') => apiClient.patch(`/api/v1/Order/${id}/status`, { status, reason }),
   deleteOrder: (id: number) => apiClient.post(`/api/v1/Order/${id}/cancel`),
   exportToExcel: (status?: string, searchTerm?: string, startDate?: string, endDate?: string) => {
     let url = '/api/v1/Order/ExportToExcel?';

@@ -245,3 +245,10 @@
     </div>
   </form>
 </app-modal>
+
+<app-order-details-modal
+  [order]="selectedOrder()"
+  [isOpen]="showDetailsModal()"
+  (close)="showDetailsModal.set(false)"
+  (statusUpdated)="loadOrders()"
+></app-order-details-modal>

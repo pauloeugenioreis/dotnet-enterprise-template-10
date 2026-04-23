@@ -4,6 +4,8 @@ import { useProducts } from '../products/useProducts';
 import Modal from '../../components/Modal';
 import Pagination from '../../components/Pagination';
 import Dropdown from '../../components/Dropdown';
+import OrderDetailsModal from './components/OrderDetailsModal';
+import { OrderResponseDto } from '../../api/services';
 
 export default function Orders() {
   const { 
@@ -14,6 +16,8 @@ export default function Orders() {
   const { data: productsData } = useProducts();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<OrderResponseDto | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   
   const [formData, setFormData] = useState({
@@ -79,6 +83,11 @@ export default function Orders() {
     setEditingId(null);
     setFormData({ customerName: '', customerEmail: '', shippingAddress: '', items: [] });
     setIsModalOpen(true);
+  };
+
+  const handleViewDetails = (order: OrderResponseDto) => {
+    setSelectedOrder(order);
+    setIsDetailsOpen(true);
   };
 
   return (
@@ -208,6 +217,13 @@ export default function Orders() {
                 <td className="px-10 py-8">
                   <div className="flex gap-2">
                     <button 
+                      onClick={() => handleViewDetails(order)}
+                      className="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-primary-50 rounded-xl text-primary-600 transition-all active:scale-90" 
+                      title="Ver Detalhes"
+                    >
+                      🔍
+                    </button>
+                    <button 
                       onClick={() => handleEdit(order)}
                       className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors" 
                       title="Editar"
@@ -330,6 +346,18 @@ export default function Orders() {
           </button>
         </div>
       </Modal>
+
+      <OrderDetailsModal 
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        order={selectedOrder}
+        onStatusUpdated={() => {
+          setIsDetailsOpen(false);
+          // The useOrders hook should provide a reload method, but usually just changing page or status reloads it.
+          // Let's assume setPage(page) or similar triggers it.
+          setPage(page); 
+        }}
+      />
     </div>
   );
 }

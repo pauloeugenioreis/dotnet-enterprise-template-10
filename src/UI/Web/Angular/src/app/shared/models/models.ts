@@ -30,8 +30,10 @@ export interface AuthResponseDto {
 
 export interface OrderItemDto {
   productId: string;
+  productName: string;
   quantity: number;
   unitPrice: number;
+  subtotal: number;
 }
 
 export interface OrderResponseDto {
@@ -41,6 +43,9 @@ export interface OrderResponseDto {
   customerEmail?: string;
   shippingAddress?: string;
   status: string;
+  subtotal: number;
+  shippingCost: number;
+  tax: number;
   total: number;
   createdAt: string;
   items?: OrderItemDto[];

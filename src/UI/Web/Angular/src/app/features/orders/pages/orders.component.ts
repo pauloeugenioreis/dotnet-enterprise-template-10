@@ -6,12 +6,13 @@ import { OrderResponseDto, ProductResponseDto } from '../../../shared/models/mod
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { OrderDetailsModalComponent } from '../components/order-details-modal/order-details-modal.component';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule, DropdownComponent, PaginationComponent, ModalComponent],
+  imports: [CommonModule, FormsModule, DropdownComponent, PaginationComponent, ModalComponent, OrderDetailsModalComponent],
   templateUrl: './orders.component.html'
 })
 export class OrdersComponent implements OnInit, OnDestroy {
@@ -36,8 +37,10 @@ export class OrdersComponent implements OnInit, OnDestroy {
   totalItems = 0;
   totalPages = 0;
 
-  // Modal
+  // Modal State
   showModal = false;
+  showDetailsModal = signal(false);
+  selectedOrder = signal<OrderResponseDto | null>(null);
   modalTitle = 'Novo Pedido';
   editingOrder: any = null;
   formData = {
@@ -150,16 +153,9 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.showModal = true;
   }
 
-  viewDetails(order: any) {
-    this.editingOrder = order;
-    this.modalTitle = 'Detalhes do Pedido';
-    this.formData = { 
-      customerName: order.customerName || '',
-      customerEmail: order.customerEmail || '',
-      shippingAddress: order.shippingAddress || '',
-      items: order.items || []
-    };
-    this.showModal = true;
+  viewDetails(order: OrderResponseDto) {
+    this.selectedOrder.set(order);
+    this.showDetailsModal.set(true);
   }
 
   addItem() {

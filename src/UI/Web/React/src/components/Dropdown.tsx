@@ -11,19 +11,33 @@ interface DropdownProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
-  variant?: 'filter' | 'form';
+  variant?: 'filter' | 'form' | 'primary';
+  labelOverride?: string;
+  direction?: 'up' | 'down';
 }
 
-export default function Dropdown({ options, value, onChange, placeholder = 'Selecionar...', className = '', variant = 'filter' }: DropdownProps) {
+export default function Dropdown({ 
+  options, 
+  value, 
+  onChange, 
+  placeholder = 'Selecionar...', 
+  className = '', 
+  variant = 'filter',
+  labelOverride,
+  direction = 'down'
+}: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = options.find(opt => opt.value === value);
 
-  const paddingClass = variant === 'filter' ? 'py-5' : 'py-3';
+  const paddingClass = (variant === 'filter' || variant === 'primary') ? 'py-4' : 'py-3';
   const roundedClass = variant === 'filter' ? 'rounded-3xl' : 'rounded-2xl';
-  const bgClass = variant === 'filter' ? 'bg-white' : 'bg-gray-50';
-  const shadowClass = variant === 'filter' ? 'shadow-xl shadow-gray-100/50' : '';
+  const bgClass = variant === 'primary' ? 'bg-primary-600' : (variant === 'filter' ? 'bg-white' : 'bg-gray-50');
+  const textClass = variant === 'primary' ? 'text-white' : 'text-gray-900';
+  const hoverClass = variant === 'primary' ? 'hover:bg-primary-700' : 'hover:bg-gray-50';
+  const shadowClass = variant === 'primary' ? 'shadow-xl shadow-primary-200' : (variant === 'filter' ? 'shadow-xl shadow-gray-100/50' : '');
+  const iconColorClass = variant === 'primary' ? 'text-white/80' : 'text-gray-300';
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -40,11 +54,11 @@ export default function Dropdown({ options, value, onChange, placeholder = 'Sele
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full pl-8 pr-12 ${paddingClass} ${bgClass} border-none ${roundedClass} ${shadowClass} outline-none font-black text-xs uppercase tracking-widest text-gray-900 flex justify-between items-center hover:bg-gray-50 transition-all active:scale-[0.98]`}
+        className={`w-full pl-8 pr-12 ${paddingClass} ${bgClass} ${textClass} border-none ${roundedClass} ${shadowClass} outline-none font-black text-xs uppercase tracking-widest flex justify-between items-center ${hoverClass} transition-all active:scale-[0.98]`}
       >
-        <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
+        <span className="truncate">{labelOverride ?? (selectedOption ? selectedOption.label : placeholder)}</span>
         <svg 
-          className={`w-5 h-5 text-gray-300 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
+          className={`w-5 h-5 ${iconColorClass} transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"
@@ -54,7 +68,7 @@ export default function Dropdown({ options, value, onChange, placeholder = 'Sele
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 w-full mt-3 bg-white border border-gray-50 rounded-[2rem] shadow-2xl shadow-gray-200/50 py-3 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className={`absolute z-50 w-full ${direction === 'up' ? 'bottom-full mb-3' : 'mt-3'} bg-white border border-gray-50 rounded-[2rem] shadow-2xl shadow-gray-200/50 py-3 overflow-hidden animate-in fade-in zoom-in-95 duration-200`}>
           <div className="max-h-60 overflow-y-auto">
             {options.map((option) => (
               <button

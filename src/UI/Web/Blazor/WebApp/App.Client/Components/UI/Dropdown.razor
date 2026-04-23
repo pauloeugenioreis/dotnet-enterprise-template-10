@@ -4,9 +4,9 @@
 <div class="relative @ClassName">
     <button type="button"
             @onclick="Toggle"
-            class="w-full pl-8 pr-12 @PaddingClass @BgClass border-none @RoundedClass @ShadowClass outline-none font-black text-xs uppercase tracking-widest text-gray-900 flex justify-between items-center hover:bg-gray-50 transition-all active:scale-[0.98]">
-        <span class="truncate">@(SelectedOption != null ? SelectedOption.Label : Placeholder)</span>
-        <svg class="w-5 h-5 text-gray-300 transition-transform duration-300 @(IsOpen ? "rotate-180" : "")"
+            class="w-full pl-8 pr-12 @PaddingClass @BgClass border-none @RoundedClass @ShadowClass outline-none font-black text-xs uppercase tracking-widest @TextClass flex justify-between items-center @HoverClass transition-all active:scale-[0.98]">
+        <span class="truncate">@(LabelOverride ?? (SelectedOption != null ? SelectedOption.Label : Placeholder))</span>
+        <svg class="w-5 h-5 @IconClass transition-transform duration-300 @(IsOpen ? "rotate-180" : "")"
              fill="none"
              stroke="currentColor"
              viewBox="0 0 24 24">
@@ -16,7 +16,7 @@
 
     @if (IsOpen)
     {
-        <div class="absolute z-50 w-full mt-3 bg-white border border-gray-50 rounded-[2rem] shadow-2xl shadow-gray-200/50 py-3 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div class="absolute z-50 w-full @(Direction == "up" ? "bottom-full mb-3" : "mt-3") bg-white border border-gray-50 rounded-[2rem] shadow-2xl shadow-gray-200/50 py-3 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div class="max-h-60 overflow-y-auto">
                 @foreach (var option in Options)
                 {
@@ -38,6 +38,8 @@
     [Parameter] public string Placeholder { get; set; } = "Selecionar...";
     [Parameter] public string Variant { get; set; } = "filter";
     [Parameter] public string ClassName { get; set; } = "";
+    [Parameter] public string? LabelOverride { get; set; }
+    [Parameter] public string Direction { get; set; } = "down";
 
     private bool IsOpen { get; set; }
 
@@ -52,8 +54,11 @@
         IsOpen = false;
     }
 
-    private string PaddingClass => Variant == "filter" ? "py-5" : "py-3";
+    private string PaddingClass => (Variant == "filter" || Variant == "primary") ? "py-4" : "py-3";
     private string RoundedClass => Variant == "filter" ? "rounded-3xl" : "rounded-2xl";
-    private string BgClass => Variant == "filter" ? "bg-white" : "bg-gray-50";
-    private string ShadowClass => Variant == "filter" ? "shadow-xl shadow-gray-100/50" : "";
+    private string BgClass => Variant == "primary" ? "bg-primary-600" : (Variant == "filter" ? "bg-white" : "bg-gray-50");
+    private string TextClass => Variant == "primary" ? "text-white" : "text-gray-900";
+    private string HoverClass => Variant == "primary" ? "hover:bg-primary-700" : "hover:bg-gray-50";
+    private string ShadowClass => Variant == "primary" ? "shadow-xl shadow-primary-200" : (Variant == "filter" ? "shadow-xl shadow-gray-100/50" : "");
+    private string IconClass => Variant == "primary" ? "text-white/80" : "text-gray-300";
 }
