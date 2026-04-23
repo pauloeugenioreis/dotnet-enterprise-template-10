@@ -96,5 +96,7 @@ words:
   - troubleshooting
   - XVCJ
   - webhook
+  - orquestracao
+  - resiliencia
 allowCompoundWords: true
 caseSensitive: false

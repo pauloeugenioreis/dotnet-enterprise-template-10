@@ -145,6 +145,7 @@ export default function Audit() {
                       <button
                         onClick={() => setSelectedLog(log)}
                         className="p-3 hover:bg-primary-50 rounded-xl text-primary-600 transition-colors"
+                        title="Ver Detalhes"
                       >
                         🔍
                       </button>
@@ -216,10 +217,9 @@ export default function Audit() {
               <div className="flex justify-end pt-2">
                 <button
                   onClick={closeLog}
-                  className="group flex items-center gap-3 px-10 py-4 bg-gray-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-primary-600 hover:scale-105 active:scale-90 transition-all shadow-xl shadow-gray-900/20"
+                  className="bg-primary-600 hover:bg-primary-700 text-white font-black px-8 py-4 rounded-2xl shadow-lg shadow-primary-600/20 transition-all active:scale-95"
                 >
-                  <span>Fechar Detalhes</span>
-                  <span className="text-lg group-hover:translate-x-1 transition-transform">→</span>
+                  FECHAR DETALHES
                 </button>
               </div>
             </div>

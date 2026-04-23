@@ -83,7 +83,7 @@ chmod +x new-project.sh
 ### Parâmetros (modo não-interativo)
 
 | Parâmetro | Valores | Padrão |
-|-----------|---------|--------|
+| --------- | --------- | -------- |
 | Database | `InMemory`, `SqlServer`, `Oracle`, `PostgreSQL`, `MySQL` | `InMemory` |
 | Queue | `Yes`, `No` | `No` |
 | Storage | `None`, `Azure`, `Aws`, `Google` | `None` |

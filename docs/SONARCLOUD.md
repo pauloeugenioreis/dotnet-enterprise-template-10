@@ -181,7 +181,7 @@ dotnet sonarscanner end /d:sonar.token="YOUR_SONAR_TOKEN"
 O SonarCloud usa o Quality Gate **"Sonar way"** por padrão:
 
 | Métrica | Condição |
-|---------|----------|
+| --------- | ---------- |
 | **Coverage** | ≥ 80% em novo código |
 | **Duplications** | ≤ 3% em novo código |
 | **Maintainability Rating** | ≥ A em novo código |

@@ -46,12 +46,12 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 
 ### Documentação Principal
 
-| Documento                                                      | Descrição                                       | Quando Usar                             |
-| -------------------------------------------------------------- | ----------------------------------------------- | --------------------------------------- |
-| **[README.md](README.md)**                                     | Documentação principal e overview completo      | Entender o projeto como um todo         |
-| **[QUICK-START.md](QUICK-START.md)**                           | Início rápido em 5 minutos                      | Primeira vez usando o template          |
-| **[LICENSE](LICENSE)**                                         | Licença do projeto (MIT)                        | Entender termos de uso                  |
-| **[sonar-project.properties](sonar-project.properties)**       | Configuração do SonarCloud                      | Configurar análise de qualidade         |
+| Documento                                                | Descrição                                  | Quando Usar                       |
+| -------------------------------------------------------- | ------------------------------------------ | --------------------------------- |
+| **[README.md](README.md)**                               | Documentação principal e overview completo | Entender o projeto como um todo   |
+| **[QUICK-START.md](QUICK-START.md)**                     | Início rápido em 5 minutos                 | Primeira vez usando o template    |
+| **[LICENSE](LICENSE)**                                   | Licença do projeto (MIT)                   | Entender termos de uso            |
+| **[sonar-project.properties](sonar-project.properties)** | Configuração do SonarCloud                 | Configurar análise de qualidade   |
 
 ### Guias Técnicos
 
@@ -64,7 +64,7 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 | **[docs/CONFIGURATION-GUIDE.md](docs/CONFIGURATION-GUIDE.md)** | Configuração com IOptions\<T\>                  | Acessar configurações no código         |
 | **[docs/AUTHENTICATION.md](docs/AUTHENTICATION.md)**           | JWT & OAuth2 (Google, Microsoft, GitHub)        | Configurar autenticação                 |
 | **[docs/SECURITY.md](docs/SECURITY.md)**                       | Headers, CORS, HTTPS, proteção contra ataques   | Revisar segurança da API                |
-| **[docs/RATE-LIMITING.md](docs/RATE-LIMITING.md)**             | 4 estratégias de Rate Limiting                 | Controle de taxa de requisições         |
+| **[docs/RATE-LIMITING.md](docs/RATE-LIMITING.md)**             | 4 estratégias de Rate Limiting                  | Controle de taxa de requisições         |
 | **[docs/EVENT-SOURCING.md](docs/EVENT-SOURCING.md)**           | Event Sourcing com Marten + PostgreSQL          | Auditoria e time travel                 |
 | **[docs/TELEMETRY.md](docs/TELEMETRY.md)**                     | OpenTelemetry, Jaeger, Prometheus, Grafana      | Configurar observabilidade              |
 | **[docs/TESTING-DATABASES.md](docs/TESTING-DATABASES.md)**     | Testes multi-banco de dados                     | Validar suporte a 4+ bancos             |

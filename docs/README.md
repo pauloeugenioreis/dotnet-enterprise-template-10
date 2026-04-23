@@ -7,7 +7,7 @@ Esta pasta contém documentação técnica adicional e guias especializados para
 ## 📄 Documentos Disponíveis
 
 | Documento | Descrição | Quando Usar |
-|-----------|-----------|-------------|
+| ----------- | ----------- | ------------- |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Clean Architecture, diagramas de camadas, princípios SOLID | Entender a arquitetura do projeto |
 | [FEATURES.md](FEATURES.md) | MongoDB, Quartz, RabbitMQ, Storage, Logging, Swagger | Habilitar recursos avançados |
 | [ORM-GUIDE.md](ORM-GUIDE.md) | EF Core, Dapper, ADO.NET — como alternar e comparações | Escolher ou alternar ORM |
@@ -27,7 +27,7 @@ Esta pasta contém documentação técnica adicional e guias especializados para
 ### Exemplos
 
 | Documento | Descrição |
-|-----------|-----------|
+| ----------- | ----------- |
 | [examples/ORDER-EXAMPLE.md](examples/ORDER-EXAMPLE.md) | Exemplo completo de entidade Order com Event Sourcing |
 | [examples/event-sourcing.http](examples/event-sourcing.http) | Request collection para testar Event Sourcing |
 
