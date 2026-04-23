@@ -37,7 +37,9 @@ export abstract class BaseService<T> {
 
   protected async downloadFile(url: string, fileName: string): Promise<void> {
     const response = await api.get(url, { responseType: 'blob' });
-    const blob = new Blob([response.data], { type: response.headers['content-type'] });
+    const contentTypeHeader = response.headers?.['content-type'];
+    const contentType = typeof contentTypeHeader === 'string' ? contentTypeHeader : undefined;
+    const blob = new Blob([response.data], contentType ? { type: contentType } : undefined);
     const link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
     link.download = fileName;
