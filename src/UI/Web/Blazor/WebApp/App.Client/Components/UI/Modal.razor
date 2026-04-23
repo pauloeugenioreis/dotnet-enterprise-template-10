@@ -3,7 +3,7 @@
 {
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
         <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" @onclick="OnClose"></div>
-        <div class="bg-white rounded-[3rem] shadow-2xl w-full max-w-lg relative z-10 overflow-hidden animate-in zoom-in-95 duration-300">
+        <div class="bg-white rounded-[3rem] shadow-2xl w-full @MaxWidth relative z-10 overflow-hidden animate-in zoom-in-95 duration-300">
             <div class="px-10 pt-10 pb-6 flex justify-between items-center border-b border-gray-50">
                 <h2 class="text-3xl font-black text-gray-900 tracking-tighter">@Title</h2>
                 <button @onclick="OnClose" class="text-gray-300 hover:text-gray-900 transition-colors">
@@ -22,6 +22,7 @@
 @code {
     [Parameter] public bool Show { get; set; }
     [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string MaxWidth { get; set; } = "max-w-lg";
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
 }

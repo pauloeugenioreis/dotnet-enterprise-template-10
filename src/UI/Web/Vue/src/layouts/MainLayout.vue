@@ -16,12 +16,10 @@ const menuItems = [
   { name: 'Auditoria', path: '/audit', icon: '🛡️' },
 ];
 
-const userName = computed(() => {
-  return authStore.user?.fullName || 'Usuário';
-});
-
+const isAdmin = computed(() => authStore.user?.email?.toLowerCase() === 'admin@projecttemplate.com');
+const userName = computed(() => isAdmin.value ? 'System Administrator' : (authStore.user?.fullName || 'Usuário'));
 const userEmail = computed(() => authStore.user?.email || 'admin@projecttemplate.com');
-const userInitial = computed(() => (authStore.user?.fullName?.[0] || authStore.user?.email?.[0] || 'U').toUpperCase());
+const userInitial = computed(() => isAdmin.value ? 'S' : (authStore.user?.fullName?.[0] || authStore.user?.email?.[0] || 'U').toUpperCase());
 
 const handleLogout = () => {
   authStore.logout();

@@ -14,20 +14,21 @@
   </header>
 
   <!-- Filter Bar -->
-  <div class="grid grid-cols-12 gap-6 items-end mb-10">
+  <div class="grid grid-cols-12 gap-6 items-start mb-10">
     <div class="col-span-2 space-y-3">
       <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Agregado</label>
-      <Dropdown 
+      <Dropdown
         Options="@entityOptions"
         @bind-Value="entityType"
         @bind-Value:after="LoadLogs"
+        PaddingClassOverride="py-5"
       />
     </div>
 
-    <div class="col-span-3 space-y-3">
+    <div class="col-span-2 space-y-3">
       <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Evento</label>
-      <input 
-        type="text" 
+      <input
+        type="text"
         @bind="eventType"
         @onkeyup="HandleKeyUp"
         class="w-full px-8 py-5 bg-white border-none rounded-3xl shadow-xl shadow-gray-100/50 outline-none font-bold text-gray-900 placeholder:text-gray-300"
@@ -35,10 +36,10 @@
       />
     </div>
 
-    <div class="col-span-3 space-y-3">
+    <div class="col-span-2 space-y-3">
       <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Usuário</label>
-      <input 
-        type="text" 
+      <input
+        type="text"
         @bind="userId"
         @onkeyup="HandleKeyUp"
         class="w-full px-8 py-5 bg-white border-none rounded-3xl shadow-xl shadow-gray-100/50 outline-none font-bold text-gray-900 placeholder:text-gray-300"
@@ -46,14 +47,42 @@
       />
     </div>
 
-    <div class="col-span-2 flex justify-end">
-      <button 
-        @onclick="ClearFilters"
-        class="group flex items-center gap-3 px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-primary-600 transition-all"
-      >
-        <span class="group-hover:rotate-180 transition-transform duration-500">🔄</span>
-        Limpar
-      </button>
+    <div class="col-span-4 space-y-3">
+      <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Período</label>
+      <div class="flex bg-white p-2 rounded-3xl shadow-xl shadow-gray-100/50 gap-2 items-center">
+        <div class="flex-1 px-4 py-1">
+          <label class="block text-[8px] font-black uppercase text-gray-400 leading-none mb-1">De</label>
+          <input
+            type="date"
+            @bind="startDate"
+            @bind:after="LoadLogs"
+            class="w-full bg-transparent border-none outline-none font-bold text-xs text-gray-900 cursor-pointer"
+          />
+        </div>
+        <div class="w-px h-8 bg-gray-100"></div>
+        <div class="flex-1 px-4 py-1">
+          <label class="block text-[8px] font-black uppercase text-gray-400 leading-none mb-1">Até</label>
+          <input
+            type="date"
+            @bind="endDate"
+            @bind:after="LoadLogs"
+            class="w-full bg-transparent border-none outline-none font-bold text-xs text-gray-900 cursor-pointer"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="col-span-2 space-y-3">
+      <label class="text-[10px] font-black uppercase tracking-[0.2em] text-transparent ml-4 select-none">Ações</label>
+      <div class="flex justify-end">
+        <button
+          @onclick="ClearFilters"
+          class="group flex items-center gap-3 px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-primary-600 transition-all"
+        >
+          <span class="group-hover:rotate-180 transition-transform duration-500">🔄</span>
+          Limpar
+        </button>
+      </div>
     </div>
   </div>
 
@@ -64,7 +93,7 @@
   } else {
     <div class="bg-white rounded-[3rem] shadow-2xl shadow-gray-200/40 border border-gray-50 overflow-hidden">
       <table class="w-full text-left">
-        <thead class="bg-gray-900 text-white">
+        <thead class="bg-primary-600 text-white">
           <tr>
             <th class="px-10 py-8 text-[10px] font-black uppercase tracking-[0.2em]">Evento</th>
             <th class="px-10 py-8 text-[10px] font-black uppercase tracking-[0.2em]">Entidade</th>
@@ -95,7 +124,12 @@
               </td>
               <td class="px-10 py-8">
                 <div class="flex gap-2 group-hover:opacity-100 transition-opacity">
-                  <button class="p-3 hover:bg-primary-50 rounded-xl text-primary-600 transition-colors">🔍</button>
+                  <button 
+                    @onclick="() => ShowDetails(log)"
+                    class="p-3 hover:bg-primary-50 rounded-xl text-primary-600 transition-colors"
+                  >
+                    🔍
+                  </button>
                 </div>
               </td>
             </tr>
@@ -113,15 +147,67 @@
       />
     </div>
   }
+
+  <Modal Show="@(selectedLog != null)" Title="Detalhes do Evento" MaxWidth="max-w-5xl" OnClose="() => selectedLog = null">
+    @if (selectedLog != null)
+    {
+        <div class="space-y-6">
+            <div class="flex items-center gap-4">
+                <span class="px-4 py-1.5 bg-primary-600 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-primary-600/20">
+                    @selectedLog.EventType
+                </span>
+                <div class="h-px flex-1 bg-gray-100"></div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-gray-50/50 p-6 rounded-[2rem] border border-gray-100/50">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2 ml-1">Entidade</label>
+                    <p class="font-black text-gray-900 text-xl tracking-tight">@selectedLog.AggregateType</p>
+                    <p class="text-gray-400 font-mono text-[9px] mt-1">ID: @selectedLog.AggregateId</p>
+                </div>
+                <div class="bg-gray-50/50 p-6 rounded-[2rem] border border-gray-100/50">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2 ml-1">Metadata</label>
+                    <p class="font-black text-gray-900 text-xl tracking-tight">@selectedLog.OccurredOn.ToString("g")</p>
+                    <p class="text-gray-400 text-[9px] font-bold uppercase tracking-widest mt-1">Versão: @selectedLog.Version</p>
+                </div>
+                <div class="bg-gray-50/50 p-6 rounded-[2rem] border border-gray-100/50">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2 ml-1">Usuário</label>
+                    <p class="font-black text-gray-900 text-xl tracking-tight">@(string.IsNullOrEmpty(selectedLog.UserId) ? "Sistema" : selectedLog.UserId)</p>
+                    <p class="text-gray-400 text-[9px] font-bold uppercase tracking-widest mt-1">Origin: API</p>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 rounded-[2.5rem] p-8 shadow-xl shadow-gray-900/30 relative">
+                <label class="text-[10px] font-black uppercase tracking-widest text-gray-500 block mb-4 ml-2">Payload (JSON)</label>
+                <div class="overflow-hidden rounded-xl bg-gray-950/50 p-5 border border-white/5">
+                    <pre class="text-primary-300 font-mono text-xs overflow-x-auto leading-relaxed max-h-[350px] scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">@GetEventDataJson(selectedLog.EventData)</pre>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+                <button 
+                    @onclick="() => selectedLog = null"
+                    class="group flex items-center gap-3 px-10 py-4 bg-gray-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-primary-600 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-gray-900/20"
+                >
+                    <span>Fechar Detalhes</span>
+                    <span class="text-lg group-hover:translate-x-1 transition-transform">→</span>
+                </button>
+            </div>
+        </div>
+    }
+  </Modal>
 </div>
 
 @code {
     private PagedResponse<DomainEvent>? _logs;
+    private DomainEvent? selectedLog;
     private int currentPage = 1;
     private int pageSize = 10;
     private object? entityType = "";
     private string eventType = "";
     private string userId = "";
+    private DateTime? startDate;
+    private DateTime? endDate;
 
     private List<DropdownOption> entityOptions = new() {
         new() { Label = "Todos", Value = "" },
@@ -134,12 +220,37 @@
         await LoadLogs();
     }
 
-    private async Task LoadLogs()
+    private void ShowDetails(DomainEvent log)
     {
+        selectedLog = log;
+    }
+
+    private string GetEventDataJson(object? data)
+    {
+        if (data == null) return "{}";
         try 
         {
+            return System.Text.Json.JsonSerializer.Serialize(data, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        }
+        catch 
+        {
+            return data.ToString() ?? "{}";
+        }
+    }
+
+    private async Task LoadLogs()
+    {
+        try
+        {
             _logs = null;
-            _logs = await AuditService.GetAuditLogsAsync(currentPage, pageSize, entityType?.ToString());
+            _logs = await AuditService.GetAuditLogsAsync(
+                currentPage,
+                pageSize,
+                entityType?.ToString(),
+                eventType,
+                userId,
+                startDate,
+                endDate);
         }
         catch (Exception ex)
         {
@@ -174,6 +285,8 @@
         entityType = "";
         eventType = "";
         userId = "";
+        startDate = null;
+        endDate = null;
         currentPage = 1;
         await LoadLogs();
     }

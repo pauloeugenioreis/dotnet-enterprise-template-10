@@ -38,6 +38,7 @@
     [Parameter] public string Placeholder { get; set; } = "Selecionar...";
     [Parameter] public string Variant { get; set; } = "filter";
     [Parameter] public string ClassName { get; set; } = "";
+    [Parameter] public string? PaddingClassOverride { get; set; }
     [Parameter] public string? LabelOverride { get; set; }
     [Parameter] public string Direction { get; set; } = "down";
 
@@ -54,7 +55,9 @@
         IsOpen = false;
     }
 
-    private string PaddingClass => (Variant == "filter" || Variant == "primary") ? "py-4" : "py-3";
+    private string PaddingClass => !string.IsNullOrWhiteSpace(PaddingClassOverride)
+        ? PaddingClassOverride
+        : ((Variant == "filter" || Variant == "primary") ? "py-4" : "py-3");
     private string RoundedClass => Variant == "filter" ? "rounded-3xl" : "rounded-2xl";
     private string BgClass => Variant == "primary" ? "bg-primary-600" : (Variant == "filter" ? "bg-white" : "bg-gray-50");
     private string TextClass => Variant == "primary" ? "text-white" : "text-gray-900";

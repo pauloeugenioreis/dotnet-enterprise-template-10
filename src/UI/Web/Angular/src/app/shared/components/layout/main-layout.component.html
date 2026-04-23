@@ -29,11 +29,11 @@
     <div class="p-8 border-t border-gray-100 flex flex-col gap-6 bg-gray-50/30">
       <div class="flex items-center gap-4 group cursor-default">
         <div class="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-primary-200 group-hover:scale-110 transition-transform">
-          {{ (user()?.firstName?.[0] || 'U').toUpperCase() }}
+          {{ userInitial() }}
         </div>
         <div class="flex-1 min-w-0">
           <p class="text-sm font-black text-gray-900 truncate tracking-tight">
-            {{ user()?.firstName }} {{ user()?.lastName }}
+            {{ userName() }}
           </p>
           <p class="text-[10px] text-gray-400 font-bold truncate uppercase tracking-widest">{{ user()?.email }}</p>
         </div>

@@ -15,6 +15,10 @@ export class MainLayoutComponent {
 
   user = this.authService.currentUser;
 
+  isAdmin = () => this.user()?.email?.toLowerCase() === 'admin@projecttemplate.com';
+  userInitial = () => this.isAdmin() ? 'S' : (this.user()?.firstName?.[0] || this.user()?.email?.[0] || 'U').toUpperCase();
+  userName = () => this.isAdmin() ? 'System Administrator' : (this.user()?.firstName ? `${this.user()?.firstName} ${this.user()?.lastName}` : 'Usuário');
+
   menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: '📊' },
     { name: 'Produtos', path: '/products', icon: '📦' },

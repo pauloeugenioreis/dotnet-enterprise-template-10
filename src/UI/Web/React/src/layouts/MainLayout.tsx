@@ -20,8 +20,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     { name: 'Auditoria', path: '/audit', icon: '🛡️' },
   ];
 
-  const userInitial = (user?.firstName?.[0] || user?.email?.[0] || 'U').toUpperCase();
-  const userName = user?.firstName ? `${user.firstName} ${user.lastName}` : 'Usuário';
+  const isAdmin = user?.email?.toLowerCase() === 'admin@projecttemplate.com';
+  const userInitial = isAdmin ? 'S' : (user?.firstName?.[0] || user?.email?.[0] || 'U').toUpperCase();
+  const userName = isAdmin ? 'System Administrator' : (user?.firstName ? `${user.firstName} ${user.lastName}` : 'Usuário');
 
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden font-sans">
