@@ -2,7 +2,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
-import api from '../../api/api';
+import { auditService } from '../../api/services/AuditService';
 import Pagination from '../../components/Pagination.vue';
 import Dropdown from '../../components/Dropdown.vue';
 
@@ -23,16 +23,14 @@ const selectedLog = ref<any>(null);
 const fetchAuditLogs = async () => {
   loading.value = true;
   try {
-    const { data } = await api.get('/api/v1/audit', {
-      params: {
-        page: page.value,
-        pageSize: pageSize.value,
-        entityType: entityType.value,
-        eventType: eventType.value,
-        userId: userId.value,
-        startDate: startDate.value,
-        endDate: endDate.value
-      }
+    const data = await auditService.getAll({
+      page: page.value,
+      pageSize: pageSize.value,
+      entityType: entityType.value,
+      eventType: eventType.value,
+      userId: userId.value,
+      startDate: startDate.value,
+      endDate: endDate.value
     });
     auditLogs.value = data.items;
     totalPages.value = data.totalPages;

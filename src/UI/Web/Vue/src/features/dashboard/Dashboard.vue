@@ -2,7 +2,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import api from '../../api/api';
+import { orderService } from '../../api/services/OrderService';
 
 const stats = [
   { label: 'Vendas Totais', value: 'R$ 124.500', icon: '💰', color: 'bg-emerald-50 text-emerald-600' },
@@ -15,7 +15,7 @@ const loading = ref(true);
 
 onMounted(async () => {
   try {
-    const { data } = await api.get('/api/v1/order?page=1&pageSize=5');
+    const data = await orderService.getAll({ page: 1, pageSize: 5 });
     latestOrders.value = data.items;
   } catch (error) {
     console.error('Erro ao carregar dashboard', error);

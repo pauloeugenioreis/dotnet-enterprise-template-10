@@ -2,7 +2,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
-import api from '../../api/api';
+import { productService } from '../../api/services/ProductService';
 import Pagination from '../../components/Pagination.vue';
 import Modal from '../../components/Modal.vue';
 
@@ -27,13 +27,11 @@ const formData = ref({ name: '', category: '', price: '0', stock: '0', isActive:
 const fetchProducts = async () => {
   loading.value = true;
   try {
-    const { data } = await api.get('/api/v1/product', {
-      params: {
-        page: page.value,
-        pageSize: pageSize.value,
-        searchTerm: searchTerm.value,
-        isActive: isActiveFilter.value
-      }
+    const data = await productService.getAll({
+      page: page.value,
+      pageSize: pageSize.value,
+      searchTerm: searchTerm.value,
+      isActive: isActiveFilter.value
     });
     products.value = data.items;
     totalPages.value = data.totalPages;
@@ -44,9 +42,7 @@ const fetchProducts = async () => {
   }
 };
 
-const handleExport = () => {
-  window.open(`${import.meta.env.VITE_API_BASE_URL || 'https://localhost:7196'}/api/product/export`, '_blank');
-};
+const handleExport = () => productService.exportToExcel();
 
 const handleOpenNew = () => {
   editingId.value = null;
@@ -69,7 +65,7 @@ const handleEdit = (product: any) => {
 const handleDelete = async (id: number) => {
   if (!confirm('Excluir este produto?')) return;
   try {
-    await api.delete(`/api/v1/product/${id}`);
+    await productService.delete(id);
     fetchProducts();
   } catch (error) {
     alert('Erro ao excluir produto');
@@ -78,7 +74,6 @@ const handleDelete = async (id: number) => {
 
 const handleSubmit = async () => {
   try {
-    const apiBase = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7196';
     const payload = {
       ...formData.value,
       price: parseFloat(formData.value.price),
@@ -86,9 +81,9 @@ const handleSubmit = async () => {
     };
 
     if (editingId.value) {
-      await api.put(`/api/v1/product/${editingId.value}`, payload);
+      await productService.update(editingId.value, payload);
     } else {
-      await api.post('/api/v1/product', payload);
+      await productService.create(payload);
     }
     isModalOpen.value = false;
     fetchProducts();

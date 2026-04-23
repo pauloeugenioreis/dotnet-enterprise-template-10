@@ -2,7 +2,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
-import api from '../../api/api';
+import { orderService } from '../../api/services/OrderService';
 import Dropdown from '../../components/Dropdown.vue';
 import Pagination from '../../components/Pagination.vue';
 import Modal from '../../components/Modal.vue';
@@ -33,15 +33,13 @@ const selectedOrder = ref<any>(null);
 const fetchOrders = async () => {
   loading.value = true;
   try {
-    const { data } = await api.get('/api/v1/order', {
-      params: {
-        page: page.value,
-        pageSize: pageSize.value,
-        searchTerm: searchTerm.value,
-        status: status.value,
-        startDate: startDate.value,
-        endDate: endDate.value
-      }
+    const data = await orderService.getAll({
+      page: page.value,
+      pageSize: pageSize.value,
+      searchTerm: searchTerm.value,
+      status: status.value,
+      startDate: startDate.value,
+      endDate: endDate.value
     });
     orders.value = data.items;
     totalPages.value = data.totalPages;
@@ -52,9 +50,7 @@ const fetchOrders = async () => {
   }
 };
 
-const handleExport = () => {
-  window.open(`${import.meta.env.VITE_API_BASE_URL || 'https://localhost:7196'}/api/order/export`, '_blank');
-};
+const handleExport = () => orderService.exportToExcel();
 
 const handleOpenNew = () => {
   isModalOpen.value = true;
@@ -68,7 +64,7 @@ const handleViewDetails = (order: any) => {
 const handleCancel = async (id: number) => {
   if (!confirm('Tem certeza que deseja cancelar este pedido?')) return;
   try {
-    await api.put(`/api/v1/order/${id}/status`, { status: 'Cancelled', note: 'Cancelado pelo usuário' });
+    await orderService.updateStatus(id, 'Cancelled', 'Cancelado pelo usuário');
     fetchOrders();
   } catch (error) {
     alert('Erro ao cancelar pedido');

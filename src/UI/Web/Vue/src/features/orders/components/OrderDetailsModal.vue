@@ -124,7 +124,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import api from '../../../api/api';
+import { orderService } from '../../../api/services/OrderService';
 import Dropdown from '../../../components/Dropdown.vue';
 
 const props = defineProps<{
@@ -149,10 +149,7 @@ watch(() => props.order, (newOrder) => {
 const handleStatusChange = async (newStatus: string) => {
   if (!props.order) return;
   try {
-    await api.put(`/api/v1/order/${props.order.id}/status`, { 
-      status: newStatus, 
-      note: 'Atualizado via Dashboard Vue' 
-    });
+    await orderService.updateStatus(props.order.id, newStatus, 'Atualizado via Dashboard Vue');
     emit('onStatusUpdated');
   } catch (error) {
     alert('Erro ao atualizar status');
