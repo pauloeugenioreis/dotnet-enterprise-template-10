@@ -1,11 +1,13 @@
 <template src="./Orders.html"></template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { orderService } from '../../api/services/OrderService';
+import { productService } from '../../api/services/ProductService';
 import Dropdown from '../../components/Dropdown.vue';
 import Pagination from '../../components/Pagination.vue';
 import Modal from '../../components/Modal.vue';
+import Drawer from '../../components/Drawer.vue';
 import OrderDetailsModal from './components/OrderDetailsModal.vue';
 
 const orders = ref<any[]>([]);
@@ -30,6 +32,55 @@ const isModalOpen = ref(false);
 const isDetailsOpen = ref(false);
 const selectedOrder = ref<any>(null);
 
+const products = ref<any[]>([]);
+const productPage = ref(1);
+const productLoading = ref(false);
+const hasMoreProducts = ref(true);
+
+const fetchProducts = async (isLoadMore = false) => {
+  if (productLoading.value || (!hasMoreProducts.value && isLoadMore)) return;
+  
+  productLoading.value = true;
+  try {
+    const data = await productService.getAll({ page: productPage.value, pageSize: 20 });
+    const newItems = Array.isArray(data) ? data : (data?.items || []);
+    
+    if (isLoadMore) {
+      products.value = [...products.value, ...newItems];
+    } else {
+      products.value = newItems;
+    }
+    
+    hasMoreProducts.value = newItems.length === 20;
+    if (hasMoreProducts.value) productPage.value++;
+  } catch (error) {
+    console.error('Erro ao carregar produtos', error);
+  } finally {
+    productLoading.value = false;
+  }
+};
+
+const handleLoadMoreProducts = () => {
+  if (hasMoreProducts.value) {
+    fetchProducts(true);
+  }
+};
+
+const editingId = ref<number | null>(null);
+const formData = ref({
+  customerName: '',
+  customerEmail: '',
+  shippingAddress: '',
+  items: [] as any[]
+});
+
+const productOptions = computed(() => 
+  (products.value || []).map(p => ({
+    label: p ? `${p.name} - R$ ${p.price}` : '',
+    value: p?.id?.toString() || ''
+  }))
+);
+
 const fetchOrders = async () => {
   loading.value = true;
   try {
@@ -41,7 +92,7 @@ const fetchOrders = async () => {
       startDate: startDate.value,
       endDate: endDate.value
     });
-    orders.value = data.items;
+    orders.value = data?.items || [];
     totalPages.value = data.totalPages;
   } catch (error) {
     console.error('Erro ao carregar pedidos', error);
@@ -53,6 +104,23 @@ const fetchOrders = async () => {
 const handleExport = () => orderService.exportToExcel();
 
 const handleOpenNew = () => {
+  editingId.value = null;
+  formData.value = { customerName: '', customerEmail: '', shippingAddress: '', items: [] };
+  isModalOpen.value = true;
+};
+
+const handleEdit = (order: any) => {
+  editingId.value = order.id;
+  formData.value = {
+    customerName: order.customerName || '',
+    customerEmail: order.customerEmail || '',
+    shippingAddress: order.shippingAddress || '',
+    items: order.items ? order.items.map((item: any) => ({
+      productId: item.productId,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice
+    })) : []
+  };
   isModalOpen.value = true;
 };
 
@@ -68,6 +136,39 @@ const handleCancel = async (id: number) => {
     fetchOrders();
   } catch (error) {
     alert('Erro ao cancelar pedido');
+  }
+};
+
+const handleAddItem = () => {
+  formData.value.items.push({ productId: '', quantity: 1, unitPrice: 0 });
+};
+
+const handleRemoveItem = (index: number) => {
+  formData.value.items.splice(index, 1);
+};
+
+const handleItemChange = (index: number, field: string, value: any) => {
+  const item = formData.value.items[index];
+  if (field === 'productId') {
+    const product = products.value.find(p => p.id === parseInt(value));
+    item.productId = parseInt(value);
+    item.unitPrice = product?.price || 0;
+  } else {
+    (item as any)[field] = value;
+  }
+};
+
+const handleSubmit = async () => {
+  try {
+    if (editingId.value) {
+      await orderService.update(editingId.value, formData.value);
+    } else {
+      await orderService.create(formData.value);
+    }
+    isModalOpen.value = false;
+    fetchOrders();
+  } catch (error) {
+    alert('Erro ao salvar pedido. Verifique se todos os campos estão preenchidos.');
   }
 };
 
@@ -94,7 +195,10 @@ watch(searchTerm, () => {
   fetchOrders();
 });
 
-onMounted(fetchOrders);
+onMounted(() => {
+  fetchOrders();
+  fetchProducts();
+});
 </script>
 
 <style scoped>

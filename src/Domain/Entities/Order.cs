@@ -34,6 +34,7 @@ public class OrderItem : EntityBase
     public decimal Subtotal { get; set; }
 
     // Navigation properties
+    [System.Text.Json.Serialization.JsonIgnore]
     public Order Order { get; set; } = null!;
     public Product Product { get; set; } = null!;
 }

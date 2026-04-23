@@ -24,7 +24,7 @@
         class="absolute z-50 w-full bg-white border border-gray-50 rounded-[2rem] shadow-2xl shadow-gray-200/50 py-3 overflow-hidden"
         :class="[direction === 'up' ? 'bottom-full mb-3' : 'mt-3']"
       >
-        <div class="max-h-60 overflow-y-auto">
+        <div class="max-h-60 overflow-y-auto" @scroll="handleScroll">
           <button
             v-for="option in options"
             :key="option.value"
@@ -39,6 +39,11 @@
           >
             {{ option.label }}
           </button>
+          
+          <!-- Loading Indicator -->
+          <div v-if="loading" class="px-8 py-4 flex justify-center">
+            <div class="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+          </div>
         </div>
       </div>
     </transition>
@@ -61,9 +66,10 @@ const props = defineProps<{
   variant?: 'filter' | 'form' | 'primary';
   labelOverride?: string | null;
   direction?: 'up' | 'down';
+  loading?: boolean;
 }>();
 
-const emit = defineEmits(['update:modelValue', 'change']);
+const emit = defineEmits(['update:modelValue', 'change', 'loadMore']);
 
 const isOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
@@ -79,6 +85,12 @@ const shadowClass = computed(() => props.variant === 'primary' ? 'shadow-xl shad
 const iconColorClass = computed(() => props.variant === 'primary' ? 'text-white/80' : 'text-gray-300');
 
 const toggle = () => isOpen.value = !isOpen.value;
+const handleScroll = (e: Event) => {
+  const target = e.target as HTMLElement;
+  if (target.scrollTop + target.clientHeight >= target.scrollHeight - 10) {
+    emit('loadMore');
+  }
+};
 
 const select = (option: Option) => {
   emit('update:modelValue', option.value);
