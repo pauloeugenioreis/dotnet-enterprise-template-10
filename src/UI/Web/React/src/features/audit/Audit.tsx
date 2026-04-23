@@ -15,6 +15,12 @@ export default function Audit() {
 
   const closeLog = () => setSelectedLog(null);
 
+  const entityOptions = [
+    { label: 'Todos', value: '' },
+    { label: 'Pedidos', value: 'Order' },
+    { label: 'Produtos', value: 'Product' }
+  ];
+
   return (
     <div className="w-full space-y-10 animate-in fade-in duration-500">
       <header>
@@ -24,43 +30,40 @@ export default function Audit() {
 
       {/* Filter Bar */}
       <div className="grid grid-cols-12 gap-6 items-end mb-10">
-        <div className="col-span-2 space-y-3">
-          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Agregado</label>
+        <div className="col-span-2 flex flex-col gap-3">
+          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-8">Agregado</label>
           <Dropdown
             value={entityType}
-            onChange={setEntityType}
-            options={[
-              { label: 'Todos', value: '' },
-              { label: 'Pedidos', value: 'Order' },
-              { label: 'Produtos', value: 'Product' }
-            ]}
+            onChange={(val) => { setEntityType(val); setPage(1); }}
+            options={entityOptions}
+            padding="py-5"
           />
         </div>
 
-        <div className="col-span-2 space-y-3">
-          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Evento</label>
+        <div className="col-span-2 flex flex-col gap-3">
+          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-8">Evento</label>
           <input
             type="text"
             placeholder="Tipo..."
             className="w-full px-8 py-5 bg-white border-none rounded-[2rem] shadow-xl shadow-gray-100/50 outline-none font-bold text-xs text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all placeholder:text-gray-300"
             value={eventType}
-            onChange={(e) => setEventType(e.target.value)}
+            onChange={(e) => { setEventType(e.target.value); setPage(1); }}
           />
         </div>
 
-        <div className="col-span-2 space-y-3">
-          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Usuário</label>
+        <div className="col-span-2 flex flex-col gap-3">
+          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-8">Usuário</label>
           <input
             type="text"
             placeholder="User ID..."
             className="w-full px-8 py-5 bg-white border-none rounded-[2rem] shadow-xl shadow-gray-100/50 outline-none font-bold text-xs text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all placeholder:text-gray-300"
             value={userId}
-            onChange={(e) => setUserId(e.target.value)}
+            onChange={(e) => { setUserId(e.target.value); setPage(1); }}
           />
         </div>
 
-        <div className="col-span-4 space-y-3">
-          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Período</label>
+        <div className="col-span-4 flex flex-col gap-3">
+          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-8">Período</label>
           <div className="flex bg-white p-2 rounded-[2rem] shadow-xl shadow-gray-100/50 gap-0 items-center border border-gray-50">
             <div className="flex-1 px-4 py-3 hover:bg-gray-50 rounded-2xl transition-colors flex items-center gap-3">
               <label className="text-[10px] font-black uppercase tracking-[0.1em] text-gray-400">De</label>

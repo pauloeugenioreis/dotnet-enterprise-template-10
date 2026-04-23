@@ -6,8 +6,8 @@
 
   <!-- Filter Bar -->
   <div class="grid grid-cols-12 gap-6 items-end mb-10">
-    <div class="col-span-2 space-y-3">
-      <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Agregado</label>
+    <div class="col-span-2 flex flex-col gap-3">
+      <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-8">Agregado</label>
       <Dropdown 
         v-model="entityType"
         :options="[
@@ -19,8 +19,8 @@
       />
     </div>
 
-    <div class="col-span-2 space-y-3">
-      <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Evento</label>
+    <div class="col-span-2 flex flex-col gap-3">
+      <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-8">Evento</label>
       <input 
         type="text" 
         v-model="eventType"
@@ -29,8 +29,8 @@
       />
     </div>
 
-    <div class="col-span-2 space-y-3">
-      <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Usuário</label>
+    <div class="col-span-2 flex flex-col gap-3">
+      <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-8">Usuário</label>
       <input 
         type="text" 
         v-model="userId"
@@ -39,8 +39,8 @@
       />
     </div>
 
-    <div class="col-span-4 space-y-3">
-      <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Período</label>
+    <div class="col-span-4 flex flex-col gap-3">
+      <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-8">Período</label>
       <div class="flex bg-white p-2 rounded-[2rem] shadow-xl shadow-gray-100/50 gap-0 items-center border border-gray-50">
         <div class="flex-1 px-4 py-3 hover:bg-gray-50 rounded-2xl transition-colors flex items-center gap-3">
           <label class="text-[10px] font-black uppercase tracking-[0.1em] text-gray-400">De</label>

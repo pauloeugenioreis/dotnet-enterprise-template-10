@@ -4,7 +4,7 @@
 <div class="relative @ClassName">
     <button type="button"
             @onclick="Toggle"
-            class="w-full pl-8 pr-12 @PaddingClass @BgClass border-none @RoundedClass @ShadowClass outline-none font-black text-xs uppercase tracking-widest @TextClass flex justify-between items-center @HoverClass transition-all active:scale-[0.98]">
+            class="w-full pl-8 pr-12 @PaddingClass @BgClass border-none @RoundedClass @ShadowClass outline-none font-bold text-xs uppercase tracking-widest @TextClass flex justify-between items-center @HoverClass transition-all active:scale-[0.98]">
         <span class="truncate">@(LabelOverride ?? (SelectedOption != null ? SelectedOption.Label : Placeholder))</span>
         <svg class="w-5 h-5 @IconClass transition-transform duration-300 @(IsOpen ? "rotate-180" : "")"
              fill="none"
