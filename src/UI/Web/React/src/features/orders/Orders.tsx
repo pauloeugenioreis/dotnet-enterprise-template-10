@@ -91,16 +91,16 @@ export default function Orders() {
   };
 
   return (
-    <div className="p-10 max-w-7xl mx-auto space-y-10 animate-in fade-in duration-500">
+    <div className="w-full space-y-10 animate-in fade-in duration-500">
       <header className="flex justify-between items-end">
         <div>
-          <h1 className="text-5xl font-black text-gray-900 tracking-tighter">Pedidos</h1>
-          <p className="text-gray-500 mt-3 font-medium text-lg">Histórico completo de transações.</p>
+          <h1 className="text-6xl font-black text-gray-900 tracking-tighter">Pedidos</h1>
+          <p className="text-gray-500 mt-4 font-medium text-xl">Histórico completo de transações.</p>
         </div>
         <div className="flex gap-4">
           <button 
             onClick={handleExport}
-            className="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md text-gray-400 hover:text-primary-600 transition-all active:scale-95 group"
+            className="p-5 bg-white border border-gray-100 rounded-[2rem] shadow-xl shadow-gray-200/50 text-gray-300 hover:text-primary-600 transition-all hover:scale-105 active:scale-95 group"
             title="Exportar para Excel"
           >
             📊
@@ -185,13 +185,13 @@ export default function Orders() {
 
       <div className="bg-white rounded-[3rem] border border-gray-50 shadow-2xl overflow-hidden">
         <table className="w-full text-left border-collapse">
-          <thead className="bg-gray-50">
+          <thead className="bg-primary-600">
             <tr>
-              <th className="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400"># Número</th>
-              <th className="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Cliente</th>
-              <th className="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Status</th>
-              <th className="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Total</th>
-              <th className="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Ações</th>
+              <th className="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]"># Número</th>
+              <th className="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Cliente</th>
+              <th className="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Total</th>
+              <th className="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Status</th>
+              <th className="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em] text-center">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -206,13 +206,13 @@ export default function Orders() {
                   <div>{order.customerName}</div>
                   <div className="text-[10px] text-gray-300 uppercase tracking-tighter">{order.customerEmail}</div>
                 </td>
+                <td className="px-10 py-8 text-xl font-black text-gray-900">
+                  R$ {order.total.toLocaleString('pt-BR')}
+                </td>
                 <td className="px-10 py-8">
                   <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${getStatusColor(order.status)}`}>
                     {order.status}
                   </span>
-                </td>
-                <td className="px-10 py-8 text-xl font-black text-gray-900">
-                  R$ {order.total.toLocaleString()}
                 </td>
                 <td className="px-10 py-8">
                   <div className="flex gap-2">
@@ -225,14 +225,14 @@ export default function Orders() {
                     </button>
                     <button 
                       onClick={() => handleEdit(order)}
-                      className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors" 
+                      className="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-blue-50 rounded-xl text-blue-600 transition-all active:scale-90" 
                       title="Editar"
                     >
                       ✏️
                     </button>
                     <button 
                       onClick={() => handleCancel(order.id)}
-                      className={`p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors ${order.status === 'Cancelled' ? 'opacity-20 cursor-not-allowed' : ''}`} 
+                      className={`w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-red-50 rounded-xl text-red-600 transition-all active:scale-90 ${order.status === 'Cancelled' ? 'opacity-20 cursor-not-allowed' : ''}`} 
                       disabled={order.status === 'Cancelled'}
                       title="Cancelar"
                     >

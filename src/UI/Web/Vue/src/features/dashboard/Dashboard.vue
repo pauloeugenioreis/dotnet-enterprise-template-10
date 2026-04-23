@@ -5,9 +5,9 @@ import { ref, onMounted } from 'vue';
 import { orderService } from '../../api/services/OrderService';
 
 const stats = [
-  { label: 'Vendas Totais', value: 'R$ 124.500', icon: '💰', color: 'bg-emerald-50 text-emerald-600' },
-  { label: 'Pedidos', value: '1.240', icon: '🛍️', color: 'bg-primary-50 text-primary-600' },
-  { label: 'Clientes', value: '850', icon: '👥', color: 'bg-amber-50 text-amber-600' },
+  { label: 'Vendas Mensais', value: 'R$ 842.500', icon: '📈', color: 'bg-rose-50 text-rose-500' },
+  { label: 'Novos Clientes', value: '+ 128', icon: '👤', color: 'bg-blue-50 text-blue-500' },
+  { label: 'Status do Sistema', value: 'Operacional', icon: '✅', color: 'bg-emerald-50 text-emerald-500' },
 ];
 
 const latestOrders = ref<any[]>([]);

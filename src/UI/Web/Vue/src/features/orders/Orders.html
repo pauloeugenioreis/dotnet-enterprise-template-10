@@ -1,13 +1,13 @@
-<div class="max-w-7xl mx-auto space-y-10 animate-fade-in">
+<div class="w-full space-y-10 animate-fade-in">
   <header class="flex justify-between items-end">
     <div>
-      <h1 class="text-5xl font-black text-gray-900 tracking-tighter">Pedidos</h1>
-      <p class="text-gray-500 mt-3 font-medium text-lg">Histórico completo de transações.</p>
+      <h1 class="text-6xl font-black text-gray-900 tracking-tighter">Pedidos</h1>
+      <p class="text-gray-500 mt-4 font-medium text-xl">Histórico completo de transações.</p>
     </div>
     <div class="flex gap-4">
       <button 
         @click="handleExport"
-        class="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md text-gray-400 hover:text-primary-600 transition-all active:scale-95"
+        class="p-5 bg-white border border-gray-100 rounded-[2rem] shadow-xl shadow-gray-200/50 text-gray-300 hover:text-primary-600 transition-all hover:scale-105 active:scale-95 group"
         title="Exportar para Excel"
       >
         📊
@@ -22,7 +22,7 @@
   </header>
 
   <!-- Filter Bar -->
-  <div class="grid grid-cols-12 gap-6 items-center">
+  <div class="grid grid-cols-12 gap-6 items-center mb-10">
     <div class="col-span-3 relative group">
       <div class="absolute inset-y-0 left-6 flex items-center pointer-events-none">
         <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,13 +77,13 @@
 
   <div class="bg-white rounded-[3rem] border border-gray-50 shadow-2xl overflow-hidden">
     <table class="w-full text-left border-collapse">
-      <thead class="bg-gray-50">
+      <thead class="bg-primary-600">
         <tr>
-          <th class="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400"># Número</th>
-          <th class="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Cliente</th>
-          <th class="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Status</th>
-          <th class="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Total</th>
-          <th class="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Ações</th>
+          <th class="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]"># Número</th>
+          <th class="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Cliente</th>
+          <th class="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Total</th>
+          <th class="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Status</th>
+          <th class="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em] text-center">Ações</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-50">
@@ -99,13 +99,13 @@
               <div>{{ order.customerName }}</div>
               <div class="text-[10px] text-gray-300 uppercase tracking-tighter">{{ order.customerEmail }}</div>
             </td>
+            <td class="px-10 py-8 text-xl font-black text-gray-900">
+              R$ {{ order.total.toLocaleString('pt-BR') }}
+            </td>
             <td class="px-10 py-8">
               <span :class="['px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest', getStatusClass(order.status)]">
                 {{ order.status }}
               </span>
-            </td>
-            <td class="px-10 py-8 text-xl font-black text-gray-900">
-              R$ {{ order.total.toLocaleString('pt-BR') }}
             </td>
             <td class="px-10 py-8">
               <div class="flex gap-2">

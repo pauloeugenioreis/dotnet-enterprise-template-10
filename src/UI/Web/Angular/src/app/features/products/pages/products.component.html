@@ -1,15 +1,16 @@
-<div class="p-12 max-w-[1600px] mx-auto animate-in fade-in duration-700">
-  <header class="flex justify-between items-end mb-12">
+<div class="w-full space-y-10 animate-in fade-in duration-700">
+  <header class="flex justify-between items-end mb-16">
     <div>
-      <h1 class="text-5xl font-black text-gray-900 tracking-tighter">Produtos</h1>
-      <p class="text-gray-500 mt-3 font-medium text-lg">Catálogo completo de itens.</p>
+      <h1 class="text-6xl font-black text-gray-900 tracking-tighter">Produtos</h1>
+      <p class="text-gray-500 mt-4 font-medium text-xl">Catálogo completo de itens.</p>
     </div>
     <div class="flex gap-4">
       <button 
         (click)="exportExcel()"
-        class="bg-white border-2 border-gray-100 hover:border-primary-100 text-gray-600 font-black px-8 py-4 rounded-2xl shadow-xl shadow-gray-100/20 transition-all active:scale-95 flex items-center gap-2"
+        class="p-5 bg-white border border-gray-100 rounded-[2rem] shadow-xl shadow-gray-200/50 text-gray-300 hover:text-primary-600 transition-all hover:scale-105 active:scale-95 group"
+        title="Exportar para Excel"
       >
-        📥 Exportar
+        📊
       </button>
       <button 
         (click)="openNew()"
@@ -66,14 +67,14 @@
   } @else {
     <div class="bg-white rounded-[3rem] shadow-2xl shadow-gray-200/40 border border-gray-50 overflow-hidden">
       <table class="w-full text-left">
-        <thead>
-          <tr class="bg-gray-50/50">
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Produto</th>
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Categoria</th>
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Preço</th>
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Estoque</th>
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Status</th>
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">Ações</th>
+        <thead class="bg-primary-600">
+          <tr>
+            <th class="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Produto</th>
+            <th class="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Categoria</th>
+            <th class="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Preço</th>
+            <th class="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Estoque</th>
+            <th class="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Status</th>
+            <th class="px-12 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em] text-right">Ações</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-50">
@@ -120,16 +121,16 @@
           }
         </tbody>
       </table>
-    </div>
 
-    <app-pagination 
-      [page]="page" 
-      [pageSize]="pageSize"
-      [totalPages]="totalPages" 
-      [totalItems]="totalItems" 
-      (pageChange)="onPageChange($event)"
-      (pageSizeChange)="onPageSizeChange($event)"
-    ></app-pagination>
+      <app-pagination 
+        [page]="page" 
+        [pageSize]="pageSize"
+        [totalPages]="totalPages" 
+        [totalItems]="totalItems" 
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)"
+      ></app-pagination>
+    </div>
   }
 </div>
 

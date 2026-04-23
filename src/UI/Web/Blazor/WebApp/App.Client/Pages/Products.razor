@@ -8,19 +8,19 @@
 @inject NavigationManager Navigation
 @rendermode InteractiveAuto
 
-<div class="p-12 max-w-[1600px] mx-auto animate-in fade-in duration-700">
-  <header class="flex justify-between items-end mb-12">
+<div class="animate-in fade-in duration-700">
+  <header class="flex justify-between items-end mb-16">
     <div>
-      <h1 class="text-5xl font-black text-gray-900 tracking-tighter">Produtos</h1>
-      <p class="text-gray-500 mt-3 font-medium text-lg">Catálogo completo de itens.</p>
+      <h1 class="text-6xl font-black text-gray-900 tracking-tighter">Produtos</h1>
+      <p class="text-gray-500 mt-4 font-medium text-xl">Catálogo completo de itens.</p>
     </div>
     <div class="flex gap-4">
       <button 
         @onclick="ExportToExcel"
-        class="bg-white hover:bg-gray-50 text-gray-700 font-bold px-8 py-4 rounded-2xl shadow-sm border border-gray-100 transition-all flex items-center gap-2 active:scale-95"
+        class="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md text-gray-400 hover:text-primary-600 transition-all active:scale-95"
+        title="Exportar para Excel"
       >
-        <span>📥</span>
-        <span>Exportar</span>
+        📊
       </button>
       <button 
         @onclick="OpenNew"
@@ -78,14 +78,14 @@
   } else {
     <div class="bg-white rounded-[3rem] shadow-2xl shadow-gray-200/40 border border-gray-50 overflow-hidden">
       <table class="w-full text-left">
-        <thead>
-          <tr class="bg-gray-50/50">
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Produto</th>
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Categoria</th>
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Preço</th>
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Estoque</th>
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Status</th>
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Ações</th>
+        <thead class="bg-primary-600">
+          <tr>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Produto</th>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Categoria</th>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Preço</th>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Estoque</th>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Status</th>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Ações</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-50">
@@ -119,11 +119,11 @@
                 </span>
               </td>
               <td class="px-10 py-8">
-                <div class="flex gap-2 group-hover:opacity-100 transition-opacity">
-                  <button title="Editar" @onclick="() => OpenEdit(item)" class="p-3 hover:bg-primary-50 rounded-xl text-primary-600 transition-colors">
+                <div class="flex gap-2">
+                  <button title="Editar" @onclick="() => OpenEdit(item)" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-primary-50 rounded-xl text-primary-600 transition-all active:scale-90">
                     ✏️
                   </button>
-                  <button title="Excluir" @onclick="() => DeleteProduct(item.Id)" class="p-3 hover:bg-red-50 rounded-xl text-red-600 transition-colors">
+                  <button title="Excluir" @onclick="() => DeleteProduct(item.Id)" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-red-50 rounded-xl text-red-600 transition-all active:scale-90">
                     🗑️
                   </button>
                 </div>
@@ -132,16 +132,16 @@
           }
         </tbody>
       </table>
-    </div>
 
-    <Pagination 
-      Page="@currentPage" 
-      TotalPages="@products.TotalPages" 
-      TotalItems="@products.TotalCount" 
-      PageSize="@pageSize"
-      OnPageChanged="ChangePage"
-      OnPageSizeChanged="ChangePageSize"
-    />
+      <Pagination 
+        Page="@currentPage" 
+        TotalPages="@products.TotalPages" 
+        TotalItems="@products.TotalCount" 
+        PageSize="@pageSize"
+        OnPageChanged="ChangePage"
+        OnPageSizeChanged="ChangePageSize"
+      />
+    </div>
   }
 </div>
 

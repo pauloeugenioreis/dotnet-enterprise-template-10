@@ -16,10 +16,10 @@ export default function Audit() {
   const closeLog = () => setSelectedLog(null);
 
   return (
-    <div className="p-10 max-w-7xl mx-auto space-y-10 animate-in fade-in duration-500">
+    <div className="w-full space-y-10 animate-in fade-in duration-500">
       <header>
-        <h1 className="text-5xl font-black text-gray-900 tracking-tighter">Auditoria</h1>
-        <p className="text-gray-500 mt-3 font-medium text-lg">Histórico de integridade do sistema.</p>
+        <h1 className="text-6xl font-black text-gray-900 tracking-tighter">Auditoria</h1>
+        <p className="text-gray-500 mt-4 font-medium text-xl">Histórico de integridade do sistema.</p>
       </header>
 
       {/* Filter Bar */}

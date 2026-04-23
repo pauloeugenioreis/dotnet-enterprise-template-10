@@ -7,10 +7,10 @@
 @inject IAuditService AuditService
 @rendermode InteractiveAuto
 
-<div class="p-12 max-w-[1600px] mx-auto animate-in fade-in duration-700">
-  <header class="mb-12">
-    <h1 class="text-5xl font-black text-gray-900 tracking-tighter">Auditoria</h1>
-    <p class="text-gray-500 mt-3 font-medium text-lg">Histórico de integridade do sistema.</p>
+<div class="animate-in fade-in duration-700">
+  <header class="mb-16">
+    <h1 class="text-6xl font-black text-gray-900 tracking-tighter">Auditoria</h1>
+    <p class="text-gray-500 mt-4 font-medium text-xl">Histórico de integridade do sistema.</p>
   </header>
 
   <!-- Filter Bar -->
@@ -64,13 +64,13 @@
   } else {
     <div class="bg-white rounded-[3rem] shadow-2xl shadow-gray-200/40 border border-gray-50 overflow-hidden">
       <table class="w-full text-left">
-        <thead>
-          <tr class="bg-gray-50/50">
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Evento</th>
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Entidade</th>
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Usuário</th>
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Data</th>
-            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Ações</th>
+        <thead class="bg-gray-900 text-white">
+          <tr>
+            <th class="px-10 py-8 text-[10px] font-black uppercase tracking-[0.2em]">Evento</th>
+            <th class="px-10 py-8 text-[10px] font-black uppercase tracking-[0.2em]">Entidade</th>
+            <th class="px-10 py-8 text-[10px] font-black uppercase tracking-[0.2em]">Usuário</th>
+            <th class="px-10 py-8 text-[10px] font-black uppercase tracking-[0.2em]">Data</th>
+            <th class="px-10 py-8 text-[10px] font-black uppercase tracking-[0.2em]">Ações</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-50">
@@ -102,16 +102,16 @@
           }
         </tbody>
       </table>
-    </div>
 
-    <Pagination 
-      Page="@currentPage" 
-      TotalPages="@_logs.TotalPages" 
-      TotalItems="@_logs.TotalCount" 
-      PageSize="@pageSize"
-      OnPageChanged="ChangePage"
-      OnPageSizeChanged="ChangePageSize"
-    />
+      <Pagination 
+        Page="@currentPage" 
+        TotalPages="@_logs.TotalPages" 
+        TotalItems="@_logs.TotalCount" 
+        PageSize="@pageSize"
+        OnPageChanged="ChangePage"
+        OnPageSizeChanged="ChangePageSize"
+      />
+    </div>
   }
 </div>
 

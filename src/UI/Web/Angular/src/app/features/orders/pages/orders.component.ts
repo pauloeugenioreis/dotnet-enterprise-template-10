@@ -158,6 +158,32 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.showDetailsModal.set(true);
   }
 
+  openEdit(order: OrderResponseDto) {
+    this.editingOrder = order;
+    this.modalTitle = 'Editar Pedido';
+    this.formData = {
+      customerName: order.customerName,
+      customerEmail: order.customerEmail || '',
+      shippingAddress: order.shippingAddress || '',
+      items: (order.items || []).map(item => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice
+      }))
+    };
+    this.showModal = true;
+  }
+
+  cancelOrder(order: OrderResponseDto) {
+    if (order.status === 'Cancelled') return;
+    if (confirm('Tem certeza que deseja cancelar este pedido?')) {
+      this.orderService.updateStatus(order.id, 'Cancelled').subscribe({
+        next: () => this.loadOrders(),
+        error: () => alert('Erro ao cancelar pedido')
+      });
+    }
+  }
+
   addItem() {
     this.formData.items.push({ productId: '', quantity: 1, unitPrice: 0 });
   }

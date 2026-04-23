@@ -2,25 +2,25 @@
 @using BlazorApp.Components.UI
 @using Microsoft.AspNetCore.Components.Authorization
 
-<div class="flex h-screen bg-gray-50 font-sans">
+<div class="flex h-screen bg-gray-100 overflow-hidden font-sans">
     <LoadingBar />
 
     <AuthorizeView>
         <Authorized>
             <!-- Sidebar -->
-            <aside class="w-80 bg-white border-r border-gray-100 hidden md:flex flex-col z-20">
+            <aside class="w-72 bg-white shadow-2xl relative flex flex-col z-20">
                 <NavMenu />
             </aside>
 
-            <!-- Main Content -->
-            <main class="flex-1 flex flex-col overflow-hidden relative">
-                <!-- Page Content -->
-                <div class="flex-1 overflow-y-auto p-12 bg-gray-50/50">
-                    <div class="max-w-[1600px] mx-auto">
+            <!-- Main Content Area -->
+            <div class="flex-1 overflow-auto bg-gray-50/50 relative">
+                <div class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-40 pointer-events-none"></div>
+                <main class="relative z-10 min-h-full">
+                    <div class="p-10">
                         @Body
                     </div>
-                </div>
-            </main>
+                </main>
+            </div>
         </Authorized>
         <NotAuthorized>
             <main class="flex-1 overflow-y-auto bg-white">

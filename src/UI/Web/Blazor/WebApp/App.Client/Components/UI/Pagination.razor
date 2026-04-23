@@ -1,48 +1,37 @@
 @namespace BlazorApp.Components.UI
 
-<div class="flex items-center justify-between mt-10 px-10 py-8 bg-white rounded-[3rem] shadow-2xl shadow-gray-200/40 border border-gray-50">
-    <!-- Left: Page Info -->
-    <div class="flex items-center gap-1">
-        <span class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Página </span>
-        <span class="text-[14px] font-black text-gray-900 mx-1">@Page</span>
-        <span class="text-[11px] font-bold text-gray-500 uppercase tracking-widest"> de </span>
-        <span class="text-[14px] font-black text-gray-900 ml-1">@TotalPages</span>
-    </div>
-
-    <!-- Center: Page Size Selector -->
-    <div class="flex items-center gap-4">
-        <span class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Itens por página:</span>
-        <div class="relative">
+<div class="bg-gray-50 px-10 py-6 flex justify-between items-center border-t border-gray-100">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-10">
+        <p class="text-sm text-gray-500 font-bold">
+            Página <span class="text-gray-900">@Page</span> de <span class="text-gray-900">@(TotalPages == 0 ? 1 : TotalPages)</span>
+        </p>
+        
+        <div class="flex items-center gap-3">
+            <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Itens por página:</span>
             <select 
                 @onchange="OnPageSizeChange"
-                class="appearance-none bg-gray-50 border border-gray-100 rounded-2xl px-6 py-3 pr-10 text-xs font-black text-gray-900 outline-none focus:ring-2 focus:ring-primary-600/10 transition-all cursor-pointer"
+                class="bg-white border border-gray-200 rounded-xl px-4 py-2 text-xs font-black text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-600 transition-all cursor-pointer shadow-sm"
             >
                 @foreach (var size in PageSizes)
                 {
                     <option value="@size" selected="@(size == PageSize)">@size</option>
                 }
             </select>
-            <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
-                </svg>
-            </div>
         </div>
     </div>
 
-    <!-- Right: Navigation Buttons -->
-    <div class="flex gap-4">
+    <div class="flex gap-3">
         <button 
             @onclick="() => OnPageChange(Page - 1)"
             disabled="@(Page <= 1)"
-            class="px-8 py-4 rounded-2xl bg-white border border-gray-100 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-white transition-all active:scale-95 shadow-sm"
+            class="px-6 py-3 bg-white border border-gray-200 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
         >
             Anterior
         </button>
         <button 
             @onclick="() => OnPageChange(Page + 1)"
-            disabled="@(Page >= TotalPages)"
-            class="px-8 py-4 rounded-2xl bg-primary-600 text-[10px] font-black text-white uppercase tracking-[0.2em] hover:bg-primary-700 shadow-lg shadow-primary-600/20 disabled:opacity-30 disabled:hover:bg-primary-600 transition-all active:scale-95"
+            disabled="@(Page >= TotalPages || TotalPages == 0)"
+            class="px-6 py-3 bg-primary-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-primary-600/20 active:scale-95"
         >
             Próxima
         </button>

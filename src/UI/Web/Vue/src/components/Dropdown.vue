@@ -58,7 +58,7 @@ interface Option {
   value: any;
 }
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   options: Option[];
   modelValue: any;
   placeholder?: string;
@@ -67,7 +67,11 @@ const props = defineProps<{
   labelOverride?: string | null;
   direction?: 'up' | 'down';
   loading?: boolean;
-}>();
+}>(), {
+  variant: 'filter',
+  placeholder: 'Selecionar...',
+  direction: 'down'
+});
 
 const emit = defineEmits(['update:modelValue', 'change', 'loadMore']);
 
