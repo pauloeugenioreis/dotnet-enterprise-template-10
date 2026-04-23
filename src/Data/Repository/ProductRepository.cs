@@ -25,15 +25,26 @@ public class ProductRepository : HybridRepository<Product>, IProductRepository
         _dbContext = context;
     }
 
-    public async Task<(IEnumerable<Product> Items, int Total)> GetByFilterAsync(bool? isActive, string? category, int? page = null, int? pageSize = null, CancellationToken cancellationToken = default)
+    public async Task<(IEnumerable<Product> Items, int Total)> GetByFilterAsync(
+        string? searchTerm = null,
+        bool? isActive = null, 
+        int? page = null, 
+        int? pageSize = null, 
+        CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Products.AsNoTracking().AsQueryable();
 
         if (isActive.HasValue)
             query = query.Where(p => p.IsActive == isActive.Value);
 
-        if (!string.IsNullOrEmpty(category))
-            query = query.Where(p => p.Category.Contains(category));
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            var term = searchTerm.ToLower();
+            query = query.Where(p => 
+                p.Name.ToLower().Contains(term) || 
+                (p.Category != null && p.Category.ToLower().Contains(term)) ||
+                (p.Description != null && p.Description.ToLower().Contains(term)));
+        }
 
         var total = await query.CountAsync(cancellationToken);
 

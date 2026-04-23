@@ -26,19 +26,22 @@ public class AuditController : ApiControllerBase
     }
 
     /// <summary>
-    /// Get history of events for an entity type (paginated)
+    /// Get history of events (paginated). Optionally filter by entity type.
     /// </summary>
-    [HttpGet("{entityType}")]
-    [ProducesResponseType(typeof(IEnumerable<DomainEvent>), StatusCodes.Status200OK)]
+    [HttpGet("{entityType?}")]
     [ProducesResponseType(typeof(PagedResponse<DomainEvent>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetEntitiesHistory(
-        string entityType,
+        string? entityType,
+        [FromQuery] string? eventType,
+        [FromQuery] string? userId,
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? toDate,
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
         CancellationToken cancellationToken = default)
     {
-        return await GetHistoryInternal(entityType, null, page, pageSize, cancellationToken);
+        return await GetHistoryInternal(entityType, null, eventType, userId, from, toDate, page, pageSize, cancellationToken);
     }
 
     /// <summary>
@@ -55,19 +58,20 @@ public class AuditController : ApiControllerBase
         [FromQuery] int? pageSize,
         CancellationToken cancellationToken = default)
     {
-        return await GetHistoryInternal(entityType, entityId, page, pageSize, cancellationToken);
+        return await GetHistoryInternal(entityType, entityId, null, null, null, null, page, pageSize, cancellationToken);
     }
 
     private async Task<IActionResult> GetHistoryInternal(
-        string entityType,
+        string? entityType,
         string? entityId,
+        string? eventType,
+        string? userId,
+        DateTime? from,
+        DateTime? toDate,
         int? page,
         int? pageSize,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(entityType))
-            return BadRequest("entityType is required");
-
         if (!_settings.Enabled || !_settings.EnableAuditApi)
             return BadRequest(EventSourcingDisabledMessage);
 
@@ -90,19 +94,20 @@ public class AuditController : ApiControllerBase
 
         if (string.IsNullOrWhiteSpace(entityId))
         {
-            (items, total) = await _eventStore.GetEventsByTypeAsync(
-                entityType, null, null, limit, offset, cancellationToken);
+            (items, total) = await _eventStore.GetEventsByFilterAsync(
+                entityType, eventType, userId, from, toDate, limit, offset, cancellationToken);
         }
         else
         {
+            // For a specific aggregate instance, we usually want all history or paged history
             if (usePagination)
             {
                 (items, total) = await _eventStore.GetEventsPagedAsync(
-                    entityType, entityId, limit, offset, cancellationToken);
+                    entityType!, entityId, limit, offset, cancellationToken);
             }
             else
             {
-                items = await _eventStore.GetEventsAsync(entityType, entityId, cancellationToken);
+                items = await _eventStore.GetEventsAsync(entityType!, entityId, cancellationToken);
                 total = items.Count;
             }
         }
@@ -192,7 +197,8 @@ public class AuditController : ApiControllerBase
         if (!_settings.Enabled || !_settings.EnableAuditApi)
             return BadRequest(EventSourcingDisabledMessage);
 
-        var (items, total) = await _eventStore.GetEventsByUserAsync(userId, from, toDate, limit, 0, cancellationToken);
+        (List<DomainEvent> items, long total) = await _eventStore.GetEventsByFilterAsync(
+            null, null, userId, from, toDate, limit, 0, cancellationToken);
 
         return Ok(new
         {

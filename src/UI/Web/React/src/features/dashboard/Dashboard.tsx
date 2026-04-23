@@ -1,6 +1,8 @@
+import { useNavigate } from 'react-router-dom';
 import { useDashboard } from './useDashboard';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { orders, isLoading, stats } = useDashboard();
 
   return (
@@ -27,7 +29,12 @@ export default function Dashboard() {
       <div className="bg-white rounded-[3rem] border border-gray-50 shadow-xl overflow-hidden">
         <div className="p-10 border-b border-gray-50 flex justify-between items-center">
           <h3 className="text-2xl font-black text-gray-900">Últimos Pedidos</h3>
-          <button className="text-primary-600 font-black text-sm uppercase tracking-widest hover:underline">Ver Todos</button>
+          <button 
+            onClick={() => navigate('/orders')}
+            className="text-primary-600 font-black text-sm uppercase tracking-widest hover:underline"
+          >
+            Ver Todos
+          </button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">

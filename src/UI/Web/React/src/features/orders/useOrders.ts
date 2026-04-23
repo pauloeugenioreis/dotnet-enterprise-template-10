@@ -4,12 +4,16 @@ import { orderService } from '../../api/services';
 
 export function useOrders() {
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(5);
+  const [status, setStatus] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['orders', page, pageSize],
-    queryFn: () => orderService.getOrders(page, pageSize),
+    queryKey: ['orders', page, pageSize, status, searchTerm, startDate, endDate],
+    queryFn: () => orderService.getOrders(page, pageSize, status, searchTerm, startDate, endDate),
   });
 
   const createMutation = useMutation({
@@ -34,7 +38,7 @@ export function useOrders() {
 
   const handleExport = async () => {
     try {
-      const response = await orderService.exportToExcel();
+      const response = await orderService.exportToExcel(status, searchTerm, startDate, endDate);
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -49,9 +53,13 @@ export function useOrders() {
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
+      case 'concluído':
       case 'delivered': return 'bg-green-100 text-green-700';
+      case 'enviado':
       case 'shipped': return 'bg-blue-100 text-blue-700';
+      case 'pendente':
       case 'pending': return 'bg-amber-100 text-amber-700';
+      case 'cancelado':
       case 'cancelled': return 'bg-red-100 text-red-700';
       default: return 'bg-gray-100 text-gray-700';
     }
@@ -64,6 +72,30 @@ export function useOrders() {
     page,
     setPage,
     pageSize,
+    setPageSize: (size: number) => {
+      setPageSize(size);
+      setPage(1);
+    },
+    status,
+    setStatus: (s: string) => {
+      setStatus(s);
+      setPage(1);
+    },
+    searchTerm,
+    setSearchTerm: (term: string) => {
+      setSearchTerm(term);
+      setPage(1);
+    },
+    startDate,
+    setStartDate: (date: string) => {
+      setStartDate(date);
+      setPage(1);
+    },
+    endDate,
+    setEndDate: (date: string) => {
+      setEndDate(date);
+      setPage(1);
+    },
     handleCancel,
     handleExport,
     createOrder: createMutation.mutateAsync,

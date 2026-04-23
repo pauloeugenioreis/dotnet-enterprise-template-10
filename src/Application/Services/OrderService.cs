@@ -174,9 +174,16 @@ public class OrderService : Service<Order>, IOrderService
         return orders.Select(MapToResponseDto).ToList();
     }
 
-    public async Task<(IEnumerable<OrderResponseDto> Items, int Total)> GetAllOrderDetailsAsync(string? status = null, int? page = null, int? pageSize = null, CancellationToken cancellationToken = default)
+    public async Task<(IEnumerable<OrderResponseDto> Items, int Total)> GetAllOrderDetailsAsync(
+        string? status = null, 
+        string? searchTerm = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        int? page = null, 
+        int? pageSize = null, 
+        CancellationToken cancellationToken = default)
     {
-        var (orders, total) = await _orderRepository.GetByFilterAsync(status, page, pageSize, cancellationToken);
+        var (orders, total) = await _orderRepository.GetByFilterAsync(status, searchTerm, startDate, endDate, page, pageSize, cancellationToken);
         return (orders.Select(MapToResponseDto).ToList(), total);
     }
 

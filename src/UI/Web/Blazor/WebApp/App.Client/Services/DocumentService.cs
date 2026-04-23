@@ -8,11 +8,11 @@ public interface IDocumentService
     Task<PagedResponse<DocumentResponseDto>> GetPagedAsync(int page = 1, int pageSize = 10, CancellationToken ct = default);
 }
 
-public class DocumentService(IHttpClientFactory httpClientFactory) 
-    : BaseService(httpClientFactory), IDocumentService
+public class DocumentService(IHttpClientFactory httpClientFactory, LocalStorageService localStorage) 
+    : BaseService(httpClientFactory, localStorage, "api/v1/document"), IDocumentService
 {
     public Task<PagedResponse<DocumentResponseDto>> GetPagedAsync(int page = 1, int pageSize = 10, CancellationToken ct = default)
     {
-        return GetAsync<PagedResponse<DocumentResponseDto>>($"api/v1/document?pageNumber={page}&pageSize={pageSize}", ct);
+        return GetAsync<PagedResponse<DocumentResponseDto>>($"{ResourcePath}?pageNumber={page}&pageSize={pageSize}", ct);
     }
 }

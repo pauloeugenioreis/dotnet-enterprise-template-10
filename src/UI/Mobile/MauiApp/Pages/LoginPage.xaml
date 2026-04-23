@@ -34,6 +34,7 @@
             <Frame BackgroundColor="White" CornerRadius="16" Padding="0" HasShadow="False"
                    BorderColor="#E2E8F0" Margin="0,0,0,16">
                 <Entry x:Name="EmailEntry"
+                       Text="admin@projecttemplate.com"
                        Placeholder="seu@email.com"
                        Keyboard="Email"
                        ReturnType="Next"
@@ -47,6 +48,7 @@
             <Frame BackgroundColor="White" CornerRadius="16" Padding="0" HasShadow="False"
                    BorderColor="#E2E8F0" Margin="0,0,0,32">
                 <Entry x:Name="PasswordEntry"
+                       Text="Admin@2026!Secure"
                        Placeholder="••••••••"
                        IsPassword="True"
                        ReturnType="Done"

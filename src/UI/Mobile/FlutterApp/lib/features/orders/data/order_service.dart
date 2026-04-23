@@ -2,7 +2,14 @@ import '../../../shared/models/api_models.dart';
 import '../../../core/network/api_client.dart';
 
 abstract class IOrderService {
-  Future<PagedResponse<OrderResponse>> getOrders({int page = 1, int pageSize = 10});
+  Future<PagedResponse<OrderResponse>> getOrders({
+    int page = 1,
+    int pageSize = 10,
+    String? searchTerm,
+    String? status,
+    DateTime? fromDate,
+    DateTime? toDate,
+  });
   Future<OrderStatistics> getStatistics();
 }
 
@@ -12,10 +19,24 @@ class OrderService implements IOrderService {
   OrderService(this._client);
 
   @override
-  Future<PagedResponse<OrderResponse>> getOrders({int page = 1, int pageSize = 10}) async {
+  Future<PagedResponse<OrderResponse>> getOrders({
+    int page = 1,
+    int pageSize = 10,
+    String? searchTerm,
+    String? status,
+    DateTime? fromDate,
+    DateTime? toDate,
+  }) async {
     final response = await _client.dio.get(
       '/api/orders',
-      queryParameters: {'page': page, 'pageSize': pageSize},
+      queryParameters: {
+        'page': page,
+        'pageSize': pageSize,
+        if (searchTerm != null && searchTerm.isNotEmpty) 'searchTerm': searchTerm,
+        if (status != null && status.isNotEmpty) 'status': status,
+        if (fromDate != null) 'fromDate': fromDate.toIso8601String(),
+        if (toDate != null) 'toDate': toDate.toIso8601String(),
+      },
     );
     final data = response.data as Map<String, dynamic>;
     return PagedResponse<OrderResponse>(

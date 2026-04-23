@@ -1,9 +1,11 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Infrastructure Resources
-var postgres = builder.AddPostgres("postgres")
-    .WithDataVolume()
-    .AddDatabase("ProjectTemplateDb");
+// Usando um nome novo "pg-server" para garantir que o Docker crie um container limpo
+var postgres = builder.AddPostgres("pg-server");
+
+var projectDb = postgres.AddDatabase("ProjectTemplateDb");
+var eventsDb = postgres.AddDatabase("ProjectTemplateEvents");
 
 var redis = builder.AddRedis("redis");
 
@@ -14,10 +16,12 @@ var mongodb = builder.AddMongoDB("mongodb")
 
 // Api Project
 var api = builder.AddProject<Projects.Api>("api")
-    .WithReference(postgres)
+    .WithReference(projectDb)
+    .WithReference(eventsDb)
     .WithReference(redis)
     .WithReference(rabbitmq)
     .WithReference(mongodb)
+    .WithEnvironment("AppSettings__Infrastructure__EventSourcing__ConnectionString", postgres)
     .WithEndpoint(endpointName: "https", callback: endpoint => endpoint.Port = 7196)
     .WithEndpoint(endpointName: "http", callback: endpoint => endpoint.Port = 5125)
     .WithExternalHttpEndpoints();

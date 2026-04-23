@@ -1,36 +1,216 @@
-<div class="p-8 max-w-7xl mx-auto animate-fade-in">
-  <header class="flex justify-between items-center mb-10">
+<div class="p-12 max-w-[1600px] mx-auto animate-in fade-in duration-700">
+  <header class="flex justify-between items-end mb-12">
     <div>
-      <h1 class="text-4xl font-black text-gray-900 tracking-tight">Produtos</h1>
-      <p class="text-gray-500 mt-2 font-medium">Gestão de catálogo e estoque.</p>
+      <h1 class="text-5xl font-black text-gray-900 tracking-tighter">Produtos</h1>
+      <p class="text-gray-500 mt-3 font-medium text-lg">Catálogo completo de itens.</p>
     </div>
-    <button class="bg-primary-600 hover:bg-primary-700 text-white font-bold px-6 py-3 rounded-2xl shadow-lg shadow-primary-600/20 transition-all">
-      + Novo Produto
-    </button>
+    <div class="flex gap-4">
+      <button 
+        (click)="exportExcel()"
+        class="bg-white border-2 border-gray-100 hover:border-primary-100 text-gray-600 font-black px-8 py-4 rounded-2xl shadow-xl shadow-gray-100/20 transition-all active:scale-95 flex items-center gap-2"
+      >
+        📥 Exportar
+      </button>
+      <button 
+        (click)="openNew()"
+        class="bg-primary-600 hover:bg-primary-700 text-white font-black px-8 py-4 rounded-2xl shadow-lg shadow-primary-600/20 transition-all active:scale-95"
+      >
+        + Novo Produto
+      </button>
+    </div>
   </header>
 
+  <!-- Filter Bar -->
+  <div class="flex gap-6 items-center mb-10">
+    <div class="flex-1 relative group">
+      <div class="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+        <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <input 
+        type="text"
+        placeholder="Buscar por nome ou categoria..."
+        class="w-full pl-16 pr-8 py-5 bg-white border-none rounded-3xl shadow-xl shadow-gray-100/50 focus:ring-2 focus:ring-primary-600/20 outline-none transition-all font-bold text-gray-900 placeholder:text-gray-300"
+        [ngModel]="searchTerm"
+        (ngModelChange)="onSearchChange($event)"
+      />
+    </div>
+    
+    <div class="flex bg-white p-2 rounded-[2rem] shadow-xl shadow-gray-100/50 gap-1">
+      <button
+        (click)="onStatusFilter(undefined)"
+        [class]="'px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ' + (isActive === undefined ? 'bg-gray-900 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')"
+      >
+        Todos
+      </button>
+      <button
+        (click)="onStatusFilter(true)"
+        [class]="'px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ' + (isActive === true ? 'bg-gray-900 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')"
+      >
+        Ativos
+      </button>
+      <button
+        (click)="onStatusFilter(false)"
+        [class]="'px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ' + (isActive === false ? 'bg-gray-900 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')"
+      >
+        Inativos
+      </button>
+    </div>
+  </div>
+
   @if (loading()) {
-    <div class="flex justify-center py-20">
-      <div class="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+    <div class="flex justify-center py-40 bg-white rounded-[3rem] shadow-xl shadow-gray-100/50">
+      <div class="w-16 h-16 border-8 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
     </div>
   } @else {
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      @for (product of products(); track product.id) {
-        <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
-          <div class="w-full h-48 bg-gray-50 rounded-2xl mb-6 flex items-center justify-center overflow-hidden">
-            <span class="text-5xl group-hover:scale-110 transition-transform">📦</span>
-          </div>
-          <div class="flex justify-between items-start mb-2">
-            <h3 class="text-lg font-black text-gray-900 leading-tight">{{ product.name }}</h3>
-            <span class="text-primary-600 font-black">R$ {{ product.price | number:'1.2-2' }}</span>
-          </div>
-          <p class="text-gray-400 text-sm mb-6">{{ product.category }}</p>
-          <div class="flex justify-between items-center pt-6 border-t border-gray-50">
-            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Estoque: {{ product.stockQuantity }}</span>
-            <button class="text-primary-600 font-bold text-sm hover:underline">Editar</button>
-          </div>
-        </div>
-      }
+    <div class="bg-white rounded-[3rem] shadow-2xl shadow-gray-200/40 border border-gray-50 overflow-hidden">
+      <table class="w-full text-left">
+        <thead>
+          <tr class="bg-gray-50/50">
+            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Produto</th>
+            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Categoria</th>
+            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Preço</th>
+            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Estoque</th>
+            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Status</th>
+            <th class="px-10 py-8 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          @for (product of products(); track product.id) {
+            <tr class="hover:bg-gray-50/50 transition-colors group">
+              <td class="px-10 py-8">
+                <div class="flex items-center gap-6">
+                  <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                    📦
+                  </div>
+                  <span class="font-black text-gray-900 text-lg tracking-tight">{{ product.name }}</span>
+                </div>
+              </td>
+              <td class="px-10 py-8">
+                <span class="px-4 py-2 bg-gray-50 rounded-xl text-gray-500 font-bold text-xs uppercase tracking-wider">
+                  {{ product.category }}
+                </span>
+              </td>
+              <td class="px-10 py-8">
+                <span class="font-black text-primary-600 text-lg">R$ {{ product.price | number:'1.2-2' }}</span>
+              </td>
+              <td class="px-10 py-8">
+                <div class="flex items-baseline gap-1">
+                  <span class="font-black text-gray-900 text-lg">{{ product.stock }}</span>
+                  <span class="text-[10px] font-bold text-gray-300 uppercase tracking-widest">unid</span>
+                </div>
+              </td>
+              <td class="px-10 py-8">
+                <span [class]="'px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest ' + (product.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600')">
+                  {{ product.isActive ? 'Ativo' : 'Inativo' }}
+                </span>
+              </td>
+              <td class="px-10 py-8 text-right">
+                <div class="flex justify-end gap-2">
+                  <button (click)="openEdit(product)" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-primary-50 rounded-xl text-primary-600 transition-all active:scale-90" title="Editar">
+                    ✏️
+                  </button>
+                  <button (click)="deleteProduct(product.id)" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-red-50 rounded-xl text-red-600 transition-all active:scale-90" title="Excluir">
+                    🗑️
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
+
+    <app-pagination 
+      [page]="page" 
+      [pageSize]="pageSize"
+      [totalPages]="totalPages" 
+      [totalItems]="totalItems" 
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+    ></app-pagination>
   }
 </div>
+
+<!-- Product Modal -->
+<app-modal [show]="showModal" [title]="modalTitle" (close)="showModal = false">
+  <form (submit)="save()" class="space-y-8">
+    <div class="space-y-3">
+      <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Nome do Produto</label>
+      <input 
+        type="text" 
+        [(ngModel)]="formData.name" 
+        name="name"
+        class="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all"
+        placeholder="Ex: Teclado Mecânico"
+        required
+      />
+    </div>
+
+    <div class="grid grid-cols-2 gap-6">
+      <div class="space-y-3">
+        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Categoria</label>
+        <input 
+          type="text" 
+          [(ngModel)]="formData.category" 
+          name="category"
+          class="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all"
+          placeholder="Ex: Hardware"
+          required
+        />
+      </div>
+      <div class="space-y-3">
+        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Preço (R$)</label>
+        <input 
+          type="number" 
+          [(ngModel)]="formData.price" 
+          name="price"
+          class="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-6">
+      <div class="space-y-3">
+        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Estoque Inicial</label>
+        <input 
+          type="number" 
+          [(ngModel)]="formData.stock" 
+          name="stock"
+          class="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all"
+          required
+        />
+      </div>
+      <div class="space-y-3">
+        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Status</label>
+        <div class="flex items-center gap-4 px-8 py-5 bg-gray-50 rounded-3xl">
+          <input 
+            type="checkbox" 
+            [(ngModel)]="formData.isActive" 
+            name="isActive"
+            class="w-6 h-6 rounded-lg text-primary-600 focus:ring-primary-600/20 border-none bg-gray-200"
+          />
+          <span class="text-xs font-black uppercase tracking-widest text-gray-600">Produto Ativo</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pt-6 flex gap-4">
+      <button 
+        type="button"
+        (click)="showModal = false"
+        class="flex-1 px-8 py-5 rounded-3xl font-black text-xs uppercase tracking-widest text-gray-400 hover:bg-gray-50 transition-all"
+      >
+        Cancelar
+      </button>
+      <button 
+        type="submit"
+        class="flex-2 bg-primary-600 hover:bg-primary-700 text-white font-black px-12 py-5 rounded-3xl shadow-xl shadow-primary-600/20 transition-all active:scale-95"
+      >
+        Confirmar e Salvar
+      </button>
+    </div>
+  </form>
+</app-modal>

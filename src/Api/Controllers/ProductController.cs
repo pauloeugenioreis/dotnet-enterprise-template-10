@@ -26,13 +26,13 @@ public class ProductController(
 
     [ProducesResponseType(typeof(PagedResponse<ProductResponseDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllAsync(
+        [FromQuery] string? searchTerm,
         [FromQuery] bool? isActive,
-        [FromQuery] string? category,
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
         CancellationToken cancellationToken)
     {
-        var (items, total) = await productService.GetAllProductsAsync(isActive, category, page, pageSize, cancellationToken);
+        var (items, total) = await productService.GetAllProductsAsync(searchTerm, isActive, page, pageSize, cancellationToken);
 
         if (page.HasValue && pageSize.HasValue)
             return HandlePagedResult(items, total, page.Value, pageSize.Value);
@@ -113,15 +113,15 @@ public class ProductController(
     [HttpGet("ExportToExcel")]
     [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
     public async Task<ActionResult> ExportToExcelAsync(
+        [FromQuery] string? searchTerm,
         [FromQuery] bool? isActive,
-        [FromQuery] string? category,
         CancellationToken cancellationToken)
     {
         logger.LogInformation("Generating Excel report for products");
 
         var stopwatch = Stopwatch.StartNew();
 
-        var (products, _) = await productService.GetAllProductsAsync(isActive, category, cancellationToken: cancellationToken);
+        var (products, _) = await productService.GetAllProductsAsync(searchTerm, isActive, cancellationToken: cancellationToken);
         var productList = products.ToList();
 
         var config = new OpenXmlConfiguration

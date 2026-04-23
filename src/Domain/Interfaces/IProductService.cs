@@ -11,7 +11,12 @@ public interface IProductService : IService<Product>
 {
     Task<ProductResponseDto?> GetProductByIdAsync(long id, CancellationToken cancellationToken = default);
 
-    Task<(IEnumerable<ProductResponseDto> Items, int Total)> GetAllProductsAsync(bool? isActive, string? category, int? page = null, int? pageSize = null, CancellationToken cancellationToken = default);
+    Task<(IEnumerable<ProductResponseDto> Items, int Total)> GetAllProductsAsync(
+        string? searchTerm = null,
+        bool? isActive = null, 
+        int? page = null, 
+        int? pageSize = null, 
+        CancellationToken cancellationToken = default);
 
     Task<ProductResponseDto> CreateProductAsync(CreateProductRequest dto, CancellationToken cancellationToken = default);
 

@@ -1,0 +1,27 @@
+@namespace BlazorApp.Components.UI
+@if (Show)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+        <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" @onclick="OnClose"></div>
+        <div class="bg-white rounded-[3rem] shadow-2xl w-full max-w-lg relative z-10 overflow-hidden animate-in zoom-in-95 duration-300">
+            <div class="px-10 pt-10 pb-6 flex justify-between items-center border-b border-gray-50">
+                <h2 class="text-3xl font-black text-gray-900 tracking-tighter">@Title</h2>
+                <button @onclick="OnClose" class="text-gray-300 hover:text-gray-900 transition-colors">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-10">
+                @ChildContent
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+}

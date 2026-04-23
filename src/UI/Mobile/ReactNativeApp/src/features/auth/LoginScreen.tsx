@@ -5,8 +5,8 @@ import apiClient from '../../api/apiClient';
 import * as SecureStore from 'expo-secure-store';
 
 export default function LoginScreen({ navigation }: any) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@projecttemplate.com');
+  const [password, setPassword] = useState('Admin@2026!Secure');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 

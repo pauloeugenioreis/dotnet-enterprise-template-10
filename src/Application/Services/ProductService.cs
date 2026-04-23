@@ -21,13 +21,13 @@ public class ProductService(
     }
 
     public async Task<(IEnumerable<ProductResponseDto> Items, int Total)> GetAllProductsAsync(
-        bool? isActive,
-        string? category,
+        string? searchTerm = null,
+        bool? isActive = null,
         int? page = null,
         int? pageSize = null,
         CancellationToken cancellationToken = default)
     {
-        var (products, total) = await repository.GetByFilterAsync(isActive, category, page, pageSize, cancellationToken);
+        var (products, total) = await repository.GetByFilterAsync(searchTerm, isActive, page, pageSize, cancellationToken);
         return (products.Select(MapToResponse).ToList(), total);
     }
 

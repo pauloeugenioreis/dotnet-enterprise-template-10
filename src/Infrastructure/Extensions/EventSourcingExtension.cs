@@ -6,6 +6,7 @@ using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 using ProjectTemplate.Infrastructure.Services;
 using Weasel.Core;
+using Microsoft.Extensions.Configuration;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
 
@@ -23,10 +24,6 @@ public static class EventSourcingExtension
 
         // Register settings so repositories/controllers can resolve even when disabled
         services.AddSingleton(settings);
-
-        // Register payload factories
-        services.AddTransient<IEventPayloadFactory<Order>, OrderEventPayloadFactory>();
-        services.AddTransient<IEventPayloadFactory<Product>, ProductEventPayloadFactory>();
 
         if (!settings.Enabled)
         {
@@ -63,8 +60,27 @@ public static class EventSourcingExtension
                 "EventSourcing:ConnectionString is required when using Marten provider");
         }
 
-        // Configure Marten with simplified settings for Marten 8.x
-        services.AddMarten(settings.ConnectionString);
+        // Configure Marten using Reflection to avoid namespace issues across versions
+        services.AddMarten(options =>
+        {
+            options.Connection(settings.ConnectionString);
+
+            // Set AutoCreateSchemaObjects to All via reflection to avoid namespace issues across Marten versions
+            var autoCreateProperty = options.GetType().GetProperty(nameof(options.AutoCreateSchemaObjects));
+            if (autoCreateProperty != null)
+            {
+                var allValue = Enum.Parse(autoCreateProperty.PropertyType, "All");
+                autoCreateProperty.SetValue(options, allValue);
+            }
+
+            // Set StreamIdentity to AsString using reflection to handle Marten 7/8+ variations
+            var streamIdentityProperty = options.Events.GetType().GetProperty(nameof(options.Events.StreamIdentity));
+            if (streamIdentityProperty?.PropertyType.IsEnum == true)
+            {
+                var streamIdentityValue = Enum.Parse(streamIdentityProperty.PropertyType, "AsString");
+                streamIdentityProperty.SetValue(options.Events, streamIdentityValue);
+            }
+        });
 
         // Register Event Store implementation
         services.AddScoped<IEventStore, MartenEventStore>();
@@ -88,12 +104,34 @@ internal class NoOpEventStore : IEventStore
         return Task.CompletedTask;
     }
 
+    public Task AppendEventsAsync(
+        string aggregateType,
+        string aggregateId,
+        IEnumerable<object> events,
+        string? userId = null,
+        Dictionary<string, string>? metadata = null,
+        CancellationToken cancellationToken = default)
+    {
+        // No-op
+        return Task.CompletedTask;
+    }
+
     public Task<List<DomainEvent>> GetEventsAsync(
         string aggregateType,
         string aggregateId,
         CancellationToken cancellationToken = default)
     {
         return Task.FromResult(new List<DomainEvent>());
+    }
+
+    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsPagedAsync(
+        string aggregateType,
+        string aggregateId,
+        int? limit = null,
+        int? offset = null,
+        CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult((new List<DomainEvent>(), 0L));
     }
 
     public Task<List<DomainEvent>> GetEventsAsync(
@@ -115,36 +153,17 @@ internal class NoOpEventStore : IEventStore
         return Task.FromResult(new List<DomainEvent>());
     }
 
-    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsPagedAsync(
-        string aggregateType,
-        string aggregateId,
-        int? limit = null,
-        int? offset = null,
-        CancellationToken cancellationToken = default)
-    {
-        return Task.FromResult<(List<DomainEvent>, long)>((new List<DomainEvent>(), 0L));
-    }
-
-    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByTypeAsync(
-        string aggregateType,
+    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByFilterAsync(
+        string? aggregateType = null,
+        string? eventType = null,
+        string? userId = null,
         DateTime? from = null,
         DateTime? toDate = null,
         int? limit = null,
         int? offset = null,
         CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<(List<DomainEvent>, long)>((new List<DomainEvent>(), 0L));
-    }
-
-    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByUserAsync(
-        string userId,
-        DateTime? from = null,
-        DateTime? toDate = null,
-        int? limit = null,
-        int? offset = null,
-        CancellationToken cancellationToken = default)
-    {
-        return Task.FromResult<(List<DomainEvent>, long)>((new List<DomainEvent>(), 0L));
+        return Task.FromResult((new List<DomainEvent>(), 0L));
     }
 
     public Task<int> GetLatestVersionAsync(
@@ -175,7 +194,7 @@ internal class NoOpEventStore : IEventStore
 
     public Task<EventStatistics> GetStatisticsAsync(
         DateTime? from = null,
-        DateTime? toDate = null,
+        DateTime? to = null,
         CancellationToken cancellationToken = default)
     {
         return Task.FromResult(new EventStatistics());

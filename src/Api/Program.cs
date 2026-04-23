@@ -3,6 +3,7 @@ using ProjectTemplate.Data.Context;
 using ProjectTemplate.Data.Seeders;
 using ProjectTemplate.Infrastructure.Extensions;
 using ProjectTemplate.Infrastructure.Filters;
+using ProjectTemplate.Domain.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -92,7 +93,12 @@ if (app.Environment.IsDevelopment())
     await context.Database.EnsureCreatedAsync();
 
     // Run seeder
-    var seeder = new DbSeeder(context);
+    var eventStore = scope.ServiceProvider.GetRequiredService<IEventStore>();
+
+    // Warm up Marten / Ensure Schema is ready before seeding
+    await eventStore.GetStatisticsAsync();
+
+    var seeder = new DbSeeder(context, eventStore);
     await seeder.SeedAsync();
 
     // Run MongoDB seeder (optional - enabled by scripts when MongoDB is selected)

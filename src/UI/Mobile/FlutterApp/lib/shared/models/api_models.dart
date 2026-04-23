@@ -145,6 +145,36 @@ class PagedResponse<T> {
   });
 }
 
+class ProductResponse {
+  final int id;
+  final String name;
+  final String? description;
+  final double price;
+  final int stock;
+  final String category;
+  final bool isActive;
+
+  const ProductResponse({
+    required this.id,
+    required this.name,
+    this.description,
+    required this.price,
+    required this.stock,
+    required this.category,
+    required this.isActive,
+  });
+
+  factory ProductResponse.fromJson(Map<String, dynamic> json) => ProductResponse(
+        id: json['id'] as int,
+        name: json['name'] as String,
+        description: json['description'] as String?,
+        price: (json['price'] as num).toDouble(),
+        stock: json['stock'] as int,
+        category: json['category'] as String,
+        isActive: json['isActive'] as bool,
+      );
+}
+
 // ─── Dashboard Stats ─────────────────────────────────────────────
 
 class TopProduct {

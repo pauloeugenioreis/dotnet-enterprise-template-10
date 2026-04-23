@@ -1,0 +1,59 @@
+@namespace BlazorApp.Components.UI
+@using Microsoft.AspNetCore.Components.Web
+
+<div class="relative @ClassName">
+    <button type="button"
+            @onclick="Toggle"
+            class="w-full pl-8 pr-12 @PaddingClass @BgClass border-none @RoundedClass @ShadowClass outline-none font-black text-xs uppercase tracking-widest text-gray-900 flex justify-between items-center hover:bg-gray-50 transition-all active:scale-[0.98]">
+        <span class="truncate">@(SelectedOption != null ? SelectedOption.Label : Placeholder)</span>
+        <svg class="w-5 h-5 text-gray-300 transition-transform duration-300 @(IsOpen ? "rotate-180" : "")"
+             fill="none"
+             stroke="currentColor"
+             viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
+        </svg>
+    </button>
+
+    @if (IsOpen)
+    {
+        <div class="absolute z-50 w-full mt-3 bg-white border border-gray-50 rounded-[2rem] shadow-2xl shadow-gray-200/50 py-3 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div class="max-h-60 overflow-y-auto">
+                @foreach (var option in Options)
+                {
+                    <button type="button"
+                            @onclick="() => Select(option)"
+                            class="w-full text-left px-8 py-4 text-[10px] font-black uppercase tracking-widest transition-colors @(Value?.ToString() == option.Value?.ToString() ? "bg-primary-50 text-primary-600" : "text-gray-500 hover:bg-gray-50")">
+                        @option.Label
+                    </button>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<DropdownOption> Options { get; set; } = new();
+    [Parameter] public object? Value { get; set; }
+    [Parameter] public EventCallback<object?> ValueChanged { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "Selecionar...";
+    [Parameter] public string Variant { get; set; } = "filter";
+    [Parameter] public string ClassName { get; set; } = "";
+
+    private bool IsOpen { get; set; }
+
+    private DropdownOption? SelectedOption => Options.FirstOrDefault(o => o.Value?.ToString() == Value?.ToString());
+
+    private void Toggle() => IsOpen = !IsOpen;
+
+    private async Task Select(DropdownOption option)
+    {
+        Value = option.Value;
+        await ValueChanged.InvokeAsync(Value);
+        IsOpen = false;
+    }
+
+    private string PaddingClass => Variant == "filter" ? "py-5" : "py-3";
+    private string RoundedClass => Variant == "filter" ? "rounded-3xl" : "rounded-2xl";
+    private string BgClass => Variant == "filter" ? "bg-white" : "bg-gray-50";
+    private string ShadowClass => Variant == "filter" ? "shadow-xl shadow-gray-100/50" : "";
+}

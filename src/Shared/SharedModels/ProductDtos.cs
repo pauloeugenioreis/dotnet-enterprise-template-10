@@ -35,13 +35,13 @@ public record UpdateProductRequest : SaveProductRequest;
 /// </summary>
 public record ProductResponseDto
 {
-    public long Id { get; init; }
-    public string Name { get; init; } = string.Empty;
-    public string? Description { get; init; }
-    public decimal Price { get; init; }
-    public int Stock { get; init; }
-    public string Category { get; init; } = string.Empty;
-    public bool IsActive { get; init; }
+    public long Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public decimal Price { get; set; }
+    public int Stock { get; set; }
+    public string Category { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
     public DateTime CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; init; }
 }

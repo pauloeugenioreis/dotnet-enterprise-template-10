@@ -6,8 +6,8 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../store/auth';
 import axios from 'axios';
 
-const email = ref('');
-const password = ref('');
+const email = ref('admin@projecttemplate.com');
+const password = ref('Admin@2026!Secure');
 const loading = ref(false);
 const router = useRouter();
 const authStore = useAuthStore();

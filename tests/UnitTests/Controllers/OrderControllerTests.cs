@@ -73,11 +73,11 @@ public class OrderControllerTests
             UpdatedAt = DateTime.UtcNow,
             Items = new List<OrderItemResponseDto>()
         };
-        _mockOrderService.Setup(s => s.GetAllOrderDetailsAsync(null, null, null, It.IsAny<CancellationToken>()))
+        _mockOrderService.Setup(s => s.GetAllOrderDetailsAsync(null, null, null, null, null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(((IEnumerable<OrderResponseDto>)new List<OrderResponseDto> { orderDetails }, 1));
 
         // Act
-        var result = await _controller.GetAllAsync(null, null, null, CancellationToken.None);
+        var result = await _controller.GetAllAsync(null, null, null, null, null, null, CancellationToken.None);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();

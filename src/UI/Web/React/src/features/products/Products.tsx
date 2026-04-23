@@ -1,12 +1,17 @@
 import { useState } from 'react';
 import { useProducts } from './useProducts';
 import Modal from '../../components/Modal';
+import Pagination from '../../components/Pagination';
 
 export default function Products() {
-  const { data, isLoading, page, setPage, handleDelete, handleExport, createProduct, updateProduct } = useProducts();
+  const { 
+    data, isLoading, page, setPage, pageSize, setPageSize, 
+    handleDelete, handleExport, createProduct, updateProduct,
+    searchTerm, setSearchTerm, isActive, setIsActive
+  } = useProducts();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [formData, setFormData] = useState({ name: '', category: '', price: '', stockQuantity: '' });
+  const [formData, setFormData] = useState({ name: '', category: '', price: '', stock: '', isActive: true });
 
   const totalPages = data?.totalPages || 1;
 
@@ -16,14 +21,15 @@ export default function Products() {
       name: product.name || '',
       category: product.category || '',
       price: product.price?.toString() || '0',
-      stockQuantity: product.stockQuantity?.toString() || '0'
+      stock: product.stock?.toString() || '0',
+      isActive: product.isActive ?? true
     });
     setIsModalOpen(true);
   };
 
   const handleOpenNew = () => {
     setEditingId(null);
-    setFormData({ name: '', category: '', price: '', stockQuantity: '' });
+    setFormData({ name: '', category: '', price: '', stock: '', isActive: true });
     setIsModalOpen(true);
   };
 
@@ -32,7 +38,7 @@ export default function Products() {
     const payload = {
       ...formData,
       price: parseFloat(formData.price),
-      stockQuantity: parseInt(formData.stockQuantity)
+      stock: parseInt(formData.stock)
     };
 
     try {
@@ -42,7 +48,7 @@ export default function Products() {
         await createProduct(payload);
       }
       setIsModalOpen(false);
-      setFormData({ name: '', category: '', price: '', stockQuantity: '' });
+      setFormData({ name: '', category: '', price: '', stock: '', isActive: true });
     } catch (error) {
       alert(`Erro ao ${editingId ? 'atualizar' : 'criar'} produto`);
     }
@@ -72,6 +78,44 @@ export default function Products() {
         </div>
       </header>
 
+      {/* Filter Bar */}
+      <div className="flex gap-6 items-center">
+        <div className="flex-1 relative group">
+          <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+            <svg className="w-5 h-5 text-gray-400 group-focus-within:text-primary-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input 
+            type="text"
+            placeholder="Buscar por nome ou categoria..."
+            className="w-full pl-16 pr-8 py-5 bg-white border-none rounded-3xl shadow-xl shadow-gray-100/50 focus:ring-2 focus:ring-primary-600/20 outline-none transition-all font-bold text-gray-900 placeholder:text-gray-300"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        
+        <div className="flex bg-white p-2 rounded-[2rem] shadow-xl shadow-gray-100/50 gap-1">
+          {[
+            { label: 'Todos', value: undefined },
+            { label: 'Ativos', value: true },
+            { label: 'Inativos', value: false }
+          ].map((status) => (
+            <button
+              key={status.label}
+              onClick={() => setIsActive(status.value)}
+              className={`px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
+                isActive === status.value 
+                ? 'bg-gray-900 text-white shadow-lg' 
+                : 'text-gray-400 hover:bg-gray-50'
+              }`}
+            >
+              {status.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="bg-white rounded-[3rem] border border-gray-50 shadow-2xl overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead className="bg-gray-50">
@@ -80,12 +124,13 @@ export default function Products() {
               <th className="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Categoria</th>
               <th className="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Preço</th>
               <th className="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Estoque</th>
+              <th className="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Status</th>
               <th className="px-10 py-6 text-xs font-black uppercase tracking-[0.2em] text-gray-400">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
             {isLoading ? (
-              <tr><td colSpan={5} className="p-20 text-center"><div className="w-10 h-10 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto" /></td></tr>
+              <tr><td colSpan={6} className="p-20 text-center"><div className="w-10 h-10 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto" /></td></tr>
             ) : data?.items.map((product: any) => (
               <tr key={product.id} className="hover:bg-gray-50/50 transition-colors group">
                 <td className="px-10 py-8">
@@ -103,7 +148,16 @@ export default function Products() {
                   R$ {product.price.toLocaleString()}
                 </td>
                 <td className="px-10 py-8 font-black text-gray-900">
-                  {product.stockQuantity} <span className="text-gray-300 font-medium text-xs">unid</span>
+                  {product.stock} <span className="text-gray-300 font-medium text-xs">unid</span>
+                </td>
+                <td className="px-10 py-8">
+                  <span className={`px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest ${
+                    product.isActive 
+                    ? 'bg-emerald-50 text-emerald-600' 
+                    : 'bg-red-50 text-red-600'
+                  }`}>
+                    {product.isActive ? 'Ativo' : 'Inativo'}
+                  </span>
                 </td>
                 <td className="px-10 py-8">
                   <div className="flex gap-2">
@@ -128,28 +182,13 @@ export default function Products() {
           </tbody>
         </table>
 
-        {/* Paginação */}
-        <div className="bg-gray-50 px-10 py-6 flex justify-between items-center border-t border-gray-100">
-          <p className="text-sm text-gray-500 font-bold">
-            Página <span className="text-gray-900">{page}</span> de <span className="text-gray-900">{totalPages}</span>
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="px-6 py-3 bg-white border border-gray-200 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              Anterior
-            </button>
-            <button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="px-6 py-3 bg-primary-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              Próxima
-            </button>
-          </div>
-        </div>
+        <Pagination 
+          currentPage={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
       </div>
 
       {/* Modal Produto */}
@@ -187,8 +226,8 @@ export default function Products() {
                 required
                 type="number"
                 className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-600 outline-none transition-all font-bold text-gray-900"
-                value={formData.stockQuantity}
-                onChange={e => setFormData({ ...formData, stockQuantity: e.target.value })}
+                value={formData.stock}
+                onChange={e => setFormData({ ...formData, stock: e.target.value })}
                 placeholder="0"
               />
             </div>
@@ -202,6 +241,16 @@ export default function Products() {
               onChange={e => setFormData({ ...formData, category: e.target.value })}
               placeholder="Ex: Periféricos"
             />
+          </div>
+          <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-2xl">
+            <input 
+              type="checkbox"
+              id="isActive"
+              className="w-5 h-5 accent-primary-600"
+              checked={formData.isActive}
+              onChange={e => setFormData({ ...formData, isActive: e.target.checked })}
+            />
+            <label htmlFor="isActive" className="text-sm font-bold text-gray-700 cursor-pointer">Produto Ativo</label>
           </div>
           <button 
             type="submit"

@@ -1,5 +1,6 @@
 using BlazorApp.Client;
 using BlazorApp.Components;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,8 +9,11 @@ builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents()
-    .AddInteractiveWebAssemblyComponents();
+    .AddInteractiveServerComponents();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options => { options.LoginPath = "/login"; });
+builder.Services.AddAuthorization();
 
 // Usar o método de extensão compartilhado
 // No servidor, podemos passar a URL da API do Aspire
@@ -23,11 +27,7 @@ var app = builder.Build();
 app.MapDefaultEndpoints();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseWebAssemblyDebugging();
-}
-else
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
@@ -37,11 +37,14 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.MapStaticAssets();
+
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
-    .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(BlazorApp.Client.DependencyInjection).Assembly);
+    .AddAdditionalAssemblies(typeof(BlazorApp.Client.DependencyInjection).Assembly)
+    .AllowAnonymous();
 
 app.Run();

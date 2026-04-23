@@ -25,7 +25,14 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
         _dbContext = context;
     }
 
-    public async Task<(IEnumerable<Order> Items, int Total)> GetByFilterAsync(string? status = null, int? page = null, int? pageSize = null, CancellationToken cancellationToken = default)
+    public async Task<(IEnumerable<Order> Items, int Total)> GetByFilterAsync(
+        string? status = null, 
+        string? searchTerm = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        int? page = null, 
+        int? pageSize = null, 
+        CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Orders
             .AsNoTracking()
@@ -35,6 +42,26 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
 
         if (!string.IsNullOrEmpty(status))
             query = query.Where(o => o.Status == status);
+
+        if (startDate.HasValue)
+            query = query.Where(o => o.CreatedAt >= startDate.Value);
+
+        if (endDate.HasValue)
+            query = query.Where(o => o.CreatedAt <= endDate.Value);
+
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            var term = searchTerm.ToLower();
+            
+            // Try to match by ID if numeric
+            bool isIdSearch = long.TryParse(searchTerm, out var idSearch);
+
+            query = query.Where(o => 
+                (isIdSearch && o.Id == idSearch) ||
+                o.OrderNumber.ToLower().Contains(term) ||
+                o.CustomerName.ToLower().Contains(term) ||
+                o.CustomerEmail.ToLower().Contains(term));
+        }
 
         var total = await query.CountAsync(cancellationToken);
 

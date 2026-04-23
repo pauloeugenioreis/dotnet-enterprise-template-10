@@ -56,6 +56,17 @@ public record UpdateOrderStatusDto(
 );
 
 /// <summary>
+/// DTO for updating an existing order
+/// </summary>
+public record UpdateOrderRequest
+{
+    public required string CustomerName { get; init; }
+    public required string Status { get; init; }
+    public string? ShippingAddress { get; init; }
+    public string? Notes { get; init; }
+}
+
+/// <summary>
 /// Response DTO for order with calculated totals
 /// </summary>
 public record OrderResponseDto

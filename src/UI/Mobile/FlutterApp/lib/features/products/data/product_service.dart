@@ -2,24 +2,39 @@ import '../../../core/network/api_client.dart';
 import '../../../shared/models/api_models.dart';
 
 abstract class IProductService {
-  Future<PagedResponse<OrderResponse>> getProducts({int page = 1, int pageSize = 10});
+  Future<PagedResponse<ProductResponse>> getProducts({
+    int page = 1,
+    int pageSize = 10,
+    String? searchTerm,
+    bool? isActive,
+  });
 }
 
-class ProductService {
+class ProductService implements IProductService {
   final ApiClient _client;
 
   ProductService(this._client);
 
-  Future<PagedResponse<OrderResponse>> getProducts({int page = 1, int pageSize = 10}) async {
+  @override
+  Future<PagedResponse<ProductResponse>> getProducts({
+    int page = 1,
+    int pageSize = 10,
+    String? searchTerm,
+    bool? isActive,
+  }) async {
     final response = await _client.dio.get(
       '/api/products',
-      queryParameters: {'page': page, 'pageSize': pageSize},
+      queryParameters: {
+        'page': page,
+        'pageSize': pageSize,
+        if (searchTerm != null && searchTerm.isNotEmpty) 'searchTerm': searchTerm,
+        if (isActive != null) 'isActive': isActive,
+      },
     );
-    // Nota: O mapeamento real usaria ProductResponse.fromJson, 
-    // mas aqui seguimos a estrutura do PagedResponse.
-    return PagedResponse<OrderResponse>(
+
+    return PagedResponse<ProductResponse>(
       items: (response.data['items'] as List)
-          .map((e) => OrderResponse.fromJson(e as Map<String, dynamic>))
+          .map((e) => ProductResponse.fromJson(e as Map<String, dynamic>))
           .toList(),
       totalCount: response.data['totalCount'],
       page: response.data['page'],

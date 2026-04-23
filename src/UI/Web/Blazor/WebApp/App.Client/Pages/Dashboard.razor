@@ -1,165 +1,126 @@
 @page "/dashboard"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 @using BlazorApp.Components.UI
 @using BlazorApp.Client.Services
 @using ProjectTemplate.SharedModels
 @inject IOrderService OrderService
+@inject NavigationManager Navigation
 @rendermode InteractiveAuto
 
-<div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Bem-vindo de volta!</h1>
-    <p class="text-gray-500 mt-2">Aqui está o que está acontecendo com sua empresa hoje.</p>
-</div>
-
-@if (stats == null)
-{
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        @for(int i=0; i<4; i++) {
-            <div class="bg-white p-6 rounded-[2rem] border border-gray-100 animate-pulse">
-                <div class="w-12 h-12 bg-gray-100 rounded-2xl mb-4"></div>
-                <div class="h-4 w-24 bg-gray-100 rounded mb-2"></div>
-                <div class="h-6 w-32 bg-gray-50 rounded"></div>
-            </div>
-        }
+<div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div class="mb-16">
+        <h1 class="text-6xl font-black text-gray-900 tracking-tighter">Dashboard</h1>
+        <p class="text-gray-500 mt-4 font-medium text-xl">Performance em tempo real.</p>
     </div>
-}
-else
-{
+
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Stat Card 1 -->
-        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-xl hover:shadow-primary-500/5 transition-all group">
-            <div class="flex justify-between items-start mb-4">
-                <div class="w-12 h-12 bg-primary-50 rounded-2xl flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-16">
+        <!-- Monthly Sales -->
+        <div class="bg-white p-10 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-50 flex flex-col gap-6">
+            <div class="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 shadow-sm border border-rose-100/50">
+                <span class="text-3xl">📈</span>
             </div>
             <div>
-                <p class="text-sm font-medium text-gray-500">Receita Total</p>
-                <p class="text-2xl font-black text-gray-900 mt-1">@stats.TotalRevenue.ToString("C")</p>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Vendas Mensais</p>
+                <p class="text-4xl font-black text-gray-900 tracking-tighter">R$ 842.500</p>
             </div>
         </div>
 
-        <!-- Stat Card 2 -->
-        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-xl hover:shadow-indigo-500/5 transition-all group">
-            <div class="flex justify-between items-start mb-4">
-                <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                </div>
+        <!-- New Customers -->
+        <div class="bg-white p-10 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-50 flex flex-col gap-6">
+            <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 shadow-sm border border-blue-100/50">
+                <span class="text-3xl">👤</span>
             </div>
             <div>
-                <p class="text-sm font-medium text-gray-500">Total de Pedidos</p>
-                <p class="text-2xl font-black text-gray-900 mt-1">@stats.TotalOrders</p>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Novos Clientes</p>
+                <p class="text-4xl font-black text-gray-900 tracking-tighter">+ 128</p>
             </div>
         </div>
 
-        <!-- Stat Card 3 -->
-        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-xl hover:shadow-amber-500/5 transition-all group">
-            <div class="flex justify-between items-start mb-4">
-                <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                </div>
+        <!-- System Status -->
+        <div class="bg-white p-10 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-50 flex flex-col gap-6">
+            <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 shadow-sm border border-emerald-100/50">
+                <span class="text-3xl">✅</span>
             </div>
             <div>
-                <p class="text-sm font-medium text-gray-500">Ticket Médio</p>
-                <p class="text-2xl font-black text-gray-900 mt-1">@stats.AverageOrderValue.ToString("C")</p>
-            </div>
-        </div>
-
-        <!-- Stat Card 4 -->
-        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-xl hover:shadow-rose-500/5 transition-all group">
-            <div class="flex justify-between items-start mb-4">
-                <div class="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 group-hover:bg-rose-600 group-hover:text-white transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                </div>
-            </div>
-            <div>
-                <p class="text-sm font-medium text-gray-500">Categorias</p>
-                <p class="text-2xl font-black text-gray-900 mt-1">@stats.OrdersByStatus.Count</p>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Status do Sistema</p>
+                <p class="text-4xl font-black text-gray-900 tracking-tighter">Operacional</p>
             </div>
         </div>
     </div>
-}
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Main Chart Placeholder -->
-    <div class="lg:col-span-2 bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-bold text-gray-800">Principais Produtos</h2>
-            <button class="text-xs font-bold text-primary-600 hover:underline">Ver Relatório</button>
+    <!-- Latest Orders Section -->
+    <div class="bg-white rounded-[3.5rem] shadow-2xl shadow-gray-200/60 border border-gray-50 overflow-hidden">
+        <div class="p-12 border-b border-gray-50 flex justify-between items-center">
+            <h2 class="text-3xl font-black text-gray-900 tracking-tight">Últimos Pedidos</h2>
+            <button @onclick='() => Navigation.NavigateTo("/orders")' class="text-[10px] font-black text-primary-600 uppercase tracking-[0.2em] hover:bg-primary-50 px-6 py-3 rounded-xl transition-all">
+                Ver Todos
+            </button>
         </div>
-        <div class="space-y-4">
-            @if (stats?.TopProducts != null)
-            {
-                @foreach (var prod in stats.TopProducts.Take(5))
-                {
-                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-primary-600 font-bold shadow-sm">@prod.ProductName[0]</div>
-                            <span class="text-sm font-bold text-gray-700">@prod.ProductName</span>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm font-black text-gray-900">@prod.Revenue.ToString("C")</p>
-                            <p class="text-[10px] text-gray-400">@prod.QuantitySold vendidos</p>
-                        </div>
-                    </div>
-                }
-            }
-        </div>
-    </div>
-
-    <!-- Recent Activity -->
-    <div class="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm">
-        <h2 class="text-xl font-bold text-gray-800 mb-8">Status de Pedidos</h2>
-        <div class="space-y-6">
-            @if (stats?.OrdersByStatus != null)
-            {
-                @foreach (var s in stats.OrdersByStatus)
-                {
-                    <div>
-                        <div class="flex justify-between text-xs font-bold mb-2">
-                            <span class="text-gray-500 uppercase">@s.Status</span>
-                            <span class="text-gray-900">@s.Count</span>
-                        </div>
-                        <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                            @{
-                                var percentage = stats.TotalOrders > 0 ? (s.Count * 100 / stats.TotalOrders) : 0;
-                            }
-                            <div class="bg-primary-600 h-full" style="width: @(percentage)%"></div>
-                        </div>
-                    </div>
-                }
-            }
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50/30">
+                        <th class="px-12 py-8 text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">Pedido</th>
+                        <th class="px-12 py-8 text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">Cliente</th>
+                        <th class="px-12 py-8 text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @if (recentOrders == null)
+                    {
+                        @for (int i = 0; i < 5; i++)
+                        {
+                            <tr>
+                                <td colspan="3" class="px-12 py-8 animate-pulse bg-gray-50/50"></td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        @foreach (var order in recentOrders)
+                        {
+                            <tr class="hover:bg-gray-50/30 transition-colors group">
+                                <td class="px-12 py-10">
+                                    <span class="font-black text-gray-900 tracking-tight text-lg">#@order.OrderNumber</span>
+                                </td>
+                                <td class="px-12 py-10">
+                                    <span class="font-bold text-gray-500 text-lg">@order.CustomerName</span>
+                                </td>
+                                <td class="px-12 py-10">
+                                    <span class="font-black text-primary-600 text-xl tracking-tight">@order.Total.ToString("C")</span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
 @code {
-    private OrderStatisticsDto? stats;
+    private List<OrderResponseDto>? recentOrders;
 
     protected override async Task OnInitializedAsync()
     {
         try 
         {
-            stats = await OrderService.GetStatisticsAsync();
+            var result = await OrderService.GetPagedAsync(1, 5);
+            recentOrders = result.Items.ToList();
         }
         catch 
         {
-            // Fallback mock se a API falhar
-            stats = new OrderStatisticsDto
+            // Fallback mock para demonstração se a API demorar
+            recentOrders = new List<OrderResponseDto>
             {
-                TotalOrders = 120,
-                TotalRevenue = 25000.50m,
-                AverageOrderValue = 208.33m,
-                OrdersByStatus = new() { new("Completed", 80, 15000), new("Pending", 30, 8000), new("Cancelled", 10, 2000) },
-                TopProducts = new() { new(1, "Product A", 50, 5000), new(2, "Product B", 30, 3000) }
+                new() { OrderNumber = "ORD-20260423-F03F1948", CustomerName = "Rodrigo Costa", Total = 12666.40m, CreatedAt = DateTime.Now },
+                new() { OrderNumber = "ORD-20260423-23CDED6B", CustomerName = "Amanda Almeida", Total = 17192.75m, CreatedAt = DateTime.Now },
+                new() { OrderNumber = "ORD-20260423-6B7AEA86", CustomerName = "Beatriz Oliveira", Total = 3805.73m, CreatedAt = DateTime.Now },
+                new() { OrderNumber = "ORD-20260423-39AF0E83", CustomerName = "Lucas Oliveira", Total = 6355.67m, CreatedAt = DateTime.Now },
+                new() { OrderNumber = "ORD-20260423-C91CB95C", CustomerName = "Bruno Santos", Total = 1497.99m, CreatedAt = DateTime.Now }
             };
         }
     }

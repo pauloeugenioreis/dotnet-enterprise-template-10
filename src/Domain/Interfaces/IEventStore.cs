@@ -20,6 +20,17 @@ public interface IEventStore
         CancellationToken cancellationToken = default) where TEvent : class;
 
     /// <summary>
+    /// Append multiple events to the event stream
+    /// </summary>
+    Task AppendEventsAsync(
+        string aggregateType,
+        string aggregateId,
+        IEnumerable<object> events,
+        string? userId = null,
+        Dictionary<string, string>? metadata = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Get all events for a specific aggregate
     /// </summary>
     Task<List<DomainEvent>> GetEventsAsync(
@@ -56,27 +67,6 @@ public interface IEventStore
         int toVersion,
         CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Get all events for a specific entity type (paginated)
-    /// </summary>
-    Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByTypeAsync(
-        string aggregateType,
-        DateTime? from = null,
-        DateTime? toDate = null,
-        int? limit = null,
-        int? offset = null,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Get events by user who triggered them
-    /// </summary>
-    Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByUserAsync(
-        string userId,
-        DateTime? from = null,
-        DateTime? toDate = null,
-        int? limit = null,
-        int? offset = null,
-        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get latest version number for an aggregate
@@ -110,6 +100,19 @@ public interface IEventStore
     Task<EventStatistics> GetStatisticsAsync(
         DateTime? from = null,
         DateTime? toDate = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get events by various filters (paginated)
+    /// </summary>
+    Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByFilterAsync(
+        string? aggregateType = null,
+        string? eventType = null,
+        string? userId = null,
+        DateTime? from = null,
+        DateTime? toDate = null,
+        int? limit = null,
+        int? offset = null,
         CancellationToken cancellationToken = default);
 }
 

@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ProjectTemplate.Data.Context;
 using ProjectTemplate.Domain.Entities;
+using ProjectTemplate.Domain.Events;
+using ProjectTemplate.Domain.Interfaces;
 
 namespace ProjectTemplate.Data.Seeders;
 
@@ -15,6 +17,7 @@ namespace ProjectTemplate.Data.Seeders;
 public class DbSeeder
 {
     private readonly ApplicationDbContext _context;
+    private readonly IEventStore _eventStore;
 
     // Lists for generating realistic fake data
     private static readonly string[] FirstNames = { "João", "Maria", "Pedro", "Ana", "Lucas", "Juliana", "Carlos", "Beatriz", "Rafael", "Camila", "Fernando", "Patricia", "Rodrigo", "Amanda", "Bruno", "Mariana", "Diego", "Larissa", "Thiago", "Gabriela" };
@@ -25,9 +28,10 @@ public class DbSeeder
     private static readonly string[] Cities = { "São Paulo", "Rio de Janeiro", "Belo Horizonte", "Porto Alegre", "Curitiba", "Brasília", "Salvador", "Fortaleza", "Recife", "Manaus" };
     private static readonly string[] States = { "SP", "RJ", "MG", "RS", "PR", "DF", "BA", "CE", "PE", "AM" };
 
-    public DbSeeder(ApplicationDbContext context)
+    public DbSeeder(ApplicationDbContext context, IEventStore eventStore)
     {
         _context = context;
+        _eventStore = eventStore;
     }
 
     /// <summary>
@@ -194,6 +198,23 @@ public class DbSeeder
         await _context.Products.AddRangeAsync(products);
         await _context.SaveChangesAsync();
 
+        // Generate events for audit trail
+        foreach (var product in products)
+        {
+            var @event = new ProductCreatedEvent
+            {
+                ProductId = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Stock = product.Stock,
+                Category = product.Category,
+                IsActive = product.IsActive
+            };
+
+            await _eventStore.AppendEventAsync("Product", product.Id.ToString(), @event, "system");
+        }
+
         return products;
     }
 
@@ -258,6 +279,35 @@ public class DbSeeder
 
         await _context.Orders.AddRangeAsync(orders);
         await _context.SaveChangesAsync();
+
+        // Generate events for audit trail
+        foreach (var order in orders)
+        {
+            var @event = new OrderCreatedEvent
+            {
+                OrderId = order.Id,
+                OrderNumber = order.OrderNumber,
+                CustomerName = order.CustomerName,
+                CustomerEmail = order.CustomerEmail,
+                CustomerPhone = order.CustomerPhone,
+                ShippingAddress = order.ShippingAddress,
+                Subtotal = order.Subtotal,
+                Tax = order.Tax,
+                ShippingCost = order.ShippingCost,
+                Total = order.Total,
+                Notes = order.Notes,
+                Items = order.Items.Select(i => new OrderItemData
+                {
+                    ProductId = i.ProductId,
+                    ProductName = i.ProductName,
+                    Quantity = i.Quantity,
+                    UnitPrice = i.UnitPrice,
+                    Subtotal = i.Subtotal
+                }).ToList()
+            };
+
+            await _eventStore.AppendEventAsync("Order", order.Id.ToString(), @event, "system");
+        }
 
         return orders.Count;
     }

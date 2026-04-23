@@ -33,12 +33,21 @@
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="App.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <HeadOutlet @rendermode="InteractiveAuto" />
+    <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
 <body class="bg-gray-50 text-gray-900 antialiased">
-    <Routes @rendermode="InteractiveAuto" />
+    <Routes @rendermode="InteractiveServer" />
     <ReconnectModal />
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script>
+        window.exportToExcel = (filename, data) => {
+            const worksheet = XLSX.utils.json_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Dados");
+            XLSX.writeFile(workbook, filename);
+        }
+    </script>
     <script src="_framework/blazor.web.js"></script>
 </body>
 

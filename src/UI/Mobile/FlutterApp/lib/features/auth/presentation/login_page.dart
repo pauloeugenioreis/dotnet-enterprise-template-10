@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
-import '../data/auth_service.dart';
 import '../../dashboard/presentation/dashboard_page.dart';
 import '../../../shared/models/api_models.dart';
+import '../../../shared/dependency_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,8 +13,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController(text: 'admin@projecttemplate.com');
+  final _passwordCtrl = TextEditingController(text: 'Admin@2026!Secure');
   bool _loading = false;
   String? _errorMessage;
   bool _obscurePassword = true;
@@ -35,8 +35,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final service = context.findAncestorWidgetOfExactType<AuthServiceProvider>()?.service
-          ?? AuthServiceProvider.of(context);
+      final service = DependencyProvider.of(context).authService;
 
       final result = await service.login(
         LoginRequest(
@@ -234,23 +233,5 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-/// Provider simples de AuthService — em produção usar Provider/Riverpod.
-class AuthServiceProvider extends InheritedWidget {
-  final IAuthService service;
-
-  const AuthServiceProvider({
-    super.key,
-    required this.service,
-    required super.child,
-  });
-
-  static IAuthService of(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<AuthServiceProvider>()!
-        .service;
   }
-
-  @override
-  bool updateShouldNotify(AuthServiceProvider oldWidget) =>
-      service != oldWidget.service;
 }

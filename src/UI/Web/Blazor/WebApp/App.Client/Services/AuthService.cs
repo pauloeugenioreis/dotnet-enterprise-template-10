@@ -9,14 +9,14 @@ public interface IAuthService
     Task<bool> RegisterAsync(RegisterDto request);
 }
 
-public class AuthService(IHttpClientFactory httpClientFactory) 
-    : BaseService(httpClientFactory), IAuthService
+public class AuthService(IHttpClientFactory httpClientFactory, LocalStorageService localStorage) 
+    : BaseService(httpClientFactory, localStorage, "api/v1/auth"), IAuthService
 {
     public async Task<AuthResponseDto?> LoginAsync(LoginDto request)
     {
         try 
         {
-            return await PostAsync<LoginDto, AuthResponseDto>("api/v1/auth/login", request);
+            return await PostAsync<LoginDto, AuthResponseDto>($"{ResourcePath}/login", request);
         }
         catch 
         {
@@ -28,7 +28,7 @@ public class AuthService(IHttpClientFactory httpClientFactory)
     {
         try
         {
-            await PostAsync<RegisterDto, object>("api/v1/auth/register", request);
+            await PostAsync<RegisterDto, object>($"{ResourcePath}/register", request);
             return true;
         }
         catch

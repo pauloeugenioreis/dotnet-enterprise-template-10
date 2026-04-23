@@ -34,11 +34,14 @@ public class OrderController : ApiControllerBase
     [ProducesResponseType(typeof(PagedResponse<OrderResponseDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllAsync(
         [FromQuery] string? status,
+        [FromQuery] string? searchTerm,
+        [FromQuery] DateTime? startDate,
+        [FromQuery] DateTime? endDate,
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
         CancellationToken cancellationToken)
     {
-        var (items, total) = await _orderService.GetAllOrderDetailsAsync(status, page, pageSize, cancellationToken);
+        var (items, total) = await _orderService.GetAllOrderDetailsAsync(status, searchTerm, startDate, endDate, page, pageSize, cancellationToken);
 
         if (page.HasValue && pageSize.HasValue)
             return HandlePagedResult(items, total, page.Value, pageSize.Value);
@@ -114,6 +117,32 @@ public class OrderController : ApiControllerBase
     }
 
     /// <summary>
+    /// Update existing order
+    /// </summary>
+    [HttpPut("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateAsync(
+        long id,
+        [FromBody] UpdateOrderRequest dto,
+        CancellationToken cancellationToken)
+    {
+        // For simplicity, we'll map the DTO to the entity here if the service doesn't have a direct DTO method
+        // But since we want to follow Clean Architecture, we should check if IOrderService has UpdateAsync
+        // It inherits from IService<Order>, so we can fetch and update
+        var order = await _orderService.GetByIdAsync(id, cancellationToken);
+        if (order == null) return NotFound();
+
+        order.CustomerName = dto.CustomerName;
+        order.Status = dto.Status;
+        if (dto.ShippingAddress != null) order.ShippingAddress = dto.ShippingAddress;
+        if (dto.Notes != null) order.Notes = dto.Notes;
+
+        await _orderService.UpdateAsync(id, order, cancellationToken);
+        return NoContent();
+    }
+
+    /// <summary>
     /// Cancel order
     /// </summary>
     [HttpPost("{id}/cancel")]
@@ -139,13 +168,16 @@ public class OrderController : ApiControllerBase
     [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
     public async Task<ActionResult> ExportToExcelAsync(
         [FromQuery] string? status,
+        [FromQuery] string? searchTerm,
+        [FromQuery] DateTime? startDate,
+        [FromQuery] DateTime? endDate,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Generating Excel report for orders");
 
         var stopwatch = Stopwatch.StartNew();
 
-        var (orders, _) = await _orderService.GetAllOrderDetailsAsync(status, cancellationToken: cancellationToken);
+        var (orders, _) = await _orderService.GetAllOrderDetailsAsync(status, searchTerm, startDate, endDate, cancellationToken: cancellationToken);
 
         var results = orders.ToList();
 

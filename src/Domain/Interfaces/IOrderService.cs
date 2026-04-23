@@ -38,7 +38,14 @@ public interface IOrderService : IService<Order>
     /// Get all orders with details, with optional pagination.
     /// When page/pageSize are null, returns all records.
     /// </summary>
-    Task<(IEnumerable<OrderResponseDto> Items, int Total)> GetAllOrderDetailsAsync(string? status = null, int? page = null, int? pageSize = null, CancellationToken cancellationToken = default);
+    Task<(IEnumerable<OrderResponseDto> Items, int Total)> GetAllOrderDetailsAsync(
+        string? status = null, 
+        string? searchTerm = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        int? page = null, 
+        int? pageSize = null, 
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Calculate order totals

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http;
 using BlazorApp.Client.Services.Base;
 using BlazorApp.Client.Services;
 using BlazorApp.Client.Auth;
@@ -16,9 +17,17 @@ public static class DependencyInjection
         services.AddScoped<LoadingService>();
         services.AddTransient<LoadingHandler>();
 
-        services.AddHttpClient("ApiGateway", client => 
+        var httpClientBuilder = services.AddHttpClient("ApiGateway", client => 
             client.BaseAddress = new Uri(apiUrl))
             .AddHttpMessageHandler<LoadingHandler>();
+
+        if (!OperatingSystem.IsBrowser())
+        {
+            httpClientBuilder.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+            });
+        }
 
         services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ApiGateway"));
 

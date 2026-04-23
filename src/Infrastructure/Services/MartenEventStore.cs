@@ -33,11 +33,23 @@ public class MartenEventStore : IEventStore
         Dictionary<string, string>? metadata = null,
         CancellationToken cancellationToken = default) where TEvent : class
     {
+        await AppendEventsAsync(aggregateType, aggregateId, new[] { eventData }, userId, metadata, cancellationToken);
+    }
+
+    public async Task AppendEventsAsync(
+        string aggregateType,
+        string aggregateId,
+        IEnumerable<object> events,
+        string? userId = null,
+        Dictionary<string, string>? metadata = null,
+        CancellationToken cancellationToken = default)
+    {
         await using var session = _documentStore.LightweightSession();
 
         var streamId = $"{aggregateType}-{aggregateId}";
 
-        session.Events.Append(streamId, new object[] { eventData });
+        // Use reflection or better yet, just pass the array to Marten
+        session.Events.Append(streamId, events.ToArray());
 
         await session.SaveChangesAsync(cancellationToken);
     }
@@ -159,8 +171,10 @@ public class MartenEventStore : IEventStore
         return (items, totalCount);
     }
 
-    public async Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByUserAsync(
-        string userId,
+    public async Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByFilterAsync(
+        string? aggregateType = null,
+        string? eventType = null,
+        string? userId = null,
         DateTime? from = null,
         DateTime? toDate = null,
         int? limit = null,
@@ -169,9 +183,13 @@ public class MartenEventStore : IEventStore
     {
         await using var session = _documentStore.QuerySession();
 
-        var query = session.Events.QueryAllRawEvents()
-            .Where(e => ((DomainEvent)e.Data).UserId == userId)
-            .AsQueryable();
+        var query = session.Events.QueryAllRawEvents().AsQueryable();
+
+        if (!string.IsNullOrEmpty(aggregateType))
+            query = query.Where(e => e.StreamKey != null && e.StreamKey.StartsWith(aggregateType + "-"));
+
+        if (!string.IsNullOrEmpty(eventType))
+            query = query.Where(e => e.EventTypeName == eventType);
 
         if (from.HasValue)
             query = query.Where(e => e.Timestamp >= from.Value);
@@ -181,19 +199,24 @@ public class MartenEventStore : IEventStore
 
         query = query.OrderByDescending(e => e.Timestamp);
 
-        var totalCount = await query.CountAsync(cancellationToken);
-
-        if (offset.HasValue && offset.Value > 0)
-            query = query.Skip(offset.Value);
-
-        if (limit.HasValue)
-            query = query.Take(limit.Value);
-
+        // Fetch all candidates to filter by userId if needed
+        // Marten doesn't support deep filtering in JSON via QueryAllRawEvents easily without specialized mappings
         var events = await query.ToListAsync(cancellationToken);
 
-        var items = events
+        var domainEvents = events
             .Select(e => ConvertToTypedEvent(e.Data, e))
-            .OfType<DomainEvent>()
+            .OfType<DomainEvent>();
+
+        if (!string.IsNullOrEmpty(userId))
+        {
+            domainEvents = domainEvents.Where(e => e.UserId == userId);
+        }
+
+        var totalCount = domainEvents.Count();
+
+        var items = domainEvents
+            .Skip(offset ?? 0)
+            .Take(limit ?? 100)
             .ToList();
 
         return (items, totalCount);

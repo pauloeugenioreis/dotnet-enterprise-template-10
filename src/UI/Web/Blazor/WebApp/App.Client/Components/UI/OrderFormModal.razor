@@ -1,0 +1,163 @@
+@using ProjectTemplate.SharedModels
+@using BlazorApp.Client.Services
+@inject IProductService ProductService
+
+@if (IsOpen)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-end">
+        <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" @onclick="Close"></div>
+        
+        <div class="relative w-full max-w-2xl h-full bg-white shadow-2xl animate-in slide-in-from-right duration-500 flex flex-col">
+            <header class="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <div>
+                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">
+                        @(IsEdit ? $"Editar Pedido #{OrderNumber}" : "Novo Pedido")
+                    </h2>
+                    <p class="text-gray-500 font-medium mt-1">Preencha as informações abaixo.</p>
+                </div>
+                <button @onclick="Close" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-gray-100 text-gray-400 hover:text-rose-600 transition-all active:scale-90 shadow-sm">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-8 space-y-8">
+                <!-- Informações Básicas -->
+                <div class="space-y-6">
+                    <h3 class="text-[10px] font-black text-primary-600 uppercase tracking-[0.2em]">Dados do Cliente</h3>
+                    
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Nome do Cliente</label>
+                            <input type="text" @bind="customerName" class="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-600/20 outline-none font-bold text-gray-900" placeholder="Ex: João Silva" />
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Status</label>
+                            <select @bind="status" class="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-600/20 outline-none font-bold text-gray-900">
+                                <option value="Pending">Pendente</option>
+                                <option value="Shipped">Enviado</option>
+                                <option value="Delivered">Entregue</option>
+                                <option value="Cancelled">Cancelado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-50" />
+
+                <!-- Itens do Pedido (Simulação simplificada) -->
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-[10px] font-black text-primary-600 uppercase tracking-[0.2em]">Itens do Pedido</h3>
+                        <span class="px-4 py-1 bg-primary-50 text-primary-600 rounded-full text-[10px] font-black uppercase">Total: @total.ToString("C")</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        @foreach (var item in items)
+                        {
+                            <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl group transition-all hover:bg-gray-100">
+                                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-xl shadow-sm">📦</div>
+                                <div class="flex-1">
+                                    <p class="font-bold text-gray-900">Produto Exemplo</p>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">SKU: PROD-001</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <button @onclick="() => UpdateQty(item, -1)" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white text-gray-400 hover:text-primary-600 shadow-sm transition-all">-</button>
+                                    <span class="font-black text-gray-900 w-8 text-center">@item.Quantity</span>
+                                    <button @onclick="() => UpdateQty(item, 1)" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white text-gray-400 hover:text-primary-600 shadow-sm transition-all">+</button>
+                                </div>
+                                <div class="text-right min-w-[80px]">
+                                    <p class="font-black text-gray-900">@((item.UnitPrice * item.Quantity).ToString("C"))</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <footer class="p-8 border-t border-gray-100 bg-gray-50/50 flex gap-4">
+                <button @onclick="Close" class="flex-1 py-5 rounded-2xl bg-white border border-gray-100 text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] hover:bg-gray-100 transition-all active:scale-95">
+                    Cancelar
+                </button>
+                <button @onclick="Save" class="flex-[2] py-5 rounded-2xl bg-primary-600 text-[11px] font-black text-white uppercase tracking-[0.2em] hover:bg-primary-700 shadow-lg shadow-primary-600/20 transition-all active:scale-95">
+                    @(IsEdit ? "Salvar Alterações" : "Criar Pedido")
+                </button>
+            </footer>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public OrderResponseDto? Order { get; set; }
+    [Parameter] public string? OrderNumber { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<OrderResponseDto> OnSave { get; set; }
+
+    private string customerName = "";
+    private string status = "Pending";
+    private decimal total = 0;
+    private List<OrderItemResponseDto> items = new();
+
+    protected override void OnParametersSet()
+    {
+        if (IsOpen)
+        {
+            if (IsEdit && Order != null)
+            {
+                customerName = Order.CustomerName;
+                status = Order.Status;
+                items = Order.Items?.ToList() ?? new();
+                CalculateTotal();
+            }
+            else
+            {
+                Reset();
+            }
+        }
+    }
+
+    private void Reset()
+    {
+        customerName = "";
+        status = "Pending";
+        total = 0;
+        items = new List<OrderItemResponseDto> 
+        { 
+            new OrderItemResponseDto { ProductName = "Produto Exemplo", Quantity = 1, UnitPrice = 150.00m } 
+        };
+        CalculateTotal();
+    }
+
+    private void CalculateTotal()
+    {
+        total = items.Sum(i => i.UnitPrice * i.Quantity);
+    }
+
+    private void UpdateQty(OrderItemResponseDto item, int change)
+    {
+        var index = items.IndexOf(item);
+        if (index != -1)
+        {
+            items[index] = item with { Quantity = Math.Max(1, item.Quantity + change) };
+            CalculateTotal();
+        }
+    }
+
+    private async Task Close() => await OnClose.InvokeAsync();
+
+    private async Task Save()
+    {
+        // Usamos 'with' para criar uma nova instância do record com os dados atualizados
+        var savedOrder = (Order ?? new OrderResponseDto()) with 
+        {
+            CustomerName = customerName,
+            Status = status,
+            Total = total,
+            Items = items
+        };
+        
+        await OnSave.InvokeAsync(savedOrder);
+        await Close();
+    }
+}

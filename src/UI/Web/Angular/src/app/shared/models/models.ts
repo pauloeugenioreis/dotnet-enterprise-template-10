@@ -10,20 +10,40 @@ export interface PagedResponse<T> {
   hasPreviousPage: boolean;
 }
 
-export interface AuthResponseDto {
-  token: string;
-  userId: string;
+export interface UserDto {
+  id: string | number;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  profileImageUrl: string | null;
+  roles: string[];
+  createdAt: string;
+}
+
+export interface AuthResponseDto {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
+  user: UserDto;
+}
+
+export interface OrderItemDto {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
 }
 
 export interface OrderResponseDto {
   id: string;
   orderNumber: string;
   customerName: string;
+  customerEmail?: string;
+  shippingAddress?: string;
   status: string;
   total: number;
   createdAt: string;
+  items?: OrderItemDto[];
 }
 
 export interface OrderStatisticsDto {
@@ -41,4 +61,13 @@ export interface DomainEvent {
   occurredOn: string;
   userId: string;
   version: number;
+}
+
+export interface ProductResponseDto {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+  isActive: boolean;
 }

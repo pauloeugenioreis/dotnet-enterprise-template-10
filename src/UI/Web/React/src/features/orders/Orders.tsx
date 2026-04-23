@@ -2,9 +2,15 @@ import { useState } from 'react';
 import { useOrders } from './useOrders';
 import { useProducts } from '../products/useProducts';
 import Modal from '../../components/Modal';
+import Pagination from '../../components/Pagination';
+import Dropdown from '../../components/Dropdown';
 
 export default function Orders() {
-  const { data, isLoading, getStatusColor, page, setPage, handleCancel, handleExport, createOrder } = useOrders();
+  const { 
+    data, isLoading, getStatusColor, page, setPage, pageSize, setPageSize, 
+    handleCancel, handleExport, createOrder,
+    status, setStatus, searchTerm, setSearchTerm, startDate, setStartDate, endDate, setEndDate
+  } = useOrders();
   const { data: productsData } = useProducts();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -99,6 +105,75 @@ export default function Orders() {
         </div>
       </header>
 
+      {/* Filter Bar */}
+      <div className="grid grid-cols-12 gap-6 items-center">
+        <div className="col-span-3 relative group">
+          <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+            <svg className="w-5 h-5 text-gray-400 group-focus-within:text-primary-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input 
+            type="text"
+            placeholder="Buscar pedido..."
+            className="w-full pl-16 pr-8 py-5 bg-white border-none rounded-3xl shadow-xl shadow-gray-100/50 focus:ring-2 focus:ring-primary-600/20 outline-none transition-all font-bold text-gray-900 placeholder:text-gray-300"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className="col-span-4 flex bg-white p-2 rounded-3xl shadow-xl shadow-gray-100/50 gap-2 items-center">
+          <div className="flex-1 px-4 py-1">
+            <label className="block text-[8px] font-black uppercase text-gray-400 leading-none mb-1">De</label>
+            <input 
+              type="date"
+              className="w-full bg-transparent border-none outline-none font-bold text-xs text-gray-900 cursor-pointer"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+          </div>
+          <div className="w-px h-8 bg-gray-100"></div>
+          <div className="flex-1 px-4 py-1">
+            <label className="block text-[8px] font-black uppercase text-gray-400 leading-none mb-1">Até</label>
+            <input 
+              type="date"
+              className="w-full bg-transparent border-none outline-none font-bold text-xs text-gray-900 cursor-pointer"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="col-span-3">
+          <Dropdown 
+            value={status}
+            onChange={setStatus}
+            options={[
+              { label: 'Todos os Status', value: '' },
+              { label: 'Pendente', value: 'Pending' },
+              { label: 'Enviado', value: 'Shipped' },
+              { label: 'Entregue', value: 'Delivered' },
+              { label: 'Cancelado', value: 'Cancelled' }
+            ]}
+          />
+        </div>
+
+        <div className="col-span-2 flex justify-end">
+          <button 
+            onClick={() => {
+              setSearchTerm('');
+              setStatus('');
+              setStartDate('');
+              setEndDate('');
+            }}
+            className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-red-500 transition-colors flex items-center gap-2 group"
+          >
+            <span className="group-hover:rotate-90 transition-transform duration-300">✕</span>
+            Limpar
+          </button>
+        </div>
+      </div>
+
       <div className="bg-white rounded-[3rem] border border-gray-50 shadow-2xl overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead className="bg-gray-50">
@@ -154,27 +229,13 @@ export default function Orders() {
           </tbody>
         </table>
 
-        <div className="bg-gray-50 px-10 py-6 flex justify-between items-center border-t border-gray-100">
-          <p className="text-sm text-gray-500 font-bold">
-            Página <span className="text-gray-900">{page}</span> de <span className="text-gray-900">{totalPages}</span>
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="px-6 py-3 bg-white border border-gray-200 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              Anterior
-            </button>
-            <button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="px-6 py-3 bg-primary-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              Próxima
-            </button>
-          </div>
-        </div>
+        <Pagination 
+          currentPage={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
       </div>
 
       <Modal 
@@ -229,16 +290,17 @@ export default function Orders() {
               {formData.items.map((item, index) => (
                 <div key={index} className="flex gap-3 items-end">
                   <div className="flex-1">
-                    <select 
-                      className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl outline-none font-bold text-sm text-gray-900"
-                      value={item.productId}
-                      onChange={e => handleItemChange(index, 'productId', e.target.value)}
-                    >
-                      <option value="">Selecionar Produto</option>
-                      {productsData?.items.map((p: any) => (
-                        <option key={p.id} value={p.id}>{p.name} - R$ {p.price}</option>
-                      ))}
-                    </select>
+                    <Dropdown 
+                      variant="form"
+                      className="w-full"
+                      value={item.productId?.toString()}
+                      onChange={val => handleItemChange(index, 'productId', val)}
+                      placeholder="Selecionar Produto"
+                      options={productsData?.items.map((p: any) => ({
+                        label: `${p.name} - R$ ${p.price}`,
+                        value: p.id.toString()
+                      })) || []}
+                    />
                   </div>
                   <div className="w-20">
                     <input 

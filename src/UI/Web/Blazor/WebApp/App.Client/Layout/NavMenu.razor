@@ -5,73 +5,71 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
 
-<div class="flex flex-col h-full py-8 px-6">
+<div class="flex flex-col h-full py-10 px-6">
     <!-- Brand -->
-    <div class="flex items-center gap-3 px-2 mb-10 group cursor-pointer">
-        <div class="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary-200 group-hover:rotate-12 transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
+    <div class="flex items-center gap-4 px-3 mb-12 group cursor-pointer">
+        <div class="w-12 h-12 bg-primary-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-primary-500/30 group-hover:rotate-6 transition-all font-black text-2xl">
+            ET
         </div>
-        <span class="text-xl font-black text-gray-900 tracking-tight">Enterprise</span>
+        <span class="text-2xl font-black text-gray-900 tracking-tight">Enterprise</span>
     </div>
 
     <!-- Navigation Links -->
     <AuthorizeView>
         <Authorized>
-            <nav class="flex-1 space-y-2">
-                <NavLink href="" Match="NavLinkMatch.All" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all hover:bg-gray-50 text-gray-500" ActiveClass="bg-primary-50 !text-primary-600 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
+            <nav class="flex-1 space-y-3">
+                <NavLink href="dashboard" class="flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold transition-all hover:bg-gray-50 text-gray-400" ActiveClass="bg-primary-50 !text-primary-600 shadow-sm">
+                    <span class="text-xl">📊</span>
                     Dashboard
                 </NavLink>
 
-                <NavLink href="products" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all hover:bg-gray-50 text-gray-500" ActiveClass="bg-primary-50 !text-primary-600 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
+                <NavLink href="products" class="flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold transition-all hover:bg-gray-50 text-gray-400" ActiveClass="bg-primary-50 !text-primary-600 shadow-sm">
+                    <span class="text-xl">📦</span>
                     Produtos
                 </NavLink>
 
-                <NavLink href="orders" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all hover:bg-gray-50 text-gray-500" ActiveClass="bg-primary-50 !text-primary-600 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
+                <NavLink href="orders" class="flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold transition-all hover:bg-gray-50 text-gray-400" ActiveClass="bg-primary-50 !text-primary-600 shadow-sm">
+                    <span class="text-xl">🛍️</span>
                     Pedidos
                 </NavLink>
 
-                <NavLink href="reviews" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all hover:bg-gray-50 text-gray-500" ActiveClass="bg-primary-50 !text-primary-600 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.382-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                    </svg>
-                    Avaliações
+                <NavLink href="audit" class="flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold transition-all hover:bg-gray-50 text-gray-400" ActiveClass="bg-primary-50 !text-primary-600 shadow-sm">
+                    <span class="text-xl">🛡️</span>
+                    Auditoria
                 </NavLink>
 
-                <NavLink href="documents" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all hover:bg-gray-50 text-gray-500" ActiveClass="bg-primary-50 !text-primary-600 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
+                <NavLink href="documents" class="flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold transition-all hover:bg-gray-50 text-gray-400" ActiveClass="bg-primary-50 !text-primary-600 shadow-sm">
+                    <span class="text-xl">📄</span>
                     Documentos
                 </NavLink>
             </nav>
 
-            <!-- Bottom Actions -->
-            <div class="mt-auto space-y-4 pt-8 border-t border-gray-100">
-                <button @onclick="HandleLogout" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Sair do Sistema
-                </button>
+            <!-- Bottom Profile Card -->
+            <div class="mt-auto pt-8 border-t border-gray-50">
+                <div class="p-5 bg-gray-50/50 rounded-[2rem] border border-gray-100">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center text-primary-600 font-black text-lg">
+                            @context.User.Identity?.Name?[0]
+                        </div>
+                        <div class="flex-1 overflow-hidden">
+                            <p class="text-sm font-black text-gray-900 truncate">@context.User.Identity?.Name</p>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Administrador</p>
+                        </div>
+                    </div>
+                    <button 
+                        @onclick="HandleLogout" 
+                        class="w-full py-3 px-4 bg-white hover:bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl border border-gray-100 transition-all flex items-center justify-center gap-2"
+                    >
+                        <span>🚪</span>
+                        Sair
+                    </button>
+                </div>
             </div>
         </Authorized>
         <NotAuthorized>
             <nav class="flex-1 space-y-2">
                 <NavLink href="login" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all hover:bg-gray-50 text-gray-500" ActiveClass="bg-primary-50 !text-primary-600 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
+                    <span>🔑</span>
                     Fazer Login
                 </NavLink>
             </nav>

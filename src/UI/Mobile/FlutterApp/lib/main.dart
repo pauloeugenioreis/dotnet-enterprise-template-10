@@ -5,21 +5,28 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/data/auth_service.dart';
 import 'features/auth/presentation/login_page.dart';
 import 'features/dashboard/presentation/dashboard_page.dart';
+import 'features/products/data/product_service.dart';
+import 'features/orders/data/order_service.dart';
+import 'shared/dependency_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ─── Inicialização das Dependências ──────────────────────────
+  // ─── Dependências ──────────────────────────────────────────────
   const storage = FlutterSecureStorage();
   final apiClient = ApiClient(storage: storage);
+  
   final authService = AuthService(apiClient);
+  final productService = ProductService(apiClient);
+  final orderService = OrderService(apiClient);
 
-  // Verificar se já está autenticado
   final isLoggedIn = await authService.isAuthenticated();
 
   runApp(
-    AuthServiceProvider(
-      service: authService,
+    DependencyProvider(
+      authService: authService,
+      productService: productService,
+      orderService: orderService,
       child: MyApp(initialPage: isLoggedIn ? const DashboardPage() : const LoginPage()),
     ),
   );

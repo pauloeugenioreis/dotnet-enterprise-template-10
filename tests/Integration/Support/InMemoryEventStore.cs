@@ -39,8 +39,18 @@ internal sealed class InMemoryEventStore : IEventStore
         Dictionary<string, string>? metadata = null,
         CancellationToken cancellationToken = default) where TEvent : class
     {
+        return AppendEventsAsync(aggregateType, aggregateId, new[] { eventData }, userId, metadata, cancellationToken);
+    }
+
+    public Task AppendEventsAsync(
+        string aggregateType,
+        string aggregateId,
+        IEnumerable<object> events,
+        string? userId = null,
+        Dictionary<string, string>? metadata = null,
+        CancellationToken cancellationToken = default)
+    {
         var timestamp = DateTime.UtcNow;
-        DomainEvent domainEvent;
 
         lock (_lock)
         {
@@ -50,22 +60,25 @@ internal sealed class InMemoryEventStore : IEventStore
                 .DefaultIfEmpty(0)
                 .Max() + 1;
 
-            domainEvent = new DomainEvent
+            foreach (var eventData in events)
             {
-                Id = Interlocked.Increment(ref _eventSequence),
-                EventId = Guid.NewGuid(),
-                AggregateType = aggregateType,
-                AggregateId = aggregateId,
-                EventType = eventData?.GetType().Name ?? typeof(TEvent).Name,
-                EventData = JsonSerializer.Serialize(eventData),
-                Timestamp = timestamp,
-                OccurredOn = timestamp,
-                Version = nextVersion,
-                UserId = userId,
-                Metadata = metadata ?? new()
-            };
+                var domainEvent = new DomainEvent
+                {
+                    Id = Interlocked.Increment(ref _eventSequence),
+                    EventId = Guid.NewGuid(),
+                    AggregateType = aggregateType,
+                    AggregateId = aggregateId,
+                    EventType = eventData?.GetType().Name ?? "Unknown",
+                    EventData = JsonSerializer.Serialize(eventData),
+                    Timestamp = timestamp,
+                    OccurredOn = timestamp,
+                    Version = nextVersion++,
+                    UserId = userId,
+                    Metadata = metadata ?? new()
+                };
 
-            _events.Add(domainEvent);
+                _events.Add(domainEvent);
+            }
         }
 
         return Task.CompletedTask;
@@ -119,8 +132,10 @@ internal sealed class InMemoryEventStore : IEventStore
         return Task.FromResult(events);
     }
 
-    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByTypeAsync(
-        string aggregateType,
+    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByFilterAsync(
+        string? aggregateType = null,
+        string? eventType = null,
+        string? userId = null,
         DateTime? from = null,
         DateTime? toDate = null,
         int? limit = null,
@@ -128,28 +143,9 @@ internal sealed class InMemoryEventStore : IEventStore
         CancellationToken cancellationToken = default)
     {
         var query = SnapshotEvents()
-            .Where(e => e.AggregateType == aggregateType)
-            .Where(e => !from.HasValue || e.OccurredOn >= from.Value)
-            .Where(e => !toDate.HasValue || e.OccurredOn <= toDate.Value)
-            .OrderByDescending(e => e.OccurredOn)
-            .ToList();
-
-        var total = (long)query.Count;
-        var items = query.Skip(offset ?? 0).Take(limit ?? query.Count).ToList();
-
-        return Task.FromResult((items, total));
-    }
-
-    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByUserAsync(
-        string userId,
-        DateTime? from = null,
-        DateTime? toDate = null,
-        int? limit = null,
-        int? offset = null,
-        CancellationToken cancellationToken = default)
-    {
-        var query = SnapshotEvents()
-            .Where(e => string.Equals(e.UserId, userId, StringComparison.OrdinalIgnoreCase))
+            .Where(e => string.IsNullOrEmpty(aggregateType) || e.AggregateType == aggregateType)
+            .Where(e => string.IsNullOrEmpty(eventType) || e.EventType == eventType)
+            .Where(e => string.IsNullOrEmpty(userId) || string.Equals(e.UserId, userId, StringComparison.OrdinalIgnoreCase))
             .Where(e => !from.HasValue || e.OccurredOn >= from.Value)
             .Where(e => !toDate.HasValue || e.OccurredOn <= toDate.Value)
             .OrderByDescending(e => e.OccurredOn)
