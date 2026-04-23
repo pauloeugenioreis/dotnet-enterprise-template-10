@@ -1,110 +1,117 @@
 <template src="./Products.html"></template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import Dropdown from '../../components/Dropdown.vue';
-import Modal from '../../components/Modal.vue';
+import { ref, watch, onMounted } from 'vue';
+import api from '../../api/api';
 import Pagination from '../../components/Pagination.vue';
+import Modal from '../../components/Modal.vue';
 
 const products = ref<any[]>([]);
 const loading = ref(true);
-const apiBase = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7196';
-
-// Filters
-const searchTerm = ref('');
-const isActive = ref<boolean | undefined>(undefined);
-
-// Pagination
 const page = ref(1);
 const pageSize = ref(10);
-const totalItems = ref(0);
-const totalPages = ref(0);
+const totalPages = ref(1);
+const searchTerm = ref('');
+const isActiveFilter = ref<boolean | undefined>(undefined);
 
-// Modal
-const showModal = ref(false);
-const modalTitle = ref('Novo Produto');
-const editingProduct = ref<any>(null);
-const formData = ref({
-  name: '',
-  category: '',
-  price: 0,
-  stock: 0,
-  isActive: true
-});
+const statusFilters = [
+  { label: 'Todos', value: undefined },
+  { label: 'Ativos', value: true },
+  { label: 'Inativos', value: false }
+];
 
-const loadProducts = async () => {
+const isModalOpen = ref(false);
+const editingId = ref<number | null>(null);
+const formData = ref({ name: '', category: '', price: '0', stock: '0', isActive: true });
+
+const fetchProducts = async () => {
   loading.value = true;
   try {
-    let url = `${apiBase}/api/v1/Product?page=${page.value}&pageSize=${pageSize.value}`;
-    if (searchTerm.value) url += `&searchTerm=${encodeURIComponent(searchTerm.value)}`;
-    if (isActive.value !== undefined) url += `&isActive=${isActive.value}`;
-    
-    const { data } = await axios.get(url);
+    const { data } = await api.get('/api/v1/product', {
+      params: {
+        page: page.value,
+        pageSize: pageSize.value,
+        searchTerm: searchTerm.value,
+        isActive: isActiveFilter.value
+      }
+    });
     products.value = data.items;
-    totalItems.value = data.totalCount;
     totalPages.value = data.totalPages;
   } catch (error) {
-    console.error('Erro ao buscar produtos');
+    console.error('Erro ao carregar produtos', error);
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(loadProducts);
-
-const onSearch = () => {
-  page.value = 1;
-  loadProducts();
+const handleExport = () => {
+  window.open(`${import.meta.env.VITE_API_BASE_URL || 'https://localhost:7196'}/api/product/export`, '_blank');
 };
 
-const onStatusFilter = (val: boolean | undefined) => {
-  isActive.value = val;
-  page.value = 1;
-  loadProducts();
+const handleOpenNew = () => {
+  editingId.value = null;
+  formData.value = { name: '', category: '', price: '0', stock: '0', isActive: true };
+  isModalOpen.value = true;
 };
 
-const onPageChange = (newPage: number) => {
-  page.value = newPage;
-  loadProducts();
+const handleEdit = (product: any) => {
+  editingId.value = product.id;
+  formData.value = { 
+    name: product.name, 
+    category: product.category, 
+    price: product.price.toString(), 
+    stock: product.stock.toString(), 
+    isActive: product.isActive 
+  };
+  isModalOpen.value = true;
 };
 
-const openNew = () => {
-  editingProduct.value = null;
-  modalTitle.value = 'Novo Produto';
-  formData.value = { name: '', category: '', price: 0, stock: 0, isActive: true };
-  showModal.value = true;
-};
-
-const openEdit = (product: any) => {
-  editingProduct.value = product;
-  modalTitle.value = 'Editar Produto';
-  formData.value = { ...product };
-  showModal.value = true;
-};
-
-const save = async () => {
+const handleDelete = async (id: number) => {
+  if (!confirm('Excluir este produto?')) return;
   try {
-    if (editingProduct.value) {
-      await axios.put(`${apiBase}/api/v1/Product/${editingProduct.value.id}`, formData.value);
-    } else {
-      await axios.post(`${apiBase}/api/v1/Product`, formData.value);
-    }
-    showModal.value = false;
-    loadProducts();
-  } catch (error: any) {
-    alert('Erro ao salvar produto: ' + (error.response?.data?.message || 'Erro desconhecido'));
+    await api.delete(`/api/v1/product/${id}`);
+    fetchProducts();
+  } catch (error) {
+    alert('Erro ao excluir produto');
   }
 };
 
-const deleteProduct = async (id: string) => {
-  if (confirm('Deseja excluir este produto?')) {
-    try {
-      await axios.delete(`${apiBase}/api/v1/Product/${id}`);
-      loadProducts();
-    } catch (error) {
-      alert('Erro ao excluir produto');
+const handleSubmit = async () => {
+  try {
+    const apiBase = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7196';
+    const payload = {
+      ...formData.value,
+      price: parseFloat(formData.value.price),
+      stock: parseInt(formData.value.stock)
+    };
+
+    if (editingId.value) {
+      await api.put(`/api/v1/product/${editingId.value}`, payload);
+    } else {
+      await api.post('/api/v1/product', payload);
     }
+    isModalOpen.value = false;
+    fetchProducts();
+  } catch (error) {
+    alert('Erro ao salvar produto');
   }
 };
+
+watch([page, pageSize, isActiveFilter], fetchProducts);
+watch(searchTerm, () => {
+  page.value = 1;
+  fetchProducts();
+});
+
+onMounted(fetchProducts);
 </script>
+
+<style scoped>
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>

@@ -1,26 +1,22 @@
 <template src="./Orders.html"></template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, watch, onMounted } from 'vue';
+import api from '../../api/api';
 import Dropdown from '../../components/Dropdown.vue';
 import Pagination from '../../components/Pagination.vue';
+import Modal from '../../components/Modal.vue';
+import OrderDetailsModal from './components/OrderDetailsModal.vue';
 
 const orders = ref<any[]>([]);
 const loading = ref(true);
-const apiBase = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7196';
-
-// Filters
-const searchTerm = ref('');
-const status = ref('');
-const fromDate = ref('');
-const toDate = ref('');
-
-// Pagination
 const page = ref(1);
 const pageSize = ref(10);
-const totalItems = ref(0);
-const totalPages = ref(0);
+const totalPages = ref(1);
+const searchTerm = ref('');
+const status = ref('');
+const startDate = ref('');
+const endDate = ref('');
 
 const statusOptions = [
   { label: 'Todos os Status', value: '' },
@@ -30,54 +26,87 @@ const statusOptions = [
   { label: 'Cancelado', value: 'Cancelled' }
 ];
 
-const loadOrders = async () => {
+const isModalOpen = ref(false);
+const isDetailsOpen = ref(false);
+const selectedOrder = ref<any>(null);
+
+const fetchOrders = async () => {
   loading.value = true;
   try {
-    let url = `${apiBase}/api/v1/Order?page=${page.value}&pageSize=${pageSize.value}`;
-    if (searchTerm.value) url += `&searchTerm=${encodeURIComponent(searchTerm.value)}`;
-    if (status.value) url += `&status=${status.value}`;
-    if (fromDate.value) url += `&from=${new Date(fromDate.value).toISOString()}`;
-    if (toDate.value) url += `&toDate=${new Date(toDate.value).toISOString()}`;
-    
-    const { data } = await axios.get(url);
+    const { data } = await api.get('/api/v1/order', {
+      params: {
+        page: page.value,
+        pageSize: pageSize.value,
+        searchTerm: searchTerm.value,
+        status: status.value,
+        startDate: startDate.value,
+        endDate: endDate.value
+      }
+    });
     orders.value = data.items;
-    totalItems.value = data.totalCount;
     totalPages.value = data.totalPages;
   } catch (error) {
-    console.error('Erro ao buscar pedidos');
+    console.error('Erro ao carregar pedidos', error);
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(loadOrders);
+const handleExport = () => {
+  window.open(`${import.meta.env.VITE_API_BASE_URL || 'https://localhost:7196'}/api/order/export`, '_blank');
+};
 
-const onFilter = () => {
-  page.value = 1;
-  loadOrders();
+const handleOpenNew = () => {
+  isModalOpen.value = true;
+};
+
+const handleViewDetails = (order: any) => {
+  selectedOrder.value = order;
+  isDetailsOpen.value = true;
+};
+
+const handleCancel = async (id: number) => {
+  if (!confirm('Tem certeza que deseja cancelar este pedido?')) return;
+  try {
+    await api.put(`/api/v1/order/${id}/status`, { status: 'Cancelled', note: 'Cancelado pelo usuário' });
+    fetchOrders();
+  } catch (error) {
+    alert('Erro ao cancelar pedido');
+  }
 };
 
 const clearFilters = () => {
   searchTerm.value = '';
   status.value = '';
-  fromDate.value = '';
-  toDate.value = '';
-  page.value = 1;
-  loadOrders();
-};
-
-const onPageChange = (newPage: number) => {
-  page.value = newPage;
-  loadOrders();
+  startDate.value = '';
+  endDate.value = '';
 };
 
 const getStatusClass = (status: string) => {
-  switch (status.toLowerCase()) {
-    case 'delivered': case 'entregue': return 'bg-emerald-50 text-emerald-600';
-    case 'pending': case 'pendente': return 'bg-amber-50 text-amber-600';
-    case 'shipped': case 'enviado': return 'bg-blue-50 text-blue-600';
-    case 'cancelled': case 'cancelado': return 'bg-red-50 text-red-600';
+  switch (status?.toLowerCase()) {
+    case 'pending': return 'bg-amber-50 text-amber-600';
+    case 'completed': return 'bg-emerald-50 text-emerald-600';
+    case 'cancelled': return 'bg-rose-50 text-rose-600';
+    case 'shipped': return 'bg-indigo-50 text-indigo-600';
     default: return 'bg-gray-50 text-gray-600';
   }
 };
+
+watch([page, pageSize, status, startDate, endDate], fetchOrders);
+watch(searchTerm, () => {
+  page.value = 1;
+  fetchOrders();
+});
+
+onMounted(fetchOrders);
 </script>
+
+<style scoped>
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>

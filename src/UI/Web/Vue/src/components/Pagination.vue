@@ -1,38 +1,47 @@
-<script setup lang="ts">
-defineProps<{
-  page: number;
-  totalPages: number;
-  totalItems: number;
-}>();
-
-const emit = defineEmits(['update:page']);
-
-const onPageChange = (newPage: number) => {
-  emit('update:page', newPage);
-};
-</script>
-
 <template>
-  <div class="flex items-center justify-between mt-10 px-8 py-6 bg-white rounded-[2.5rem] shadow-xl shadow-gray-100/50 border border-gray-50">
-    <div class="flex gap-2">
-      <button 
-        @click="onPageChange(page - 1)"
-        :disabled="page === 1"
-        class="w-12 h-12 flex items-center justify-center rounded-2xl bg-gray-50 text-gray-400 hover:bg-primary-50 hover:text-primary-600 disabled:opacity-30 disabled:hover:bg-gray-50 disabled:hover:text-gray-400 transition-all active:scale-90"
-      >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" /></svg>
-      </button>
-      <div class="flex items-center px-6 bg-gray-50 rounded-2xl">
-        <span class="text-xs font-black text-gray-900 uppercase tracking-widest">Página {{ page }} de {{ totalPages }}</span>
+  <div class="bg-gray-50 px-10 py-6 flex justify-between items-center border-t border-gray-100">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-10">
+      <p class="text-sm text-gray-500 font-bold">
+        Página <span class="text-gray-900">{{ currentPage }}</span> de <span class="text-gray-900">{{ totalPages || 1 }}</span>
+      </p>
+      
+      <div class="flex items-center gap-3">
+        <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Itens por página:</span>
+        <select 
+          :value="pageSize"
+          @change="$emit('update:pageSize', Number(($event.target as HTMLSelectElement).value))"
+          class="bg-white border border-gray-200 rounded-xl px-4 py-2 text-xs font-black text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-600 transition-all cursor-pointer shadow-sm"
+        >
+          <option v-for="size in [5, 10, 20, 50, 100]" :key="size" :value="size">{{ size }}</option>
+        </select>
       </div>
-      <button 
-        @click="onPageChange(page + 1)"
-        :disabled="page === totalPages"
-        class="w-12 h-12 flex items-center justify-center rounded-2xl bg-gray-50 text-gray-400 hover:bg-primary-50 hover:text-primary-600 disabled:opacity-30 disabled:hover:bg-gray-50 disabled:hover:text-gray-400 transition-all active:scale-90"
+    </div>
+
+    <div class="flex gap-3">
+      <button
+        @click="$emit('update:currentPage', Math.max(1, currentPage - 1))"
+        :disabled="currentPage === 1"
+        class="px-6 py-3 bg-white border border-gray-200 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
       >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
+        Anterior
+      </button>
+      <button
+        @click="$emit('update:currentPage', Math.min(totalPages, currentPage + 1))"
+        :disabled="currentPage === totalPages || totalPages === 0"
+        class="px-6 py-3 bg-primary-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-primary-600/20 active:scale-95"
+      >
+        Próxima
       </button>
     </div>
-    <div class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">Total de {{ totalItems }} registros</div>
   </div>
 </template>
+
+<script setup lang="ts">
+defineProps<{
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+}>();
+
+defineEmits(['update:currentPage', 'update:pageSize']);
+</script>

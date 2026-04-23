@@ -1,66 +1,81 @@
 <template src="./Audit.html"></template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import Dropdown from '../../components/Dropdown.vue';
+import { ref, watch, onMounted } from 'vue';
+import api from '../../api/api';
 import Pagination from '../../components/Pagination.vue';
+import Dropdown from '../../components/Dropdown.vue';
 
-const logs = ref<any[]>([]);
+const auditLogs = ref<any[]>([]);
 const loading = ref(true);
-const apiBase = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7196';
+const page = ref(1);
+const pageSize = ref(10);
+const totalPages = ref(1);
 
-// Filters
 const entityType = ref('');
 const eventType = ref('');
 const userId = ref('');
+const startDate = ref('');
+const endDate = ref('');
 
-// Pagination
-const page = ref(1);
-const pageSize = ref(10);
-const totalItems = ref(0);
-const totalPages = ref(0);
+const selectedLog = ref<any>(null);
 
-const entityOptions = [
-  { label: 'Todos', value: '' },
-  { label: 'Pedidos', value: 'Order' },
-  { label: 'Produtos', value: 'Product' }
-];
-
-const loadLogs = async () => {
+const fetchAuditLogs = async () => {
   loading.value = true;
   try {
-    let url = `${apiBase}/api/v1/audit?page=${page.value}&pageSize=${pageSize.value}`;
-    if (entityType.value) url = `${apiBase}/api/v1/audit/${entityType.value}?page=${page.value}&pageSize=${pageSize.value}`;
-    
-    const { data } = await axios.get(url);
-    logs.value = data.items;
-    totalItems.value = data.totalCount;
+    const { data } = await api.get('/api/v1/audit', {
+      params: {
+        page: page.value,
+        pageSize: pageSize.value,
+        entityType: entityType.value,
+        eventType: eventType.value,
+        userId: userId.value,
+        startDate: startDate.value,
+        endDate: endDate.value
+      }
+    });
+    auditLogs.value = data.items;
     totalPages.value = data.totalPages;
   } catch (error) {
-    console.error('Erro ao buscar logs');
+    console.error('Erro ao carregar logs de auditoria', error);
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(loadLogs);
+const formatDate = (date: string) => {
+  if (!date) return '-';
+  const d = new Date(date);
+  return isNaN(d.getTime()) ? 'Data Inválida' : d.toLocaleString('pt-BR');
+};
 
-const onFilter = () => {
-  page.value = 1;
-  loadLogs();
+const viewDetails = (log: any) => {
+  selectedLog.value = log;
 };
 
 const clearFilters = () => {
   entityType.value = '';
   eventType.value = '';
   userId.value = '';
-  page.value = 1;
-  loadLogs();
+  startDate.value = '';
+  endDate.value = '';
 };
 
-const onPageChange = (newPage: number) => {
-  page.value = newPage;
-  loadLogs();
-};
+watch([page, pageSize, entityType, startDate, endDate], fetchAuditLogs);
+watch([eventType, userId], () => {
+  page.value = 1;
+  fetchAuditLogs();
+});
+
+onMounted(fetchAuditLogs);
 </script>
+
+<style scoped>
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>

@@ -20,7 +20,7 @@ const handleLogin = async () => {
       email: email.value,
       password: password.value
     });
-    authStore.setAuth(data, data.token);
+    authStore.setAuth(data.user, data.accessToken);
     router.push('/dashboard');
   } catch (error) {
     alert('Erro ao entrar');
@@ -29,3 +29,14 @@ const handleLogin = async () => {
   }
 };
 </script>
+
+<style scoped>
+@keyframes slideInFromBottom {
+  from { transform: translateY(1rem); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-in {
+  animation: slideInFromBottom 0.7s ease-out forwards;
+}
+</style>
