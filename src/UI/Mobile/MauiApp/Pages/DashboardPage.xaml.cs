@@ -1,9 +1,11 @@
+using System.Globalization;
 using EnterpriseTemplate.MauiApp.Services;
 
 namespace EnterpriseTemplate.MauiApp.Pages;
 
 public partial class DashboardPage : ContentPage
 {
+    private static readonly CultureInfo _brCulture = new CultureInfo("pt-BR");
     private readonly IOrderService _orderService;
 
     public DashboardPage(IOrderService orderService)
@@ -36,9 +38,9 @@ public partial class DashboardPage : ContentPage
 
             if (stats is not null)
             {
-                RevenueLabel.Text = stats.TotalRevenue.ToString("C");
-                OrdersLabel.Text = stats.TotalOrders.ToString("N0");
-                AvgLabel.Text = stats.AverageOrderValue.ToString("C");
+                RevenueLabel.Text = stats.TotalRevenue.ToString("C", _brCulture);
+                OrdersLabel.Text = stats.TotalOrders.ToString("N0", _brCulture);
+                AvgLabel.Text = stats.AverageOrderValue.ToString("C", _brCulture);
                 TopProductsList.ItemsSource = stats.TopProducts?.Take(5).ToList();
 
                 StatsLayout.IsVisible = true;

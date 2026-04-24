@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/dependency_provider.dart';
 import '../../../shared/models/api_models.dart';
+import '../../../core/utils/currency_formatter.dart';
+import 'order_form_dialog.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -12,8 +14,13 @@ class OrdersPage extends StatefulWidget {
 
 class _OrdersPageState extends State<OrdersPage> {
   final TextEditingController _searchCtrl = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  
   bool _loading = true;
+  bool _loadingMore = false;
+  List<OrderResponse> _orders = [];
   PagedResponse<OrderResponse>? _response;
+  
   String? _statusFilter;
   DateTime? _fromDate;
   DateTime? _toDate;
@@ -22,43 +29,117 @@ class _OrdersPageState extends State<OrdersPage> {
   @override
   void initState() {
     super.initState();
-    _loadOrders();
+    _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadOrders());
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (!_loading && !_loadingMore && (_response?.hasNextPage ?? false)) {
+        _loadMoreOrders();
+      }
+    }
   }
 
   Future<void> _loadOrders() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _currentPage = 1;
+      _orders = [];
+    });
+    await _fetchOrders();
+  }
+
+  Future<void> _loadMoreOrders() async {
+    setState(() {
+      _loadingMore = true;
+      _currentPage++;
+    });
+    await _fetchOrders(append: true);
+  }
+
+  Future<void> _fetchOrders({bool append = false}) async {
     try {
       final service = DependencyProvider.of(context).orderService;
       final res = await service.getOrders(
         page: _currentPage,
+        pageSize: 10,
         searchTerm: _searchCtrl.text,
         status: _statusFilter,
         fromDate: _fromDate,
         toDate: _toDate,
       );
+      
       setState(() {
         _response = res;
+        if (append) {
+          _orders.addAll(res.items);
+        } else {
+          _orders = res.items;
+        }
         _loading = false;
+        _loadingMore = false;
       });
     } catch (e) {
-      setState(() => _loading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erro ao carregar pedidos')),
-        );
+        setState(() {
+          _loading = false;
+          _loadingMore = false;
+        });
+        Future.microtask(() {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Erro ao carregar pedidos')),
+            );
+          }
+        });
+      }
+    }
+  }
+
+  Future<void> _handleCancel(int id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancelar Pedido?'),
+        content: const Text('Esta ação não pode ser desfeita.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('VOLTAR')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true), 
+            child: const Text('CANCELAR PEDIDO', style: TextStyle(color: Colors.red))
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        final service = DependencyProvider.of(context).orderService;
+        await service.cancelOrder(id, 'Cancelado pelo app mobile');
+        _loadOrders();
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erro ao cancelar pedido')));
+        }
       }
     }
   }
 
   void _onSearch(String value) {
-    _currentPage = 1;
     _loadOrders();
   }
 
   void _setStatus(String? value) {
     setState(() {
       _statusFilter = value;
-      _currentPage = 1;
     });
     _loadOrders();
   }
@@ -90,7 +171,6 @@ class _OrdersPageState extends State<OrdersPage> {
       setState(() {
         _fromDate = range.start;
         _toDate = range.end;
-        _currentPage = 1;
       });
       _loadOrders();
     }
@@ -102,9 +182,74 @@ class _OrdersPageState extends State<OrdersPage> {
       _statusFilter = null;
       _fromDate = null;
       _toDate = null;
-      _currentPage = 1;
     });
     _loadOrders();
+  }
+
+  void _openCreateDialog() async {
+    final res = await showDialog<bool>(
+      context: context,
+      builder: (context) => const OrderFormDialog(),
+    );
+    if (res == true) _loadOrders();
+  }
+
+  void _openEditDialog(OrderResponse order) async {
+    final res = await showDialog<bool>(
+      context: context,
+      builder: (context) => OrderFormDialog(order: order),
+    );
+    if (res == true) _loadOrders();
+  }
+
+  void _showOrderDetails(OrderResponse order) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Detalhes do Pedido', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20)),
+                  IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text('CLIENTE: ${order.customerName}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text('E-MAIL: ${order.customerEmail}', style: const TextStyle(color: AppTheme.gray500, fontSize: 13)),
+              const SizedBox(height: 12),
+              const Text('ITENS:', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 1.2, color: AppTheme.gray400)),
+              const Divider(),
+              ...order.items.map((i) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(child: Text(i.productName, style: const TextStyle(fontSize: 13))),
+                    Text('${i.quantity}x ${CurrencyFormatter.format(i.unitPrice)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  ],
+                ),
+              )),
+              const Divider(),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('TOTAL', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                  Text(CurrencyFormatter.format(order.total), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: AppTheme.primary600)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -117,6 +262,13 @@ class _OrdersPageState extends State<OrdersPage> {
           IconButton(onPressed: _clearFilters, icon: const Icon(Icons.filter_list_off)),
           IconButton(onPressed: _loadOrders, icon: const Icon(Icons.refresh)),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _openCreateDialog,
+        backgroundColor: AppTheme.primary600,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: const Text('NOVO PEDIDO', style: TextStyle(fontWeight: FontWeight.w900)),
       ),
       body: Column(
         children: [
@@ -163,29 +315,13 @@ class _OrdersPageState extends State<OrdersPage> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      _FilterChip(
-                        label: 'Todos',
-                        isSelected: _statusFilter == null,
-                        onTap: () => _setStatus(null),
-                      ),
+                      _FilterChip(label: 'Todos', isSelected: _statusFilter == null, onTap: () => _setStatus(null)),
                       const SizedBox(width: 8),
-                      _FilterChip(
-                        label: 'Pendentes',
-                        isSelected: _statusFilter == 'Pending',
-                        onTap: () => _setStatus('Pending'),
-                      ),
+                      _FilterChip(label: 'Pendentes', isSelected: _statusFilter == 'Pending', onTap: () => _setStatus('Pending')),
                       const SizedBox(width: 8),
-                      _FilterChip(
-                        label: 'Enviados',
-                        isSelected: _statusFilter == 'Shipped',
-                        onTap: () => _setStatus('Shipped'),
-                      ),
+                      _FilterChip(label: 'Enviados', isSelected: _statusFilter == 'Shipped', onTap: () => _setStatus('Shipped')),
                       const SizedBox(width: 8),
-                      _FilterChip(
-                        label: 'Entregues',
-                        isSelected: _statusFilter == 'Delivered',
-                        onTap: () => _setStatus('Delivered'),
-                      ),
+                      _FilterChip(label: 'Entregues', isSelected: _statusFilter == 'Delivered', onTap: () => _setStatus('Delivered')),
                     ],
                   ),
                 ),
@@ -204,13 +340,23 @@ class _OrdersPageState extends State<OrdersPage> {
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
-                : _response == null || _response!.items.isEmpty
+                : _orders.isEmpty
                     ? const Center(child: Text('Nenhum pedido encontrado'))
                     : ListView.builder(
+                        controller: _scrollController,
                         padding: const EdgeInsets.all(20),
-                        itemCount: _response!.items.length,
+                        itemCount: _orders.length + (_loadingMore ? 1 : 0),
                         itemBuilder: (context, index) {
-                          final order = _response!.items[index];
+                          if (index == _orders.length) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+
+                          final order = _orders[index];
                           return Container(
                             margin: const EdgeInsets.only(bottom: 16),
                             decoration: BoxDecoration(
@@ -260,16 +406,32 @@ class _OrdersPageState extends State<OrdersPage> {
                                       Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          const Text('TOTAL', style: TextStyle(color: AppTheme.gray400, fontSize: 9, fontWeight: FontWeight.black, letterSpacing: 1.1)),
+                                          const Text('TOTAL', style: TextStyle(color: AppTheme.gray400, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.1)),
                                           Text(
-                                            'R\$ ${order.total.toStringAsFixed(2)}',
+                                            CurrencyFormatter.format(order.total),
                                             style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: AppTheme.primary600),
                                           ),
                                         ],
                                       ),
-                                      Text(
-                                        '${order.createdAt.day}/${order.createdAt.month}/${order.createdAt.year}',
-                                        style: const TextStyle(color: AppTheme.gray400, fontSize: 12, fontWeight: FontWeight.bold),
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            onPressed: () => _showOrderDetails(order),
+                                            icon: const Icon(Icons.search, color: AppTheme.primary600),
+                                            tooltip: 'Detalhes',
+                                          ),
+                                          IconButton(
+                                            onPressed: () => _openEditDialog(order),
+                                            icon: const Icon(Icons.edit_outlined, color: AppTheme.primary600),
+                                            tooltip: 'Editar',
+                                          ),
+                                          if (order.status != 'Cancelled')
+                                            IconButton(
+                                              onPressed: () => _handleCancel(order.id), 
+                                              icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                              tooltip: 'Cancelar',
+                                            ),
+                                        ],
                                       ),
                                     ],
                                   ),

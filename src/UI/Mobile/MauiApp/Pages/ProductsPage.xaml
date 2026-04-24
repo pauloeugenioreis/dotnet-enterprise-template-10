@@ -10,6 +10,7 @@
         <conv:StatusColorConverter x:Key="StatusColorConverter" />
         <conv:StatusTextConverter x:Key="StatusTextConverter" />
         <conv:StatusTextColorsConverter x:Key="StatusTextColorsConverter" />
+        <conv:CurrencyConverter x:Key="CurrencyConverter" />
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto, Auto, *">
@@ -44,7 +45,8 @@
             <VerticalStackLayout Spacing="0">
                 <ActivityIndicator x:Name="LoadingIndicator" Color="{StaticResource Primary}" IsRunning="True" IsVisible="True" Margin="0,40,0,0" />
 
-                <CollectionView x:Name="ProductsList" IsVisible="False" Margin="20,0,20,20">
+                <CollectionView x:Name="ProductsList" IsVisible="False" Margin="20,0,20,20"
+                                RemainingItemsThreshold="2" RemainingItemsThresholdReached="OnRemainingItemsReached">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <Frame Margin="0,0,0,16" BackgroundColor="White" CornerRadius="24" Padding="16" HasShadow="False" BorderColor="{StaticResource Gray100}">
@@ -67,7 +69,7 @@
                                     </VerticalStackLayout>
 
                                     <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="End">
-                                        <Label Text="{Binding Price, StringFormat='R$ {0:N2}'}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+                                        <Label Text="{Binding Price, Converter={StaticResource CurrencyConverter}}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
                                         <Label Text="{Binding Stock, StringFormat='Stock: {0}'}" FontSize="11" FontAttributes="Bold" TextColor="{StaticResource Gray400}" HorizontalOptions="End" />
                                     </VerticalStackLayout>
                                 </Grid>

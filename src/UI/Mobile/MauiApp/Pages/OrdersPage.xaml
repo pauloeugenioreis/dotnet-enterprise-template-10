@@ -7,8 +7,8 @@
              BackgroundColor="{StaticResource Gray50}">
 
     <ContentPage.Resources>
-        <!-- For Orders we need slightly different status logic or a more generic converter -->
         <conv:StatusColorConverter x:Key="StatusColorConverter" />
+        <conv:CurrencyConverter x:Key="CurrencyConverter" />
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto, Auto, *">
@@ -54,7 +54,8 @@
             <VerticalStackLayout Spacing="0">
                 <ActivityIndicator x:Name="LoadingIndicator" Color="{StaticResource Primary}" IsRunning="True" IsVisible="True" Margin="0,40,0,0" />
 
-                <CollectionView x:Name="OrdersList" IsVisible="False" Margin="20,0,20,20">
+                <CollectionView x:Name="OrdersList" IsVisible="False" Margin="20,0,20,20"
+                                RemainingItemsThreshold="2" RemainingItemsThresholdReached="OnRemainingItemsReached">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <Frame Margin="0,0,0,16" BackgroundColor="White" CornerRadius="24" Padding="20" HasShadow="False" BorderColor="{StaticResource Gray100}">
@@ -78,10 +79,13 @@
                                     <Grid ColumnDefinitions="*, Auto">
                                         <VerticalStackLayout Grid.Column="0">
                                             <Label Text="TOTAL" FontSize="9" FontAttributes="Bold" TextColor="{StaticResource Gray400}" CharacterSpacing="1.1" />
-                                            <Label Text="{Binding Total, StringFormat='R$ {0:N2}'}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+                                            <Label Text="{Binding Total, Converter={StaticResource CurrencyConverter}}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
                                         </VerticalStackLayout>
                                         
-                                        <Label Grid.Column="1" Text="{Binding CreatedAt, StringFormat='{0:dd/MM/yyyy}'}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Gray400}" VerticalOptions="End" />
+                                        <HorizontalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="End">
+                                            <Button Text="🔍" Clicked="OnViewDetailsClicked" BackgroundColor="Transparent" Padding="0" WidthRequest="40" HeightRequest="40" CornerRadius="20" FontSize="18" />
+                                            <Button Text="✏️" Clicked="OnEditClicked" BackgroundColor="Transparent" Padding="0" WidthRequest="40" HeightRequest="40" CornerRadius="20" FontSize="18" />
+                                        </HorizontalStackLayout>
                                     </Grid>
                                 </VerticalStackLayout>
                             </Frame>

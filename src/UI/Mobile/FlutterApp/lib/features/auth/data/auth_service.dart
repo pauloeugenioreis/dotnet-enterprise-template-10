@@ -22,7 +22,7 @@ class AuthService implements IAuthService {
         data: request.toJson(),
       );
       final result = AuthResponse.fromJson(response.data);
-      await _client.auth.saveToken(result.token);
+      await _client.auth.saveToken(result.accessToken);
       return result;
     } on DioException {
       return null;

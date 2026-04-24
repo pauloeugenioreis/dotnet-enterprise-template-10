@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, FlatList, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl, Alert, StyleSheet } from 'react-native';
 import { colors } from '../../theme/colors';
 import apiClient from '../../api/apiClient';
+import OrderFormModal from './OrderFormModal';
+import { formatCurrency, formatDate } from '../../utils/formatters';
 
 export default function OrdersScreen() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -9,20 +11,33 @@ export default function OrdersScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
-  const loadOrders = useCallback(async (isRefresh = false) => {
+  const loadOrders = useCallback(async (isRefresh = false, newPage = 1) => {
     if (isRefresh) setRefreshing(true);
-    else setLoading(true);
+    else setLoading(newPage === 1);
 
     try {
-      const response = await apiClient.get('/api/orders', {
+      const response = await apiClient.get('/api/v1/Order', {
         params: {
           searchTerm: search,
           status: status,
-          pageSize: 20
+          page: newPage,
+          pageSize: 10
         }
       });
-      setOrders(response.data.items);
+      
+      if (newPage === 1) {
+        setOrders(response.data.items);
+      } else {
+        setOrders(prev => [...prev, ...response.data.items]);
+      }
+      
+      setTotalPages(response.data.totalPages);
+      setPage(newPage);
     } catch (err) {
       console.error(err);
     } finally {
@@ -34,6 +49,39 @@ export default function OrdersScreen() {
   useEffect(() => {
     loadOrders();
   }, [loadOrders]);
+
+  const handleDetails = (item: any) => {
+    const message = `Cliente: ${item.customerName}\nEmail: ${item.customerEmail}\nEndereço: ${item.shippingAddress}\n\nItens:\n` + 
+                    item.items.map((i: any) => `- ${i.productName} (${i.quantity}x)`).join('\n');
+    Alert.alert('Detalhes do Pedido', message);
+  };
+
+  const handleEdit = (item: any) => {
+    setSelectedOrder(item);
+    setModalVisible(true);
+  };
+
+  const handleCancel = (id: number) => {
+    Alert.alert(
+      'Cancelar Pedido',
+      'Tem certeza que deseja cancelar este pedido?',
+      [
+        { text: 'Não', style: 'cancel' },
+        { 
+          text: 'Sim, Cancelar', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await apiClient.post(`/api/v1/Order/${id}/cancel`, '"Cancelado via App Mobile"');
+              loadOrders(false, 1);
+            } catch (err) {
+              Alert.alert('Erro', 'Não foi possível cancelar o pedido');
+            }
+          }
+        }
+      ]
+    );
+  };
 
   const renderStatusBadge = (orderStatus: string) => {
     let badgeColors = { bg: colors.gray[50], text: colors.primary[600] };
@@ -70,7 +118,7 @@ export default function OrdersScreen() {
               placeholder="Número ou cliente..."
               value={search}
               onChangeText={setSearch}
-              onSubmitEditing={() => loadOrders()}
+              onSubmitEditing={() => loadOrders(false, 1)}
             />
           </View>
         </View>
@@ -79,7 +127,7 @@ export default function OrdersScreen() {
           {['Todos', 'Pending', 'Shipped', 'Delivered'].map((s) => (
             <TouchableOpacity 
               key={s}
-              onTap={() => setStatus(s === 'Todos' ? null : s)}
+              onPress={() => setStatus(s === 'Todos' ? null : s)}
               style={{ 
                 paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12,
                 backgroundColor: (status === s || (s === 'Todos' && status === null)) ? colors.primary[600] : colors.gray[50]
@@ -94,41 +142,86 @@ export default function OrdersScreen() {
         </View>
       </View>
 
-      {loading && !refreshing ? (
-        <ActivityIndicator style={{ marginTop: 40 }} color={colors.primary[600]} />
-      ) : (
-        <FlatList
-          data={orders}
-          keyExtractor={item => item.id}
-          contentContainerStyle={{ padding: 20 }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadOrders(true)} />}
-          renderItem={({ item }) => (
-            <View style={{ backgroundColor: 'white', borderRadius: 24, padding: 20, marginBottom: 16, elevation: 2 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={{ fontSize: 18, fontWeight: '900', color: colors.gray[900] }}>#{item.orderNumber}</Text>
-                {renderStatusBadge(item.status)}
+      <FlatList
+        data={orders}
+        keyExtractor={item => item.id.toString()}
+        contentContainerStyle={{ padding: 20 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadOrders(true, 1)} />}
+        onEndReached={() => {
+          if (page < totalPages && !loading) {
+            loadOrders(false, page + 1);
+          }
+        }}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={() => (
+          loading && page > 1 ? <ActivityIndicator style={{ marginVertical: 20 }} color={colors.primary[600]} /> : null
+        )}
+        ListEmptyComponent={() => (
+          !loading ? <Text style={{ textAlign: 'center', marginTop: 40, color: colors.gray[400] }}>Nenhum pedido encontrado</Text> : null
+        )}
+        renderItem={({ item }) => (
+          <View style={{ backgroundColor: 'white', borderRadius: 24, padding: 20, marginBottom: 16, elevation: 2 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={{ fontSize: 18, fontWeight: '900', color: colors.gray[900] }}>#{item.orderNumber}</Text>
+              {renderStatusBadge(item.status)}
+            </View>
+            
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12 }}>
+              <Text style={{ fontSize: 14, marginRight: 8 }}>👤</Text>
+              <Text style={{ fontSize: 13, fontWeight: 'bold', color: colors.gray[700] }}>{item.customerName}</Text>
+            </View>
+
+            <View style={{ height: 1, backgroundColor: colors.gray[50], marginVertical: 16 }} />
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+              <View>
+                <Text style={{ fontSize: 9, fontWeight: '900', color: colors.gray[400], letterSpacing: 1.1 }}>TOTAL</Text>
+                <Text style={{ fontSize: 20, fontWeight: '900', color: colors.primary[600] }}>{formatCurrency(item.total)}</Text>
               </View>
               
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12 }}>
-                <Text style={{ fontSize: 14, marginRight: 8 }}>👤</Text>
-                <Text style={{ fontSize: 13, fontWeight: 'bold', color: colors.gray[700] }}>{item.customerName}</Text>
-              </View>
-
-              <View style={{ height: 1, backgroundColor: colors.gray[50], marginVertical: 16 }} />
-
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                <View>
-                  <Text style={{ fontSize: 9, fontWeight: '900', color: colors.gray[400], letterSpacing: 1.1 }}>TOTAL</Text>
-                  <Text style={{ fontSize: 20, fontWeight: '900', color: colors.primary[600] }}>R$ {item.total.toFixed(2)}</Text>
-                </View>
-                <Text style={{ fontSize: 12, fontWeight: 'bold', color: colors.gray[400] }}>
-                  {new Date(item.createdAt).toLocaleDateString('pt-BR')}
-                </Text>
+              <View style={{ flexDirection: 'row', gap: 0 }}>
+                <TouchableOpacity onPress={() => handleDetails(item)} style={{ padding: 8 }}>
+                  <Text style={{ fontSize: 20 }}>🔍</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleEdit(item)} style={{ padding: 8 }}>
+                  <Text style={{ fontSize: 20 }}>✏️</Text>
+                </TouchableOpacity>
+                {item.status !== 'Cancelled' && (
+                  <TouchableOpacity onPress={() => handleCancel(item.id)} style={{ padding: 8 }}>
+                    <Text style={{ fontSize: 20 }}>🗑️</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
-          )}
-        />
+          </View>
+        )}
+      />
+      
+      {loading && page === 1 && (
+        <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.7)', justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={colors.primary[600]} />
+        </View>
       )}
+
+      <TouchableOpacity 
+        onPress={() => setModalVisible(true)}
+        style={{ 
+          position: 'absolute', right: 24, bottom: 24, 
+          backgroundColor: colors.primary[600], paddingHorizontal: 20, paddingVertical: 16, 
+          borderRadius: 30, flexDirection: 'row', alignItems: 'center', elevation: 8
+        }}
+      >
+        <Text style={{ color: 'white', fontWeight: '900', fontSize: 16, marginRight: 8 }}>+</Text>
+        <Text style={{ color: 'white', fontWeight: '900', fontSize: 12 }}>NOVO PEDIDO</Text>
+      </TouchableOpacity>
+
+      <OrderFormModal 
+        visible={modalVisible} 
+        onClose={(refresh) => {
+          setModalVisible(false);
+          if (refresh) loadOrders(false, 1);
+        }} 
+      />
     </SafeAreaView>
   );
 }

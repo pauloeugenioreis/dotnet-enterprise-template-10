@@ -31,30 +31,36 @@ class RegisterRequest {
 }
 
 class AuthResponse {
-  final String token;
-  final String userId;
+  final String accessToken;
+  final String refreshToken;
+  final int userId;
   final String email;
   final String name;
 
   const AuthResponse({
-    required this.token,
+    required this.accessToken,
+    required this.refreshToken,
     required this.userId,
     required this.email,
     required this.name,
   });
 
-  factory AuthResponse.fromJson(Map<String, dynamic> json) => AuthResponse(
-        token: json['token'] as String,
-        userId: json['userId'] as String,
-        email: json['email'] as String,
-        name: json['name'] as String,
-      );
+  factory AuthResponse.fromJson(Map<String, dynamic> json) {
+    final userData = json['user'] as Map<String, dynamic>;
+    return AuthResponse(
+      accessToken: json['accessToken'] as String,
+      refreshToken: json['refreshToken'] as String,
+      userId: userData['id'] as int,
+      email: userData['email'] as String,
+      name: userData['fullName'] as String,
+    );
+  }
 }
 
 // ─── Orders ──────────────────────────────────────────────────────
 
 class OrderResponse {
-  final String id;
+  final int id;
   final String orderNumber;
   final String customerName;
   final String customerEmail;
@@ -83,25 +89,28 @@ class OrderResponse {
   });
 
   factory OrderResponse.fromJson(Map<String, dynamic> json) => OrderResponse(
-        id: json['id'] as String,
-        orderNumber: json['orderNumber'] as String,
-        customerName: json['customerName'] as String,
-        customerEmail: json['customerEmail'] as String,
-        status: json['status'] as String,
-        total: (json['total'] as num).toDouble(),
-        subtotal: (json['subtotal'] as num).toDouble(),
-        shippingCost: (json['shippingCost'] as num).toDouble(),
-        tax: (json['tax'] as num).toDouble(),
-        shippingAddress: json['shippingAddress'] as String,
-        createdAt: DateTime.parse(json['createdAt'] as String),
-        items: (json['items'] as List<dynamic>)
-            .map((e) => OrderItemResponse.fromJson(e as Map<String, dynamic>))
-            .toList(),
+        id: json['id'] as int? ?? 0,
+        orderNumber: json['orderNumber'] as String? ?? 'N/A',
+        customerName: json['customerName'] as String? ?? 'Cliente',
+        customerEmail: json['customerEmail'] as String? ?? '',
+        status: json['status'] as String? ?? 'Pending',
+        total: (json['total'] as num?)?.toDouble() ?? 0.0,
+        subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
+        shippingCost: (json['shippingCost'] as num?)?.toDouble() ?? 0.0,
+        tax: (json['tax'] as num?)?.toDouble() ?? 0.0,
+        shippingAddress: json['shippingAddress'] as String? ?? '',
+        createdAt: json['createdAt'] != null
+            ? DateTime.parse(json['createdAt'] as String)
+            : DateTime.now(),
+        items: (json['items'] as List<dynamic>?)
+                ?.map((e) => OrderItemResponse.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            [],
       );
 }
 
 class OrderItemResponse {
-  final String productId;
+  final int productId;
   final String productName;
   final int quantity;
   final double unitPrice;
@@ -117,11 +126,11 @@ class OrderItemResponse {
 
   factory OrderItemResponse.fromJson(Map<String, dynamic> json) =>
       OrderItemResponse(
-        productId: json['productId'] as String,
-        productName: json['productName'] as String,
-        quantity: json['quantity'] as int,
-        unitPrice: (json['unitPrice'] as num).toDouble(),
-        subtotal: (json['subtotal'] as num).toDouble(),
+        productId: json['productId'] as int? ?? 0,
+        productName: json['productName'] as String? ?? 'Produto',
+        quantity: json['quantity'] as int? ?? 0,
+        unitPrice: (json['unitPrice'] as num?)?.toDouble() ?? 0.0,
+        subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
       );
 }
 
@@ -165,13 +174,13 @@ class ProductResponse {
   });
 
   factory ProductResponse.fromJson(Map<String, dynamic> json) => ProductResponse(
-        id: json['id'] as int,
-        name: json['name'] as String,
+        id: json['id'] as int? ?? 0,
+        name: json['name'] as String? ?? 'Produto Sem Nome',
         description: json['description'] as String?,
-        price: (json['price'] as num).toDouble(),
-        stock: json['stock'] as int,
-        category: json['category'] as String,
-        isActive: json['isActive'] as bool,
+        price: (json['price'] as num?)?.toDouble() ?? 0.0,
+        stock: json['stock'] as int? ?? 0,
+        category: json['category'] as String? ?? 'Geral',
+        isActive: json['isActive'] as bool? ?? true,
       );
 }
 
@@ -191,10 +200,10 @@ class TopProduct {
   });
 
   factory TopProduct.fromJson(Map<String, dynamic> json) => TopProduct(
-        productId: json['productId'] as int,
-        productName: json['productName'] as String,
-        quantitySold: json['quantitySold'] as int,
-        revenue: (json['revenue'] as num).toDouble(),
+        productId: json['productId'] as int? ?? 0,
+        productName: json['productName'] as String? ?? 'Desconhecido',
+        quantitySold: json['quantitySold'] as int? ?? 0,
+        revenue: (json['revenue'] as num?)?.toDouble() ?? 0.0,
       );
 }
 
@@ -213,11 +222,12 @@ class OrderStatistics {
 
   factory OrderStatistics.fromJson(Map<String, dynamic> json) =>
       OrderStatistics(
-        totalOrders: json['totalOrders'] as int,
-        totalRevenue: (json['totalRevenue'] as num).toDouble(),
-        averageOrderValue: (json['averageOrderValue'] as num).toDouble(),
-        topProducts: (json['topProducts'] as List<dynamic>)
-            .map((e) => TopProduct.fromJson(e as Map<String, dynamic>))
-            .toList(),
+        totalOrders: json['totalOrders'] as int? ?? 0,
+        totalRevenue: (json['totalRevenue'] as num?)?.toDouble() ?? 0.0,
+        averageOrderValue: (json['averageOrderValue'] as num?)?.toDouble() ?? 0.0,
+        topProducts: (json['topProducts'] as List<dynamic>?)
+                ?.map((e) => TopProduct.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            [],
       );
 }

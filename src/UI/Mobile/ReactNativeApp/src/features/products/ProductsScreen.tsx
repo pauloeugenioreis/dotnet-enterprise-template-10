@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { colors } from '../../theme/colors';
 import apiClient from '../../api/apiClient';
+import { formatCurrency } from '../../utils/formatters';
 
 export default function ProductsScreen() {
   const [products, setProducts] = useState<any[]>([]);
@@ -9,20 +10,30 @@ export default function ProductsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
   const [isActive, setIsActive] = useState<boolean | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const loadProducts = useCallback(async (isRefresh = false) => {
+  const loadProducts = useCallback(async (isRefresh = false, newPage = 1) => {
     if (isRefresh) setRefreshing(true);
-    else setLoading(true);
+    else setLoading(newPage === 1);
 
     try {
-      const response = await apiClient.get('/api/products', {
+      const response = await apiClient.get('/api/v1/Product', {
         params: {
           searchTerm: search,
           isActive: isActive,
-          pageSize: 20
+          page: newPage,
+          pageSize: 10
         }
       });
-      setProducts(response.data.items);
+      
+      if (newPage === 1) {
+        setProducts(response.data.items);
+      } else {
+        setProducts(prev => [...prev, ...response.data.items]);
+      }
+      setTotalPages(response.data.totalPages);
+      setPage(newPage);
     } catch (err) {
       console.error(err);
     } finally {
@@ -95,7 +106,16 @@ export default function ProductsScreen() {
           data={products}
           keyExtractor={item => String(item.id)}
           contentContainerStyle={{ padding: 20 }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadProducts(true)} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadProducts(true, 1)} />}
+          onEndReached={() => {
+            if (page < totalPages && !loading) {
+              loadProducts(false, page + 1);
+            }
+          }}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={() => (
+            loading && page > 1 ? <ActivityIndicator style={{ marginVertical: 20 }} color={colors.primary[600]} /> : null
+          )}
           renderItem={({ item }) => (
             <View style={{ backgroundColor: 'white', borderRadius: 24, padding: 16, marginBottom: 16, elevation: 2 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -112,8 +132,8 @@ export default function ProductsScreen() {
                     {renderStatusBadge(item.isActive)}
                   </View>
                 </View>
-                <View style={{ alignItems: 'end' }}>
-                  <Text style={{ fontSize: 18, fontWeight: '900', color: colors.primary[600] }}>R$ {item.price.toFixed(2)}</Text>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={{ fontSize: 18, fontWeight: '900', color: colors.primary[600] }}>{formatCurrency(item.price)}</Text>
                   <Text style={{ fontSize: 11, fontWeight: 'bold', color: colors.gray[400] }}>Stock: {item.stock}</Text>
                 </View>
               </View>

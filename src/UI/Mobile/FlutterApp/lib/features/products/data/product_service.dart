@@ -23,7 +23,7 @@ class ProductService implements IProductService {
     bool? isActive,
   }) async {
     final response = await _client.dio.get(
-      '/api/products',
+      '/api/v1/Product',
       queryParameters: {
         'page': page,
         'pageSize': pageSize,
@@ -32,16 +32,18 @@ class ProductService implements IProductService {
       },
     );
 
+    final data = response.data as Map<String, dynamic>;
     return PagedResponse<ProductResponse>(
-      items: (response.data['items'] as List)
-          .map((e) => ProductResponse.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      totalCount: response.data['totalCount'],
-      page: response.data['page'],
-      pageSize: response.data['pageSize'],
-      totalPages: response.data['totalPages'],
-      hasNextPage: response.data['hasNextPage'],
-      hasPreviousPage: response.data['hasPreviousPage'],
+      items: (data['items'] as List?)
+              ?.map((e) => ProductResponse.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      totalCount: data['totalCount'] as int? ?? 0,
+      page: data['pageNumber'] as int? ?? data['page'] as int? ?? 1,
+      pageSize: data['pageSize'] as int? ?? 10,
+      totalPages: data['totalPages'] as int? ?? 1,
+      hasNextPage: data['hasNextPage'] as bool? ?? false,
+      hasPreviousPage: data['hasPreviousPage'] as bool? ?? false,
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/dependency_provider.dart';
 import '../../../shared/models/api_models.dart';
+import '../../../core/utils/currency_formatter.dart';
 
 class ProductsPage extends StatefulWidget {
   const ProductsPage({super.key});
@@ -12,49 +13,99 @@ class ProductsPage extends StatefulWidget {
 
 class _ProductsPageState extends State<ProductsPage> {
   final TextEditingController _searchCtrl = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  
   bool _loading = true;
+  bool _loadingMore = false;
+  List<ProductResponse> _products = [];
   PagedResponse<ProductResponse>? _response;
+  
   bool? _isActiveFilter;
   int _currentPage = 1;
 
   @override
   void initState() {
     super.initState();
-    _loadProducts();
+    _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadProducts());
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (!_loading && !_loadingMore && (_response?.hasNextPage ?? false)) {
+        _loadMoreProducts();
+      }
+    }
   }
 
   Future<void> _loadProducts() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _currentPage = 1;
+      _products = [];
+    });
+    await _fetchProducts();
+  }
+
+  Future<void> _loadMoreProducts() async {
+    setState(() {
+      _loadingMore = true;
+      _currentPage++;
+    });
+    await _fetchProducts(append: true);
+  }
+
+  Future<void> _fetchProducts({bool append = false}) async {
     try {
       final service = DependencyProvider.of(context).productService;
       final res = await service.getProducts(
         page: _currentPage,
+        pageSize: 10,
         searchTerm: _searchCtrl.text,
         isActive: _isActiveFilter,
       );
+      
       setState(() {
         _response = res;
+        if (append) {
+          _products.addAll(res.items);
+        } else {
+          _products = res.items;
+        }
         _loading = false;
+        _loadingMore = false;
       });
     } catch (e) {
-      setState(() => _loading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erro ao carregar produtos')),
-        );
+        setState(() {
+          _loading = false;
+          _loadingMore = false;
+        });
+        Future.microtask(() {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Erro ao carregar produtos')),
+            );
+          }
+        });
       }
     }
   }
 
   void _onSearch(String value) {
-    _currentPage = 1;
     _loadProducts();
   }
 
   void _toggleFilter(bool? value) {
     setState(() {
       _isActiveFilter = value;
-      _currentPage = 1;
     });
     _loadProducts();
   }
@@ -124,13 +175,23 @@ class _ProductsPageState extends State<ProductsPage> {
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
-                : _response == null || _response!.items.isEmpty
+                : _products.isEmpty
                     ? const Center(child: Text('Nenhum produto encontrado'))
                     : ListView.builder(
+                        controller: _scrollController,
                         padding: const EdgeInsets.all(20),
-                        itemCount: _response!.items.length,
+                        itemCount: _products.length + (_loadingMore ? 1 : 0),
                         itemBuilder: (context, index) {
-                          final product = _response!.items[index];
+                          if (index == _products.length) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+
+                          final product = _products[index];
                           return Container(
                             margin: const EdgeInsets.only(bottom: 16),
                             decoration: BoxDecoration(
@@ -179,7 +240,7 @@ class _ProductsPageState extends State<ProductsPage> {
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
                                       Text(
-                                        'R\$ ${product.price.toStringAsFixed(2)}',
+                                        CurrencyFormatter.format(product.price),
                                         style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppTheme.primary600),
                                       ),
                                       Text(

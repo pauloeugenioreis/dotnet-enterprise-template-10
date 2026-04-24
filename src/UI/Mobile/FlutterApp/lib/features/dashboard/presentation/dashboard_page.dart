@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/models/api_models.dart';
+import '../../../shared/dependency_provider.dart';
+import '../../auth/presentation/login_page.dart';
 import '../../orders/presentation/orders_page.dart';
+import '../../products/presentation/products_page.dart';
+import '../../../core/utils/currency_formatter.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -19,32 +23,38 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
-    _loadStats();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadStats());
   }
 
   Future<void> _loadStats() async {
     setState(() { _loading = true; _error = null; });
     try {
-      // TODO: pegar via Provider/DI
-      // final stats = await orderService.getStatistics();
-      // Simulando dados para o template
-      await Future.delayed(const Duration(milliseconds: 800));
+      final service = DependencyProvider.of(context).orderService;
+      final stats = await service.getStatistics();
       setState(() {
-        _stats = OrderStatistics(
-          totalOrders: 120,
-          totalRevenue: 25000.50,
-          averageOrderValue: 208.33,
-          topProducts: [
-            const TopProduct(productId: 1, productName: 'Product Alpha', quantitySold: 50, revenue: 5000),
-            const TopProduct(productId: 2, productName: 'Product Beta', quantitySold: 30, revenue: 3000),
-            const TopProduct(productId: 3, productName: 'Product Gamma', quantitySold: 20, revenue: 2000),
-          ],
-        );
+        _stats = stats;
       });
     } catch (e) {
-      setState(() => _error = e.toString());
+      setState(() => _error = 'Erro ao conectar com o servidor');
     } finally {
       setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _handleLogout() async {
+    try {
+      final client = DependencyProvider.of(context).apiClient;
+      await client.auth.clearToken();
+    } catch (e) {
+      // Mesmo se falhar a limpeza, queremos sair
+      debugPrint('Erro ao limpar token: $e');
+    } finally {
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+          (route) => false,
+        );
+      }
     }
   }
 
@@ -59,6 +69,14 @@ class _DashboardPageState extends State<DashboardPage> {
             floating: true,
             pinned: true,
             backgroundColor: AppTheme.primary600,
+            actions: [
+              IconButton(
+                onPressed: _handleLogout,
+                icon: const Icon(Icons.logout_rounded, color: Colors.white),
+                tooltip: 'Sair',
+              ),
+              const SizedBox(width: 8),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
               title: Column(
@@ -87,15 +105,21 @@ class _DashboardPageState extends State<DashboardPage> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedTab,
         onDestinationSelected: (i) {
-          setState(() => _selectedTab = i);
+          if (i == _selectedTab) return;
+          
           if (i == 1) {
             Navigator.push(context, MaterialPageRoute(builder: (_) => const OrdersPage()));
+          } else if (i == 2) {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const ProductsPage()));
+          } else {
+            setState(() => _selectedTab = i);
           }
         },
         indicatorColor: AppTheme.primary100,
         destinations: const [
           NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'Dashboard'),
           NavigationDestination(icon: Icon(Icons.receipt_long_outlined), selectedIcon: Icon(Icons.receipt_long), label: 'Pedidos'),
+          NavigationDestination(icon: Icon(Icons.inventory_2_outlined), selectedIcon: Icon(Icons.inventory_2), label: 'Produtos'),
         ],
       ),
     );
@@ -136,7 +160,7 @@ class _DashboardPageState extends State<DashboardPage> {
         Row(children: [
           Expanded(child: _StatCard(
             label: 'Receita Total',
-            value: 'R\$ ${stats.totalRevenue.toStringAsFixed(0)}',
+            value: CurrencyFormatter.format(stats.totalRevenue),
             icon: Icons.attach_money_rounded,
             color: AppTheme.primary600,
             bgColor: AppTheme.primary50,
@@ -178,7 +202,7 @@ class _DashboardPageState extends State<DashboardPage> {
               const Text('Ticket Médio',
                   style: TextStyle(color: Color(0xFFBAE6FD), fontSize: 12, fontWeight: FontWeight.bold)),
               Text(
-                'R\$ ${stats.averageOrderValue.toStringAsFixed(2)}',
+                CurrencyFormatter.format(stats.averageOrderValue),
                 style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900),
               ),
               const Text('por pedido', style: TextStyle(color: Color(0xFF7DD3FC), fontSize: 11)),
@@ -266,7 +290,7 @@ class _ProductRow extends StatelessWidget {
         Text('${product.quantitySold} vendidos', style: const TextStyle(fontSize: 12, color: AppTheme.gray500)),
       ])),
       Text(
-        'R\$ ${product.revenue.toStringAsFixed(0)}',
+        CurrencyFormatter.format(product.revenue),
         style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primary600),
       ),
     ]),

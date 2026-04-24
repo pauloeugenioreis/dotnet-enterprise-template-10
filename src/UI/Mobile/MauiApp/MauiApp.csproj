@@ -26,6 +26,12 @@
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 	</PropertyGroup>
 
+	<!-- Linux environment paths (Detected from your system) -->
+	<PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+		<AndroidSdkDirectory>/home/paulo/Android/Sdk</AndroidSdkDirectory>
+		<JavaSdkDirectory>/home/paulo/.local/share/JetBrains/Toolbox/apps/android-studio/jbr</JavaSdkDirectory>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<!-- App Icon - brand color #0284c7 (primary-600) -->
 		<MauiIcon Include="Resources\appicon.svg" ForegroundFile="Resources\appiconfg.svg" Color="#0284c7" />

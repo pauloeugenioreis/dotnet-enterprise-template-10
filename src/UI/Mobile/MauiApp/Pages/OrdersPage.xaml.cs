@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using System.Linq;
 using EnterpriseTemplate.MauiApp.Services;
 using ProjectTemplate.Shared.Models;
 
@@ -7,19 +9,25 @@ public partial class OrdersPage : ContentPage
 {
     private readonly IOrderService _orderService;
     private string _currentSearch = "";
-    private string _currentStatus = null;
+    private string? _currentStatus = null;
     private int _currentPage = 1;
+    private bool _isBusy = false;
+    private bool _hasNextPage = true;
+
+    public ObservableCollection<OrderResponseDto> Orders { get; } = new();
 
     public OrdersPage(IOrderService orderService)
     {
         InitializeComponent();
         _orderService = orderService;
+        OrdersList.ItemsSource = Orders;
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await LoadOrdersAsync();
+        if (Orders.Count == 0)
+            await LoadOrdersAsync();
     }
 
     private async void OnRefreshing(object sender, EventArgs e)
@@ -88,22 +96,34 @@ public partial class OrdersPage : ContentPage
         BtnDelivered.TextColor = _currentStatus == "Delivered" ? Colors.White : Color.FromArgb("#64748B");
     }
 
-    private async Task LoadOrdersAsync()
+    private async Task LoadOrdersAsync(bool append = false)
     {
-        LoadingIndicator.IsVisible = true;
-        OrdersList.IsVisible = false;
+        if (_isBusy) return;
+        _isBusy = true;
+
+        if (!append)
+        {
+            _currentPage = 1;
+            Orders.Clear();
+            LoadingIndicator.IsVisible = true;
+            OrdersList.IsVisible = false;
+        }
+        
         EmptyState.IsVisible = false;
 
         try
         {
             var result = await _orderService.GetOrdersAsync(page: _currentPage, searchTerm: _currentSearch, status: _currentStatus);
 
-            if (result?.Items is { Count: > 0 })
+            if (result?.Items != null && result.Items.Any())
             {
-                OrdersList.ItemsSource = result.Items;
+                foreach (var item in result.Items)
+                    Orders.Add(item);
+                
+                _hasNextPage = result.HasNextPage;
                 OrdersList.IsVisible = true;
             }
-            else
+            else if (!append)
             {
                 EmptyState.IsVisible = true;
             }
@@ -114,7 +134,35 @@ public partial class OrdersPage : ContentPage
         }
         finally
         {
+            _isBusy = false;
             LoadingIndicator.IsVisible = false;
         }
+    }
+
+    private async void OnRemainingItemsReached(object sender, EventArgs e)
+    {
+        if (_hasNextPage && !_isBusy)
+        {
+            _currentPage++;
+            await LoadOrdersAsync(append: true);
+        }
+    }
+
+    private async void OnViewDetailsClicked(object sender, EventArgs e)
+    {
+        if (sender is Button btn && btn.BindingContext is OrderResponseDto order)
+        {
+            // Similar to Flutter details dialog
+            var message = $"Cliente: {order.CustomerName}\nEmail: {order.CustomerEmail}\nEndereço: {order.ShippingAddress}\n\nItens:\n";
+            foreach (var item in order.Items)
+                message += $"- {item.ProductName} ({item.Quantity}x)\n";
+
+            await DisplayAlert("Detalhes do Pedido", message, "Fechar");
+        }
+    }
+
+    private async void OnEditClicked(object sender, EventArgs e)
+    {
+        await DisplayAlert("Editar", "Funcionalidade de edição em desenvolvimento para MAUI.", "OK");
     }
 }

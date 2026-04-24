@@ -24,6 +24,7 @@ void main() async {
 
   runApp(
     DependencyProvider(
+      apiClient: apiClient,
       authService: authService,
       productService: productService,
       orderService: orderService,

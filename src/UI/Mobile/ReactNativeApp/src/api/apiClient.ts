@@ -1,7 +1,10 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 
-const API_URL = 'https://localhost:7196'; // Em dev com emulador Android, usar 10.0.2.2
+const API_URL = Platform.OS === 'android' 
+  ? 'http://10.0.2.2:5000' 
+  : 'http://localhost:5000';
 
 const apiClient = axios.create({
   baseURL: API_URL,

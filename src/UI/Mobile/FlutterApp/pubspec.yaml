@@ -25,6 +25,9 @@ dependencies:
   # UI: ícones premium
   cupertino_icons: ^1.0.8
 
+  # Localização e formatação (Moeda PT-BR)
+  intl: ^0.19.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

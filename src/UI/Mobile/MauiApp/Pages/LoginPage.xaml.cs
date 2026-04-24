@@ -1,4 +1,5 @@
 using EnterpriseTemplate.MauiApp.Services;
+using ProjectTemplate.Shared.Models;
 
 namespace EnterpriseTemplate.MauiApp.Pages;
 
@@ -30,13 +31,13 @@ public partial class LoginPage : ContentPage
 
         try
         {
-            var result = await _authService.LoginAsync(new ProjectTemplate.Shared.Models.LoginRequestDto
+            var result = await _authService.LoginAsync(new LoginDto
             {
                 Email = email,
                 Password = password
             });
 
-            if (result?.Token is not null)
+            if (result?.AccessToken is not null)
             {
                 // Navegar para o Dashboard
                 await Shell.Current.GoToAsync("//dashboard");

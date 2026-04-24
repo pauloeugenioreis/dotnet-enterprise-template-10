@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'auth_interceptor.dart';
@@ -5,7 +6,10 @@ import 'auth_interceptor.dart';
 /// Fábrica de clientes HTTP configurados com interceptors.
 /// Equivalente ao AddHttpClient("ApiGateway").AddHttpMessageHandler<AuthTokenHandler>()
 class ApiClient {
-  static const String baseUrl = 'https://localhost:7196';
+  static String get baseUrl {
+    if (Platform.isAndroid) return 'http://10.0.2.2:5000'; // HTTP para evitar erros de SSL em dev
+    return 'http://localhost:5000';
+  }
 
   final Dio _dio;
   final AuthInterceptor _authInterceptor;

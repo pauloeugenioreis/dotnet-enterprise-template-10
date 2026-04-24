@@ -85,4 +85,15 @@ class AppTheme {
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
     ),
   );
+
+  static InputDecoration inputDecoration(String label, {IconData? icon}) {
+    return InputDecoration(
+      labelText: label,
+      floatingLabelBehavior: FloatingLabelBehavior.always,
+      prefixIcon: icon != null ? Icon(icon, color: primary600) : null,
+      hintStyle: const TextStyle(color: gray400, fontSize: 14),
+      labelStyle: const TextStyle(color: primary600, fontSize: 13, fontWeight: FontWeight.w900),
+      alignLabelWithHint: true,
+    );
+  }
 }

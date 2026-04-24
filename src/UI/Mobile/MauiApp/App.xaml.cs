@@ -1,4 +1,4 @@
-﻿namespace MauiApp;
+namespace EnterpriseTemplate.MauiApp;
 
 public partial class App : Application
 {

@@ -1,14 +1,42 @@
-import React from 'react';
-import { View, Text, ScrollView, SafeAreaView, RefreshControl } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, ScrollView, SafeAreaView, RefreshControl, ActivityIndicator } from 'react-native';
 import { colors } from '../../theme/colors';
+import apiClient from '../../api/apiClient';
+import { formatCurrency } from '../../utils/formatters';
 
 export default function DashboardScreen() {
-  const [refreshing, setRefreshing] = React.useState(false);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
+  const loadStats = useCallback(async () => {
+    try {
+      const response = await apiClient.get('/api/v1/Order/statistics');
+      setStats(response.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    loadStats();
+  }, [loadStats]);
+
+  if (loading && !refreshing) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.gray[50] }}>
+        <ActivityIndicator size="large" color={colors.primary[600]} />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.gray[50] }}>
@@ -25,8 +53,8 @@ export default function DashboardScreen() {
 
         {/* Stats Row */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
-          <StatCard label="Receita" value="R$ 25.000" icon="💰" color={colors.primary[600]} bgColor={colors.primary[50]} />
-          <StatCard label="Pedidos" value="120" icon="📦" color={colors.success} bgColor="#F0FDF4" />
+          <StatCard label="Receita" value={formatCurrency(stats?.totalRevenue || 0)} icon="💰" color={colors.primary[600]} bgColor={colors.primary[50]} />
+          <StatCard label="Pedidos" value={stats?.totalOrders?.toString() || '0'} icon="📦" color={colors.success} bgColor="#F0FDF4" />
         </View>
 
         {/* Highlight Card */}
@@ -39,19 +67,29 @@ export default function DashboardScreen() {
             <Text style={{ fontSize: 40, marginRight: 16 }}>📈</Text>
             <View>
               <Text style={{ color: colors.primary[200], fontSize: 12, fontWeight: 'bold' }}>Ticket Médio</Text>
-              <Text style={{ color: 'white', fontSize: 28, fontWeight: '900' }}>R$ 208,33</Text>
+              <Text style={{ color: 'white', fontSize: 28, fontWeight: '900' }}>{formatCurrency(stats?.averageOrderValue || 0)}</Text>
             </View>
           </View>
         </View>
 
-        {/* Content Placeholder */}
+        {/* Top Products */}
         <View style={{ backgroundColor: 'white', borderRadius: 24, padding: 20, elevation: 2 }}>
           <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 16 }}>Produtos em Destaque</Text>
-          <View style={{ height: 200, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ color: colors.gray[400] }}>Lista de produtos aqui...</Text>
-          </View>
+          {stats?.topProducts?.map((item: any) => (
+            <View key={item.productId} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ width: 40, height: 40, backgroundColor: colors.primary[50], borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={{ color: colors.primary[600], fontWeight: 'bold' }}>{item.productName[0]}</Text>
+                </View>
+                <View style={{ marginLeft: 12 }}>
+                  <Text style={{ fontWeight: 'bold', color: colors.gray[900] }}>{item.productName}</Text>
+                  <Text style={{ fontSize: 11, color: colors.gray[500] }}>{item.quantitySold} vendidos</Text>
+                </View>
+              </View>
+              <Text style={{ fontWeight: 'bold', color: colors.primary[600] }}>{formatCurrency(item.revenue)}</Text>
+            </View>
+          ))}
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );
