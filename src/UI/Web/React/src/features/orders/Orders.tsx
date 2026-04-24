@@ -1,94 +1,38 @@
-import { useState } from 'react';
 import { useOrders } from './useOrders';
-import { useProducts } from '../products/useProducts';
 import Modal from '../../components/Modal';
 import Pagination from '../../components/Pagination';
 import Dropdown from '../../components/Dropdown';
 import OrderDetailsModal from './components/OrderDetailsModal';
-import { OrderResponseDto } from '../../api/services';
+import { OrderResponse } from '../../api/services';
 
 export default function Orders() {
   const {
     data, isLoading, getStatusColor, page, setPage, pageSize, setPageSize,
-    handleCancel, handleExport, createOrder,
-    status, setStatus, searchTerm, setSearchTerm, startDate, setStartDate, endDate, setEndDate
+    handleCancel, handleExport,
+    status, setStatus, searchTerm, setSearchTerm, startDate, setStartDate, endDate, setEndDate,
+    
+    // Data from hooks
+    productsData,
+    
+    // Modal & Form State
+    isModalOpen, setIsModalOpen,
+    isDetailsOpen, setIsDetailsOpen,
+    selectedOrder,
+    editingId,
+    formData,
+    setFormData,
+    
+    // Handlers
+    handleSubmit,
+    handleEdit,
+    handleAddItem,
+    handleRemoveItem,
+    handleItemChange,
+    handleOpenNew,
+    handleViewDetails
   } = useOrders();
-  const { data: productsData } = useProducts();
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<OrderResponseDto | null>(null);
-  const [editingId, setEditingId] = useState<number | null>(null);
-
-  const [formData, setFormData] = useState({
-    customerName: '',
-    customerEmail: '',
-    shippingAddress: '',
-    items: [] as any[]
-  });
-
-  const handleSubmit = async () => {
-    try {
-      await createOrder(formData);
-      setIsModalOpen(false);
-      setFormData({ customerName: '', customerEmail: '', shippingAddress: '', items: [] });
-    } catch (error) {
-      alert('Erro ao criar pedido. Verifique se todos os campos estão preenchidos.');
-    }
-  };
-
-  const handleEdit = (order: any) => {
-    setEditingId(order.id);
-    setFormData({
-      customerName: order.customerName || '',
-      customerEmail: order.customerEmail || '',
-      shippingAddress: order.shippingAddress || '',
-      items: order.items || []
-    });
-    setIsModalOpen(true);
-  };
 
   const totalPages = data?.totalPages || 1;
-
-  const handleAddItem = () => {
-    setFormData({
-      ...formData,
-      items: [...formData.items, { productId: '', quantity: 1, unitPrice: 0 }]
-    });
-  };
-
-  const handleRemoveItem = (index: number) => {
-    setFormData({
-      ...formData,
-      items: formData.items.filter((_, i) => i !== index)
-    });
-  };
-
-  const handleItemChange = (index: number, field: string, value: any) => {
-    const newItems = [...formData.items];
-    if (field === 'productId') {
-      const product = productsData?.items.find((p: any) => p.id === parseInt(value));
-      newItems[index] = {
-        ...newItems[index],
-        productId: parseInt(value),
-        unitPrice: product?.price || 0
-      };
-    } else {
-      newItems[index] = { ...newItems[index], [field]: value };
-    }
-    setFormData({ ...formData, items: newItems });
-  };
-
-  const handleOpenNew = () => {
-    setEditingId(null);
-    setFormData({ customerName: '', customerEmail: '', shippingAddress: '', items: [] });
-    setIsModalOpen(true);
-  };
-
-  const handleViewDetails = (order: OrderResponseDto) => {
-    setSelectedOrder(order);
-    setIsDetailsOpen(true);
-  };
 
   return (
     <div className="animate-in fade-in duration-700">
@@ -313,7 +257,7 @@ export default function Orders() {
                       onChange={val => handleItemChange(index, 'productId', val)}
                       placeholder="Selecionar Produto"
                       options={productsData?.items.map((p: any) => ({
-                        label: `${p.name} - R$ ${p.price}`,
+                        label: `${p.name} - R$ ${p.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
                         value: p.id.toString()
                       })) || []}
                     />

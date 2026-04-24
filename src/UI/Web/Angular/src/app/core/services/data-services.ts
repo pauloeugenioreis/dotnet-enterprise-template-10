@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BaseService } from './base.service';
-import { PagedResponse, OrderResponseDto, DomainEvent } from '../../shared/models/models';
+import { PagedResponse, OrderResponse, DomainEvent } from '../../shared/models/models';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService extends BaseService {
@@ -10,7 +10,7 @@ export class OrderService extends BaseService {
     if (status) url += `&status=${status}`;
     if (from) url += `&startDate=${from.toISOString()}`;
     if (to) url += `&endDate=${to.toISOString()}`;
-    return this.http.get<PagedResponse<OrderResponseDto>>(url);
+    return this.http.get<PagedResponse<OrderResponse>>(url);
   }
 
   createOrder(order: any) {

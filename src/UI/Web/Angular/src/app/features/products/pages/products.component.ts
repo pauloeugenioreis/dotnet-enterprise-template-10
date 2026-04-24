@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../../core/services/data-services';
-import { ProductResponseDto } from '../../../shared/models/models';
+import { ProductResponse } from '../../../shared/models/models';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
@@ -18,7 +18,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
   
-  products = signal<ProductResponseDto[]>([]);
+  products = signal<ProductResponse[]>([]);
   loading = signal(true);
   
   // Filters
@@ -122,7 +122,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.showModal = true;
   }
 
-  openEdit(product: ProductResponseDto) {
+  openEdit(product: ProductResponse) {
     this.editingProduct = product;
     this.modalTitle = 'Editar Produto';
     this.formData = { ...product };

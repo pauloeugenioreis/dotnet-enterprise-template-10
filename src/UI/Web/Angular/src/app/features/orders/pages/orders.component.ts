@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrderService, ProductService } from '../../../core/services/data-services';
-import { OrderResponseDto, ProductResponseDto } from '../../../shared/models/models';
+import { OrderResponse, ProductResponse } from '../../../shared/models/models';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
@@ -21,8 +21,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
   
-  orders = signal<OrderResponseDto[]>([]);
-  products = signal<ProductResponseDto[]>([]);
+  orders = signal<OrderResponse[]>([]);
+  products = signal<ProductResponse[]>([]);
   loading = signal(true);
   
   // Filters
@@ -40,7 +40,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
   // Modal State
   showModal = false;
   showDetailsModal = signal(false);
-  selectedOrder = signal<OrderResponseDto | null>(null);
+  selectedOrder = signal<OrderResponse | null>(null);
   modalTitle = 'Novo Pedido';
   editingOrder: any = null;
   formData = {
@@ -153,12 +153,12 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.showModal = true;
   }
 
-  viewDetails(order: OrderResponseDto) {
+  viewDetails(order: OrderResponse) {
     this.selectedOrder.set(order);
     this.showDetailsModal.set(true);
   }
 
-  openEdit(order: OrderResponseDto) {
+  openEdit(order: OrderResponse) {
     this.editingOrder = order;
     this.modalTitle = 'Editar Pedido';
     this.formData = {
@@ -174,7 +174,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.showModal = true;
   }
 
-  cancelOrder(order: OrderResponseDto) {
+  cancelOrder(order: OrderResponse) {
     if (order.status === 'Cancelled') return;
     if (confirm('Tem certeza que deseja cancelar este pedido?')) {
       this.orderService.updateStatus(order.id, 'Cancelled').subscribe({

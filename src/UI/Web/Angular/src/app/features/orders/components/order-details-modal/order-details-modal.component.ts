@@ -1,29 +1,21 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
-import { OrderResponseDto } from '../../../../shared/models/models';
+import { OrderResponse } from '../../../../shared/models/models';
 import { DropdownComponent } from '../../../../shared/components/dropdown/dropdown.component';
 import { OrderService } from '../../../../core/services/data-services';
 import { inject } from '@angular/core';
+import { DrawerComponent } from '../../../../shared/components/drawer/drawer.component';
 
 @Component({
   selector: 'app-order-details-modal',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe, DatePipe, DropdownComponent],
-  templateUrl: './order-details-modal.component.html',
-  styles: [`
-    @keyframes slideIn {
-      from { transform: translateX(100%); }
-      to { transform: translateX(0); }
-    }
-    .animate-slide-in {
-      animation: slideIn 0.3s ease-out forwards;
-    }
-  `]
+  imports: [CommonModule, DatePipe, DropdownComponent, DrawerComponent],
+  templateUrl: './order-details-modal.component.html'
 })
 export class OrderDetailsModalComponent {
   private orderService = inject(OrderService);
 
-  @Input() order: OrderResponseDto | null = null;
+  @Input() order: OrderResponse | null = null;
   @Input() isOpen = false;
   @Output() close = new EventEmitter<void>();
   @Output() statusUpdated = new EventEmitter<void>();
@@ -47,7 +39,7 @@ export class OrderDetailsModalComponent {
     if (!this.order || !newStatus) return;
     if (this.order.status === newStatus) return;
 
-    this.orderService.updateStatus(this.order.id, newStatus).subscribe({
+    this.orderService.updateStatus(this.order.id, newStatus, 'Atualizado via Dashboard Angular').subscribe({
       next: () => {
         this.statusUpdated.emit();
       }

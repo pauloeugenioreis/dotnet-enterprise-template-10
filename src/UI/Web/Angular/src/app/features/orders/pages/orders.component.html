@@ -115,15 +115,15 @@
               </td>
               <td class="px-10 py-8">
                 <div class="flex gap-2">
-                  <button (click)="viewDetails(order)" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-primary-50 rounded-xl text-primary-600 transition-all active:scale-90" title="Ver Detalhes">
+                  <button (click)="viewDetails(order)" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-blue-50 rounded-xl text-blue-600 transition-all active:scale-90" title="Ver Detalhes">
                     🔍
                   </button>
-                  <button (click)="openEdit(order)" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-blue-50 rounded-xl text-blue-600 transition-all active:scale-90" title="Editar">
+                  <button (click)="openEdit(order)" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-primary-50 rounded-xl text-primary-600 transition-all active:scale-90" title="Editar">
                     ✏️
                   </button>
                   <button
                     (click)="cancelOrder(order)"
-                    class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-red-50 rounded-xl text-red-600 transition-all active:scale-90"
+                    class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-rose-50 rounded-xl text-rose-600 transition-all active:scale-90"
                     [class.opacity-20]="order.status === 'Cancelled'"
                     [disabled]="order.status === 'Cancelled'"
                     title="Cancelar"

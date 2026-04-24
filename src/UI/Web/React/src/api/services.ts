@@ -1,6 +1,6 @@
 import apiClient from './apiClient';
 
-export interface OrderItemDto {
+export interface OrderItem {
   productId: number;
   productName: string;
   quantity: number;
@@ -8,7 +8,7 @@ export interface OrderItemDto {
   subtotal: number;
 }
 
-export interface OrderResponseDto {
+export interface OrderResponse {
   id: number;
   orderNumber: string;
   customerName: string;
@@ -20,7 +20,7 @@ export interface OrderResponseDto {
   tax: number;
   total: number;
   createdAt: string;
-  items: OrderItemDto[];
+  items: OrderItem[];
 }
 
 export const authService = {

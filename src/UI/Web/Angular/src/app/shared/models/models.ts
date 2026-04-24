@@ -10,7 +10,7 @@ export interface PagedResponse<T> {
   hasPreviousPage: boolean;
 }
 
-export interface UserDto {
+export interface User {
   id: string | number;
   email: string;
   firstName: string;
@@ -21,14 +21,14 @@ export interface UserDto {
   createdAt: string;
 }
 
-export interface AuthResponseDto {
+export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
   expiresAt: string;
-  user: UserDto;
+  user: User;
 }
 
-export interface OrderItemDto {
+export interface OrderItem {
   productId: string;
   productName: string;
   quantity: number;
@@ -36,7 +36,7 @@ export interface OrderItemDto {
   subtotal: number;
 }
 
-export interface OrderResponseDto {
+export interface OrderResponse {
   id: string;
   orderNumber: string;
   customerName: string;
@@ -48,10 +48,10 @@ export interface OrderResponseDto {
   tax: number;
   total: number;
   createdAt: string;
-  items?: OrderItemDto[];
+  items?: OrderItem[];
 }
 
-export interface OrderStatisticsDto {
+export interface OrderStatistics {
   totalOrders: number;
   totalRevenue: number;
   averageOrderValue: number;
@@ -68,7 +68,7 @@ export interface DomainEvent {
   version: number;
 }
 
-export interface ProductResponseDto {
+export interface ProductResponse {
   id: string;
   name: string;
   category: string;

@@ -4,6 +4,7 @@
 @using BlazorApp.Components.UI
 @using BlazorApp.Client.Services
 @using ProjectTemplate.Shared.Models
+@using System.Globalization
 @inject IOrderService OrderService
 @inject NavigationManager Navigation
 @rendermode InteractiveAuto
@@ -90,7 +91,7 @@
                                     <span class="font-bold text-gray-500 text-lg">@order.CustomerName</span>
                                 </td>
                                 <td class="px-12 py-10">
-                                    <span class="font-black text-primary-600 text-xl tracking-tight">@order.Total.ToString("C")</span>
+                                    <span class="font-black text-primary-600 text-xl tracking-tight">R$ @order.Total.ToString("N2", new CultureInfo("pt-BR"))</span>
                                 </td>
                             </tr>
                         }

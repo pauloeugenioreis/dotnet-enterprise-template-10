@@ -3,6 +3,7 @@
 @attribute [Authorize]
 @using BlazorApp.Client.Services
 @using ProjectTemplate.Shared.Models
+@using System.Globalization
 @inject IOrderService OrderService
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
@@ -117,7 +118,7 @@
                 <div class="text-[10px] text-gray-400 uppercase tracking-tighter">@order.CustomerEmail</div>
               </td>
               <td class="px-10 py-8">
-                <span class="font-black text-primary-600 text-lg">R$ @order.Total.ToString("N2")</span>
+                <span class="font-black text-primary-600 text-lg">R$ @order.Total.ToString("N2", new CultureInfo("pt-BR"))</span>
               </td>
               <td class="px-10 py-8">
                 <span class='px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest @GetStatusClass(order.Status)'>

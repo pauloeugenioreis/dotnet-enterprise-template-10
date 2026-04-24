@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { orderService } from '../../api/services';
+import { orderService, OrderResponse } from '../../api/services';
+import { useProducts } from '../products/useProducts';
 
 export function useOrders() {
+  const { data: productsData } = useProducts();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [status, setStatus] = useState<string>('');
@@ -65,6 +67,79 @@ export function useOrders() {
     }
   };
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<OrderResponse | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  const [formData, setFormData] = useState({
+    customerName: '',
+    customerEmail: '',
+    shippingAddress: '',
+    items: [] as any[]
+  });
+
+  const handleSubmit = async () => {
+    try {
+      await createMutation.mutateAsync(formData);
+      setIsModalOpen(false);
+      setFormData({ customerName: '', customerEmail: '', shippingAddress: '', items: [] });
+    } catch (error) {
+      alert('Erro ao criar pedido. Verifique se todos os campos estão preenchidos.');
+    }
+  };
+
+  const handleEdit = (order: any) => {
+    setEditingId(order.id);
+    setFormData({
+      customerName: order.customerName || '',
+      customerEmail: order.customerEmail || '',
+      shippingAddress: order.shippingAddress || '',
+      items: order.items || []
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleAddItem = () => {
+    setFormData({
+      ...formData,
+      items: [...formData.items, { productId: '', quantity: 1, unitPrice: 0 }]
+    });
+  };
+
+  const handleRemoveItem = (index: number) => {
+    setFormData({
+      ...formData,
+      items: formData.items.filter((_, i) => i !== index)
+    });
+  };
+
+  const handleItemChange = (index: number, field: string, value: any) => {
+    const newItems = [...formData.items];
+    if (field === 'productId') {
+      const product = productsData?.items.find((p: any) => p.id === parseInt(value));
+      newItems[index] = {
+        ...newItems[index],
+        productId: parseInt(value),
+        unitPrice: product?.price || 0
+      };
+    } else {
+      newItems[index] = { ...newItems[index], [field]: value };
+    }
+    setFormData({ ...formData, items: newItems });
+  };
+
+  const handleOpenNew = () => {
+    setEditingId(null);
+    setFormData({ customerName: '', customerEmail: '', shippingAddress: '', items: [] });
+    setIsModalOpen(true);
+  };
+
+  const handleViewDetails = (order: OrderResponse) => {
+    setSelectedOrder(order);
+    setIsDetailsOpen(true);
+  };
+
   return {
     data,
     isLoading,
@@ -99,6 +174,29 @@ export function useOrders() {
     handleCancel,
     handleExport,
     createOrder: createMutation.mutateAsync,
-    isCreating: createMutation.isPending
+    isCreating: createMutation.isPending,
+    
+    // Data
+    productsData,
+    
+    // Modal & Form State
+    isModalOpen,
+    setIsModalOpen,
+    isDetailsOpen,
+    setIsDetailsOpen,
+    selectedOrder,
+    setSelectedOrder,
+    editingId,
+    formData,
+    setFormData,
+    
+    // Handlers
+    handleSubmit,
+    handleEdit,
+    handleAddItem,
+    handleRemoveItem,
+    handleItemChange,
+    handleOpenNew,
+    handleViewDetails
   };
 }

@@ -5,7 +5,7 @@ import { ref, onMounted } from 'vue';
 import { orderService } from '../../api/services/OrderService';
 
 const stats = [
-  { label: 'Vendas Mensais', value: 'R$ 842.500', icon: '📈', color: 'bg-rose-50 text-rose-500' },
+  { label: 'Vendas Mensais', value: 'R$ 842.500,00', icon: '📈', color: 'bg-rose-50 text-rose-500' },
   { label: 'Novos Clientes', value: '+ 128', icon: '👤', color: 'bg-blue-50 text-blue-500' },
   { label: 'Status do Sistema', value: 'Operacional', icon: '✅', color: 'bg-emerald-50 text-emerald-500' },
 ];

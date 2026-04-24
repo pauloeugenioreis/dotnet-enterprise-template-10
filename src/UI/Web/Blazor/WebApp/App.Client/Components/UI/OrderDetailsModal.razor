@@ -1,29 +1,16 @@
 @using BlazorApp.Client.Services
 @using ProjectTemplate.Shared.Models
+@using System.Globalization
 
-<div class="fixed inset-0 z-50 @(IsOpen ? "block" : "hidden")">
-    <!-- Backdrop -->
-    <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" @onclick="Close"></div>
-
-    <!-- Modal Content -->
-    <div class="absolute right-0 top-0 h-full w-full max-w-2xl bg-white shadow-2xl flex flex-col animate-slide-in print-area">
+<Drawer IsOpen="@IsOpen" 
+        OnClose="Close" 
+        Title="@("Pedido #" + Order?.OrderNumber)"
+        Subtitle="@(Order != null ? "Realizado em " + Order.CreatedAt.ToString("dd/MM/yyyy HH:mm") : "")">
+    
+    <ChildContent>
         @if (Order != null)
         {
-            <!-- Header -->
-            <div class="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                <div>
-                    <h2 class="text-2xl font-black text-gray-900">Pedido #@Order.OrderNumber</h2>
-                    <p class="text-gray-500 text-sm mt-1">Realizado em @Order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
-                </div>
-                <button @onclick="Close" class="p-2 hover:bg-gray-200 rounded-xl transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Body -->
-            <div class="flex-1 overflow-y-auto p-8 space-y-10">
+            <div class="space-y-10">
                 <!-- Status & Info -->
                 <div class="grid grid-cols-2 gap-8">
                     <div>
@@ -61,8 +48,8 @@
                                             <p class="text-[10px] text-gray-400">ID: @item.ProductId</p>
                                         </td>
                                         <td class="px-6 py-4 text-center text-sm font-medium text-gray-600">@item.Quantity</td>
-                                        <td class="px-6 py-4 text-right text-sm text-gray-600">@item.UnitPrice.ToString("C")</td>
-                                        <td class="px-6 py-4 text-right text-sm font-bold text-gray-900">@item.Subtotal.ToString("C")</td>
+                                        <td class="px-6 py-4 text-right text-sm text-gray-600">R$ @item.UnitPrice.ToString("N2", new CultureInfo("pt-BR"))</td>
+                                        <td class="px-6 py-4 text-right text-sm font-bold text-gray-900">R$ @item.Subtotal.ToString("N2", new CultureInfo("pt-BR"))</td>
                                     </tr>
                                 }
                             </tbody>
@@ -81,60 +68,50 @@
                         <p class="text-sm text-gray-700 leading-relaxed">@Order.ShippingAddress</p>
                     </div>
                 </div>
-            </div>
 
-            <!-- Footer / Totals -->
-            <div class="p-8 border-t border-gray-100 bg-gray-50/30">
-                <div class="space-y-3">
+                <!-- Totals Summary -->
+                <div class="space-y-3 pt-6 border-t border-gray-100">
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-500">Subtotal</span>
-                        <span class="font-medium text-gray-900">@Order.Subtotal.ToString("C")</span>
+                        <span class="font-medium text-gray-900">R$ @Order.Subtotal.ToString("N2", new CultureInfo("pt-BR"))</span>
                     </div>
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-500">Frete</span>
-                        <span class="font-medium text-gray-900">@Order.ShippingCost.ToString("C")</span>
+                        <span class="font-medium text-gray-900">R$ @Order.ShippingCost.ToString("N2", new CultureInfo("pt-BR"))</span>
                     </div>
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-500">Impostos</span>
-                        <span class="font-medium text-gray-900">@Order.Tax.ToString("C")</span>
+                        <span class="font-medium text-gray-900">R$ @Order.Tax.ToString("N2", new CultureInfo("pt-BR"))</span>
                     </div>
                     <div class="pt-4 border-t border-gray-200 flex justify-between items-end">
                         <span class="text-lg font-bold text-gray-900">Total</span>
-                        <span class="text-3xl font-black text-primary-600">@Order.Total.ToString("C")</span>
+                        <span class="text-3xl font-black text-primary-600">R$ @Order.Total.ToString("N2", new CultureInfo("pt-BR"))</span>
                     </div>
                 </div>
-                
-                <div class="mt-10 flex gap-4 no-print">
-                    <button @onclick="Print" class="flex-1 bg-gradient-to-br from-gray-50 to-white border border-gray-200 py-3 rounded-xl text-sm font-bold text-gray-600 hover:bg-white hover:border-gray-300 hover:shadow-lg hover:shadow-gray-100 transition-all active:scale-95 flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                        </svg>
-                        Imprimir Pedido
-                    </button>
-                    <div class="flex-1">
-                        <Dropdown Options="statusOptions" 
-                                  Value="@Order.Status" 
-                                  ValueChanged="HandleStatusChange" 
-                                  Variant="primary"
-                                  Placeholder="Atualizar Status"
-                                  LabelOverride="Atualizar Status"
-                                  Direction="up" />
-                    </div>
-                </div>
+
             </div>
         }
-    </div>
-</div>
+    </ChildContent>
 
-<style>
-    @@keyframes slideIn {
-        from { transform: translateX(100%); }
-        to { transform: translateX(0); }
-    }
-    .animate-slide-in {
-        animation: slideIn 0.3s ease-out forwards;
-    }
-</style>
+    <FooterContent>
+        <div class="flex gap-4 no-print">
+            <button @onclick="Print" class="flex-1 bg-gradient-to-br from-primary-50/50 to-white border border-primary-100 py-4 rounded-2xl text-[11px] font-bold text-primary-700 uppercase tracking-widest hover:bg-white hover:border-primary-200 hover:shadow-lg hover:shadow-primary-100/50 transition-all active:scale-95 flex items-center justify-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Imprimir Pedido
+            </button>
+            <div class="flex-1">
+                <Dropdown Options="statusOptions" 
+                          Value="@Order?.Status" 
+                          ValueChanged="HandleStatusChange" 
+                          Variant="primary"
+                          LabelOverride="Atualizar Status"
+                          Direction="up" />
+            </div>
+        </div>
+    </FooterContent>
+</Drawer>
 
 @code {
     [Parameter] public OrderResponseDto? Order { get; set; }
