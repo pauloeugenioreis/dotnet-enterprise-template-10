@@ -1,11 +1,11 @@
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 using ProjectTemplate.Domain.Exceptions;
 using ProjectTemplate.Domain.Interfaces;
 using Xunit;
@@ -15,7 +15,8 @@ namespace ProjectTemplate.Integration.Tests.Controllers;
 /// <summary>
 /// Integration tests for DocumentController using an in-memory document service.
 /// </summary>
-public class DocumentControllerTests : IClassFixture<WebApplicationFactoryFixture>
+[Collection("Integration Tests")]
+public class DocumentControllerTests
 {
     private readonly HttpClient _client;
 

@@ -45,8 +45,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-API_PROJECT="$PROJECT_ROOT/src/Api/Api.csproj"
-DATA_PROJECT="$PROJECT_ROOT/src/Data/Data.csproj"
+API_PROJECT="$PROJECT_ROOT/src/Server/Api/Api.csproj"
+DATA_PROJECT="$PROJECT_ROOT/src/Server/Data/Data.csproj"
 
 echo -e "${CYAN}================================================${NC}"
 echo -e "${CYAN}  Testing All Database Providers${NC}"

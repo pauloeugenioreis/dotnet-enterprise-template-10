@@ -30,7 +30,7 @@ public partial class LoginPage : ContentPage
 
         try
         {
-            var result = await _authService.LoginAsync(new ProjectTemplate.SharedModels.LoginRequestDto
+            var result = await _authService.LoginAsync(new ProjectTemplate.Shared.Models.LoginRequestDto
             {
                 Email = email,
                 Password = password

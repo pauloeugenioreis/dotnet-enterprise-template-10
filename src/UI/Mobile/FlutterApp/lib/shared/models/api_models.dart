@@ -1,4 +1,4 @@
-/// Modelos Dart que espelham os DTOs do src/Shared/SharedModels.
+/// Modelos Dart que espelham os DTOs do src/Shared/Shared.Models.
 /// Mantém paridade com: LoginRequestDto, AuthResponseDto, OrderResponseDto, etc.
 
 // ─── Auth ────────────────────────────────────────────────────────

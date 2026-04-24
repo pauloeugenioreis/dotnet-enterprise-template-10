@@ -22,7 +22,7 @@ Creates a high-performance Excel export endpoint for a given entity using the `M
 ## Procedure
 
 ### 1. API Controller
-1. Open the target controller (e.g., `src/Api/Controllers/{Name}Controller.cs`).
+1. Open the target controller (e.g., `src/Server/Api/Controllers/{Name}Controller.cs`).
 2. Add a new `[HttpGet("ExportToExcel")]` endpoint.
 3. Accept the same filtering query parameters (`[FromQuery]`) that the `GetAll` endpoint uses, but DO NOT accept `page` or `pageSize`.
 4. Accept a `CancellationToken`.

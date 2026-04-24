@@ -54,7 +54,7 @@ cd ..\MeuProjeto
 
 > Se você usou o script interativo acima, o banco já foi configurado automaticamente. Esta seção é para ajustes manuais.
 
-Edite `src/Api/appsettings.json` e ajuste a connection string para seu ambiente:
+Edite `src/Server/Api/appsettings.json` e ajuste a connection string para seu ambiente:
 
 ```json
 {
@@ -91,7 +91,7 @@ Mais detalhes em [docs/MONGODB-GUIDE.md](docs/MONGODB-GUIDE.md).
 ### Opção A: .NET CLI (Desenvolvimento)
 
 ```bash
-cd src/Api
+cd src/Server/Api
 dotnet run
 ```
 
@@ -139,7 +139,7 @@ Swagger: `https://localhost:3060/swagger`
 
 1. Abra a pasta do projeto
 2. Pressione F5 (debug)
-3. Ou use terminal: `dotnet run --project src/Api/Api.csproj`
+3. Ou use terminal: `dotnet run --project src/Server/Api/Api.csproj`
 
 ### Opção D: .NET Aspire (Orquestração Moderna) 🚀
 
@@ -148,7 +148,7 @@ Esta é a forma recomendada para desenvolvimento local. O Aspire irá subir auto
 1. Navegue até o projeto AppHost:
 
    ```bash
-   cd src/AppHost
+   cd src/Aspire/AppHost
    dotnet run
    ```
 
@@ -276,7 +276,7 @@ cd scripts/linux
 
 ### 1. Criar a entidade
 
-`src/Domain/Entities/Product.cs`:
+`src/Server/Domain/Entities/Product.cs`:
 
 ```csharp
 namespace MeuProjeto.Domain.Entities;
@@ -291,7 +291,7 @@ public class Product : EntityBase
 
 ### 2. Adicionar ao DbContext
 
-`src/Data/Context/ApplicationDbContext.cs`:
+`src/Server/Data/Context/ApplicationDbContext.cs`:
 
 ```csharp
 public DbSet<Product> Products { get; set; }
@@ -300,14 +300,14 @@ public DbSet<Product> Products { get; set; }
 ### 3. Criar migration (EF Core)
 
 ```bash
-cd src/Api
+cd src/Server/Api
 dotnet ef migrations add AddProduct --project ../Data/Data.csproj
 dotnet ef database update
 ```
 
 ### 4. Criar Interface e Repositório concreto
 
-`src/Domain/Interfaces/IProductRepository.cs`:
+`src/Server/Domain/Interfaces/IProductRepository.cs`:
 
 ```csharp
 namespace MeuProjeto.Domain.Interfaces;
@@ -318,7 +318,7 @@ public interface IProductRepository : IRepository<Product>
 }
 ```
 
-`src/Data/Repository/ProductRepository.cs`:
+`src/Server/Data/Repository/ProductRepository.cs`:
 
 ```csharp
 namespace MeuProjeto.Data.Repository;
@@ -333,7 +333,7 @@ public class ProductRepository : Repository<Product>, IProductRepository
 
 ### 5. Criar Interface e Service concreto
 
-`src/Domain/Interfaces/IProductService.cs`:
+`src/Server/Domain/Interfaces/IProductService.cs`:
 
 ```csharp
 namespace MeuProjeto.Domain.Interfaces;
@@ -344,7 +344,7 @@ public interface IProductService : IService<Product>
 }
 ```
 
-`src/Application/Services/ProductService.cs`:
+`src/Server/Application/Services/ProductService.cs`:
 
 ```csharp
 namespace MeuProjeto.Application.Services;
@@ -362,7 +362,7 @@ public class ProductService : Service<Product>, IProductService
 
 ### 6. Criar o Controller
 
-`src/Api/Controllers/ProductController.cs`:
+`src/Server/Api/Controllers/ProductController.cs`:
 
 ```csharp
 namespace MeuProjeto.Api.Controllers;
@@ -421,7 +421,7 @@ Teste os endpoints criados!
 
 Para trocar de ORM, **não use appsettings.json**:
 
-1. Abra `src/Infrastructure/Extensions/DatabaseExtension.cs`
+1. Abra `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`
 2. Comente a linha do EF Core (linha ~26)
 3. Descomente a linha do ORM desejado (Dapper, NHibernate ou Linq2Db)
 
@@ -492,7 +492,7 @@ docker build -t meuprojeto-api:latest .
 ### Hot Reload
 
 ```bash
-dotnet watch --project src/Api/Api.csproj
+dotnet watch --project src/Server/Api/Api.csproj
 ```
 
 ### Ver logs estruturados

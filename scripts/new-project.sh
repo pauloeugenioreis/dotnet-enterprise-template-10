@@ -315,7 +315,7 @@ find . -type f \( -name "*.cs" -o -name "*.csproj" -o -name "*.sln" -o -name "*.
 
 write_step "⚙️" "Configurando appsettings.json..."
 
-APPSETTINGS="$TARGET_DIR/src/Api/appsettings.json"
+APPSETTINGS="$TARGET_DIR/src/Server/Api/appsettings.json"
 
 # Helper: update JSON value using sed (works without jq)
 json_set() {
@@ -431,7 +431,7 @@ declare -A DB_FILES=(
 )
 
 for db in "${!DB_FILES[@]}"; do
-    filepath="$TARGET_DIR/src/Api/${DB_FILES[$db]}"
+    filepath="$TARGET_DIR/src/Server/Api/${DB_FILES[$db]}"
     if [ -f "$filepath" ]; then
         if [ "$DATABASE" = "InMemory" ] || [ "$DATABASE" != "$db" ]; then
             rm -f "$filepath"
@@ -443,7 +443,7 @@ done
 # Enable optional features in Program.cs
 # ============================================================
 
-PROGRAM_CS="$TARGET_DIR/src/Api/Program.cs"
+PROGRAM_CS="$TARGET_DIR/src/Server/Api/Program.cs"
 
 if [ "$MONGODB" = "yes" ]; then
     write_step "🍃" "Habilitando MongoDB no Program.cs..."
@@ -1009,13 +1009,13 @@ echo -e "  $STEP. dotnet build"
 STEP=$((STEP+1))
 
 if [ "$DATABASE" != "InMemory" ]; then
-    echo -e "  $STEP. dotnet ef migrations add InitialCreate --project src/Data --startup-project src/Api"
+    echo -e "  $STEP. dotnet ef migrations add InitialCreate --project src/Server/Data --startup-project src/Server/Api"
     STEP=$((STEP+1))
-    echo -e "  $STEP. dotnet ef database update --project src/Data --startup-project src/Api"
+    echo -e "  $STEP. dotnet ef database update --project src/Server/Data --startup-project src/Server/Api"
     STEP=$((STEP+1))
 fi
 
-echo -e "  $STEP. dotnet run --project src/Api"
+echo -e "  $STEP. dotnet run --project src/Server/Api"
 STEP=$((STEP+1))
 
 echo ""

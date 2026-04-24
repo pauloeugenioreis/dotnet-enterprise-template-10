@@ -3,7 +3,7 @@ services:
     container_name: api
     build:
       context: .
-      dockerfile: src/Api/Dockerfile
+      dockerfile: src/Server/Api/Dockerfile
     ports:
       - "5000:8080"
     environment:

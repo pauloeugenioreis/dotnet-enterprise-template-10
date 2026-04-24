@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ProjectTemplate.Api.Controllers;
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 using ProjectTemplate.Domain.Exceptions;
 using ProjectTemplate.Domain.Interfaces;
 using Xunit;

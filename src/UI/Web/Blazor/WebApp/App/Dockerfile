@@ -9,9 +9,9 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/UI/Web/Blazor/WebApp/App/App.csproj", "src/UI/Web/Blazor/WebApp/App/"]
 COPY ["src/UI/Web/Blazor/WebApp/App.Client/App.Client.csproj", "src/UI/Web/Blazor/WebApp/App.Client/"]
-COPY ["src/Shared/SharedModels/SharedModels.csproj", "src/Shared/SharedModels/"]
-COPY ["src/ServiceDefaults/ServiceDefaults.csproj", "src/ServiceDefaults/"]
-COPY ["src/Domain/Domain.csproj", "src/Domain/"]
+COPY ["src/Shared/Shared.csproj", "src/Shared/"]
+COPY ["src/Aspire/ServiceDefaults/ServiceDefaults.csproj", "src/Aspire/ServiceDefaults/"]
+COPY ["src/Server/Domain/Domain.csproj", "src/Server/Domain/"]
 RUN dotnet restore "src/UI/Web/Blazor/WebApp/App/App.csproj"
 COPY . .
 WORKDIR "/src/src/UI/Web/Blazor/WebApp/App"

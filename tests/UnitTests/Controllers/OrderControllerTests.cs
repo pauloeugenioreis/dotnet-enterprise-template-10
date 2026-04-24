@@ -5,12 +5,12 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ProjectTemplate.Api.Controllers;
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 using Xunit;
 
-using OrderItemDto = ProjectTemplate.SharedModels.OrderItemDto;
+using OrderItemDto = ProjectTemplate.Shared.Models.OrderItemDto;
 
 namespace ProjectTemplate.UnitTests.Controllers;
 

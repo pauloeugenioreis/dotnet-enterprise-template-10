@@ -1,6 +1,6 @@
 ---
 description: "Use when creating or modifying API controllers. Covers base controller patterns, versioning, route conventions, and response handling."
-applyTo: "src/Api/Controllers/**"
+applyTo: "src/Server/Api/Controllers/**"
 ---
 
 # Controller Conventions

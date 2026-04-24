@@ -1,8 +1,8 @@
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 using Xunit;
 
 namespace ProjectTemplate.Integration.Tests.Controllers;
@@ -10,7 +10,8 @@ namespace ProjectTemplate.Integration.Tests.Controllers;
 /// <summary>
 /// Integration tests for OrderController
 /// </summary>
-public class OrderControllerTests : IClassFixture<WebApplicationFactoryFixture>
+[Collection("Integration Tests")]
+public class OrderControllerTests
 {
     private readonly HttpClient _client;
     private readonly WebApplicationFactoryFixture _factory;

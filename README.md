@@ -272,7 +272,7 @@ new-project.bat
 2. Abra o repositório no VS Code e execute o comando `Dev Containers: Reopen in Container`.
 3. O `.devcontainer` monta automaticamente o `docker-compose.yml` raiz, inicializando SQL Server, Oracle, PostgreSQL, MySQL, Postgres (event sourcing), Jaeger, Prometheus e Grafana.
 4. Ao concluir o build, o comando `dotnet restore && dotnet tool restore` já terá sido executado dentro do container.
-5. Use o terminal integrado para rodar `dotnet run --project src/Api` ou qualquer script; o workspace está disponível em `/workspace`.
+5. Use o terminal integrado para rodar `dotnet run --project src/Server/Api` ou qualquer script; o workspace está disponível em `/workspace`.
 
 ### GitHub Codespaces
 
@@ -307,7 +307,7 @@ cd MeuProjeto
 
 ### 2. Configure a Connection String
 
-Edite `src/Api/appsettings.json` e ajuste a connection string:
+Edite `src/Server/Api/appsettings.json` e ajuste a connection string:
 
 ```json
 {
@@ -324,7 +324,7 @@ Edite `src/Api/appsettings.json` e ajuste a connection string:
 
 ### 3. Escolha seu Banco de Dados
 
-Edite `src/Api/appsettings.json` e configure o tipo de banco e a connection string:
+Edite `src/Server/Api/appsettings.json` e configure o tipo de banco e a connection string:
 
 **Para SQL Server:**
 
@@ -403,19 +403,19 @@ dotnet build
 ### 6. Crie a Primeira Migration
 
 ```bash
-dotnet ef migrations add InitialCreate --project src/Data --startup-project src/Api
+dotnet ef migrations add InitialCreate --project src/Server/Data --startup-project src/Server/Api
 ```
 
 ### 7. Aplique a Migration no Banco
 
 ```bash
-dotnet ef database update --project src/Data --startup-project src/Api
+dotnet ef database update --project src/Server/Data --startup-project src/Server/Api
 ```
 
 ### 8. Execute o Projeto
 
 ```bash
-dotnet run --project src/Api
+dotnet run --project src/Server/Api
 ```
 
 ### 9. Acesse a API
@@ -459,7 +459,7 @@ O template foi projetado para suportar diferentes ORMs.
 
 Para trocar de ORM, **não use appsettings.json**. Edite diretamente o arquivo:
 
-- **Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`
+- **Arquivo**: `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`
 - **Linha**: ~26 (procure por "DEFAULT: Entity Framework Core")
 
 #### Entity Framework Core (Padrão ✅)
@@ -468,14 +468,14 @@ Já está habilitado. Não precisa fazer nada!
 
 #### Dapper (Alta Performance 💤)
 
-1. Abra `src/Infrastructure/Extensions/DatabaseExtension.cs`
+1. Abra `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`
 2. Comente a linha do EF Core (linha ~26)
 3. Descomente a linha do Dapper (linha ~29)
 4. Veja [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md) para implementação completa
 
 #### NHibernate / Linq2Db (Preparados 💤)
 
-1. Abra `src/Infrastructure/Extensions/DatabaseExtension.cs`
+1. Abra `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`
 2. Comente a linha do EF Core (linha ~26)
 3. Descomente a linha do ORM desejado
 4. Veja [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md) para implementação completa
@@ -487,7 +487,7 @@ O template inclui health checks configurados:
 - `/health` - Status geral da aplicação
 - `/health/ready` - Readiness check (para Kubernetes)
 
-Para adicionar health checks personalizados, edite `src/Infrastructure/Extensions/HealthChecksExtension.cs`
+Para adicionar health checks personalizados, edite `src/Server/Infrastructure/Extensions/HealthChecksExtension.cs`
 
 ---
 
@@ -516,7 +516,7 @@ Api → Infrastructure → Application → Data → Domain
 ### 1. Crie a Entidade no Domain
 
 ```csharp
-// src/Domain/Entities/Product.cs
+// src/Server/Domain/Entities/Product.cs
 namespace MeuProjeto.Domain.Entities;
 
 public class Product : EntityBase
@@ -530,7 +530,7 @@ public class Product : EntityBase
 ### 2. Crie o Repositório
 
 ```csharp
-// src/Data/Repository/ProductRepository.cs
+// src/Server/Data/Repository/ProductRepository.cs
 namespace MeuProjeto.Data.Repository;
 
 public class ProductRepository : Repository<Product>, IProductRepository
@@ -546,7 +546,7 @@ public class ProductRepository : Repository<Product>, IProductRepository
 ### 3. Crie o Service
 
 ```csharp
-// src/Application/Services/ProductService.cs
+// src/Server/Application/Services/ProductService.cs
 namespace MeuProjeto.Application.Services;
 
 public class ProductService : Service<Product>, IProductService
@@ -563,7 +563,7 @@ public class ProductService : Service<Product>, IProductService
 ### 4. Crie o Controller
 
 ```csharp
-// src/Api/Controllers/ProductController.cs
+// src/Server/Api/Controllers/ProductController.cs
 namespace MeuProjeto.Api.Controllers;
 
 public class ProductController : ApiControllerBase
@@ -622,15 +622,15 @@ public class ProductController : ApiControllerBase
 ### 5. Adicione o DbSet ao Context
 
 ```csharp
-// src/Data/Context/ApplicationDbContext.cs
+// src/Server/Data/Context/ApplicationDbContext.cs
 public DbSet<Product> Products { get; set; }
 ```
 
 ### 6. Crie a Migration
 
 ```bash
-dotnet ef migrations add AddProduct --project src/Data --startup-project src/Api
-dotnet ef database update --project src/Data --startup-project src/Api
+dotnet ef migrations add AddProduct --project src/Server/Data --startup-project src/Server/Api
+dotnet ef database update --project src/Server/Data --startup-project src/Server/Api
 ```
 
 ---
@@ -646,7 +646,7 @@ O template usa **Scrutor** com `.AsMatchingInterface()` para registro automátic
 Seus repositórios e services são **automaticamente registrados** sem necessidade de configuração manual:
 
 ```csharp
-// src/Infrastructure/Extensions/DependencyInjectionExtensions.cs
+// src/Server/Infrastructure/Extensions/DependencyInjectionExtensions.cs
 services.Scan(scan => scan
     .FromAssembliesOf(typeof(Repository<>))
     .AddClasses(classes => classes.AssignableTo(typeof(IRepository<>)))
@@ -755,14 +755,14 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
-COPY ["src/Api/Api.csproj", "src/Api/"]
-COPY ["src/Application/Application.csproj", "src/Application/"]
-COPY ["src/Data/Data.csproj", "src/Data/"]
-COPY ["src/Domain/Domain.csproj", "src/Domain/"]
-COPY ["src/Infrastructure/Infrastructure.csproj", "src/Infrastructure/"]
-RUN dotnet restore "src/Api/Api.csproj"
+COPY ["src/Server/Api/Api.csproj", "src/Server/Api/"]
+COPY ["src/Server/Application/Application.csproj", "src/Server/Application/"]
+COPY ["src/Server/Data/Data.csproj", "src/Server/Data/"]
+COPY ["src/Server/Domain/Domain.csproj", "src/Server/Domain/"]
+COPY ["src/Server/Infrastructure/Infrastructure.csproj", "src/Server/Infrastructure/"]
+RUN dotnet restore "src/Server/Api/Api.csproj"
 COPY . .
-WORKDIR "/src/src/Api"
+WORKDIR "/src/src/Server/Api"
 RUN dotnet build "Api.csproj" -c Release -o /app/build
 
 FROM build AS publish

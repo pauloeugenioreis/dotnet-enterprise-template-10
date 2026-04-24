@@ -109,7 +109,7 @@ Todos os repositórios são **registrados automaticamente** usando **Scrutor** c
 
 #### Como o registro automático funciona?
 
-// src/Infrastructure/Extensions/DependencyInjectionExtensions.cs
+// src/Server/Infrastructure/Extensions/DependencyInjectionExtensions.cs
 services.Scan(scan => scan
 .FromAssembliesOf(typeof(Repository<>))
 .AddClasses(classes => classes.AssignableTo(typeof(IRepository<>)))
@@ -127,10 +127,10 @@ services.Scan(scan => scan
 
 ## 📁 Estrutura dos Repositórios
 
-Todo o código de referência de cada ORM vive em `src/Data/Repository` e está pronto para ser habilitado quando necessário:
+Todo o código de referência de cada ORM vive em `src/Server/Data/Repository` e está pronto para ser habilitado quando necessário:
 
 ```text
-src/Data/Repository/
+src/Server/Data/Repository/
 ├── Repository.cs                 # EF Core (genérico)
 ├── OrderRepository.cs            # EF Core específico
 ├── Dapper/
@@ -188,7 +188,7 @@ Entity Framework Core está sempre habilitado como **ORM primário** do projeto.
 
 ### Localização no Código
 
-**Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`
+**Arquivo**: `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`
 **Linha**: ~73 (procure por "PRIMARY: Entity Framework Core")
 
 // PRIMARY: Entity Framework Core (Change Tracking, Migrations, CRUD)
@@ -267,7 +267,7 @@ public class ProductService
 
 ### Localização no Código
 
-**Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`
+**Arquivo**: `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`
 **Linha**: ~76 (procure por "ENABLED: Dapper")
 
 // ENABLED: Dapper (High Performance Queries, Complex Reports)
@@ -280,8 +280,8 @@ services.AddDapper(connectionString);
 
 ### Implementações
 
-- ✅ `src/Data/Repository/Dapper/ProductDapperRepository.cs`
-- ✅ `src/Data/Repository/Dapper/OrderDapperRepository.cs`
+- ✅ `src/Server/Data/Repository/Dapper/ProductDapperRepository.cs`
+- ✅ `src/Server/Data/Repository/Dapper/OrderDapperRepository.cs`
 
 ### Implementação de Repositório com Dapper
 
@@ -355,7 +355,7 @@ public class ProductDapperRepository : IRepository<Product>
 
 **Passo 4**: Registre seus repositórios Dapper no método `AddDapper`:
 
-Edite `src/Infrastructure/Extensions/DatabaseExtension.cs`:
+Edite `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`:
 
 ```csharp
 private static IServiceCollection AddDapper(
@@ -382,7 +382,7 @@ using Microsoft.Data.SqlClient;
 // using System.Data.SqlClient;
 **Compatibilidade**: O `Microsoft.Data.SqlClient` implementa `IDbConnection`, funcionando perfeitamente com **Dapper** e **ADO.NET**!
 
-**Pacotes Necessários**: Dapper já está incluído no `src/Data/Data.csproj` ✅
+**Pacotes Necessários**: Dapper já está incluído no `src/Server/Data/Data.csproj` ✅
 
 ---
 
@@ -424,7 +424,7 @@ public class ProductService
 
 ### Localização no Código
 
-**Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`
+**Arquivo**: `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`
 **Linha**: ~79 (procure por "ENABLED: ADO.NET")
 
 // ENABLED: ADO.NET (Maximum Control, Legacy Integration)
@@ -437,8 +437,8 @@ services.AddAdo(connectionString);
 
 ### Implementações
 
-- ✅ `src/Data/Repository/Ado/ProductAdoRepository.cs`
-- ✅ `src/Data/Repository/Ado/OrderAdoRepository.cs`
+- ✅ `src/Server/Data/Repository/Ado/ProductAdoRepository.cs`
+- ✅ `src/Server/Data/Repository/Ado/OrderAdoRepository.cs`
 
 ### Características
 
@@ -528,7 +528,7 @@ using Microsoft.Data.SqlClient;
 
 ### Como Habilitar
 
-**Passo 1**: Abra o arquivo `src/Infrastructure/Extensions/DatabaseExtension.cs`
+**Passo 1**: Abra o arquivo `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`
 
 **Passo 2**: Comente a linha do Entity Framework (~linha 26):
 
@@ -548,7 +548,7 @@ services.AddNHibernate(connectionString, dbSettings);
 
 **Passo 4**: Instale os pacotes NuGet necessários:
 
-Adicione ao `src/Data/Data.csproj`:
+Adicione ao `src/Server/Data/Data.csproj`:
 
 ```xml
 <PackageReference Include="NHibernate" Version="5.5.2" />
@@ -557,7 +557,7 @@ Adicione ao `src/Data/Data.csproj`:
 
 **Passo 5**: Configure o SessionFactory no método `AddNHibernate`:
 
-Edite o método em `src/Infrastructure/Extensions/DatabaseExtension.cs`:
+Edite o método em `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`:
 
 ```csharp
 private static IServiceCollection AddNHibernate(
@@ -584,7 +584,7 @@ private static IServiceCollection AddNHibernate(
 
 ### Criar Mappings
 
-// src/Data/Mappings/ProductMap.cs
+// src/Server/Data/Mappings/ProductMap.cs
 
 ```csharp
 using FluentNHibernate.Mapping;
@@ -641,7 +641,7 @@ public class ProductNHibernateRepository : IRepository<Product>
 
 ### Como Habilitar
 
-**Passo 1**: Abra o arquivo `src/Infrastructure/Extensions/DatabaseExtension.cs`
+**Passo 1**: Abra o arquivo `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`
 
 **Passo 2**: Comente a linha do Entity Framework (~linha 26):
 
@@ -661,7 +661,7 @@ services.AddLinq2Db(connectionString, dbSettings);
 
 **Passo 4**: Instale os pacotes NuGet necessários:
 
-Adicione ao `src/Data/Data.csproj`:
+Adicione ao `src/Server/Data/Data.csproj`:
 
 ```xml
 <PackageReference Include="linq2db" Version="5.4.1" />
@@ -670,7 +670,7 @@ Adicione ao `src/Data/Data.csproj`:
 
 **Passo 5**: Configure o DataConnection no método `AddLinq2Db`:
 
-Edite o método em `src/Infrastructure/Extensions/DatabaseExtension.cs`:
+Edite o método em `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`:
 
 ```csharp
 private static IServiceCollection AddLinq2Db(
@@ -691,7 +691,7 @@ private static IServiceCollection AddLinq2Db(
 
 ### Criar DataConnection
 
-// src/Data/Context/ApplicationDataConnection.cs
+// src/Server/Data/Context/ApplicationDataConnection.cs
 
 ```csharp
 using LinqToDB;
@@ -767,7 +767,7 @@ private readonly IProductAdoRepository \_adoRepo;
 
 ### 📂 Onde estão configurados?
 
-**Arquivo**: `src/Infrastructure/Extensions/DatabaseExtension.cs`
+**Arquivo**: `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`
 
 // Linha ~73: Entity Framework Core
 services.AddEntityFramework(connectionString, dbSettings);
@@ -792,7 +792,7 @@ services.AddAdo(connectionString);
 
 Se quiser habilitar NHibernate ou Linq2Db:
 
-1. **Abra**: `src/Infrastructure/Extensions/DatabaseExtension.cs`
+1. **Abra**: `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`
 2. **Localize**: Linhas ~82-89 (métodos comentados)
 3. **Descomente**: A linha do ORM desejado
 4. **Implemente**: Repositórios e configurações necessárias (veja seções abaixo)
@@ -955,10 +955,10 @@ Precisa de múltiplos ao mesmo tempo?
 
 ### 🔁 Alternando rapidamente entre ORMs
 
-1. Abra `src/Infrastructure/Extensions/DatabaseExtension.cs`.
+1. Abra `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`.
 2. Comente a chamada atual (`services.AddEntityFramework(...)`).
 3. Descomente o método correspondente ao ORM desejado (`AddDapper`, `AddNHibernate`, `AddLinq2Db`, `AddAdo`).
-4. Salve, execute `dotnet build`/`dotnet run --project src/Api` e valide seus endpoints.
+4. Salve, execute `dotnet build`/`dotnet run --project src/Server/Api` e valide seus endpoints.
 
 Como todas as implementações seguem a interface `IRepository<T>` ou versões específicas (`IProductDapperRepository`, `IOrderAdoRepository`, etc.), **não é preciso alterar controllers ou services** para trocar de ORM: a injeção de dependência redireciona automaticamente para a implementação ativa.
 
@@ -973,7 +973,7 @@ Como todas as implementações seguem a interface `IRepository<T>` ou versões e
 Depois de habilitar um ORM alternativo, rode a API normalmente e valide os mesmos endpoints usados no dia a dia:
 
 ```bash
-dotnet run --project src/Api
+dotnet run --project src/Server/Api
 ```
 
 ### Swagger UI
@@ -1042,14 +1042,14 @@ public class ProductServiceTests
 
 ### "Type not found" ao usar NHibernate
 
-Instale os pacotes `NHibernate` e `FluentNHibernate` no `src/Data/Data.csproj` e garanta que o método `AddNHibernate` esteja descomentado em `DatabaseExtension`.
+Instale os pacotes `NHibernate` e `FluentNHibernate` no `src/Server/Data/Data.csproj` e garanta que o método `AddNHibernate` esteja descomentado em `DatabaseExtension`.
 
 ### "Table doesn't exist" ao usar Dapper ou Linq2Db
 
 Execute as migrations do EF Core para criar as tabelas antes de rodar os repositórios alternativos:
 
 ```bash
-dotnet ef database update --project src/Data --startup-project src/Api
+dotnet ef database update --project src/Server/Data --startup-project src/Server/Api
 ```
 
 ### Erro de compilação com Linq2Db
@@ -1080,7 +1080,7 @@ Graças ao **Scrutor com `.AsMatchingInterface()`**, adicionar um novo repositó
 ### Passo 1: Criar a Interface Específica
 
 ```csharp
-// src/Domain/Interfaces/IProductDapperRepository.cs
+// src/Server/Domain/Interfaces/IProductDapperRepository.cs
 public interface IProductDapperRepository : IRepository<Product>
 {
     Task<IEnumerable<Product>> GetProductsWithHighPerformanceAsync();
@@ -1090,7 +1090,7 @@ public interface IProductDapperRepository : IRepository<Product>
 ### Passo 2: Implementar o Repositório
 
 ```csharp
-// src/Data/Repository/Dapper/ProductDapperRepository.cs
+// src/Server/Data/Repository/Dapper/ProductDapperRepository.cs
 public class ProductDapperRepository : IProductDapperRepository
 {
     private readonly IDbConnectionFactory _connectionFactory;

@@ -1,5 +1,5 @@
 using EnterpriseTemplate.MauiApp.Services;
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 
 namespace EnterpriseTemplate.MauiApp.Pages;
 

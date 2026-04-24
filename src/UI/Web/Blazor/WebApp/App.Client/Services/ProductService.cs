@@ -1,5 +1,5 @@
 using BlazorApp.Client.Services.Base;
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 
 namespace BlazorApp.Client.Services;
 

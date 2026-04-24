@@ -1,4 +1,4 @@
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 using ProjectTemplate.Domain.Exceptions;
 using ProjectTemplate.Domain.Interfaces;
 using ProjectTemplate.Integration.Tests.Support;
@@ -21,7 +21,8 @@ namespace ProjectTemplate.Integration.Tests.Controllers;
 /// <summary>
 /// Integration tests for AuthController using a deterministic in-memory auth service.
 /// </summary>
-public class AuthControllerTests : IClassFixture<WebApplicationFactoryFixture>
+[Collection("Integration Tests")]
+public class AuthControllerTests
 {
     private readonly HttpClient _client;
 

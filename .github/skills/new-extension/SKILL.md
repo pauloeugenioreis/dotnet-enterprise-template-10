@@ -16,7 +16,7 @@ Creates a modular infrastructure extension following the project's established p
 ## Procedure
 
 ### 1. Configuration
-1. Add configuration section to `src/Domain/AppSettings.cs` under `Infrastructure`
+1. Add configuration section to `src/Server/Domain/AppSettings.cs` under `Infrastructure`
 ```csharp
 public class MyFeatureSettings
 {
@@ -26,7 +26,7 @@ public class MyFeatureSettings
 ```
 
 ### 2. Extension Class
-2. Create `src/Infrastructure/Extensions/MyFeatureExtension.cs`
+2. Create `src/Server/Infrastructure/Extensions/MyFeatureExtension.cs`
 ```csharp
 public static class MyFeatureExtension
 {
@@ -49,16 +49,16 @@ public static class MyFeatureExtension
 ```
 
 ### 3. Registration
-3. Register in `src/Infrastructure/Extensions/InfrastructureExtensions.cs`:
+3. Register in `src/Server/Infrastructure/Extensions/InfrastructureExtensions.cs`:
    - Add `services.AddMyFeature(settings);` in `AddInfrastructure`
    - Add `app.UseMyFeature(settings);` in `UseInfrastructure` (if middleware needed)
 
 ### 4. Configuration Files
-4. Add default settings to `src/Api/appsettings.json` under `AppSettings.Infrastructure`
+4. Add default settings to `src/Server/Api/appsettings.json` under `AppSettings.Infrastructure`
 5. Document the feature in `docs/` if complex
 
 ### 5. Tests
 6. Add unit test for the extension registration
 
 ## Reference
-- Orchestrator: `src/Infrastructure/Extensions/InfrastructureExtensions.cs`
+- Orchestrator: `src/Server/Infrastructure/Extensions/InfrastructureExtensions.cs`

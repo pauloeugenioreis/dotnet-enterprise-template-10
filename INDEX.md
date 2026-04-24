@@ -90,7 +90,7 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 1. Leia: [QUICK-START.md](QUICK-START.md) - Seção "Criar Novo Projeto"
 2. Execute: `cd scripts && ./new-project.sh MeuProjeto` (ou `.ps1` / `.bat`)
 3. O script interativo configura banco, mensageria, storage, telemetria e event sourcing
-4. Rode: `dotnet run --project src/Api/Api.csproj`
+4. Rode: `dotnet run --project src/Server/Api/Api.csproj`
 
 ### "Quero usar outro banco de dados"
 

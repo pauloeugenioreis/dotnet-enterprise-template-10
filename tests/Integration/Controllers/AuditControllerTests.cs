@@ -1,4 +1,4 @@
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using FluentAssertions;
 using ProjectTemplate.Api.Controllers;
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 using Xunit;
@@ -18,7 +18,8 @@ namespace ProjectTemplate.Integration.Tests.Controllers;
 /// <summary>
 /// Integration tests for AuditController to guarantee the Event Sourcing surface stays functional.
 /// </summary>
-public class AuditControllerTests : IClassFixture<WebApplicationFactoryFixture>
+[Collection("Integration Tests")]
+public class AuditControllerTests
 {
     private readonly HttpClient _client;
 

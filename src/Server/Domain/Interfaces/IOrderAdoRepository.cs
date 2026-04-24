@@ -1,0 +1,12 @@
+using ProjectTemplate.Shared.Models;
+using ProjectTemplate.Domain.Entities;
+
+namespace ProjectTemplate.Domain.Interfaces;
+
+/// <summary>
+/// ADO.NET-specific interface for Order repository.
+/// Inherits from IRepository of Order but uses specific interface to avoid Scrutor auto-registration.
+/// </summary>
+public interface IOrderAdoRepository : IRepository<Order>
+{
+}

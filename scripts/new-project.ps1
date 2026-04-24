@@ -306,7 +306,7 @@ foreach ($file in $files) {
 
 Write-Step "⚙️" "Configurando appsettings.json..."
 
-$appSettingsPath = Join-Path $TargetDir "src/Api/appsettings.json"
+$appSettingsPath = Join-Path $TargetDir "src/Server/Api/appsettings.json"
 $appSettings = Get-Content $appSettingsPath -Raw | ConvertFrom-Json
 
 # -- Database --
@@ -330,7 +330,7 @@ $dbFileMap = @{
 }
 
 foreach ($db in $dbFileMap.Keys) {
-    $filePath = Join-Path $TargetDir "src/Api/$($dbFileMap[$db])"
+    $filePath = Join-Path $TargetDir "src/Server/Api/$($dbFileMap[$db])"
     if (Test-Path $filePath) {
         if ($Database -eq "InMemory" -or $Database -ne $db) {
             Remove-Item $filePath -Force
@@ -388,7 +388,7 @@ Set-Content $appSettingsPath $jsonContent -Encoding UTF8
 # Enable optional features in Program.cs
 # ============================================================
 
-$programPath = Join-Path $TargetDir "src/Api/Program.cs"
+$programPath = Join-Path $TargetDir "src/Server/Api/Program.cs"
 $programContent = Get-Content $programPath -Raw
 
 if ($MongoDB -eq "Yes") {
@@ -951,13 +951,13 @@ Write-Host "  $stepNum. dotnet build" -ForegroundColor White
 $stepNum++
 
 if ($Database -ne "InMemory") {
-    Write-Host "  $stepNum. dotnet ef migrations add InitialCreate --project src/Data --startup-project src/Api" -ForegroundColor White
+    Write-Host "  $stepNum. dotnet ef migrations add InitialCreate --project src/Server/Data --startup-project src/Server/Api" -ForegroundColor White
     $stepNum++
-    Write-Host "  $stepNum. dotnet ef database update --project src/Data --startup-project src/Api" -ForegroundColor White
+    Write-Host "  $stepNum. dotnet ef database update --project src/Server/Data --startup-project src/Server/Api" -ForegroundColor White
     $stepNum++
 }
 
-Write-Host "  $stepNum. dotnet run --project src/Api" -ForegroundColor White
+Write-Host "  $stepNum. dotnet run --project src/Server/Api" -ForegroundColor White
 $stepNum++
 
 Write-Host ""

@@ -40,8 +40,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<!-- SharedModels: DTOs compartilhados com a API -->
-		<ProjectReference Include="../../../Shared/SharedModels/SharedModels.csproj" />
+		<!-- Shared.Models: DTOs compartilhados com a API -->
+		<ProjectReference Include="../../../Shared/Shared.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

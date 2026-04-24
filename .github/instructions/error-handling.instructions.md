@@ -1,6 +1,6 @@
 ---
 description: "Use when creating controllers, services, or handling business validations to ensure consistent error responses using RFC 7807 Problem Details."
-applyTo: ["src/Application/**", "src/Api/**", "src/Domain/**"]
+applyTo: ["src/Server/Application/**", "src/Server/Api/**", "src/Server/Domain/**"]
 ---
 
 # Error Handling Rules
@@ -11,7 +11,7 @@ All API error responses must adhere to the RFC 7807 `ProblemDetails` format.
 - DO NOT use `return NotFound("not found")` with raw text.
 
 ## Domain Exceptions
-- All business rule violations must be handled by throwing exceptions that inherit from `DomainExceptions` (located in `src/Domain/Exceptions/`).
+- All business rule violations must be handled by throwing exceptions that inherit from `DomainExceptions` (located in `src/Server/Domain/Exceptions/`).
 - Example: `throw new BusinessException("O saldo é insuficiente.");`
 - Example: `throw new NotFoundException("Produto não encontrado.");`
 

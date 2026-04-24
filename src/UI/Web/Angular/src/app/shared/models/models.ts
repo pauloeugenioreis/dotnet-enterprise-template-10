@@ -1,4 +1,4 @@
-// Espelho dos DTOs do C# (src/Shared/SharedModels)
+// Espelho dos DTOs do C# (src/Shared/Shared.Models)
 
 export interface PagedResponse<T> {
   items: T[];

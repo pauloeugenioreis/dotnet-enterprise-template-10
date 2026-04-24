@@ -9,7 +9,7 @@ This project supports SQL Server, PostgreSQL, MySQL, and Oracle. Migrations must
 
 ## Creating Migrations
 ```bash
-dotnet ef migrations add <MigrationName> --project src/Data --startup-project src/Api
+dotnet ef migrations add <MigrationName> --project src/Server/Data --startup-project src/Server/Api
 ```
 
 ## Rules

@@ -160,14 +160,14 @@ public async Task<ActionResult> ExportToExcelAsync(
 
 ```bash
 cd template
-dotnet ef migrations add AddProduct --project src/Data --startup-project src/Api
-dotnet ef database update --project src/Data --startup-project src/Api
+dotnet ef migrations add AddProduct --project src/Server/Data --startup-project src/Server/Api
+dotnet ef database update --project src/Server/Data --startup-project src/Server/Api
 ```
 
 ### 2. Executar a API
 
 ```bash
-dotnet run --project src/Api
+dotnet run --project src/Server/Api
 ```
 
 ### 3. Acessar Swagger

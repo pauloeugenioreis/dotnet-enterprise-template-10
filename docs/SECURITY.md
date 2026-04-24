@@ -54,7 +54,7 @@ WHERE Username = 'admin';
 
 ### Option 3: Modify DbSeeder
 
-Edit `src/Data/Seeders/DbSeeder.cs` before first deployment:
+Edit `src/Server/Data/Seeders/DbSeeder.cs` before first deployment:
 
 ```csharp
 private async Task SeedRolesAndAdminUserAsync()

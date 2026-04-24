@@ -136,11 +136,11 @@ public class MyService
 
 ### Estrutura de implementação
 
-- `src/Domain/Entities/MongoEntityBase.cs` define a base para documentos Mongo.
-- `src/Domain/Interfaces/IMongoRepository.cs` define o contrato genérico.
-- `src/Data/Repository/Mongo/MongoRepository.cs` implementa o repositório base.
-- `src/Data/Repository/Mongo/CustomerReviewRepository.cs` mostra um repositório concreto.
-- `src/Data/Seeders/MongoDbSeeder.cs` adiciona o seed de desenvolvimento.
+- `src/Server/Domain/Entities/MongoEntityBase.cs` define a base para documentos Mongo.
+- `src/Server/Domain/Interfaces/IMongoRepository.cs` define o contrato genérico.
+- `src/Server/Data/Repository/Mongo/MongoRepository.cs` implementa o repositório base.
+- `src/Server/Data/Repository/Mongo/CustomerReviewRepository.cs` mostra um repositório concreto.
+- `src/Server/Data/Seeders/MongoDbSeeder.cs` adiciona o seed de desenvolvimento.
 
 ### Troubleshooting
 
@@ -1599,7 +1599,7 @@ Sistema completo de autenticação/autorização com JWT, refresh tokens e OAuth
 
 ### Como usar
 
-Basta executar o projeto `src/AppHost`. Ele subirá toda a infraestrutura necessária automaticamente.
+Basta executar o projeto `src/Aspire/AppHost`. Ele subirá toda a infraestrutura necessária automaticamente.
 
 ---
 

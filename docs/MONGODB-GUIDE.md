@@ -112,13 +112,13 @@ Isso evita o problema clássico de startup em que a API sobe antes do banco esta
 
 Os principais arquivos da implementação são:
 
-- `src/Domain/Entities/MongoEntityBase.cs` — base para documentos Mongo;
-- `src/Domain/Entities/CustomerReview.cs` — entidade de exemplo;
-- `src/Domain/Interfaces/IMongoRepository.cs` — contrato genérico;
-- `src/Data/Repository/Mongo/MongoRepository.cs` — implementação genérica;
-- `src/Data/Repository/Mongo/CustomerReviewRepository.cs` — repositório concreto;
-- `src/Data/Seeders/MongoDbSeeder.cs` — seed de desenvolvimento;
-- `src/Infrastructure/Extensions/MongoExtension.cs` — registro no DI.
+- `src/Server/Domain/Entities/MongoEntityBase.cs` — base para documentos Mongo;
+- `src/Server/Domain/Entities/CustomerReview.cs` — entidade de exemplo;
+- `src/Server/Domain/Interfaces/IMongoRepository.cs` — contrato genérico;
+- `src/Server/Data/Repository/Mongo/MongoRepository.cs` — implementação genérica;
+- `src/Server/Data/Repository/Mongo/CustomerReviewRepository.cs` — repositório concreto;
+- `src/Server/Data/Seeders/MongoDbSeeder.cs` — seed de desenvolvimento;
+- `src/Server/Infrastructure/Extensions/MongoExtension.cs` — registro no DI.
 
 ---
 

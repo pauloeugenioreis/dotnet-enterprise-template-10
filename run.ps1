@@ -212,7 +212,7 @@ switch ($choice) {
         Clean-Environment
         Write-Host "`n$($YELLOW)🔥 Iniciando via AppHost (Aspire) com $script:DB_TYPE...$($NC)"
         $env:DB_TYPE = $script:DB_TYPE
-        dotnet run --project src/AppHost
+        dotnet run --project src/Aspire/AppHost
     }
     "3" {
         Clean-Environment

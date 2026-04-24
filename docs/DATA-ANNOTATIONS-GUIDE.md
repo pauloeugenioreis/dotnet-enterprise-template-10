@@ -362,7 +362,7 @@ Execute a aplicação com configuração inválida:
 
 ```powershell
 $env:AppSettings__Authentication__Jwt__Secret="short"
-dotnet run --project src/Api/Api.csproj
+dotnet run --project src/Server/Api/Api.csproj
 ```
 
 **Resultado esperado:**

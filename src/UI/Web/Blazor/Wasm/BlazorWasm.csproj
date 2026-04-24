@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../../../Shared/SharedModels/SharedModels.csproj" />
+    <ProjectReference Include="../../../../Shared/Shared.csproj" />
     <ProjectReference Include="../WebApp/App.Client/App.Client.csproj" />
   </ItemGroup>
 

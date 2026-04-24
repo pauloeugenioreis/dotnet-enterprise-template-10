@@ -173,7 +173,7 @@ case $choice in
         select_database
         clean_environment
         echo -e "\n${YELLOW}🔥 Iniciando via AppHost (Aspire) com $DB_TYPE...${NC}"
-        DB_TYPE=$DB_TYPE dotnet run --project src/AppHost
+        DB_TYPE=$DB_TYPE dotnet run --project src/Aspire/AppHost
         ;;
     3)
         clean_environment

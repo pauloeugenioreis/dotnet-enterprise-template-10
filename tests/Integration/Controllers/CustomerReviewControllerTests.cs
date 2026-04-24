@@ -1,10 +1,10 @@
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 using ProjectTemplate.Domain.Exceptions;
 using ProjectTemplate.Domain.Interfaces;
 using Xunit;
@@ -15,7 +15,8 @@ namespace ProjectTemplate.Integration.Tests.Controllers;
 /// Integration tests for CustomerReviewController.
 /// Uses an in-memory implementation of ICustomerReviewService to keep tests deterministic in CI.
 /// </summary>
-public class CustomerReviewControllerTests : IClassFixture<WebApplicationFactoryFixture>
+[Collection("Integration Tests")]
+public class CustomerReviewControllerTests
 {
     private readonly HttpClient _client;
 

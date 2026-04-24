@@ -46,7 +46,7 @@ Role:     Admin
 Para popular o banco com o usuário admin padrão, execute:
 
 ```bash
-dotnet run --project src/Api
+dotnet run --project src/Server/Api
 ```
 
 O seeder criará automaticamente:
@@ -194,7 +194,7 @@ O seeder criará automaticamente:
 
 ```bash
 # Iniciar a API
-dotnet run --project src/Api
+dotnet run --project src/Server/Api
 
 # API disponível em http://localhost:5000
 # Swagger UI em http://localhost:5000/swagger
@@ -866,7 +866,7 @@ CREATE TABLE RefreshTokens (
 ### Passo 1: Iniciar a aplicação
 
 ```bash
-dotnet run --project src/Api/Api.csproj
+dotnet run --project src/Server/Api/Api.csproj
 ```
 
 ### Passo 2: Abrir o Swagger UI
@@ -927,13 +927,13 @@ Se você está migrando da autenticação básica:
 1. **Criar a migration:**
 
     ```bash
-    dotnet ef migrations add AddAuthentication --project src/Data --startup-project src/Api
+    dotnet ef migrations add AddAuthentication --project src/Server/Data --startup-project src/Server/Api
     ```
 
 2. **Atualizar o banco de dados:**
 
     ```bash
-    dotnet ef database update --project src/Data --startup-project src/Api
+    dotnet ef database update --project src/Server/Data --startup-project src/Server/Api
     ```
 
 3. **Popular as roles padrão:**

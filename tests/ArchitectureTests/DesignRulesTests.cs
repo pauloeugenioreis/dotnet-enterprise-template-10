@@ -39,7 +39,7 @@ public class DesignRulesTests
         var types = Types
             .InAssembly(domainAssembly)
             .That()
-            .ResideInNamespace("ProjectTemplate.SharedModels")
+            .ResideInNamespace("ProjectTemplate.Shared.Models")
             .And()
             .AreNotInterfaces()
             .GetTypes();

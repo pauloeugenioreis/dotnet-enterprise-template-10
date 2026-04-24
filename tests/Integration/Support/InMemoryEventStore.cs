@@ -1,4 +1,4 @@
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;

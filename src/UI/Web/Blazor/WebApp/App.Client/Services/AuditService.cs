@@ -1,4 +1,4 @@
-using ProjectTemplate.SharedModels;
+using ProjectTemplate.Shared.Models;
 using ProjectTemplate.Domain.Entities;
 using BlazorApp.Client.Services.Base;
 
