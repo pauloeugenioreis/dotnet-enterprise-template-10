@@ -1,9 +1,12 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using ProjectTemplate.Application;
 using ProjectTemplate.Application.Services;
+using ProjectTemplate.Data;
 using ProjectTemplate.Data.Repository;
 using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Interfaces;
+using ProjectTemplate.Infrastructure;
 using ProjectTemplate.Infrastructure.Services;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
@@ -22,15 +25,9 @@ public static class DependencyInjectionExtensions
         // ✅ ProductRepository → IProductRepository
         // ✅ OrderRepository → IOrderRepository
         // ✅ ProductDapperRepository → IProductDapperRepository (NOT IRepository<Product>)
-        // ✅ ProductAdoRepository → IProductAdoRepository (NOT IRepository<Product>)
-        // ✅ OrderDapperRepository → IOrderDapperRepository (NOT IRepository<Order>)
-        // ✅ OrderAdoRepository → IOrderAdoRepository (NOT IRepository<Order>)
-        //
-        // This prevents conflicts: alternative ORMs won't overwrite base IRepository<T>
-        // Tests use IRepository<T> → EF Core InMemory ✅
-        // Production can inject specific ORMs: IProductDapperRepository → ProductDapperRepository ✅
+        // Scan and register repositories
         services.Scan(scan => scan
-            .FromAssembliesOf(typeof(Repository<>))
+            .FromAssembliesOf(typeof(DataAssemblyMarker))
             .AddClasses(classes => classes.AssignableTo(typeof(IRepository<>)))
             .AsMatchingInterface()
             .WithScopedLifetime()
@@ -38,16 +35,8 @@ public static class DependencyInjectionExtensions
 
         // Scan and register services
         services.Scan(scan => scan
-            .FromAssembliesOf(typeof(Service<>))
+            .FromAssembliesOf(typeof(ApplicationAssemblyMarker))
             .AddClasses(classes => classes.AssignableTo(typeof(IService<>)))
-            .AsImplementedInterfaces()
-            .WithScopedLifetime()
-        );
-
-        // Register event payload factories
-        services.Scan(scan => scan
-            .FromAssembliesOf(typeof(ProductEventPayloadFactory))
-            .AddClasses(classes => classes.AssignableTo(typeof(IEventPayloadFactory<>)))
             .AsImplementedInterfaces()
             .WithScopedLifetime()
         );
@@ -55,6 +44,13 @@ public static class DependencyInjectionExtensions
         // Register generic repository and service (fallback)
         if (appSettings.Infrastructure.EventSourcing.Enabled)
         {
+            // Register event payload factories
+            services.Scan(scan => scan
+                .FromAssembliesOf(typeof(InfrastructureAssemblyMarker))
+                .AddClasses(classes => classes.AssignableTo(typeof(IEventPayloadFactory<>)))
+                .AsImplementedInterfaces()
+                .WithScopedLifetime()
+            );
             services.AddScoped(typeof(IRepository<>), typeof(HybridRepository<>));
         }
         else
