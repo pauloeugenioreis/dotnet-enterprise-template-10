@@ -16,8 +16,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization();
 
 // Usar o método de extensão compartilhado
-// No servidor, podemos passar a URL da API do Aspire
-var apiUrl = builder.Configuration["SERVICES:API:HTTPS:0"] ?? "https://localhost:7196";
+// No servidor, podemos passar a URL da API (Aspire ou Docker)
+var apiUrl = builder.Configuration["ApiBaseUrl"] 
+             ?? builder.Configuration["AppSettings:ApiBaseUrl"]
+             ?? builder.Configuration["SERVICES:API:HTTPS:0"] 
+             ?? "https://localhost:7196";
 builder.Services.AddClientServices(apiUrl);
 
 // Serviços adicionais específicos do servidor (se houver)

@@ -43,6 +43,9 @@ public static class InfrastructureExtensions
         // Resilience (Polly v8)
         services.AddResilienceConfiguration();
 
+        // Distributed Cache (Redis)
+        services.AddRedis(appSettings);
+
         // Authentication (JWT + OAuth2)
         services.AddJwtAuthentication(appSettings);
 

@@ -1,11 +1,33 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-// Infrastructure Resources
-// Usando um nome novo "pg-server" para garantir que o Docker crie um container limpo
-var postgres = builder.AddPostgres("pg-server");
+// Database Selection Logic
+var dbType = builder.Configuration["DB_TYPE"]?.ToLowerInvariant() ?? "postgresql";
 
-var projectDb = postgres.AddDatabase("ProjectTemplateDb");
-var eventsDb = postgres.AddDatabase("ProjectTemplateEvents");
+// Event Sourcing always needs PostgreSQL (Marten)
+var pgEventsServer = builder.AddPostgres("events-server");
+var eventsDb = pgEventsServer.AddDatabase("ProjectTemplateEvents");
+
+IResourceBuilder<IResourceWithConnectionString> projectDb;
+
+switch (dbType)
+{
+    case "sqlserver":
+        projectDb = builder.AddSqlServer("sqlserver-server").AddDatabase("ProjectTemplateDb");
+        break;
+    case "mysql":
+        projectDb = builder.AddMySql("mysql-server").AddDatabase("ProjectTemplateDb");
+        break;
+    case "oracle":
+        projectDb = builder.AddOracle("oracle-server")
+            .AddDatabase("FREEPDB1");
+        break;
+    case "postgresql":
+    default:
+        // Use the events server as the main server for PostgreSQL to save resources
+        projectDb = pgEventsServer.AddDatabase("ProjectTemplateDb");
+        dbType = "postgresql";
+        break;
+}
 
 var redis = builder.AddRedis("redis");
 
@@ -21,9 +43,9 @@ var api = builder.AddProject<Projects.Api>("api")
     .WithReference(redis)
     .WithReference(rabbitmq)
     .WithReference(mongodb)
-    .WithEnvironment("AppSettings__Infrastructure__EventSourcing__ConnectionString", postgres)
-    .WithEndpoint(endpointName: "https", callback: endpoint => endpoint.Port = 7196)
-    .WithEndpoint(endpointName: "http", callback: endpoint => endpoint.Port = 5125)
+    .WithEnvironment("AppSettings__Infrastructure__Database__DatabaseType", dbType)
+    .WithEnvironment("AppSettings__Infrastructure__Database__ConnectionString", projectDb)
+    .WithEnvironment("AppSettings__Infrastructure__EventSourcing__ConnectionString", eventsDb)
     .WithExternalHttpEndpoints();
 
 // Web Projects
@@ -35,18 +57,21 @@ builder.AddProject<Projects.App>("blazor-app")
 builder.AddNpmApp("angular-web", "../UI/Web/Angular", "start")
     .WithReference(api)
     .WithHttpEndpoint(env: "PORT")
+    .WithEnvironment("API_URL", api.GetEndpoint("https"))
     .WithExternalHttpEndpoints();
 
 builder.AddNpmApp("react-web", "../UI/Web/React", "dev")
     .WithReference(api)
     .WithHttpEndpoint(env: "PORT")
-    .WithEnvironment("VITE_API_BASE_URL", api.GetEndpoint("https"))
+    .WithEnvironment("VITE_API_BASE_URL", "")
+    .WithEnvironment("API_TARGET_URL", api.GetEndpoint("https"))
     .WithExternalHttpEndpoints();
 
 builder.AddNpmApp("vue-web", "../UI/Web/Vue", "dev")
     .WithReference(api)
     .WithHttpEndpoint(env: "PORT")
-    .WithEnvironment("VITE_API_BASE_URL", api.GetEndpoint("https"))
+    .WithEnvironment("VITE_API_BASE_URL", "")
+    .WithEnvironment("API_TARGET_URL", api.GetEndpoint("https"))
     .WithExternalHttpEndpoints();
 
 builder.Build().Run();

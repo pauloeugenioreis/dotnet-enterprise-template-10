@@ -31,6 +31,7 @@ public class InfrastructureSettings
     public DatabaseSettings Database { get; set; } = new();
     public MongoDbSettings MongoDB { get; set; } = new();
     public RabbitMqSettings RabbitMQ { get; set; } = new();
+    public RedisSettings Redis { get; set; } = new();
     public StorageSettings Storage { get; set; } = new();
     public QuartzSettings Quartz { get; set; } = new();
     public TelemetrySettings Telemetry { get; set; } = new();
@@ -78,6 +79,11 @@ public class MongoDbSettings
 }
 
 public class RabbitMqSettings
+{
+    public string? ConnectionString { get; set; }
+}
+
+public class RedisSettings
 {
     public string? ConnectionString { get; set; }
 }

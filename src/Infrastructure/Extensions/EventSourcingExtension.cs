@@ -1,4 +1,5 @@
 using Marten;
+using Npgsql;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using ProjectTemplate.Domain;
@@ -60,10 +61,19 @@ public static class EventSourcingExtension
                 "EventSourcing:ConnectionString is required when using Marten provider");
         }
 
-        // Configure Marten using Reflection to avoid namespace issues across versions
-        services.AddMarten(options =>
+        // Configure Marten
+        services.AddMarten(sp =>
         {
+            var options = new StoreOptions();
             options.Connection(settings.ConnectionString);
+
+            // Configure Marten to create the database if it doesn't exist
+            options.CreateDatabasesForTenants(c =>
+            {
+                var builder = new Npgsql.NpgsqlConnectionStringBuilder(settings.ConnectionString);
+                builder.Database = "postgres";
+                c.MaintenanceDatabase(builder.ConnectionString);
+            });
 
             // Set AutoCreateSchemaObjects to All via reflection to avoid namespace issues across Marten versions
             var autoCreateProperty = options.GetType().GetProperty(nameof(options.AutoCreateSchemaObjects));
@@ -80,6 +90,8 @@ public static class EventSourcingExtension
                 var streamIdentityValue = Enum.Parse(streamIdentityProperty.PropertyType, "AsString");
                 streamIdentityProperty.SetValue(options.Events, streamIdentityValue);
             }
+
+            return options;
         });
 
         // Register Event Store implementation

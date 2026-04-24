@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
-EXPOSE 80
+EXPOSE 8080
 EXPOSE 443
 
 # Install curl for Docker healthcheck
@@ -16,6 +16,8 @@ COPY ["src/Application/Application.csproj", "src/Application/"]
 COPY ["src/Data/Data.csproj", "src/Data/"]
 COPY ["src/Domain/Domain.csproj", "src/Domain/"]
 COPY ["src/Infrastructure/Infrastructure.csproj", "src/Infrastructure/"]
+COPY ["src/ServiceDefaults/ServiceDefaults.csproj", "src/ServiceDefaults/"]
+COPY ["src/Shared/SharedModels/SharedModels.csproj", "src/Shared/SharedModels/"]
 RUN dotnet restore "src/Api/Api.csproj"
 
 # Copy everything else and build
@@ -36,6 +38,6 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 \
-    CMD curl -f http://localhost:80/health || exit 1
+    CMD curl -f http://localhost:8080/health || exit 1
 
-ENTRYPOINT ["dotnet", "ProjectTemplate.Api.dll"]
+ENTRYPOINT ["dotnet", "Api.dll"]

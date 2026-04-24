@@ -1,9 +1,12 @@
+using Npgsql;
 using Microsoft.EntityFrameworkCore;
 using ProjectTemplate.Data.Context;
 using ProjectTemplate.Data.Seeders;
 using ProjectTemplate.Infrastructure.Extensions;
 using ProjectTemplate.Infrastructure.Filters;
 using ProjectTemplate.Domain.Interfaces;
+using Polly;
+using Polly.Retry;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,13 +28,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("EnterpriseCorsPolicy", policy =>
     {
-        policy.WithOrigins(
-                "http://localhost:4200", // Angular
-                "http://localhost:5173", // React
-                "http://localhost:5174", // Vue
-                "https://localhost:7196", // Self
-                "http://localhost:5000"  // Generic/Local
-            )
+        policy.SetIsOriginAllowed(origin => true)
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
@@ -89,17 +86,81 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-    // Ensure database is created
-    await context.Database.EnsureCreatedAsync();
+    // Use Polly to wait for database readiness (useful for Docker containers like Oracle/SQL Server)
+    var retryPipeline = new ResiliencePipelineBuilder()
+        .AddRetry(new RetryStrategyOptions
+        {
+            ShouldHandle = new PredicateBuilder().Handle<Exception>(ex => 
+                // Don't retry if the error is "Object already exists" (ORA-00955)
+                !ex.Message.Contains("ORA-00955")),
+            Delay = TimeSpan.FromSeconds(5),
+            MaxRetryAttempts = 30,
+            BackoffType = DelayBackoffType.Constant,
+            OnRetry = args =>
+            {
+                Console.WriteLine($"⚠️ Database not ready yet. Retrying in 5s... (Attempt {args.AttemptNumber}/30)");
+                Console.WriteLine($"   Reason: {args.Outcome.Exception?.Message}");
+                return default;
+            }
+        })
+        .Build();
 
-    // Run seeder
-    var eventStore = scope.ServiceProvider.GetRequiredService<IEventStore>();
+    await retryPipeline.ExecuteAsync(async token =>
+    {
+        try
+        {
+            // Ensure database is created
+            await context.Database.EnsureCreatedAsync(token);
+        }
+        catch (Exception ex) when (ex.Message.Contains("ORA-00955"))
+        {
+            // Ignore "Table already exists" error in Oracle
+            Console.WriteLine("ℹ️ Database objects already exist. Skipping creation.");
+        }
 
-    // Warm up Marten / Ensure Schema is ready before seeding
-    await eventStore.GetStatisticsAsync();
+        // Run seeder
+        var eventStore = scope.ServiceProvider.GetRequiredService<IEventStore>();
 
-    var seeder = new DbSeeder(context, eventStore);
-    await seeder.SeedAsync();
+        try 
+        {
+            // Get AppSettings from DI
+            var appSettings = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<ProjectTemplate.Domain.AppSettings>>().Value;
+
+            // Ensure PostgreSQL database for Marten exists
+            var pgConnString = appSettings.Infrastructure.EventSourcing.ConnectionString;
+            if (!string.IsNullOrEmpty(pgConnString))
+            {
+                var builder = new Npgsql.NpgsqlConnectionStringBuilder(pgConnString);
+                var targetDb = builder.Database;
+                builder.Database = "postgres"; // Connect to admin DB
+                
+                using var conn = new Npgsql.NpgsqlConnection(builder.ConnectionString);
+                await conn.OpenAsync(token);
+                
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = $"SELECT 1 FROM pg_database WHERE datname = '{targetDb}'";
+                var exists = await cmd.ExecuteScalarAsync(token) != null;
+                
+                if (!exists)
+                {
+                    Console.WriteLine($"ℹ️ Creating PostgreSQL database '{targetDb}'...");
+                    cmd.CommandText = $"CREATE DATABASE \"{targetDb}\"";
+                    await cmd.ExecuteNonQueryAsync(token);
+                }
+            }
+
+            // Warm up Marten / Ensure Schema is ready before seeding
+            await eventStore.GetStatisticsAsync();
+        }
+        catch (Exception ex)
+        {
+             Console.WriteLine($"ℹ️ Event Store (Marten) not fully ready yet: {ex.Message}");
+             throw; // Rethrow to trigger Polly retry if connection fails
+        }
+
+        var seeder = new DbSeeder(context, eventStore);
+        await seeder.SeedAsync();
+    });
 
     // Run MongoDB seeder (optional - enabled by scripts when MongoDB is selected)
     // await MongoDbSeeder.SeedAsync(scope.ServiceProvider);

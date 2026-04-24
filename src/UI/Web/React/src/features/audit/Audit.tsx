@@ -36,7 +36,6 @@ export default function Audit() {
             value={entityType}
             onChange={(val) => { setEntityType(val); setPage(1); }}
             options={entityOptions}
-            padding="py-5"
           />
         </div>
 

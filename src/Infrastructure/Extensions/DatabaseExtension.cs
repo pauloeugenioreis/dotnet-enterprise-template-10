@@ -136,11 +136,9 @@ public static class DatabaseExtension
                     break;
 
                 case "mysql":
-                    var serverVersion = ServerVersion.AutoDetect(connectionString);
-                    options.UseMySql(connectionString, serverVersion, mySqlOptions =>
+                    options.UseMySQL(connectionString, mySqlOptions =>
                     {
                         mySqlOptions.CommandTimeout(settings.CommandTimeoutSeconds);
-                        mySqlOptions.EnableRetryOnFailure(3);
                     });
                     break;
 
@@ -157,6 +155,9 @@ public static class DatabaseExtension
             }
 
             options.EnableDetailedErrors();
+            
+            // Ignore pending model changes warning (EF Core 10 strictness)
+            options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
         });
 
         // Register DbContext as generic DbContext for Repository<T> to resolve

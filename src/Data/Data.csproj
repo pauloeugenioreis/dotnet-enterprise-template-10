@@ -20,7 +20,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.5" />
     <PackageReference Include="Oracle.EntityFrameworkCore" Version="10.23.26200" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
+    <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.1" />
 
     <!-- Dapper (Alternative/Complementary ORM for high-performance queries) -->
     <PackageReference Include="Dapper" Version="2.1.72" />
