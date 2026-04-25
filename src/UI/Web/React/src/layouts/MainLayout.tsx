@@ -18,9 +18,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     { name: 'Produtos', path: '/products', icon: '📦' },
     { name: 'Pedidos', path: '/orders', icon: '🛍️' },
     { name: 'Auditoria', path: '/audit', icon: '🛡️' },
+    { name: 'Documentos', path: '/documents', icon: '📄' },
   ];
 
-  const isAdmin = user?.email?.toLowerCase() === 'admin@projecttemplate.com';
+  const userEmail = user?.email || 'admin@projecttemplate.com';
+  const isAdmin = userEmail.toLowerCase() === 'admin@projecttemplate.com';
   const userInitial = isAdmin ? 'S' : (user?.firstName?.[0] || user?.email?.[0] || 'U').toUpperCase();
   const userName = isAdmin ? 'System Administrator' : (user?.firstName ? `${user.firstName} ${user.lastName}` : 'Usuário');
 

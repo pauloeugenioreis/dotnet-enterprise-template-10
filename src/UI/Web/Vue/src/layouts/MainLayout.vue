@@ -14,6 +14,7 @@ const menuItems = [
   { name: 'Produtos', path: '/products', icon: '📦' },
   { name: 'Pedidos', path: '/orders', icon: '🛍️' },
   { name: 'Auditoria', path: '/audit', icon: '🛡️' },
+  { name: 'Documentos', path: '/documents', icon: '📄' },
 ];
 
 const isAdmin = computed(() => authStore.user?.email?.toLowerCase() === 'admin@projecttemplate.com');
