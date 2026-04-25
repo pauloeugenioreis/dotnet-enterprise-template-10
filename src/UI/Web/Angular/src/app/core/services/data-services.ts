@@ -33,6 +33,10 @@ export class OrderService extends BaseService {
     if (to) url += `&endDate=${to.toISOString()}`;
     return this.http.get(url, { responseType: 'blob' });
   }
+
+  getStatistics() {
+    return this.http.get<any>(`${this.baseUrl}/api/v1/Order/statistics`);
+  }
 }
 
 @Injectable({ providedIn: 'root' })

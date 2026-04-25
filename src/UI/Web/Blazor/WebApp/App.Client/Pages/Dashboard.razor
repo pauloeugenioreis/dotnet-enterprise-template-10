@@ -23,19 +23,25 @@
                 <span class="text-3xl">📈</span>
             </div>
             <div>
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Vendas Mensais</p>
-                <p class="text-4xl font-black text-gray-900 tracking-tighter">R$ 842.500</p>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Vendas Totais</p>
+                <p class="text-4xl font-black text-gray-900 tracking-tighter">
+                    @if (statistics == null) { <span class="animate-pulse">...</span> }
+                    else { @(statistics.TotalRevenue.ToString("C2", new CultureInfo("pt-BR"))) }
+                </p>
             </div>
         </div>
 
-        <!-- New Customers -->
+        <!-- Total Orders -->
         <div class="bg-white p-10 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-50 flex flex-col gap-6">
             <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 shadow-sm border border-blue-100/50">
                 <span class="text-3xl">👤</span>
             </div>
             <div>
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Novos Clientes</p>
-                <p class="text-4xl font-black text-gray-900 tracking-tighter">+ 128</p>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Total de Pedidos</p>
+                <p class="text-4xl font-black text-gray-900 tracking-tighter">
+                    @if (statistics == null) { <span class="animate-pulse">...</span> }
+                    else { @statistics.TotalOrders }
+                </p>
             </div>
         </div>
 
@@ -104,13 +110,19 @@
 
 @code {
     private List<OrderResponseDto>? recentOrders;
+    private OrderStatisticsDto? statistics;
 
     protected override async Task OnInitializedAsync()
     {
         try 
         {
-            var result = await OrderService.GetPagedAsync(1, 5);
-            recentOrders = result.Items.ToList();
+            var statsTask = OrderService.GetStatisticsAsync();
+            var ordersTask = OrderService.GetPagedAsync(1, 5);
+
+            await Task.WhenAll(statsTask, ordersTask);
+            
+            statistics = await statsTask;
+            recentOrders = (await ordersTask).Items.ToList();
         }
         catch 
         {

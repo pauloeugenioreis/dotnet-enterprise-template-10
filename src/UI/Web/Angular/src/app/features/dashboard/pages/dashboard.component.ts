@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { OrderService } from '../../../core/services/data-services';
 
 @Component({
@@ -14,16 +15,22 @@ export class DashboardComponent implements OnInit {
   
   loading = signal(true);
   latestOrders = signal<any[]>([]);
+  statistics = signal<any>(null);
 
   ngOnInit() {
-    this.loadLatestOrders();
+    this.loadDashboardData();
   }
 
-  loadLatestOrders() {
+  loadDashboardData() {
     this.loading.set(true);
-    this.orderService.getOrders(1, 5).subscribe({
+    
+    forkJoin({
+      orders: this.orderService.getOrders(1, 5),
+      stats: this.orderService.getStatistics()
+    }).subscribe({
       next: (res) => {
-        this.latestOrders.set(res.items);
+        this.latestOrders.set(res.orders.items);
+        this.statistics.set(res.stats);
         this.loading.set(false);
       },
       error: () => {

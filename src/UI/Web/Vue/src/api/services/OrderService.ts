@@ -13,6 +13,11 @@ export class OrderService extends BaseService<any> {
   async exportToExcel(): Promise<void> {
     await this.downloadFile(`${this.resourcePath}/ExportToExcel`, `Pedidos_${new Date().getTime()}.xlsx`);
   }
+
+  async getStatistics(): Promise<any> {
+    const response = await api.get(`${this.resourcePath}/statistics`);
+    return response.data;
+  }
 }
 
 export const orderService = new OrderService();

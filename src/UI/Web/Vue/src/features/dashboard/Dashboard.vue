@@ -4,19 +4,28 @@
 import { ref, onMounted } from 'vue';
 import { orderService } from '../../api/services/OrderService';
 
-const stats = [
-  { label: 'Vendas Mensais', value: 'R$ 842.500,00', icon: '📈', color: 'bg-rose-50 text-rose-500' },
-  { label: 'Novos Clientes', value: '+ 128', icon: '👤', color: 'bg-blue-50 text-blue-500' },
+const stats = ref([
+  { label: 'Vendas Totais', value: '...', icon: '📈', color: 'bg-rose-50 text-rose-500' },
+  { label: 'Total de Pedidos', value: '...', icon: '👤', color: 'bg-blue-50 text-blue-500' },
   { label: 'Status do Sistema', value: 'Operacional', icon: '✅', color: 'bg-emerald-50 text-emerald-500' },
-];
+]);
 
 const latestOrders = ref<any[]>([]);
 const loading = ref(true);
 
 onMounted(async () => {
   try {
-    const data = await orderService.getAll({ page: 1, pageSize: 5 });
-    latestOrders.value = data.items;
+    const [ordersData, statsData] = await Promise.all([
+      orderService.getAll({ page: 1, pageSize: 5 }),
+      orderService.getStatistics()
+    ]);
+    
+    latestOrders.value = ordersData.items;
+    
+    // Update stats
+    stats.value[0].value = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(statsData.totalRevenue);
+    stats.value[1].value = statsData.totalOrders.toString();
+    
   } catch (error) {
     console.error('Erro ao carregar dashboard', error);
   } finally {

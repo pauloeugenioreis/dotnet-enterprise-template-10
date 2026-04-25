@@ -47,6 +47,7 @@ export const orderService = {
     if (endDate) url += `&endDate=${endDate}`;
     return apiClient.get(url, { responseType: 'blob' });
   },
+  getStatistics: () => apiClient.get('/api/v1/Order/statistics').then(res => res.data),
 };
 
 export const productService = {
