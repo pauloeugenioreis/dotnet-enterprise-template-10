@@ -373,7 +373,7 @@ if [ "$UI_WEB" = "none" ]; then
     dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App/App.csproj 2>/dev/null || true
     dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App.Client/App.Client.csproj 2>/dev/null || true
     dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/Wasm/BlazorWasm.csproj 2>/dev/null || true
-    sed -i '/UI\/Web\/Blazor\/WebApp\/App\/App.csproj/d' src/Aspire/AppHost/AppHost.csproj
+    sed -i '/UI.Web.Blazor.WebApp.App.App.csproj/d' src/Aspire/AppHost/AppHost.csproj
     # Remove all web from Aspire
     sed -i '/\/\/ Web Projects/,/builder.AddNpmApp/d' "$ASPIRE_PROGRAM"
 elif [ "$UI_WEB" != "all" ]; then
@@ -390,7 +390,7 @@ elif [ "$UI_WEB" != "all" ]; then
         dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App/App.csproj 2>/dev/null || true
         dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App.Client/App.Client.csproj 2>/dev/null || true
         dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/Wasm/BlazorWasm.csproj 2>/dev/null || true
-        sed -i '/UI\/Web\/Blazor\/WebApp\/App\/App.csproj/d' src/Aspire/AppHost/AppHost.csproj
+        sed -i '/UI.Web.Blazor.WebApp.App.App.csproj/d' src/Aspire/AppHost/AppHost.csproj
         sed -i '/builder.AddProject<Projects.App>("blazor-app")/,/ExternalHttpEndpoints();/d' "$ASPIRE_PROGRAM"
     fi
     # React
