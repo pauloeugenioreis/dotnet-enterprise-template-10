@@ -17,33 +17,33 @@ Safely create and manage EF Core migrations with multi-database awareness.
 ## Procedure
 
 ### 1. Pre-flight Checks
-1. Verify the entity/mapping changes are complete in `src/Data/Mappings/`
+1. Verify the entity/mapping changes are complete in `src/Server/Data/Mappings/`
 2. Ensure `DbSet<T>` is registered in `ApplicationDbContext`
-3. Check that no pending migrations exist: `dotnet ef migrations list --project src/Data --startup-project src/Api`
+3. Check that no pending migrations exist: `dotnet ef migrations list --project src/Server/Data --startup-project src/Server/Api`
 
 ### 2. Create Migration
 4. Generate migration:
 ```bash
-dotnet ef migrations add {MigrationName} --project src/Data --startup-project src/Api
+dotnet ef migrations add {MigrationName} --project src/Server/Data --startup-project src/Server/Api
 ```
 
 ### 3. Review Migration
-5. Open the generated migration in `src/Data/Migrations/`
+5. Open the generated migration in `src/Server/Data/Migrations/`
 6. Verify the `Up()` method creates the expected schema
 7. Verify the `Down()` method properly reverses all changes
 8. Generate SQL script for review:
 ```bash
-dotnet ef migrations script --project src/Data --startup-project src/Api
+dotnet ef migrations script --project src/Server/Data --startup-project src/Server/Api
 ```
 
 ### 4. Validate
 9. Apply migration to development database:
 ```bash
-dotnet ef database update --project src/Data --startup-project src/Api
+dotnet ef database update --project src/Server/Data --startup-project src/Server/Api
 ```
 10. Test rollback:
 ```bash
-dotnet ef database update {PreviousMigration} --project src/Data --startup-project src/Api
+dotnet ef database update {PreviousMigration} --project src/Server/Data --startup-project src/Server/Api
 ```
 
 ## Safety Rules

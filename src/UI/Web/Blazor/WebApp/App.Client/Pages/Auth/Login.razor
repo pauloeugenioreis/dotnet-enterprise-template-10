@@ -1,0 +1,125 @@
+@page "/login"
+@layout AuthLayout
+@using Microsoft.AspNetCore.Authorization
+@using BlazorApp.Client.Services
+@using BlazorApp.Client.Services.Base
+@using BlazorApp.Client.Auth
+@using ProjectTemplate.Shared.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject LocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthStateProvider
+@rendermode InteractiveAuto
+@attribute [AllowAnonymous]
+
+<div class="min-h-screen flex items-center justify-center bg-primary-50 p-6">
+    <div class="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl p-10 border border-gray-100 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div class="flex justify-center mb-10">
+            <div class="w-20 h-20 bg-primary-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-primary-600/30 rotate-3">
+                <span class="text-white text-4xl font-black -rotate-3">ET</span>
+            </div>
+        </div>
+        
+        <h1 class="text-4xl font-black text-center text-gray-900 tracking-tight mb-3">Bem-vindo</h1>
+        <p class="text-center text-gray-500 mb-10 font-medium">Ecossistema Enterprise Blazor</p>
+
+        <EditForm Model="@loginRequest" OnValidSubmit="HandleLogin" FormName="loginForm">
+            <DataAnnotationsValidator />
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 ml-1">E-mail</label>
+                    <InputText @bind-Value="loginRequest.Email"
+                              class="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-4 focus:ring-primary-600/10 focus:border-primary-600 transition-all outline-none"
+                              placeholder="seu@email.com" />
+                    <ValidationMessage For="@(() => loginRequest.Email)" class="text-rose-500 text-xs mt-2 ml-1" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 ml-1">Senha</label>
+                    <InputText @bind-Value="loginRequest.Password" type="password"
+                              class="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-4 focus:ring-primary-600/10 focus:border-primary-600 transition-all outline-none"
+                              placeholder="••••••••" />
+                    <ValidationMessage For="@(() => loginRequest.Password)" class="text-rose-500 text-xs mt-2 ml-1" />
+                </div>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3">
+                        <span class="text-sm text-rose-700 font-medium">@errorMessage</span>
+                    </div>
+                }
+
+                <button type="submit" disabled="@isSubmitting"
+                        class="w-full bg-primary-600 hover:bg-primary-700 text-white font-black py-5 rounded-2xl shadow-xl shadow-primary-600/20 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center">
+                    @if (isSubmitting)
+                    {
+                        <div class="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    }
+                    else
+                    {
+                        <span>Entrar na Plataforma</span>
+                    }
+                </button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+<style>
+    @@keyframes blob {
+        0% { transform: translate(0px, 0px) scale(1); }
+        33% { transform: translate(30px, -50px) scale(1.1); }
+        66% { transform: translate(-20px, 20px) scale(0.9); }
+        100% { transform: translate(0px, 0px) scale(1); }
+    }
+    .animate-blob {
+        animation: blob 7s infinite;
+    }
+    .animation-delay-2000 {
+        animation-delay: 2s;
+    }
+    @@keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+        20%, 40%, 60%, 80% { transform: translateX(2px); }
+    }
+    .animate-shake {
+        animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+</style>
+
+@code {
+    private LoginDto loginRequest = new() { Email = "admin@projecttemplate.com", Password = "Admin@2026!Secure" };
+    private string? errorMessage;
+    private bool isSubmitting;
+
+    private async Task HandleLogin()
+    {
+        errorMessage = null;
+        isSubmitting = true;
+
+        try
+        {
+            var result = await AuthService.LoginAsync(loginRequest);
+            if (result != null && !string.IsNullOrEmpty(result.AccessToken))
+            {
+                await LocalStorage.SetItemAsync("authToken", result.AccessToken);
+                ((CustomAuthenticationStateProvider)AuthStateProvider).NotifyUserAuthentication(result.AccessToken);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                errorMessage = "E-mail ou senha incorretos.";
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "Ocorreu um erro ao tentar entrar. Tente novamente.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

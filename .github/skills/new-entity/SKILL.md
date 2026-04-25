@@ -17,11 +17,11 @@ Creates all artifacts for a new entity following Clean Architecture patterns.
 > **ALWAYS create concrete specialized artifacts.** Never use generic `IRepository<T>` or `IService<T>` directly in services or controllers.
 > The generic interfaces exist as base contracts that developers may choose to use manually, but **scaffolding always generates concrete implementations**.
 
-- Repository interface: `I{Name}Repository : IRepository<{Name}>` — in `src/Domain/Interfaces/`
-- Repository class: `{Name}Repository : Repository<{Name}>, I{Name}Repository` — in `src/Data/Repository/`
-- Service interface: `I{Name}Service : IService<{Name}>` — in `src/Domain/Interfaces/`
-- Service class: `{Name}Service : Service<{Name}>, I{Name}Service` — injects `I{Name}Repository`, in `src/Application/Services/`
-- Controller: injects `I{Name}Service` — in `src/Api/Controllers/`
+- Repository interface: `I{Name}Repository : IRepository<{Name}>` — in `src/Server/Domain/Interfaces/`
+- Repository class: `{Name}Repository : Repository<{Name}>, I{Name}Repository` — in `src/Server/Data/Repository/`
+- Service interface: `I{Name}Service : IService<{Name}>` — in `src/Server/Domain/Interfaces/`
+- Service class: `{Name}Service : Service<{Name}>, I{Name}Service` — injects `I{Name}Repository`, in `src/Server/Application/Services/`
+- Controller: injects `I{Name}Service` — in `src/Server/Api/Controllers/`
 - Tests: mock `Mock<I{Name}Service>` for controller tests, `Mock<I{Name}Repository>` for service tests
 
 ## Pagination Pattern
@@ -32,28 +32,28 @@ Creates all artifacts for a new entity following Clean Architecture patterns.
 - **Service**: propagates the tuple `(Items, Total)` from repository, mapping entities to DTOs.
 - **Controller GET list**: accepts `[FromQuery] int? page, [FromQuery] int? pageSize`. If both present → `HandlePagedResult(items, total, page, pageSize)`. Otherwise → `Ok(items)`.
 - **Excel export endpoints**: always call without page/pageSize (all records). Use `var (items, _) = await service.GetAllAsync(..., cancellationToken: ct);`
-- Reference: check `src/Api/Controllers/ProductController.cs` and `src/Api/Controllers/OrderController.cs`
+- Reference: check `src/Server/Api/Controllers/ProductController.cs` and `src/Server/Api/Controllers/OrderController.cs`
 
 ## Procedure
 
 ### 1. Domain Layer
-1. Create entity in `src/Domain/Entities/{Name}.cs` inheriting `EntityBase`
-2. Create DTO in `src/Domain/Dtos/{Name}Dto.cs` (use record)
-3. Create validator in `src/Domain/Validators/{Name}Validator.cs` using FluentValidation
-4. Create repository interface `I{Name}Repository : IRepository<{Name}>` in `src/Domain/Interfaces/I{Name}Repository.cs`
-5. Create service interface `I{Name}Service : IService<{Name}>` in `src/Domain/Interfaces/I{Name}Service.cs`
+1. Create entity in `src/Server/Domain/Entities/{Name}.cs` inheriting `EntityBase`
+2. Create DTO in `src/Server/Domain/Dtos/{Name}Dto.cs` (use record)
+3. Create validator in `src/Server/Domain/Validators/{Name}Validator.cs` using FluentValidation
+4. Create repository interface `I{Name}Repository : IRepository<{Name}>` in `src/Server/Domain/Interfaces/I{Name}Repository.cs`
+5. Create service interface `I{Name}Service : IService<{Name}>` in `src/Server/Domain/Interfaces/I{Name}Service.cs`
 
 ### 2. Data Layer
-6. Create EF mapping in `src/Data/Mappings/{Name}Mapping.cs` implementing `IEntityTypeConfiguration<{Name}>`
-7. Add `DbSet<{Name}>` to `src/Data/Context/ApplicationDbContext.cs`
-8. Create repository `{Name}Repository : Repository<{Name}>, I{Name}Repository` in `src/Data/Repository/{Name}Repository.cs`
-9. Create migration: `dotnet ef migrations add Add{Name} --project src/Data --startup-project src/Api`
+6. Create EF mapping in `src/Server/Data/Mappings/{Name}Mapping.cs` implementing `IEntityTypeConfiguration<{Name}>`
+7. Add `DbSet<{Name}>` to `src/Server/Data/Context/ApplicationDbContext.cs`
+8. Create repository `{Name}Repository : Repository<{Name}>, I{Name}Repository` in `src/Server/Data/Repository/{Name}Repository.cs`
+9. Create migration: `dotnet ef migrations add Add{Name} --project src/Server/Data --startup-project src/Server/Api`
 
 ### 3. Application Layer
-10. Create service `{Name}Service : Service<{Name}>, I{Name}Service` in `src/Application/Services/{Name}Service.cs` — inject `I{Name}Repository` (not generic `IRepository<{Name}>`)
+10. Create service `{Name}Service : Service<{Name}>, I{Name}Service` in `src/Server/Application/Services/{Name}Service.cs` — inject `I{Name}Repository` (not generic `IRepository<{Name}>`)
 
 ### 4. Api Layer
-11. Create controller in `src/Api/Controllers/{Name}Controller.cs` inheriting `ApiControllerBase` — inject `I{Name}Service` (not generic `IService<{Name}>`)
+11. Create controller in `src/Server/Api/Controllers/{Name}Controller.cs` inheriting `ApiControllerBase` — inject `I{Name}Service` (not generic `IService<{Name}>`)
 12. Add CRUD endpoints: GET (list with optional pagination + by id), POST, PUT, DELETE. The GET list endpoint must accept optional `page` and `pageSize` query params — when provided, use `HandlePagedResult`; when omitted, return all records
 
 ### 5. Tests
@@ -61,11 +61,11 @@ Creates all artifacts for a new entity following Clean Architecture patterns.
 14. Create integration tests in `tests/Integration/Controllers/{Name}IntegrationTests.cs`
 
 ## Reference Templates
-- Entity template: check `src/Domain/Entities/Order.cs`
-- Repository interface: check `src/Domain/Interfaces/IOrderRepository.cs`
-- Repository implementation: check `src/Data/Repository/OrderRepository.cs`
-- Service interface: check `src/Domain/Interfaces/IOrderService.cs`
-- Service implementation: check `src/Application/Services/OrderService.cs`
-- Controller template: check `src/Api/Controllers/OrderController.cs`
-- Mapping template: check `src/Data/Mappings/`
+- Entity template: check `src/Server/Domain/Entities/Order.cs`
+- Repository interface: check `src/Server/Domain/Interfaces/IOrderRepository.cs`
+- Repository implementation: check `src/Server/Data/Repository/OrderRepository.cs`
+- Service interface: check `src/Server/Domain/Interfaces/IOrderService.cs`
+- Service implementation: check `src/Server/Application/Services/OrderService.cs`
+- Controller template: check `src/Server/Api/Controllers/OrderController.cs`
+- Mapping template: check `src/Server/Data/Mappings/`
 - Test template: check `tests/UnitTests/Controllers/OrderControllerTests.cs`

@@ -1,29 +1,36 @@
 services:
   api:
+    container_name: api
     build:
       context: .
-      dockerfile: src/Api/Dockerfile
+      dockerfile: src/Server/Api/Dockerfile
     ports:
-      - "5000:80"
-      - "5001:443"
+      - "5000:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
-      - AppSettings__Infrastructure__Database__DatabaseType=SqlServer
-      - AppSettings__Infrastructure__Database__ConnectionString=Server=sqlserver;Database=ProjectTemplate;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+      - ASPNETCORE_URLS=http://+:8080
+      - AppSettings__Infrastructure__Database__DatabaseType=${DB_TYPE:-PostgreSQL}
+      - AppSettings__Infrastructure__Database__ConnectionString=${DB_CONNECTION_STRING:-Host=postgres;Database=ProjectTemplate;Username=postgres;Password=PostgresPass123;Port=5432}
+      - AppSettings__Infrastructure__EventSourcing__Enabled=true
+      - AppSettings__Infrastructure__EventSourcing__ConnectionString=${DB_EVENTS_CONNECTION_STRING:-Host=postgres-events;Database=ProjectTemplateEvents;Username=postgres;Password=postgres}
+      - AppSettings__Infrastructure__Redis__ConnectionString=redis:6379
+      - AppSettings__Infrastructure__RabbitMQ__ConnectionString=amqp://guest:guest@rabbitmq:5672
+      - AppSettings__Infrastructure__MongoDB__ConnectionString=mongodb://admin:admin@mongodb:27017/ProjectTemplateMongo
       - AppSettings__Infrastructure__Telemetry__Enabled=true
       - AppSettings__Infrastructure__Telemetry__Providers__0=jaeger
       - AppSettings__Infrastructure__Telemetry__Providers__1=prometheus
       - AppSettings__Infrastructure__Telemetry__Jaeger__Host=jaeger
       - AppSettings__Infrastructure__Telemetry__Jaeger__Port=4317
       - AppSettings__Infrastructure__Telemetry__Jaeger__UseGrpc=true
-      - AppSettings__Infrastructure__EventSourcing__Enabled=true
-      - AppSettings__Infrastructure__EventSourcing__ConnectionString=Host=postgres-events;Database=ProjectTemplateEvents;Username=postgres;Password=postgres
     depends_on:
-      - sqlserver
-      - postgres-events
-      - jaeger
-      - prometheus
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+      prometheus:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -131,6 +138,61 @@ services:
       timeout: 5s
       retries: 5
 
+  # Redis - Distributed Cache
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ - Message Broker
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MongoDB - NoSQL Database
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+      - MONGO_INITDB_DATABASE=ProjectTemplateMongo
+      - MONGO_APP_USERNAME=admin
+      - MONGO_APP_PASSWORD=admin
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+      - ./scripts/mongo-init:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mongosh", "mongodb://admin:admin@localhost:27017/admin", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Jaeger - Distributed Tracing (using OTLP protocol)
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -226,8 +288,99 @@ services:
   #     - "4318:4318"   # OTLP HTTP receiver
   #     - "8888:8888"   # Prometheus metrics exposed by the collector
   #     - "8889:8889"   # Prometheus exporter metrics
-  #   networks:
-  #     - app-network
+  # Blazor Web Application
+  blazor-app:
+    container_name: web-blazor
+    build:
+      context: .
+      dockerfile: src/UI/Web/Blazor/WebApp/App/Dockerfile
+    ports:
+      - "5188:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ApiBaseUrl=http://api:8080
+    depends_on:
+      - api
+    networks:
+      - app-network
+
+  # Angular Web Application
+  angular-web:
+    container_name: web-angular
+    build:
+      context: src/UI/Web/Angular
+      dockerfile: Dockerfile
+    environment:
+      - API_URL=http://localhost:5000
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+    networks:
+      - app-network
+
+  # React Web Application
+  react-web:
+    container_name: web-react
+    build:
+      context: src/UI/Web/React
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://localhost:5000
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5000
+    depends_on:
+      - api
+    networks:
+      - app-network
+
+  # Vue Web Application
+  vue-web:
+    container_name: web-vue
+    build:
+      context: src/UI/Web/Vue
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://localhost:5000
+    ports:
+      - "5174:80"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5000
+    depends_on:
+      - api
+    networks:
+      - app-network
+
+  # Welcome service to display access links
+  welcome:
+    image: alpine
+    container_name: welcome
+    command: >
+      /bin/sh -c "
+      echo ' ' &&
+      echo '🚀 Aplicações (Frontends & API)' &&
+      echo 'API (.NET 10):       http://localhost:5000' &&
+      echo 'Angular:             http://localhost:4200' &&
+      echo 'React:               http://localhost:5173' &&
+      echo 'Vue:                 http://localhost:5174' &&
+      echo 'Blazor WebApp:       http://localhost:5188' &&
+      echo ' ' &&
+      echo '📊 Observabilidade & Infraestrutura' &&
+      echo 'Grafana:             http://localhost:3000' &&
+      echo 'Jaeger:              http://localhost:16686' &&
+      echo 'RabbitMQ Management: http://localhost:15672' &&
+      echo 'Prometheus:          http://localhost:9090' &&
+      echo ' '"
+    depends_on:
+      api: { condition: service_started }
+      angular-web: { condition: service_started }
+      react-web: { condition: service_started }
+      vue-web: { condition: service_started }
+      blazor-app: { condition: service_started }
+    networks:
+      - app-network
 
 networks:
   app-network:
@@ -241,4 +394,5 @@ volumes:
   postgres-events-data:
   prometheus-data:
   grafana-data:
+  mongodb-data:
 

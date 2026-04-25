@@ -13,7 +13,7 @@ You are a REST API design specialist for this .NET 10 project. You create endpoi
 
 ## Approach
 1. Understand the resource/entity being exposed
-2. Check existing controllers in `src/Api/Controllers/` for patterns
+2. Check existing controllers in `src/Server/Api/Controllers/` for patterns
 3. Design RESTful endpoints (GET, POST, PUT, DELETE)
 4. Ensure service layer exists for the resource
 5. Add `[ProducesResponseType]` attributes for Swagger

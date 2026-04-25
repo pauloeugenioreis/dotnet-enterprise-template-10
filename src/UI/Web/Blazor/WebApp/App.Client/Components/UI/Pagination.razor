@@ -1,0 +1,66 @@
+@namespace BlazorApp.Components.UI
+
+<div class="bg-gray-50 px-10 py-6 flex justify-between items-center border-t border-gray-100">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-10">
+        <p class="text-sm text-gray-500 font-bold">
+            Página <span class="text-gray-900">@Page</span> de <span class="text-gray-900">@(TotalPages == 0 ? 1 : TotalPages)</span>
+        </p>
+        
+        <div class="flex items-center gap-3">
+            <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Itens por página:</span>
+            <select 
+                @onchange="OnPageSizeChange"
+                class="bg-white border border-gray-200 rounded-xl px-4 py-2 text-xs font-black text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-600 transition-all cursor-pointer shadow-sm"
+            >
+                @foreach (var size in PageSizes)
+                {
+                    <option value="@size" selected="@(size == PageSize)">@size</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="flex gap-3">
+        <button 
+            @onclick="() => OnPageChange(Page - 1)"
+            disabled="@(Page <= 1)"
+            class="px-6 py-3 bg-white border border-gray-200 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
+        >
+            Anterior
+        </button>
+        <button 
+            @onclick="() => OnPageChange(Page + 1)"
+            disabled="@(Page >= TotalPages || TotalPages == 0)"
+            class="px-6 py-3 bg-primary-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-primary-600/20 active:scale-95"
+        >
+            Próxima
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Page { get; set; }
+    [Parameter] public int TotalPages { get; set; }
+    [Parameter] public long TotalItems { get; set; }
+    [Parameter] public int PageSize { get; set; } = 10;
+    [Parameter] public EventCallback<int> OnPageChanged { get; set; }
+    [Parameter] public EventCallback<int> OnPageSizeChanged { get; set; }
+
+    private List<int> PageSizes = new() { 5, 10, 20, 50 };
+
+    private async Task OnPageChange(int newPage)
+    {
+        if (newPage >= 1 && newPage <= TotalPages)
+        {
+            await OnPageChanged.InvokeAsync(newPage);
+        }
+    }
+
+    private async Task OnPageSizeChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var newSize))
+        {
+            await OnPageSizeChanged.InvokeAsync(newSize);
+        }
+    }
+}

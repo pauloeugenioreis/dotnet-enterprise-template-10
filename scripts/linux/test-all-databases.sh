@@ -45,8 +45,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-API_PROJECT="$PROJECT_ROOT/src/Api/Api.csproj"
-DATA_PROJECT="$PROJECT_ROOT/src/Data/Data.csproj"
+API_PROJECT="$PROJECT_ROOT/src/Server/Api/Api.csproj"
+DATA_PROJECT="$PROJECT_ROOT/src/Server/Data/Data.csproj"
 
 echo -e "${CYAN}================================================${NC}"
 echo -e "${CYAN}  Testing All Database Providers${NC}"
@@ -66,7 +66,7 @@ if [ "$SKIP_DOCKER" = false ]; then
     cd "$PROJECT_ROOT"
 
     docker-compose down -v 2>&1 > /dev/null
-    docker-compose up -d sqlserver oracle postgres mysql
+    docker-compose up -d sqlserver oracle postgres mysql postgres-events
 
     if [ $? -ne 0 ]; then
         echo -e "${RED}❌ Failed to start Docker Compose${NC}"
@@ -87,6 +87,7 @@ if [ "$SKIP_DOCKER" = false ]; then
     DB_STATUS["Oracle"]=0
     DB_STATUS["PostgreSQL"]=0
     DB_STATUS["MySQL"]=0
+    DB_STATUS["EventStore"]=0
 
     while [ $ELAPSED -lt $TIMEOUT ]; do
         ALL_READY=true
@@ -127,6 +128,15 @@ if [ "$SKIP_DOCKER" = false ]; then
             fi
         fi
 
+        if [ ${DB_STATUS["EventStore"]} -eq 0 ]; then
+            if check_port localhost 5432; then
+                DB_STATUS["EventStore"]=1
+                echo -e "${GREEN}  ✅ Event Store (Postgres) ready${NC}"
+            else
+                ALL_READY=false
+            fi
+        fi
+
         if [ "$ALL_READY" = true ]; then
             break
         fi
@@ -160,6 +170,7 @@ REQUIRED_CONTAINERS["sqlserver"]="1433:SQL Server"
 REQUIRED_CONTAINERS["oracle"]="1521:Oracle"
 REQUIRED_CONTAINERS["postgres"]="5433:PostgreSQL"
 REQUIRED_CONTAINERS["mysql"]="3306:MySQL"
+REQUIRED_CONTAINERS["postgres-events"]="5432:EventStore"
 
 CONTAINER_VALIDATION=true
 
@@ -216,9 +227,25 @@ for DB in "${DATABASES[@]}"; do
     RESULTS_HEALTH[$DB]=0
     RESULTS_ERROR[$DB]=""
 
+    # Build project
+    echo -e "${YELLOW}[2/4] Building project...${NC}"
+    BUILD_OUTPUT=$(dotnet build "$API_PROJECT" 2>&1)
+
+    # Check if build succeeded
+    if echo "$BUILD_OUTPUT" | grep -q "Build succeeded" || ! echo "$BUILD_OUTPUT" | grep -q "Build FAILED\|error CS\|error MSB"; then
+        echo -e "${GREEN}  ✅ Build successful${NC}"
+        RESULTS_BUILD[$DB]=1
+    else
+        echo -e "${RED}  ❌ Build failed${NC}"
+        echo -e "${CYAN}Output:${NC}"
+        echo "$BUILD_OUTPUT"
+        RESULTS_ERROR[$DB]="Build failed"
+        continue
+    fi
+
     # Run migrations
     if [ "$SKIP_MIGRATIONS" = false ]; then
-        echo -e "${YELLOW}[2/4] Running migrations for $DB...${NC}"
+        echo -e "${YELLOW}[3/4] Running migrations for $DB...${NC}"
 
         export ASPNETCORE_ENVIRONMENT=$DB
 
@@ -228,7 +255,6 @@ for DB in "${DATABASES[@]}"; do
             dotnet tool install -g dotnet-ef || true
         fi
         
-        EF_CMD="dotnet ef"
         if ! command -v dotnet-ef &> /dev/null && [ -f "$HOME/.dotnet/tools/dotnet-ef" ]; then
             export PATH="$PATH:$HOME/.dotnet/tools"
         fi
@@ -236,10 +262,10 @@ for DB in "${DATABASES[@]}"; do
         # Drop database if exists (clean state)
         dotnet ef database drop --project "$DATA_PROJECT" --startup-project "$API_PROJECT" --force --no-build 2>&1 > /dev/null || true
 
-        # Apply migrations
-        MIGRATION_OUTPUT=$(dotnet ef database update --project "$DATA_PROJECT" --startup-project "$API_PROJECT" --no-build 2>&1) || true
+        # Apply migrations (remove --no-build to ensure it uses the latest changes)
+        MIGRATION_OUTPUT=$(dotnet ef database update --project "$DATA_PROJECT" --startup-project "$API_PROJECT" 2>&1) || true
 
-        # Check if migration succeeded (look for "Done." in output)
+        # Check if migration succeeded
         if echo "$MIGRATION_OUTPUT" | grep -q "Done\.\|No migrations were applied"; then
             echo -e "${GREEN}  ✅ Migrations applied successfully${NC}"
             RESULTS_MIGRATION[$DB]=1
@@ -251,24 +277,8 @@ for DB in "${DATABASES[@]}"; do
             continue
         fi
     else
-        echo -e "${CYAN}[2/4] Skipping migrations (--skip-migrations)${NC}"
+        echo -e "${CYAN}[3/4] Skipping migrations (--skip-migrations)${NC}"
         RESULTS_MIGRATION[$DB]=1
-    fi
-
-    # Build project
-    echo -e "${YELLOW}[3/4] Building project...${NC}"
-    BUILD_OUTPUT=$(dotnet build "$API_PROJECT" --no-restore 2>&1)
-
-    # Check if build succeeded (look for success message or absence of errors)
-    if echo "$BUILD_OUTPUT" | grep -q "Build succeeded" || ! echo "$BUILD_OUTPUT" | grep -q "Build FAILED\|error CS\|error MSB"; then
-        echo -e "${GREEN}  ✅ Build successful${NC}"
-        RESULTS_BUILD[$DB]=1
-    else
-        echo -e "${RED}  ❌ Build failed${NC}"
-        echo -e "${CYAN}Output:${NC}"
-        echo "$BUILD_OUTPUT"
-        RESULTS_ERROR[$DB]="Build failed"
-        continue
     fi
 
     # Start API and test
@@ -282,6 +292,9 @@ for DB in "${DATABASES[@]}"; do
         TEMP_ERROR="/tmp/api-error-$DB.txt"
 
         # Start API process with output redirection
+        # Provide Event Sourcing connection string for localhost
+        export AppSettings__Infrastructure__EventSourcing__ConnectionString="Host=localhost;Port=5432;Database=ProjectTemplateEvents;Username=postgres;Password=postgres"
+        
         dotnet run --project "$API_PROJECT" --no-build --no-launch-profile --urls "http://localhost:5000" > "$TEMP_OUTPUT" 2> "$TEMP_ERROR" &
         API_PID=$!
 

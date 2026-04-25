@@ -920,7 +920,7 @@ $env:AppSettings__Authentication__Jwt__Secret="test-secret-key-with-at-least-32-
 $env:AppSettings__EnvironmentName="Development"
 
 # Executar aplicação
-dotnet run --project src/Api/Api.csproj
+dotnet run --project src/Server/Api/Api.csproj
 
 # Limpar após teste
 Remove-Item Env:AppSettings__Authentication__Jwt__Secret
@@ -934,7 +934,7 @@ export AppSettings__Authentication__Jwt__Secret="test-secret-key-with-at-least-3
 export AppSettings__EnvironmentName="Development"
 
 # Executar aplicação
-dotnet run --project src/Api/Api.csproj
+dotnet run --project src/Server/Api/Api.csproj
 
 # Limpar após teste
 unset AppSettings__Authentication__Jwt__Secret

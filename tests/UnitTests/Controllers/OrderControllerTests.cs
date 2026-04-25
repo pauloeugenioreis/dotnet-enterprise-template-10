@@ -5,12 +5,12 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ProjectTemplate.Api.Controllers;
-using ProjectTemplate.Domain.Dtos;
+using ProjectTemplate.Shared.Models;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 using Xunit;
 
-using OrderItemDto = ProjectTemplate.Domain.Dtos.OrderItemDto;
+using OrderItemDto = ProjectTemplate.Shared.Models.OrderItemDto;
 
 namespace ProjectTemplate.UnitTests.Controllers;
 
@@ -73,11 +73,11 @@ public class OrderControllerTests
             UpdatedAt = DateTime.UtcNow,
             Items = new List<OrderItemResponseDto>()
         };
-        _mockOrderService.Setup(s => s.GetAllOrderDetailsAsync(null, null, null, It.IsAny<CancellationToken>()))
+        _mockOrderService.Setup(s => s.GetAllOrderDetailsAsync(null, null, null, null, null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(((IEnumerable<OrderResponseDto>)new List<OrderResponseDto> { orderDetails }, 1));
 
         // Act
-        var result = await _controller.GetAllAsync(null, null, null, CancellationToken.None);
+        var result = await _controller.GetAllAsync(null, null, null, null, null, null, CancellationToken.None);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();

@@ -1,0 +1,286 @@
+# --- CONFIGURAÇÃO ---
+$ErrorActionPreference = "Stop"
+
+# Cores (Simulando o padrão do shell)
+$CYAN = "$([char]27)[0;36m"
+$GREEN = "$([char]27)[0;32m"
+$YELLOW = "$([char]27)[1;33m"
+$BLUE = "$([char]27)[0;34m"
+$RED = "$([char]27)[0;31m"
+$NC = "$([char]27)[0m"
+
+# Portas críticas
+$PORTS = @(5000, 5001, 5432, 5433, 6379, 15672, 5672, 27017, 3000, 16686, 9090, 4200, 5173, 5174, 5188)
+
+function Clean-Environment {
+    Write-Host "`n$($RED)🛑 Limpando ambiente e liberando portas...$($NC)"
+    
+    # 1. Para todos os containers do projeto atual
+    docker-compose down --remove-orphans 2>$null | Out-Null
+    
+    # 2. Busca e para QUALQUER container docker que esteja usando as portas críticas
+    foreach ($port in $PORTS) {
+        $dockerPorts = docker ps -a --format "{{.ID}} {{.Ports}}"
+        $cont_ids = $dockerPorts | Select-String ":$port->" | ForEach-Object { $_.ToString().Split(' ')[0] }
+        
+        if ($cont_ids) {
+            foreach ($id in $cont_ids) {
+                Write-Host "  - Removendo container ($id) na porta $port"
+                docker rm -f $id 2>$null | Out-Null
+            }
+        }
+        
+        # Mata processos locais (ex: dotnet run)
+        if ($IsWindows) {
+            $connections = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
+            if ($connections) {
+                foreach ($conn in $connections) {
+                    $pId = $conn.OwningProcess
+                    try {
+                        $proc = Get-Process -Id $pId -ErrorAction SilentlyContinue
+                        if ($proc) {
+                            Write-Host "  - Matando processo na porta $port (PID: $pId - $($proc.ProcessName))"
+                            Stop-Process -Id $pId -Force -ErrorAction SilentlyContinue
+                        }
+                    } catch {}
+                }
+            }
+        } else {
+            # Linux / macOS
+            $pId = (lsof -t -i:$port 2>$null)
+            if ($pId) {
+                Write-Host "  - Matando processo na porta $port (PID: $pId)"
+                kill -9 $pId 2>$null
+            }
+        }
+    }
+
+    Write-Host "$($YELLOW)⏳ Aguardando liberação total das portas...$($NC)"
+    Start-Sleep -Seconds 3
+
+    # 4. Diagnóstico final
+    Write-Host "`n$($CYAN)🔍 Verificação final de portas:$($NC)"
+    foreach ($port in $PORTS) {
+        $portBusy = $false
+        $pId = $null
+        $procName = "Desconhecido"
+
+        if ($IsWindows) {
+            $check = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue
+            if ($check) {
+                $portBusy = $true
+                $pId = $check[0].OwningProcess
+                $procName = (Get-Process -Id $pId -ErrorAction SilentlyContinue).ProcessName
+            }
+        } else {
+            $pId = (lsof -t -i:$port -sTCP:LISTEN 2>$null)
+            if ($pId) {
+                $portBusy = $true
+                $procName = (ps -p $pId -o comm= 2>$null)
+            }
+        }
+
+        if ($portBusy) {
+            Write-Host "  $($RED)⚠ ATENÇÃO: A porta $port ainda está ocupada por: [$procName] (PID: $pId)$($NC)"
+            if ($IsWindows) {
+                Write-Host "     Dica: Tente rodar 'Stop-Process -Id $pId -Force' em um terminal como Administrador."
+            } else {
+                Write-Host "     Dica: Tente rodar 'sudo kill -9 $pId' manualmente."
+            }
+        }
+    }
+    
+    Write-Host "$($GREEN)✅ Ambiente pronto!$($NC)"
+}
+
+function Select-Database {
+    Write-Host ""
+    # Verifica quais bancos estão presentes no docker-compose.yml
+    $composeContent = Get-Content "docker-compose.yml" -Raw
+    $hasPostgres = $composeContent -match "postgres:"
+    $hasMssql = $composeContent -match "mssql:"
+    $hasMysql = $composeContent -match "mysql:"
+    $hasOracle = $composeContent -match "oracle:"
+
+    $availableDbs = @()
+    if ($hasPostgres) { $availableDbs += "1" }
+    if ($hasMssql) { $availableDbs += "2" }
+    if ($hasMysql) { $availableDbs += "3" }
+    if ($hasOracle) { $availableDbs += "4" }
+
+    if ($availableDbs.Count -eq 1) {
+        $dbChoice = $availableDbs[0]
+        Write-Host "ℹ️ Banco de dados detectado automaticamente baseado no docker-compose.yml." -ForegroundColor Cyan
+    }
+    else {
+        Write-Host "`n=========================================="
+        Write-Host "  SELECIONE O BANCO DE DADOS PRINCIPAL    "
+        Write-Host "=========================================="
+        Write-Host "1) PostgreSQL (Padrão)"
+        Write-Host "2) SQL Server"
+        Write-Host "3) MySQL"
+        Write-Host "4) Oracle"
+        Write-Host "=========================================="
+        $dbChoice = Read-Host "Escolha uma opção [1-4]"
+    }
+
+    switch ($dbChoice) {
+        "2" {
+            $script:DB_TYPE = "sqlserver"
+            $script:DB_SERVICE = "sqlserver"
+            $script:DB_CONN = "Server=sqlserver;Database=ProjectTemplateDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True"
+        }
+        "3" {
+            $script:DB_TYPE = "mysql"
+            $script:DB_SERVICE = "mysql"
+            $script:DB_CONN = "Server=mysql;Port=3306;Database=ProjectTemplate;Uid=appuser;Pwd=AppPass123;"
+        }
+        "4" {
+            $script:DB_TYPE = "oracle"
+            $script:DB_SERVICE = "oracle"
+            $script:DB_CONN = "Data Source=oracle:1521/ProjectTemplate;User Id=appuser;Password=AppPass123"
+        }
+        Default {
+            $script:DB_TYPE = "postgresql"
+            $script:DB_SERVICE = "postgres"
+            $script:DB_CONN = "Host=postgres;Database=ProjectTemplate;Username=postgres;Password=PostgresPass123;Port=5432"
+        }
+    }
+    
+    $script:DB_EVENTS_CONN = "Host=postgres-events;Database=ProjectTemplateEvents;Username=postgres;Password=postgres"
+}
+
+# --- MENU PRINCIPAL ---
+Write-Host "$($CYAN)================================================================$($NC)"
+Write-Host "$($CYAN)          CENTRAL DE COMANDO - ENTERPRISE TEMPLATE 10           $($NC)"
+Write-Host "$($CYAN)================================================================$($NC)"
+Write-Host "Escolha o ambiente (limpeza profunda inclusa):"
+Write-Host " "
+Write-Host "1) $($GREEN)Docker Compose$($NC) (Ambiente isolado)"
+Write-Host "2) $($YELLOW)AppHost (Aspire)$($NC) (Desenvolvimento Local)"
+Write-Host "3) $($RED)Limpeza Total$($NC) (Para tudo e libera portas)"
+Write-Host "4) Sair"
+Write-Host " "
+$choice = Read-Host "Escolha uma opção [1-4]"
+
+switch ($choice) {
+    "1" {
+        Select-Database
+        Clean-Environment
+
+        # Define o nome do projeto baseado no diretório atual (necessário para o docker-compose)
+        $env:PROJECT_NAME = Split-Path (Get-Location) -Leaf
+
+        Write-Host "`n$($GREEN)🚀 Iniciando via Docker Compose com $script:DB_TYPE...$($NC)"
+        
+        $DB_CONTAINERS = $script:DB_SERVICE
+        if ($script:DB_TYPE -ne "postgresql") {
+            $DB_CONTAINERS = "$($script:DB_SERVICE) postgres-events"
+        } else {
+            $DB_CONTAINERS = "postgres postgres-events"
+        }
+
+        # Configura variáveis de ambiente para o comando
+        $env:DB_TYPE = $script:DB_TYPE
+        $env:DB_CONNECTION_STRING = $script:DB_CONN
+        $env:DB_EVENTS_CONNECTION_STRING = $script:DB_EVENTS_CONN
+
+        # Inicia apenas os serviços que existem no docker-compose.yml
+        # Isso garante que no template ele respeite o banco escolhido, 
+        # e no projeto gerado ele funcione mesmo com serviços removidos.
+        $CORE_SERVICES = @("api", "redis", "rabbitmq", "mongodb", "jaeger", "prometheus", "grafana", "angular-web", "react-web", "vue-web", "blazor-app")
+        $composeContent = Get-Content "docker-compose.yml" -Raw
+        $START_LIST = @()
+        
+        # Adiciona containers de banco se existirem no compose
+        foreach ($service in $DB_CONTAINERS.Split(" ")) {
+            if ($composeContent -match "^  $service:") { $START_LIST += $service }
+        }
+        # Adiciona demais serviços se existirem no compose
+        foreach ($service in $CORE_SERVICES) {
+            if ($composeContent -match "^  $service:") { $START_LIST += $service }
+        }
+
+        # Inicia apenas os serviços identificados
+        docker-compose up -d --build $START_LIST
+        
+        Write-Host "`n$($BLUE)----------------------------------------------------------------$($NC)"
+        Write-Host "$($GREEN)🚀 Ambiente Docker Iniciado!$($NC)"
+        Write-Host "$($BLUE)----------------------------------------------------------------$($NC)"
+        
+        Write-Host "$($CYAN)Aguardando serviços subirem... aqui estão os links de acesso:$($NC)"
+        Write-Host "🚀 Aplicações (Frontends & API)"
+        Write-Host "API (.NET 10):       http://localhost:5000"
+        
+        if (Test-Path "src/UI/Web/Angular") { Write-Host "Angular:             http://localhost:4200" }
+        if (Test-Path "src/UI/Web/React") { Write-Host "React:               http://localhost:5173" }
+        if (Test-Path "src/UI/Web/Vue") { Write-Host "Vue:                 http://localhost:5174" }
+        if (Test-Path "src/UI/Web/Blazor") { Write-Host "Blazor WebApp:       http://localhost:5188" }
+        
+        Write-Host " "
+        Write-Host "📊 Observabilidade & Infraestrutura"
+        
+        # Verifica serviços de infra no docker-compose.yml
+        $composeContent = Get-Content "docker-compose.yml" -Raw
+        if ($composeContent -match "grafana:") { Write-Host "Grafana:             http://localhost:3000" }
+        if ($composeContent -match "jaeger:") { Write-Host "Jaeger:              http://localhost:16686" }
+        if ($composeContent -match "rabbitmq:") { Write-Host "RabbitMQ Management: http://localhost:15672" }
+        if ($composeContent -match "prometheus:") { Write-Host "Prometheus:          http://localhost:9090" }
+        
+        Write-Host "$($BLUE)----------------------------------------------------------------$($NC)"
+
+        Write-Host "`n$($YELLOW)⏳ Verificando saúde da API... (isso pode levar um minuto)$($NC)"
+        
+        $API_READY = $false
+        for ($i=1; $i -le 60; $i++) {
+            try {
+                $response = Invoke-WebRequest -Uri "http://localhost:5000/health" -UseBasicParsing -ErrorAction SilentlyContinue
+                if ($response.StatusCode -eq 200) {
+                    $API_READY = $true
+                    break
+                }
+            } catch {}
+            Write-Host "." -NoNewline
+            Start-Sleep -Seconds 1
+        }
+
+        if ($API_READY) {
+            Write-Host "`n`n$($GREEN)✅ API está UP e Saudável!$($NC)"
+        } else {
+            Write-Host "`n`n$($RED)⚠ A API demorou para responder. Verifique os logs com: 'docker-compose logs -f api'$($NC)"
+        }
+        
+        Write-Host "$($BLUE)----------------------------------------------------------------$($NC)"
+        Write-Host "$($YELLOW)Dica: O ambiente continuará subindo em background.$($NC)"
+    }
+    "2" {
+        Select-Database
+        Clean-Environment
+
+        # Verifica node_modules para projetos UI
+        foreach ($ui in @("Angular", "React", "Vue")) {
+            $uiPath = "src/UI/Web/$ui"
+            if ((Test-Path $uiPath) -and -not (Test-Path "$uiPath/node_modules")) {
+                Write-Host "$($YELLOW)📦 Instalando dependências para $ui (isso pode levar alguns minutos)...$($NC)"
+                Push-Location $uiPath
+                npm install
+                Pop-Location
+            }
+        }
+
+        Write-Host "`n$($YELLOW)🔥 Iniciando via AppHost (Aspire) com $script:DB_TYPE...$($NC)"
+        $env:DB_TYPE = $script:DB_TYPE
+        dotnet run --project src/Aspire/AppHost
+    }
+    "3" {
+        Clean-Environment
+    }
+    "4" {
+        Write-Host "`nAté logo!"
+        exit
+    }
+    Default {
+        Write-Host "`n$($RED)❌ Opção inválida.$($NC)"
+        exit
+    }
+}

@@ -94,13 +94,13 @@ docker exec postgres pg_isready -U postgres
 
 ```powershell
 $env:ASPNETCORE_ENVIRONMENT="SqlServer"
-dotnet ef database update --project src/Data --startup-project src/Api
+dotnet ef database update --project src/Server/Data --startup-project src/Server/Api
 ```
 
 #### Rodar aplicação (SqlServer)
 
 ```powershell
-dotnet run --project src/Api --environment SqlServer
+dotnet run --project src/Server/Api --environment SqlServer
 ```
 
 #### Testar (SqlServer)
@@ -124,13 +124,13 @@ Server=localhost,1433;Database=ProjectTemplate;User Id=sa;Password=YourStrong@Pa
 
 ```powershell
 $env:ASPNETCORE_ENVIRONMENT="Oracle"
-dotnet ef database update --project src/Data --startup-project src/Api
+dotnet ef database update --project src/Server/Data --startup-project src/Server/Api
 ```
 
 #### Rodar aplicação (Oracle)
 
 ```powershell
-dotnet run --project src/Api --environment Oracle
+dotnet run --project src/Server/Api --environment Oracle
 ```
 
 #### Testar (Oracle)
@@ -156,13 +156,13 @@ User Id=appuser;Password=AppPass123;Data Source=localhost:1521/FREEPDB1;
 
 ```powershell
 $env:ASPNETCORE_ENVIRONMENT="PostgreSQL"
-dotnet ef database update --project src/Data --startup-project src/Api
+dotnet ef database update --project src/Server/Data --startup-project src/Server/Api
 ```
 
 #### Rodar aplicação (PostgreSQL)
 
 ```powershell
-dotnet run --project src/Api --environment PostgreSQL
+dotnet run --project src/Server/Api --environment PostgreSQL
 ```
 
 #### Testar (PostgreSQL)
@@ -188,13 +188,13 @@ Host=localhost;Port=5433;Database=ProjectTemplate;Username=postgres;Password=Pos
 
 ```powershell
 $env:ASPNETCORE_ENVIRONMENT="MySQL"
-dotnet ef database update --project src/Data --startup-project src/Api
+dotnet ef database update --project src/Server/Data --startup-project src/Server/Api
 ```
 
 #### Rodar aplicação (MySQL)
 
 ```powershell
-dotnet run --project src/Api --environment MySQL
+dotnet run --project src/Server/Api --environment MySQL
 ```
 
 #### Testar (MySQL)
@@ -217,7 +217,7 @@ Server=localhost;Port=3306;Database=ProjectTemplate;User=appuser;Password=AppPas
 Cada banco tem seu próprio arquivo `appsettings.{Database}.json`:
 
 ```text
-src/Api/
+src/Server/Api/
 ├── appsettings.json              # Base (InMemory)
 ├── appsettings.Development.json  # Overrides de desenvolvimento
 ├── appsettings.SqlServer.json    # SQL Server config
@@ -385,8 +385,8 @@ docker inspect sqlserver --format='{{.State.Health.Status}}'
 Limpe o banco antes de rodar migrations:
 
 ```bash
-dotnet ef database drop --project src/Data --startup-project src/Api --force
-dotnet ef database update --project src/Data --startup-project src/Api
+dotnet ef database drop --project src/Server/Data --startup-project src/Server/Api --force
+dotnet ef database update --project src/Server/Data --startup-project src/Server/Api
 ```
 
 ### Porta já em uso

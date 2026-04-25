@@ -36,9 +36,8 @@ Este template oferece um sistema de autenticação completo com suporte a JWT (J
 Para desenvolvimento e testes, um usuário admin padrão é criado automaticamente ao popular o banco de dados:
 
 ```text
-Username: admin
-Password: Admin@2026!Secure
 Email:    admin@projecttemplate.com
+Password: Admin@2026!Secure
 Role:     Admin
 ```
 
@@ -47,7 +46,7 @@ Role:     Admin
 Para popular o banco com o usuário admin padrão, execute:
 
 ```bash
-dotnet run --project src/Api
+dotnet run --project src/Server/Api
 ```
 
 O seeder criará automaticamente:
@@ -195,7 +194,7 @@ O seeder criará automaticamente:
 
 ```bash
 # Iniciar a API
-dotnet run --project src/Api
+dotnet run --project src/Server/Api
 
 # API disponível em http://localhost:5000
 # Swagger UI em http://localhost:5000/swagger
@@ -209,7 +208,7 @@ Use as credenciais padrão do admin para obter um token JWT:
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "usernameOrEmail": "admin",
+    "email": "admin@projecttemplate.com",
     "password": "Admin@2026!Secure"
   }'
 ```
@@ -223,7 +222,6 @@ curl -X POST http://localhost:5000/api/auth/login \
   "expiresAt": "2026-01-14T15:00:00Z",
   "user": {
     "id": 1,
-    "username": "admin",
     "email": "admin@projecttemplate.com",
     "firstName": "System",
     "lastName": "Administrator",
@@ -263,7 +261,6 @@ Cria uma nova conta de usuário.
 
 ```json
 {
-  "username": "john.doe",
   "email": "john.doe@example.com",
   "password": "P@ssw0rd123",
   "firstName": "John",
@@ -280,7 +277,6 @@ Cria uma nova conta de usuário.
   "expiresAt": "2024-01-01T13:00:00Z",
   "user": {
     "id": 1,
-    "username": "john.doe",
     "email": "john.doe@example.com",
     "firstName": "John",
     "lastName": "Doe",
@@ -299,7 +295,7 @@ Autentica com usuário/e-mail e senha.
 
 ```json
 {
-  "usernameOrEmail": "john.doe",
+  "email": "john.doe",
   "password": "P@ssw0rd123"
 }
 ```
@@ -313,7 +309,6 @@ Autentica com usuário/e-mail e senha.
   "expiresAt": "2024-01-01T13:00:00Z",
   "user": {
     "id": 1,
-    "username": "john.doe",
     "email": "john.doe@example.com",
     "firstName": "John",
     "lastName": "Doe",
@@ -345,7 +340,6 @@ Obtém um novo access token usando um refresh token.
   "expiresAt": "2024-01-01T13:00:00Z",
   "user": {
     "id": 1,
-    "username": "john.doe",
     "email": "john.doe@example.com",
     "firstName": "John",
     "lastName": "Doe",
@@ -387,7 +381,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```json
 {
   "id": 1,
-  "username": "john.doe",
   "email": "john.doe@example.com",
   "firstName": "John",
   "lastName": "Doe",
@@ -446,7 +439,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```json
 {
   "id": 1,
-  "username": "john.doe",
   "email": "john.doe@example.com",
   "firstName": "John",
   "lastName": "Smith",
@@ -480,7 +472,6 @@ Login com provedores OAuth2 externos.
   "expiresAt": "2024-01-01T13:00:00Z",
   "user": {
     "id": 1,
-    "username": "john.doe",
     "email": "john.doe@example.com",
     "firstName": "John",
     "lastName": "Doe",
@@ -502,7 +493,6 @@ var client = new HttpClient { BaseAddress = new Uri("http://localhost:5000") };
 
 var registerDto = new
 {
-  Username = "john.doe",
   Email = "john.doe@example.com",
   Password = "P@ssw0rd123",
   FirstName = "John",
@@ -514,7 +504,7 @@ var authResponse = await registerResponse.Content.ReadFromJsonAsync<AuthResponse
 
 var loginDto = new
 {
-  UsernameOrEmail = "john.doe",
+  email = "john.doe",
   Password = "P@ssw0rd123"
 };
 
@@ -538,12 +528,11 @@ authResponse = await refreshResponse.Content.ReadFromJsonAsync<AuthResponse>();
 const API_URL = 'http://localhost:5000/api/auth';
 
 // Registro
-async function register(username: string, email: string, password: string) {
+async function register(email: string, password: string) {
   const response = await fetch(`${API_URL}/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      username,
       email,
       password,
       firstName: 'John',
@@ -555,11 +544,11 @@ async function register(username: string, email: string, password: string) {
 }
 
 // Login
-async function login(usernameOrEmail: string, password: string) {
+async function login(email: string, password: string) {
   const response = await fetch(`${API_URL}/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ usernameOrEmail, password })
+    body: JSON.stringify({ email, password })
   });
 
   const data = await response.json();
@@ -622,7 +611,6 @@ async function logout() {
 curl -X POST http://localhost:5000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "john.doe",
     "email": "john.doe@example.com",
     "password": "P@ssw0rd123",
     "firstName": "John",
@@ -633,7 +621,7 @@ curl -X POST http://localhost:5000/api/auth/register \
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "usernameOrEmail": "john.doe",
+    "email": "john.doe",
     "password": "P@ssw0rd123"
   }'
 
@@ -731,7 +719,6 @@ bool isValid = BCrypt.Verify(password, hashedPassword);
 ```sql
 CREATE TABLE Users (
   Id BIGINT IDENTITY(1,1) PRIMARY KEY,
-  Username NVARCHAR(50) UNIQUE NOT NULL,
   Email NVARCHAR(100) UNIQUE NOT NULL,
   PasswordHash NVARCHAR(256) NOT NULL,
   FirstName NVARCHAR(50),
@@ -879,7 +866,7 @@ CREATE TABLE RefreshTokens (
 ### Passo 1: Iniciar a aplicação
 
 ```bash
-dotnet run --project src/Api/Api.csproj
+dotnet run --project src/Server/Api/Api.csproj
 ```
 
 ### Passo 2: Abrir o Swagger UI
@@ -940,13 +927,13 @@ Se você está migrando da autenticação básica:
 1. **Criar a migration:**
 
     ```bash
-    dotnet ef migrations add AddAuthentication --project src/Data --startup-project src/Api
+    dotnet ef migrations add AddAuthentication --project src/Server/Data --startup-project src/Server/Api
     ```
 
 2. **Atualizar o banco de dados:**
 
     ```bash
-    dotnet ef database update --project src/Data --startup-project src/Api
+    dotnet ef database update --project src/Server/Data --startup-project src/Server/Api
     ```
 
 3. **Popular as roles padrão:**
@@ -976,7 +963,6 @@ Se você está migrando da autenticação básica:
 ### Indexação do Banco de Dados
 
 ```sql
-CREATE INDEX IX_Users_Username ON Users(Username);
 CREATE INDEX IX_Users_Email ON Users(Email);
 CREATE INDEX IX_RefreshTokens_Token ON RefreshTokens(Token);
 CREATE INDEX IX_RefreshTokens_UserId ON RefreshTokens(UserId);

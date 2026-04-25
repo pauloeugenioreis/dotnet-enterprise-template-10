@@ -87,7 +87,7 @@ jobs:
 
     - name: 📦 Publish Artifacts
       if: success() && github.ref == 'refs/heads/main'
-      run: dotnet publish src/Api/Api.csproj --configuration Release --output ./publish --no-build
+      run: dotnet publish src/Server/Api/Api.csproj --configuration Release --output ./publish --no-build
 
     - name: 📤 Upload Artifacts
       if: success() && github.ref == 'refs/heads/main'

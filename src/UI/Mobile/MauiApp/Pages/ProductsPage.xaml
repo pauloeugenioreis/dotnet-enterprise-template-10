@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:conv="clr-namespace:EnterpriseTemplate.MauiApp.Converters"
+             x:Class="EnterpriseTemplate.MauiApp.Pages.ProductsPage"
+             Title="Produtos"
+             BackgroundColor="{StaticResource Gray50}">
+
+    <ContentPage.Resources>
+        <conv:StatusColorConverter x:Key="StatusColorConverter" />
+        <conv:StatusTextConverter x:Key="StatusTextConverter" />
+        <conv:StatusTextColorsConverter x:Key="StatusTextColorsConverter" />
+        <conv:CurrencyConverter x:Key="CurrencyConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto, Auto, *">
+        <!-- Header area -->
+        <VerticalStackLayout Grid.Row="0" Padding="20,20,20,10" Spacing="4">
+            <Label Text="Catálogo" FontSize="28" FontAttributes="Bold" TextColor="{StaticResource Gray900}" />
+            <Label Text="Gerencie seu inventário corporativo" FontSize="14" TextColor="{StaticResource Gray500}" />
+        </VerticalStackLayout>
+
+        <!-- Filters area -->
+        <VerticalStackLayout Grid.Row="1" Padding="20,10" Spacing="16">
+            <Frame BackgroundColor="White" CornerRadius="20" Padding="0" HasShadow="False" BorderColor="{StaticResource Gray200}">
+                <Grid ColumnDefinitions="Auto, *">
+                    <Label Grid.Column="0" Text="🔍" VerticalOptions="Center" Margin="16,0,0,0" />
+                    <Entry Grid.Column="1" x:Name="SearchEntry" 
+                           Placeholder="Buscar por nome ou categoria..." 
+                           Margin="10,8" 
+                           BackgroundColor="Transparent"
+                           Completed="OnSearchCompleted" />
+                </Grid>
+            </Frame>
+
+            <HorizontalStackLayout Spacing="8">
+                <Button x:Name="BtnAll" Text="TODOS" Clicked="OnFilterAll" Style="{StaticResource FilterButtonStyle}" />
+                <Button x:Name="BtnActive" Text="ATIVOS" Clicked="OnFilterActive" Style="{StaticResource FilterButtonStyle}" />
+                <Button x:Name="BtnInactive" Text="INATIVOS" Clicked="OnFilterInactive" Style="{StaticResource FilterButtonStyle}" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+
+        <!-- List area -->
+        <RefreshView Grid.Row="2" x:Name="RefreshView" Refreshing="OnRefreshing" RefreshColor="{StaticResource Primary}">
+            <VerticalStackLayout Spacing="0">
+                <ActivityIndicator x:Name="LoadingIndicator" Color="{StaticResource Primary}" IsRunning="True" IsVisible="True" Margin="0,40,0,0" />
+
+                <CollectionView x:Name="ProductsList" IsVisible="False" Margin="20,0,20,20"
+                                RemainingItemsThreshold="2" RemainingItemsThresholdReached="OnRemainingItemsReached">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Margin="0,0,0,16" BackgroundColor="White" CornerRadius="24" Padding="16" HasShadow="False" BorderColor="{StaticResource Gray100}">
+                                <Grid ColumnDefinitions="64, *, Auto" ColumnSpacing="16">
+                                    <Frame Grid.Column="0" BackgroundColor="{StaticResource Primary50}" CornerRadius="18" Padding="0" HasShadow="False" HeightRequest="64">
+                                        <Label Text="📦" FontSize="28" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Frame>
+
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                        <Label Text="{Binding Name}" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Gray900}" />
+                                        <Label Text="{Binding Category}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Gray500}" />
+                                        
+                                        <!-- Status Badge emulation in MAUI -->
+                                        <Frame BackgroundColor="{Binding IsActive, Converter={StaticResource StatusColorConverter}}" 
+                                               CornerRadius="8" Padding="8,2" HorizontalOptions="Start" HasShadow="False" Margin="0,4,0,0">
+                                            <Label Text="{Binding IsActive, Converter={StaticResource StatusTextConverter}}" 
+                                                   FontSize="9" FontAttributes="Bold" 
+                                                   TextColor="{Binding IsActive, Converter={StaticResource StatusTextColorsConverter}}" />
+                                        </Frame>
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="End">
+                                        <Label Text="{Binding Price, Converter={StaticResource CurrencyConverter}}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+                                        <Label Text="{Binding Stock, StringFormat='Stock: {0}'}" FontSize="11" FontAttributes="Bold" TextColor="{StaticResource Gray400}" HorizontalOptions="End" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </RefreshView>
+    </Grid>
+</ContentPage>

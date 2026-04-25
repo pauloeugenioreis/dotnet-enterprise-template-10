@@ -1,0 +1,340 @@
+@page "/orders"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@using BlazorApp.Client.Services
+@using ProjectTemplate.Shared.Models
+@using System.Globalization
+@inject IOrderService OrderService
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@rendermode InteractiveAuto
+
+<div class="animate-in fade-in duration-700">
+  <header class="flex justify-between items-end mb-16">
+    <div>
+      <h1 class="text-6xl font-black text-gray-900 tracking-tighter">Pedidos</h1>
+      <p class="text-gray-500 mt-4 font-medium text-xl">Histórico completo de transações.</p>
+    </div>
+        <div class="flex gap-4">
+            <button 
+                @onclick="ExportToExcel"
+                class="p-5 bg-white border border-gray-100 rounded-[2rem] shadow-xl shadow-gray-200/50 text-gray-300 hover:text-primary-600 transition-all hover:scale-105 active:scale-95 group"
+                title="Exportar para Excel"
+            >
+                📊
+            </button>
+            <button 
+                @onclick="OpenNew"
+                class="bg-primary-600 hover:bg-primary-700 text-white font-black px-8 py-4 rounded-2xl shadow-lg shadow-primary-600/20 transition-all active:scale-95"
+            >
+                + Novo Pedido
+            </button>
+        </div>
+  </header>
+
+  <!-- Filter Bar -->
+  <div class="grid grid-cols-12 gap-6 items-center mb-10">
+    <div class="col-span-3 relative group">
+      <div class="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+        <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <input 
+        type="text"
+        placeholder="Buscar pedido..."
+        class="w-full pl-16 pr-8 py-5 bg-white border-none rounded-3xl shadow-xl shadow-gray-100/50 focus:ring-2 focus:ring-primary-600/20 outline-none transition-all font-bold text-gray-900 placeholder:text-gray-300"
+        @bind="searchTerm"
+        @bind:event="oninput"
+        @onkeyup="HandleKeyUp"
+      />
+    </div>
+
+    <div class="col-span-4 flex bg-white p-2 rounded-3xl shadow-xl shadow-gray-100/50 gap-2 items-center">
+      <div class="flex-1 px-4 py-1">
+        <label class="block text-[8px] font-black uppercase text-gray-400 leading-none mb-1">De</label>
+        <input 
+          type="date" 
+          @bind="fromDate"
+          @bind:after="LoadOrders"
+          class="w-full bg-transparent border-none outline-none font-bold text-xs text-gray-900 cursor-pointer"
+        />
+      </div>
+      <div class="w-px h-8 bg-gray-100"></div>
+      <div class="flex-1 px-4 py-1">
+        <label class="block text-[8px] font-black uppercase text-gray-400 leading-none mb-1">Até</label>
+        <input 
+          type="date" 
+          @bind="toDate"
+          @bind:after="LoadOrders"
+          class="w-full bg-transparent border-none outline-none font-bold text-xs text-gray-900 cursor-pointer"
+        />
+      </div>
+    </div>
+
+    <div class="col-span-3">
+      <Dropdown 
+        Options="@statusOptions"
+        @bind-Value="status"
+        @bind-Value:after="LoadOrders"
+      />
+    </div>
+
+    <div class="col-span-2 flex justify-end">
+      <button 
+        @onclick="ClearFilters"
+        class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-red-500 transition-colors flex items-center gap-2 group"
+      >
+        <span class="group-hover:rotate-90 transition-transform duration-300">✕</span>
+        Limpar
+      </button>
+    </div>
+  </div>
+
+  @if (orders == null) {
+    <div class="flex justify-center py-40 bg-white rounded-[3rem] shadow-xl shadow-gray-100/50">
+      <div class="w-16 h-16 border-8 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  } else {
+    <div class="bg-white rounded-[3rem] shadow-2xl shadow-gray-200/40 border border-gray-50 overflow-hidden">
+      <table class="w-full text-left">
+        <thead class="bg-primary-600">
+          <tr>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]"># Número</th>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Cliente</th>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Total</th>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Status</th>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          @foreach (var order in orders.Items) {
+            <tr class="hover:bg-gray-50/50 transition-colors group">
+              <td class="px-10 py-8">
+                <span class="font-black text-gray-900 tracking-tight">@order.OrderNumber</span>
+              </td>
+              <td class="px-10 py-8">
+                <div class="font-bold text-gray-900">@order.CustomerName</div>
+                <div class="text-[10px] text-gray-400 uppercase tracking-tighter">@order.CustomerEmail</div>
+              </td>
+              <td class="px-10 py-8">
+                <span class="font-black text-primary-600 text-lg">R$ @order.Total.ToString("N2", new CultureInfo("pt-BR"))</span>
+              </td>
+              <td class="px-10 py-8">
+                <span class='px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest @GetStatusClass(order.Status)'>
+                  @order.Status
+                </span>
+              </td>
+              <td class="px-10 py-8">
+                <div class="flex gap-2">
+                  <button @onclick="() => OpenDetails(order)" title="Visualizar" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-blue-50 rounded-xl text-blue-600 transition-all active:scale-90">🔍</button>
+                  <button @onclick="() => OpenEdit(order)" title="Editar" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-primary-50 rounded-xl text-primary-600 transition-all active:scale-90">✏️</button>
+                  <button @onclick="() => DeleteOrder(order.Id)" title="Excluir" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-rose-50 rounded-xl text-rose-600 transition-all active:scale-90">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <Pagination 
+        Page="@currentPage" 
+        TotalPages="@orders.TotalPages" 
+        TotalItems="@orders.TotalCount" 
+        PageSize="@pageSize"
+        OnPageChanged="ChangePage"
+        OnPageSizeChanged="ChangePageSize"
+      />
+    </div>
+  }
+</div>
+
+<OrderDetailsModal 
+    Order="@selectedOrder" 
+    IsOpen="@showDetails" 
+    OnClose="() => showDetails = false" 
+    OnStatusUpdated="LoadOrders"
+/>
+
+<OrderFormModal
+    IsOpen="@showForm"
+    IsEdit="@isEdit"
+    Order="@selectedOrder"
+    OrderNumber="@selectedOrder?.OrderNumber"
+    OnClose="() => showForm = false"
+    OnSave="HandleSave"
+/>
+
+@code {
+    private PagedResponse<OrderResponseDto>? orders;
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private string searchTerm = "";
+    private object? status = "";
+    private DateTime? fromDate;
+    private DateTime? toDate;
+
+    private List<DropdownOption> statusOptions = new() {
+        new() { Label = "Todos os Status", Value = "" },
+        new() { Label = "Pendente", Value = "Pending" },
+        new() { Label = "Enviado", Value = "Shipped" },
+        new() { Label = "Entregue", Value = "Delivered" },
+        new() { Label = "Cancelado", Value = "Cancelled" }
+    };
+
+    // Modal State
+    private bool showDetails = false;
+    private bool showForm = false;
+    private bool isEdit = false;
+    private OrderResponseDto? selectedOrder;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrders();
+    }
+
+    private async Task LoadOrders()
+    {
+        try 
+        {
+            orders = null;
+            orders = await OrderService.GetPagedAsync(currentPage, pageSize, searchTerm, status?.ToString(), fromDate, toDate);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar pedidos: {ex.Message}");
+        }
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            currentPage = 1;
+            await LoadOrders();
+        }
+    }
+
+    private async Task ChangePage(int newPage)
+    {
+        currentPage = newPage;
+        await LoadOrders();
+    }
+
+    private async Task ChangePageSize(int newSize)
+    {
+        pageSize = newSize;
+        currentPage = 1;
+        await LoadOrders();
+    }
+
+    private async Task ClearFilters()
+    {
+        searchTerm = "";
+        status = "";
+        fromDate = null;
+        toDate = null;
+        currentPage = 1;
+        await LoadOrders();
+    }
+
+    private async Task ExportToExcel()
+    {
+        if (orders?.Items == null) return;
+
+        var data = orders.Items.Select(o => new {
+            Pedido = o.OrderNumber,
+            Cliente = o.CustomerName,
+            Data = o.CreatedAt.ToString("g"),
+            Total = o.Total,
+            Status = o.Status
+        }).ToList();
+
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        await JS.InvokeVoidAsync("exportToExcel", $"Pedidos_{timestamp}.xlsx", data);
+    }
+
+    private async Task OpenNew()
+    {
+        selectedOrder = null;
+        isEdit = false;
+        showForm = true;
+    }
+
+    private void OpenDetails(OrderResponseDto order)
+    {
+        selectedOrder = order;
+        showDetails = true;
+    }
+
+    private async Task OpenEdit(OrderResponseDto order)
+    {
+        selectedOrder = order;
+        isEdit = true;
+        showForm = true;
+    }
+
+    private async Task HandleSave(OrderResponseDto order)
+    {
+        try 
+        {
+            if (isEdit)
+            {
+                var updateRequest = new UpdateOrderRequest
+                {
+                    CustomerName = order.CustomerName,
+                    Status = order.Status,
+                    ShippingAddress = order.ShippingAddress,
+                    Notes = order.Notes
+                };
+                await OrderService.UpdateAsync(order.Id, updateRequest);
+            }
+            else
+            {
+                var createRequest = new CreateOrderRequest
+                {
+                    CustomerName = order.CustomerName,
+                    CustomerEmail = "cliente@exemplo.com", // Placeholder
+                    ShippingAddress = "Endereço Padrão", // Placeholder
+                    Items = order.Items.Select(i => new OrderItemDto(i.ProductId, i.Quantity, i.UnitPrice)).ToList()
+                };
+                await OrderService.CreateAsync(createRequest);
+            }
+            
+            showForm = false;
+            await LoadOrders();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao salvar pedido: {ex.Message}");
+            await JS.InvokeVoidAsync("alert", $"Erro ao salvar: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteOrder(long id)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "Tem certeza que deseja excluir este pedido?");
+        if (!confirmed) return;
+
+        try 
+        {
+            Console.WriteLine($"Excluindo pedido ID: {id}");
+            await OrderService.DeleteAsync(id);
+            await LoadOrders();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao excluir pedido: {ex.Message}");
+        }
+    }
+
+    private string GetStatusClass(string status) => status?.ToLower() switch
+    {
+        "pending" or "pendente" => "bg-amber-50 text-amber-600",
+        "delivered" or "entregue" => "bg-emerald-50 text-emerald-600",
+        "cancelled" or "cancelado" => "bg-red-50 text-red-600",
+        "shipped" or "enviado" => "bg-blue-50 text-blue-600",
+        _ => "bg-gray-50 text-gray-600"
+    };
+}
+

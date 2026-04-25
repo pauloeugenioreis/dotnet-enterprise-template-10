@@ -7,9 +7,9 @@
 The system creates a default admin user on first run with these credentials:
 
 ```text
-Username: admin
+Email:    admin@projecttemplate.com
 Password: Admin@2026!Secure
-Email: admin@projecttemplate.com
+Role:     Admin
 ```
 
 **⚠️ CRITICAL: Change this password immediately in production!**
@@ -21,7 +21,7 @@ Email: admin@projecttemplate.com
 curl -X POST https://your-api.com/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "usernameOrEmail": "admin",
+    "email": "admin@projecttemplate.com",
     "password": "Admin@2026!Secure"
   }'
 
@@ -54,7 +54,7 @@ WHERE Username = 'admin';
 
 ### Option 3: Modify DbSeeder
 
-Edit `src/Data/Seeders/DbSeeder.cs` before first deployment:
+Edit `src/Server/Data/Seeders/DbSeeder.cs` before first deployment:
 
 ```csharp
 private async Task SeedRolesAndAdminUserAsync()

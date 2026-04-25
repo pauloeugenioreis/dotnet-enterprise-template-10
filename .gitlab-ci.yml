@@ -42,7 +42,7 @@ build:
     - dotnet build $SOLUTION_FILE --configuration $BUILD_CONFIGURATION --no-restore
 
     - echo "📦 Publishing API..."
-    - dotnet publish src/Api/Api.csproj --configuration $BUILD_CONFIGURATION --output ./publish --no-build
+    - dotnet publish src/Server/Api/Api.csproj --configuration $BUILD_CONFIGURATION --output ./publish --no-build
 
   artifacts:
     name: "build-$CI_COMMIT_REF_SLUG"

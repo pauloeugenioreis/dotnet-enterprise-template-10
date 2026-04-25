@@ -1,6 +1,6 @@
 ---
 description: "Use when creating or modifying infrastructure extensions, middleware, or service registrations. Covers the modular extension pattern used in this project."
-applyTo: "src/Infrastructure/Extensions/**"
+applyTo: "src/Server/Infrastructure/Extensions/**"
 ---
 
 # Infrastructure Extensions

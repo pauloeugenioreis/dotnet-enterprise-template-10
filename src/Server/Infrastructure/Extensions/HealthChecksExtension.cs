@@ -1,0 +1,46 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Options;
+using ProjectTemplate.Domain;
+
+namespace ProjectTemplate.Infrastructure.Extensions;
+
+/// <summary>
+/// Health checks configuration
+/// </summary>
+public static class HealthChecksExtension
+{
+    public static IServiceCollection AddHealthChecksConfiguration(this IServiceCollection services, IOptions<AppSettings> appSettings)
+    {
+        var healthChecksBuilder = services.AddHealthChecks();
+
+        // Application self-check (Handled by Aspire ServiceDefaults)
+        // healthChecksBuilder.AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "ready" });
+
+        // Database health check
+        var connectionString = appSettings.Value.Infrastructure.Database.ConnectionString;
+        if (!string.IsNullOrEmpty(connectionString))
+        {
+            var dbType = appSettings.Value.Infrastructure.Database.DatabaseType.ToLower();
+
+            // Database health checks require specific packages to be installed
+            // Uncomment and install the appropriate package:
+            // - AspNetCore.HealthChecks.SqlServer for SQL Server
+            // - AspNetCore.HealthChecks.Oracle for Oracle
+            // - AspNetCore.HealthChecks.Npgsql for PostgreSQL
+
+            // switch (dbType)
+            // {
+            //     case "sqlserver":
+            //         healthChecksBuilder.AddSqlServer(
+            //             connectionString,
+            //             name: "database",
+            //             failureStatus: HealthStatus.Degraded,
+            //             tags: new[] { "ready", "database" });
+            //         break;
+            // }
+        }
+
+        return services;
+    }
+}

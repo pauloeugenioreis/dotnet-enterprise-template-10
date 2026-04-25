@@ -1,0 +1,230 @@
+@page "/reviews"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@using BlazorApp.Client.Services
+@using ProjectTemplate.Shared.Models
+@inject ICustomerReviewService ReviewService
+
+<div class="p-10 max-w-7xl mx-auto space-y-10 animate-in fade-in duration-700">
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div>
+            <h1 class="text-6xl font-black text-gray-900 tracking-tighter">Customer Reviews</h1>
+            <p class="text-gray-500 mt-4 font-medium text-xl">Gerenciamento e moderação de avaliações (MongoDB).</p>
+        </div>
+        <div class="flex gap-4">
+            <div class="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 flex gap-2">
+                <button @onclick="() => FilterByApproval(null)" 
+                        class="px-6 py-2 rounded-xl font-bold transition-all @(!isApproved.HasValue ? "bg-gray-900 text-white" : "text-gray-500 hover:bg-gray-50")">
+                    Todos
+                </button>
+                <button @onclick="() => FilterByApproval(true)" 
+                        class="px-6 py-2 rounded-xl font-bold transition-all @(isApproved == true ? "bg-green-600 text-white" : "text-gray-500 hover:bg-gray-50")">
+                    Aprovados
+                </button>
+                <button @onclick="() => FilterByApproval(false)" 
+                        class="px-6 py-2 rounded-xl font-bold transition-all @(isApproved == false ? "bg-amber-500 text-white" : "text-gray-500 hover:bg-gray-50")">
+                    Pendentes
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Filters -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="relative group">
+            <input type="text" @bind="productName" @bind:event="oninput" @onkeyup="HandleKeyUp"
+                   placeholder="Buscar por produto..."
+                   class="w-full pl-14 pr-6 py-5 bg-white border-none rounded-3xl shadow-xl shadow-gray-200/50 font-bold text-gray-700 focus:ring-2 focus:ring-primary-500 transition-all outline-none">
+            <span class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-primary-500 transition-colors">🔍</span>
+        </div>
+
+        <div class="relative group">
+            <select value="@minRating" @onchange="OnMinRatingChanged"
+                    class="w-full pl-14 pr-6 py-5 bg-white border-none rounded-3xl shadow-xl shadow-gray-200/50 font-bold text-gray-700 focus:ring-2 focus:ring-primary-500 transition-all outline-none appearance-none">
+                <option value="">Mínimo de Estrelas</option>
+                <option value="1">⭐ 1+ Estrela</option>
+                <option value="2">⭐⭐ 2+ Estrelas</option>
+                <option value="3">⭐⭐⭐ 3+ Estrelas</option>
+                <option value="4">⭐⭐⭐⭐ 4+ Estrelas</option>
+                <option value="5">⭐⭐⭐⭐⭐ 5 Estrelas</option>
+            </select>
+            <span class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-primary-500 transition-colors">⭐</span>
+        </div>
+    </div>
+
+    @if (loading)
+    {
+        <div class="flex flex-col items-center justify-center py-32 space-y-6">
+            <div class="w-16 h-16 border-4 border-primary-100 border-t-primary-600 rounded-full animate-spin"></div>
+            <p class="text-gray-400 font-black animate-pulse">CARREGANDO AVALIAÇÕES...</p>
+        </div>
+    }
+    else if (reviews.Count == 0)
+    {
+        <div class="bg-white rounded-[3rem] p-32 text-center shadow-2xl shadow-gray-100 border border-gray-50">
+            <div class="text-8xl mb-8">📭</div>
+            <h3 class="text-3xl font-black text-gray-900">Nenhuma avaliação encontrada</h3>
+            <p class="text-gray-400 mt-4 font-medium">Tente ajustar seus filtros para encontrar o que procura.</p>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            @foreach (var review in reviews)
+            {
+                <div class="bg-white p-8 rounded-[2.5rem] shadow-xl hover:shadow-2xl transition-all border border-gray-50 flex flex-col justify-between group">
+                    <div>
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="flex gap-0.5">
+                                @for (int i = 0; i < review.Rating; i++)
+                                {
+                                    <span class="text-amber-400 text-lg">★</span>
+                                }
+                                @for (int i = 0; i < 5 - review.Rating; i++)
+                                {
+                                    <span class="text-gray-100 text-lg">★</span>
+                                }
+                            </div>
+                            @if (review.IsVerifiedPurchase)
+                            {
+                                <span class="bg-green-50 text-green-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                                    Verificado
+                                </span>
+                            }
+                        </div>
+
+                        <h4 class="text-xl font-black text-gray-900 mb-2 leading-tight group-hover:text-primary-600 transition-colors">@review.Title</h4>
+                        <p class="text-gray-500 text-sm font-medium line-clamp-3 mb-6">@review.Comment</p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4 py-4 border-t border-gray-50">
+                            <div class="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 font-black text-xs">
+                                @review.CustomerName[0].ToString().ToUpper()
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-sm font-black text-gray-900 truncate">@review.CustomerName</p>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase truncate">@review.ProductName</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3">
+                            @if (!review.IsApproved)
+                            {
+                                <button @onclick="() => HandleApprove(review.Id, true)"
+                                        class="flex-1 py-3 bg-green-50 text-green-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-green-600 hover:text-white transition-all shadow-sm">
+                                    Aprovar
+                                </button>
+                            }
+                            else
+                            {
+                                <button @onclick="() => HandleApprove(review.Id, false)"
+                                        class="flex-1 py-3 bg-amber-50 text-amber-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-500 hover:text-white transition-all shadow-sm">
+                                    Rejeitar
+                                </button>
+                            }
+                            <button @onclick="() => HandleDelete(review.Id)"
+                                    class="p-3 bg-rose-50 text-rose-600 rounded-xl font-black hover:bg-rose-600 hover:text-white transition-all shadow-sm">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (totalCount > pageSize)
+        {
+            <footer class="flex justify-center pt-10">
+                <div class="bg-white p-2 rounded-2xl shadow-xl border border-gray-50 flex gap-2">
+                    <button disabled="@(currentPage == 1)" @onclick="() => ChangePage(-1)"
+                            class="px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest disabled:opacity-30 enabled:hover:bg-gray-50 transition-all">
+                        Anterior
+                    </button>
+                    <div class="px-6 py-3 flex items-center font-black text-primary-600 text-xs">
+                        PÁGINA @currentPage
+                    </div>
+                    <button disabled="@(reviews.Count < pageSize)" @onclick="() => ChangePage(1)"
+                            class="px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest disabled:opacity-30 enabled:hover:bg-gray-50 transition-all">
+                        Próxima
+                    </button>
+                </div>
+            </footer>
+        }
+    }
+</div>
+
+@code {
+    private List<CustomerReviewResponseDto> reviews = new();
+    private bool loading = true;
+    private long totalCount;
+    private int currentPage = 1;
+    private int pageSize = 8;
+
+    // Filters
+    private string productName = "";
+    private int? minRating;
+    private bool? isApproved;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReviews();
+    }
+
+    private async Task LoadReviews()
+    {
+        loading = true;
+        var response = await ReviewService.GetReviewsAsync(currentPage, pageSize, productName, minRating, isApproved);
+        reviews = response.Items.ToList();
+        totalCount = response.TotalCount;
+        loading = false;
+    }
+
+    private async Task OnMinRatingChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var result))
+            minRating = result;
+        else
+            minRating = null;
+
+        currentPage = 1;
+        await LoadReviews();
+    }
+
+    private async Task FilterByApproval(bool? approved)
+    {
+        isApproved = approved;
+        currentPage = 1;
+        await LoadReviews();
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            currentPage = 1;
+            await LoadReviews();
+        }
+    }
+
+    private async Task ChangePage(int delta)
+    {
+        currentPage += delta;
+        await LoadReviews();
+    }
+
+    private async Task HandleApprove(string id, bool approve)
+    {
+        await ReviewService.ApproveAsync(id, approve);
+        await LoadReviews();
+    }
+
+    private async Task HandleDelete(string id)
+    {
+        // Simplificação: no Blazor real usaríamos um Modal de confirmação
+        await ReviewService.DeleteAsync(id);
+        await LoadReviews();
+    }
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="EnterpriseTemplate.MauiApp.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:EnterpriseTemplate.MauiApp.Pages"
+    Shell.FlyoutBehavior="Flyout"
+    Shell.TabBarBackgroundColor="White"
+    Shell.TabBarForegroundColor="#0284c7"
+    Shell.TabBarUnselectedColor="#94A3B8"
+    Shell.TabBarTitleColor="#0284c7"
+    Shell.NavBarBackgroundColor="#0284c7"
+    Shell.NavBarHasShadow="False"
+    Title="Enterprise Template">
+
+    <!-- ── Login (sem Tab Bar) ── -->
+    <ShellContent
+        ContentTemplate="{DataTemplate pages:LoginPage}"
+        Route="login"
+        Shell.TabBarIsVisible="False"
+        Shell.NavBarIsVisible="False" />
+
+    <!-- ── Tabs principais (autenticadas) ── -->
+    <TabBar>
+        <ShellContent
+            Title="Dashboard"
+            Icon="home.png"
+            Route="dashboard"
+            ContentTemplate="{DataTemplate pages:DashboardPage}" />
+
+        <ShellContent
+            Title="Pedidos"
+            Icon="orders.png"
+            Route="orders"
+            ContentTemplate="{DataTemplate pages:OrdersPage}" />
+    </TabBar>
+
+</Shell>

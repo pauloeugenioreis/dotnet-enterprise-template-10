@@ -130,21 +130,35 @@ internal class InMemoryEventStore : IEventStore
         Dictionary<string, string>? metadata = null,
         CancellationToken cancellationToken = default) where TEvent : class
     {
-        var domainEvent = new DomainEvent
-        {
-            EventId = Guid.NewGuid(),
-            EventType = typeof(TEvent).Name,
-            AggregateId = aggregateId,
-            AggregateType = aggregateType,
-            EventData = System.Text.Json.JsonSerializer.Serialize(eventData),
-            OccurredOn = DateTime.UtcNow,
-            UserId = userId,
-            Metadata = metadata ?? new(),
-            Timestamp = DateTime.UtcNow,
-            Version = 1
-        };
+        return AppendEventsAsync(aggregateType, aggregateId, new[] { eventData }, userId, metadata, cancellationToken);
+    }
 
-        _events.Add(domainEvent);
+    public Task AppendEventsAsync(
+        string aggregateType,
+        string aggregateId,
+        IEnumerable<object> events,
+        string? userId = null,
+        Dictionary<string, string>? metadata = null,
+        CancellationToken cancellationToken = default)
+    {
+        foreach (var eventData in events)
+        {
+            var domainEvent = new DomainEvent
+            {
+                EventId = Guid.NewGuid(),
+                EventType = eventData?.GetType().Name ?? "Unknown",
+                AggregateId = aggregateId,
+                AggregateType = aggregateType,
+                EventData = System.Text.Json.JsonSerializer.Serialize(eventData),
+                OccurredOn = DateTime.UtcNow,
+                UserId = userId,
+                Metadata = metadata ?? new(),
+                Timestamp = DateTime.UtcNow,
+                Version = 1 // Simplified for test
+            };
+
+            _events.Add(domainEvent);
+        }
         return Task.CompletedTask;
     }
 
@@ -201,38 +215,26 @@ internal class InMemoryEventStore : IEventStore
         return Task.FromResult((items, total));
     }
 
-    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByTypeAsync(
-        string aggregateType,
+    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByFilterAsync(
+        string? aggregateType = null,
+        string? eventType = null,
+        string? userId = null,
         DateTime? from = null,
         DateTime? toDate = null,
         int? limit = null,
         int? offset = null,
         CancellationToken cancellationToken = default)
     {
-        var query = _events.Where(e => e.AggregateType == aggregateType);
+        var query = _events.AsQueryable();
 
-        if (from.HasValue)
-            query = query.Where(e => e.OccurredOn >= from.Value);
+        if (!string.IsNullOrEmpty(aggregateType))
+            query = query.Where(e => e.AggregateType == aggregateType);
 
-        if (toDate.HasValue)
-            query = query.Where(e => e.OccurredOn <= toDate.Value);
+        if (!string.IsNullOrEmpty(eventType))
+            query = query.Where(e => e.EventType == eventType);
 
-        var all = query.ToList();
-        var total = (long)all.Count;
-        var items = all.Skip(offset ?? 0).Take(limit ?? all.Count).ToList();
-
-        return Task.FromResult((items, total));
-    }
-
-    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByUserAsync(
-        string userId,
-        DateTime? from = null,
-        DateTime? toDate = null,
-        int? limit = null,
-        int? offset = null,
-        CancellationToken cancellationToken = default)
-    {
-        var query = _events.Where(e => e.UserId == userId);
+        if (!string.IsNullOrEmpty(userId))
+            query = query.Where(e => e.UserId == userId);
 
         if (from.HasValue)
             query = query.Where(e => e.OccurredOn >= from.Value);
@@ -304,6 +306,10 @@ internal class NoOpEventStore : IEventStore
         string? userId = null, Dictionary<string, string>? metadata = null,
         CancellationToken cancellationToken = default) where TEvent : class => Task.CompletedTask;
 
+    public Task AppendEventsAsync(string aggregateType, string aggregateId, IEnumerable<object> events,
+        string? userId = null, Dictionary<string, string>? metadata = null,
+        CancellationToken cancellationToken = default) => Task.CompletedTask;
+
     public Task<List<DomainEvent>> GetEventsAsync(string aggregateType, string aggregateId,
         CancellationToken cancellationToken = default) => Task.FromResult(new List<DomainEvent>());
 
@@ -318,14 +324,10 @@ internal class NoOpEventStore : IEventStore
     public Task<List<DomainEvent>> GetEventsByVersionAsync(string aggregateType, string aggregateId,
         int fromVersion, int toVersion, CancellationToken cancellationToken = default) => Task.FromResult(new List<DomainEvent>());
 
-    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByTypeAsync(
-        string aggregateType, DateTime? from = null, DateTime? toDate = null,
-        int? limit = null, int? offset = null, CancellationToken cancellationToken = default) =>
-        Task.FromResult<(List<DomainEvent>, long)>((new List<DomainEvent>(), 0L));
-
-    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByUserAsync(
-        string userId, DateTime? from = null, DateTime? toDate = null,
-        int? limit = null, int? offset = null, CancellationToken cancellationToken = default) =>
+    public Task<(List<DomainEvent> Items, long TotalCount)> GetEventsByFilterAsync(
+        string? aggregateType = null, string? eventType = null, string? userId = null,
+        DateTime? from = null, DateTime? toDate = null, int? limit = null, int? offset = null,
+        CancellationToken cancellationToken = default) =>
         Task.FromResult<(List<DomainEvent>, long)>((new List<DomainEvent>(), 0L));
 
     public Task<int> GetLatestVersionAsync(string aggregateType, string aggregateId,

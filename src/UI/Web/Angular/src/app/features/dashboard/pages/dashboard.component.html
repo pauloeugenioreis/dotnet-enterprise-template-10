@@ -1,0 +1,88 @@
+<div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
+  <div class="mb-16">
+    <h1 class="text-6xl font-black text-gray-900 tracking-tighter">Dashboard</h1>
+    <p class="text-gray-500 mt-4 font-medium text-xl">Performance em tempo real.</p>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-16">
+    <div class="bg-white p-10 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-50 flex flex-col gap-6 group cursor-default">
+      <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform bg-rose-50 text-rose-500 shadow-sm border border-rose-100/50">
+        📈
+      </div>
+      <div>
+        <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Vendas Totais</p>
+        <h2 class="text-4xl font-black text-gray-900 tracking-tighter">
+          @if (statistics()) {
+            {{ statistics().totalRevenue | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+          } @else {
+            <span class="animate-pulse">...</span>
+          }
+        </h2>
+      </div>
+    </div>
+
+    <div class="bg-white p-10 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-50 flex flex-col gap-6 group cursor-default">
+      <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform bg-blue-50 text-blue-500 shadow-sm border border-blue-100/50">
+        👤
+      </div>
+      <div>
+        <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Total de Pedidos</p>
+        <h2 class="text-4xl font-black text-gray-900 tracking-tighter">
+          @if (statistics()) {
+            {{ statistics().totalOrders }}
+          } @else {
+            <span class="animate-pulse">...</span>
+          }
+        </h2>
+      </div>
+    </div>
+
+    <div class="bg-white p-10 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-50 flex flex-col gap-6 group cursor-default">
+      <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform bg-emerald-50 text-emerald-500 shadow-sm border border-emerald-100/50">
+        ✅
+      </div>
+      <div>
+        <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Status do Sistema</p>
+        <h2 class="text-4xl font-black text-gray-900 tracking-tighter">Operacional</h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- Latest Orders Table Preview -->
+  <div class="bg-white rounded-[3.5rem] shadow-2xl shadow-gray-200/60 border border-gray-50 overflow-hidden">
+    <div class="p-12 border-b border-gray-50 flex justify-between items-center">
+      <h3 class="text-3xl font-black text-gray-900 tracking-tight">Últimos Pedidos</h3>
+      <a
+        routerLink="/orders"
+        class="text-[10px] font-black text-primary-600 uppercase tracking-[0.2em] hover:bg-primary-50 px-6 py-3 rounded-xl transition-all"
+      >
+        Ver Todos
+      </a>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-gray-50/30">
+          <tr>
+            <th class="px-12 py-8 text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">Pedido</th>
+            <th class="px-12 py-8 text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">Cliente</th>
+            <th class="px-12 py-8 text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">Total</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          @if (loading()) {
+            <tr><td colspan="3" class="px-12 py-8 animate-pulse bg-gray-50/50 h-20"></td></tr>
+          } @else {
+            @for (order of latestOrders(); track order.id) {
+              <tr class="hover:bg-gray-50/30 transition-colors group">
+                <td class="px-12 py-10 font-black text-gray-900 tracking-tight text-lg">#{{ order.orderNumber }}</td>
+                <td class="px-12 py-10 font-bold text-gray-500 text-lg">{{ order.customerName }}</td>
+                <td class="px-12 py-10 font-black text-primary-600 text-xl tracking-tight">R$ {{ order.total | number:'1.2-2' }}</td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

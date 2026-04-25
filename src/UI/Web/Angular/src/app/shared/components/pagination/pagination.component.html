@@ -1,0 +1,42 @@
+<div class="bg-gray-50 px-10 py-6 flex justify-between items-center border-t border-gray-100">
+  <div class="flex items-center gap-10">
+    <div class="flex items-center gap-2 text-sm font-bold text-gray-500">
+      <span>Página</span>
+      <span class="text-gray-900">{{ page }}</span>
+      <span>de</span>
+      <span class="text-gray-900">{{ totalPages || 1 }}</span>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Itens por página:</span>
+      <select 
+        [ngModel]="pageSize" 
+        (ngModelChange)="onPageSizeChange($event)"
+        class="bg-white border border-gray-200 rounded-xl px-4 py-2 text-xs font-black text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-600 transition-all cursor-pointer shadow-sm"
+      >
+        <option [value]="5">5</option>
+        <option [value]="10">10</option>
+        <option [value]="20">20</option>
+        <option [value]="50">50</option>
+        <option [value]="100">100</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="flex gap-3">
+    <button 
+      (click)="onPageChange(page - 1)"
+      [disabled]="page === 1"
+      class="px-6 py-3 bg-white border border-gray-200 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
+    >
+      Anterior
+    </button>
+    <button 
+      (click)="onPageChange(page + 1)"
+      [disabled]="page === totalPages || totalPages === 0"
+      class="px-6 py-3 bg-primary-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-primary-600/20 active:scale-95"
+    >
+      Próxima
+    </button>
+  </div>
+</div>

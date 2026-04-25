@@ -1,5 +1,5 @@
 using System.Reflection;
-using ProjectTemplate.Domain.Dtos;
+using ProjectTemplate.Shared.Models;
 using ProjectTemplate.Domain.Entities;
 using Xunit;
 

@@ -1,0 +1,309 @@
+@page "/products"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@using BlazorApp.Client.Services
+@using ProjectTemplate.Shared.Models
+@using System.Globalization
+@inject IProductService ProductService
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@rendermode InteractiveAuto
+
+<div class="animate-in fade-in duration-700">
+  <header class="flex justify-between items-end mb-16">
+    <div>
+      <h1 class="text-6xl font-black text-gray-900 tracking-tighter">Produtos</h1>
+      <p class="text-gray-500 mt-4 font-medium text-xl">Catálogo completo de itens.</p>
+    </div>
+    <div class="flex gap-4">
+      <button 
+        @onclick="ExportToExcel"
+        class="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md text-gray-400 hover:text-primary-600 transition-all active:scale-95"
+        title="Exportar para Excel"
+      >
+        📊
+      </button>
+      <button 
+        @onclick="OpenNew"
+        class="bg-primary-600 hover:bg-primary-700 text-white font-black px-8 py-4 rounded-2xl shadow-lg shadow-primary-600/20 transition-all active:scale-95"
+      >
+        + Novo Produto
+      </button>
+    </div>
+  </header>
+
+  <!-- Filter Bar -->
+  <div class="flex gap-6 items-center mb-10">
+    <div class="flex-1 relative group">
+      <div class="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+        <svg class="w-5 h-5 text-gray-400 group-focus-within:text-primary-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <input 
+        type="text"
+        placeholder="Buscar por nome ou categoria..."
+        class="w-full pl-16 pr-8 py-5 bg-white border-none rounded-3xl shadow-xl shadow-gray-100/50 focus:ring-2 focus:ring-primary-600/20 outline-none transition-all font-bold text-gray-900 placeholder:text-gray-300"
+        @bind="searchTerm"
+        @bind:event="oninput"
+        @onkeyup="HandleKeyUp"
+      />
+    </div>
+    
+    <div class="flex bg-white p-2 rounded-[2rem] shadow-xl shadow-gray-100/50 gap-1">
+      <button
+        @onclick="() => SetStatusFilter(null)"
+        class='px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all @(isActive == null ? "bg-gray-900 text-white shadow-lg" : "text-gray-400 hover:bg-gray-50")'
+      >
+        Todos
+      </button>
+      <button
+        @onclick="() => SetStatusFilter(true)"
+        class='px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all @(isActive == true ? "bg-gray-900 text-white shadow-lg" : "text-gray-400 hover:bg-gray-50")'
+      >
+        Ativos
+      </button>
+      <button
+        @onclick="() => SetStatusFilter(false)"
+        class='px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all @(isActive == false ? "bg-gray-900 text-white shadow-lg" : "text-gray-400 hover:bg-gray-50")'
+      >
+        Inativos
+      </button>
+    </div>
+  </div>
+
+  @if (products == null) {
+    <div class="flex justify-center py-40 bg-white rounded-[3rem] shadow-xl shadow-gray-100/50">
+      <div class="w-16 h-16 border-8 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  } else {
+    <div class="bg-white rounded-[3rem] shadow-2xl shadow-gray-200/40 border border-gray-50 overflow-hidden">
+      <table class="w-full text-left">
+        <thead class="bg-primary-600">
+          <tr>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Produto</th>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Categoria</th>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Preço</th>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Estoque</th>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Status</th>
+            <th class="px-10 py-8 text-[10px] font-black text-white uppercase tracking-[0.2em]">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          @foreach (var item in products.Items) {
+            <tr class="hover:bg-gray-50/50 transition-colors group">
+              <td class="px-10 py-8">
+                <div class="flex items-center gap-6">
+                  <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                    📦
+                  </div>
+                  <span class="font-black text-gray-900 text-lg tracking-tight">@item.Name</span>
+                </div>
+              </td>
+              <td class="px-10 py-8">
+                <span class="px-4 py-2 bg-gray-50 rounded-xl text-gray-500 font-bold text-xs uppercase tracking-wider">
+                  @item.Category
+                </span>
+              </td>
+              <td class="px-10 py-8">
+                <span class="font-black text-primary-600 text-lg">R$ @item.Price.ToString("N2", new CultureInfo("pt-BR"))</span>
+              </td>
+              <td class="px-10 py-8">
+                <div class="flex items-baseline gap-1">
+                  <span class="font-black text-gray-900 text-lg">@item.Stock</span>
+                  <span class="text-[10px] font-bold text-gray-300 uppercase tracking-widest">unid</span>
+                </div>
+              </td>
+              <td class="px-10 py-8">
+                <span class='px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest @(item.IsActive ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600")'>
+                  @(item.IsActive ? "Ativo" : "Inativo")
+                </span>
+              </td>
+              <td class="px-10 py-8">
+                <div class="flex gap-2">
+                  <button title="Editar" @onclick="() => OpenEdit(item)" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-primary-50 rounded-xl text-primary-600 transition-all active:scale-90">
+                    ✏️
+                  </button>
+                  <button title="Excluir" @onclick="() => DeleteProduct(item.Id)" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-red-50 rounded-xl text-red-600 transition-all active:scale-90">
+                    🗑️
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <Pagination 
+        Page="@currentPage" 
+        TotalPages="@products.TotalPages" 
+        TotalItems="@products.TotalCount" 
+        PageSize="@pageSize"
+        OnPageChanged="ChangePage"
+        OnPageSizeChanged="ChangePageSize"
+      />
+    </div>
+  }
+</div>
+
+<!-- Product Modal -->
+<Modal Show="@showModal" Title="@modalTitle" OnClose="() => showModal = false">
+    <div class="space-y-8">
+        <div class="space-y-3">
+            <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Nome do Produto</label>
+            <input type="text" @bind="formData.Name" class="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all" placeholder="Ex: Teclado Mecânico" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+            <div class="space-y-3">
+                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Categoria</label>
+                <input type="text" @bind="formData.Category" class="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all" placeholder="Ex: Hardware" />
+            </div>
+            <div class="space-y-3">
+                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Preço (R$)</label>
+                <input type="number" @bind="formData.Price" class="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all" />
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+            <div class="space-y-3">
+                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Estoque Inicial</label>
+                <input type="number" @bind="formData.Stock" class="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all" />
+            </div>
+            <div class="space-y-3">
+                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Status</label>
+                <div class="flex items-center gap-4 px-8 py-5 bg-gray-50 rounded-3xl cursor-pointer" @onclick="() => formData.IsActive = !formData.IsActive">
+                    <input type="checkbox" @bind="formData.IsActive" class="w-6 h-6 rounded-lg text-primary-600 focus:ring-primary-600/20 border-none bg-gray-200" />
+                    <span class="text-xs font-black uppercase tracking-widest text-gray-600">Produto Ativo</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-6 flex gap-4">
+            <button @onclick="() => showModal = false" class="flex-1 px-8 py-5 rounded-3xl font-black text-xs uppercase tracking-widest text-gray-400 hover:bg-gray-50 transition-all">Cancelar</button>
+            <button @onclick="Save" class="flex-2 bg-primary-600 hover:bg-primary-700 text-white font-black px-12 py-5 rounded-3xl shadow-xl shadow-primary-600/20 transition-all active:scale-95">Confirmar e Salvar</button>
+        </div>
+    </div>
+</Modal>
+
+@code {
+    private PagedResponse<ProductResponseDto>? products;
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private string searchTerm = "";
+    private bool? isActive = null;
+
+    // Modal
+    private bool showModal = false;
+    private string modalTitle = "Novo Produto";
+    private ProductResponseDto formData = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProducts();
+    }
+
+    private async Task LoadProducts()
+    {
+        try 
+        {
+            products = null;
+            products = await ProductService.GetPagedAsync(currentPage, pageSize, searchTerm, isActive);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar produtos: {ex.Message}");
+            // Em caso de erro (ex: 401 durante pre-rendering), mantemos products como null para mostrar o loading
+            // ou poderíamos mostrar uma mensagem de erro amigável.
+        }
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            currentPage = 1;
+            await LoadProducts();
+        }
+    }
+
+    private async Task SetStatusFilter(bool? val)
+    {
+        isActive = val;
+        currentPage = 1;
+        await LoadProducts();
+    }
+
+    private async Task ChangePage(int newPage)
+    {
+        currentPage = newPage;
+        await LoadProducts();
+    }
+
+    private async Task ChangePageSize(int newSize)
+    {
+        pageSize = newSize;
+        currentPage = 1;
+        await LoadProducts();
+    }
+
+    private async Task ExportToExcel()
+    {
+        if (products?.Items == null) return;
+
+        var data = products.Items.Select(p => new {
+            Nome = p.Name,
+            Categoria = p.Category,
+            Preco = p.Price,
+            Estoque = p.Stock,
+            Status = p.IsActive ? "Ativo" : "Inativo"
+        }).ToList();
+
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        await JS.InvokeVoidAsync("exportToExcel", $"Produtos_{timestamp}.xlsx", data);
+    }
+
+    private void OpenNew()
+    {
+        modalTitle = "Novo Produto";
+        formData = new() { IsActive = true };
+        showModal = true;
+    }
+
+    private void OpenEdit(ProductResponseDto item)
+    {
+        modalTitle = "Editar Produto";
+        formData = new() {
+            Id = item.Id,
+            Name = item.Name,
+            Category = item.Category,
+            Price = item.Price,
+            Stock = item.Stock,
+            IsActive = item.IsActive
+        };
+        showModal = true;
+    }
+
+    private async Task Save()
+    {
+        // Implementar salvamento via serviço
+        showModal = false;
+        await LoadProducts();
+    }
+
+    private async Task DeleteProduct(long id)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "Tem certeza que deseja excluir este produto?");
+        if (!confirmed) return;
+
+        try 
+        {
+            await ProductService.DeleteAsync(id);
+            await LoadProducts();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao excluir produto: {ex.Message}");
+        }
+    }
+}

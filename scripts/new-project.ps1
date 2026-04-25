@@ -6,12 +6,9 @@
 param(
     [string]$ProjectName,
 
-    [ValidateSet("InMemory", "SqlServer", "Oracle", "PostgreSQL", "MySQL")]
+    [ValidateSet("SqlServer", "Oracle", "PostgreSQL", "MySQL")]
     [string]$Database,
 
-
-    [ValidateSet("Yes", "No")]
-    [string]$MongoDB,
 
     [ValidateSet("Yes", "No")]
     [string]$Queue,
@@ -22,11 +19,15 @@ param(
     [ValidateSet("Yes", "No")]
     [string]$Telemetry,
 
-    [ValidateSet("Yes", "No")]
-    [string]$EventSourcing,
 
     [ValidateSet("Yes", "No")]
-    [string]$GitInit
+    [string]$GitInit,
+
+    [ValidateSet("None", "Flutter", "Maui", "ReactNative", "All")]
+    [string]$UIMobile,
+
+    [ValidateSet("None", "Angular", "Blazor", "React", "Vue", "All")]
+    [string]$UIWeb
 )
 
 $ErrorActionPreference = "Stop"
@@ -127,9 +128,13 @@ function Show-YesNo {
         [bool]$DefaultYes = $false
     )
 
-    $default = if ($DefaultYes) { 1 } else { 2 }
-    $result = Show-Menu -Title $Title -Options @("Sim", "Não") -Default $default
-    return ($result -eq 1)
+    if ($DefaultYes) {
+        $result = Show-Menu -Title $Title -Options @("Sim", "Não") -Default 1
+        return ($result -eq 1)
+    } else {
+        $result = Show-Menu -Title $Title -Options @("Não", "Sim") -Default 1
+        return ($result -eq 2)
+    }
 }
 
 # ============================================================
@@ -137,12 +142,12 @@ function Show-YesNo {
 # ============================================================
 
 $isInteractive = -not ($PSBoundParameters.ContainsKey('Database') -or
-                        $PSBoundParameters.ContainsKey('MongoDB') -or
                         $PSBoundParameters.ContainsKey('Queue') -or
                         $PSBoundParameters.ContainsKey('Storage') -or
                         $PSBoundParameters.ContainsKey('Telemetry') -or
-                        $PSBoundParameters.ContainsKey('EventSourcing') -or
-                        $PSBoundParameters.ContainsKey('GitInit'))
+                        $PSBoundParameters.ContainsKey('GitInit') -or
+                        $PSBoundParameters.ContainsKey('UIMobile') -or
+                        $PSBoundParameters.ContainsKey('UIWeb'))
 
 # ============================================================
 # Collect Choices
@@ -153,25 +158,20 @@ if ($isInteractive) {
 
     Write-Section "Banco de Dados"
     $dbChoice = Show-Menu -Title "Qual banco de dados utilizar?" -Options @(
-        "InMemory (sem container Docker)",
+        "PostgreSQL",
         "SQL Server",
         "Oracle",
-        "PostgreSQL",
         "MySQL"
     ) -Default 1
 
     $Database = switch ($dbChoice) {
-        1 { "InMemory" }
+        1 { "PostgreSQL" }
         2 { "SqlServer" }
         3 { "Oracle" }
-        4 { "PostgreSQL" }
-        5 { "MySQL" }
+        4 { "MySQL" }
     }
 
 
-    Write-Section "NoSQL"
-    $useMongo = Show-YesNo -Title "Habilitar MongoDB (document store)?"
-    $MongoDB = if ($useMongo) { "Yes" } else { "No" }
 
     Write-Section "Mensageria"
     $useQueue = Show-YesNo -Title "Habilitar RabbitMQ (fila de mensagens)?"
@@ -196,9 +196,40 @@ if ($isInteractive) {
     $useTelemetry = Show-YesNo -Title "Habilitar Telemetria (Jaeger + Prometheus + Grafana)?"
     $Telemetry = if ($useTelemetry) { "Yes" } else { "No" }
 
-    Write-Section "Event Sourcing"
-    $useEventSourcing = Show-YesNo -Title "Habilitar Event Sourcing (Marten + PostgreSQL)?"
-    $EventSourcing = if ($useEventSourcing) { "Yes" } else { "No" }
+
+    Write-Section "UI - Web"
+    $webChoice = Show-Menu -Title "Quais tecnologias Web deseja manter?" -Options @(
+        "Nenhuma",
+        "Angular",
+        "Blazor",
+        "React",
+        "Vue",
+        "Todas"
+    ) -Default 1
+    $UIWeb = switch ($webChoice) {
+        1 { "None" }
+        2 { "Angular" }
+        3 { "Blazor" }
+        4 { "React" }
+        5 { "Vue" }
+        6 { "All" }
+    }
+
+    Write-Section "UI - Mobile"
+    $mobileChoice = Show-Menu -Title "Quais tecnologias Mobile deseja manter?" -Options @(
+        "Nenhuma",
+        "Flutter",
+        "MAUI",
+        "React Native",
+        "Todas"
+    ) -Default 1
+    $UIMobile = switch ($mobileChoice) {
+        1 { "None" }
+        2 { "Flutter" }
+        3 { "Maui" }
+        4 { "ReactNative" }
+        5 { "All" }
+    }
 
     Write-Section "Git"
     $doGitInit = Show-YesNo -Title "Inicializar repositório Git?" -DefaultYes $true
@@ -212,31 +243,32 @@ if ($isInteractive) {
     Write-Host "  ║  Projeto:        $($ProjectName.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Banco de Dados: $($Database.PadRight(38))║" -ForegroundColor Cyan
 
-    Write-Host "  ║  MongoDB:        $($MongoDB.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  RabbitMQ:       $($Queue.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Storage:        $($Storage.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Telemetria:     $($Telemetry.PadRight(38))║" -ForegroundColor Cyan
-    Write-Host "  ║  Event Sourcing: $($EventSourcing.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Git Init:       $($GitInit.PadRight(38))║" -ForegroundColor Cyan
+    Write-Host "  ║  UI Mobile:      $($UIMobile.PadRight(38))║" -ForegroundColor Cyan
+    Write-Host "  ║  UI Web:         $($UIWeb.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
 
-    $confirm = Read-Host "  Confirmar e criar projeto? (S/N) [S]"
-    if ($confirm -eq 'N' -or $confirm -eq 'n') {
+    if (-not (Show-YesNo -Title "Confirmar e criar projeto?" -DefaultYes $true)) {
         Write-Host ""
         Write-Host "  Operação cancelada." -ForegroundColor Red
         exit 0
     }
 } else {
+    $MongoDB = "Yes"
+    $EventSourcing = "Yes"
     # Apply defaults for non-interactive mode
-    if (-not $Database) { $Database = "InMemory" }
+    if (-not $Database) { $Database = "PostgreSQL" }
 
-    if (-not $MongoDB) { $MongoDB = "No" }
     if (-not $Queue) { $Queue = "No" }
     if (-not $Storage) { $Storage = "None" }
     if (-not $Telemetry) { $Telemetry = "No" }
-    if (-not $EventSourcing) { $EventSourcing = "No" }
     if (-not $GitInit) { $GitInit = "Yes" }
+    if (-not $UIMobile) { $UIMobile = "None" }
+    if (-not $UIWeb) { $UIWeb = "None" }
 }
 
 # ============================================================
@@ -301,19 +333,101 @@ foreach ($file in $files) {
 }
 
 # ============================================================
+# UI Cleanup
+# ============================================================
+
+Write-Step "🧹" "Limpando frameworks de UI não selecionados..."
+
+# -- Mobile --
+if ($UIMobile -eq "None") {
+    Remove-Item "src/UI/Mobile" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item "run-mobile.sh", "run-mobile.ps1", "build-mobile-all.sh", "build-mobile-all.ps1" -Force -ErrorAction SilentlyContinue
+    dotnet sln "$ProjectName.sln" remove src/UI/Mobile/MauiApp/MauiApp.csproj 2>$null
+} elseif ($UIMobile -ne "All") {
+    if ($UIMobile -ne "Flutter") {
+        Remove-Item "src/UI/Mobile/FlutterApp" -Recurse -Force -ErrorAction SilentlyContinue
+        $b = Get-Content "build-mobile-all.sh" -Raw; $b = $b -replace '(?s)# Flutter.*?popd', ''; Set-Content "build-mobile-all.sh" $b -NoNewline
+        $r = Get-Content "run-mobile.sh" -Raw; $r = $r -replace '(?s)run_flutter.*?\n}', ''; $r = $r -replace '1\) \$\{CYAN\}Flutter.*?;;', ''; Set-Content "run-mobile.sh" $r -NoNewline
+    }
+    if ($UIMobile -ne "Maui") {
+        Remove-Item "src/UI/Mobile/MauiApp" -Recurse -Force -ErrorAction SilentlyContinue
+        $b = Get-Content "build-mobile-all.sh" -Raw; $b = $b -replace '(?s)# MAUI.*?MauiApp.csproj', ''; Set-Content "build-mobile-all.sh" $b -NoNewline
+        $r = Get-Content "run-mobile.sh" -Raw; $r = $r -replace '(?s)run_maui.*?\n}', ''; $r = $r -replace '3\) \$\{CYAN\}MAUI.*?;;', ''; Set-Content "run-mobile.sh" $r -NoNewline
+        dotnet sln "$ProjectName.sln" remove src/UI/Mobile/MauiApp/MauiApp.csproj 2>$null
+    }
+    if ($UIMobile -ne "ReactNative") {
+        Remove-Item "src/UI/Mobile/ReactNativeApp" -Recurse -Force -ErrorAction SilentlyContinue
+        $b = Get-Content "build-mobile-all.sh" -Raw; $b = $b -replace '(?s)# React Native.*?popd', ''; Set-Content "build-mobile-all.sh" $b -NoNewline
+        $r = Get-Content "run-mobile.sh" -Raw; $r = $r -replace '(?s)run_react_native.*?\n}', ''; $r = $r -replace '2\) \$\{CYAN\}React Native.*?;;', ''; Set-Content "run-mobile.sh" $r -NoNewline
+    }
+}
+
+# -- Web --
+$aspireProgram = Join-Path $TargetDir "src/Aspire/AppHost/Program.cs"
+$programContent = Get-Content $aspireProgram -Raw
+
+if ($UIWeb -eq "None") {
+    Remove-Item "src/UI/Web" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item "build-web-all.sh", "build-web-all.ps1" -Force -ErrorAction SilentlyContinue
+    dotnet sln "$ProjectName.sln" remove src/UI/Web/Blazor/WebApp/App/App.csproj 2>$null
+    dotnet sln "$ProjectName.sln" remove src/UI/Web/Blazor/WebApp/App.Client/App.Client.csproj 2>$null
+    dotnet sln "$ProjectName.sln" remove src/UI/Web/Blazor/Wasm/BlazorWasm.csproj 2>$null
+    # Remove ProjectReference from AppHost
+    $appHostCsproj = Join-Path $TargetDir "src/Aspire/AppHost/AppHost.csproj"
+    $appHostContent = Get-Content $appHostCsproj -Raw
+    $appHostContent = $appHostContent -replace '<ProjectReference Include=".*?UI\\Web\\Blazor\\WebApp\\App\\App\.csproj" />', ''
+    Set-Content $appHostCsproj $appHostContent -NoNewline
+    # Remove all web from Aspire (between comments)
+    $programContent = $programContent -replace '(?s)// Web Projects.*?// End Web Projects', '// Web UI Removed'
+} elseif ($UIWeb -ne "All") {
+    # Angular
+    if ($UIWeb -ne "Angular") {
+        Remove-Item "src/UI/Web/Angular" -Recurse -Force -ErrorAction SilentlyContinue
+        $b = Get-Content "build-web-all.sh" -Raw; $b = $b -replace '(?s)# Angular.*?popd', ''; Set-Content "build-web-all.sh" $b -NoNewline
+        $programContent = $programContent -replace '(?s)builder\.AddNpmApp\("angular-web".*?\.WithExternalHttpEndpoints\(\);', ''
+    }
+    # Blazor
+    if ($UIWeb -ne "Blazor") {
+        Remove-Item "src/UI/Web/Blazor" -Recurse -Force -ErrorAction SilentlyContinue
+        $b = Get-Content "build-web-all.sh" -Raw; $b = $b -replace '(?s)# Blazor.*?App.csproj', ''; Set-Content "build-web-all.sh" $b -NoNewline
+        dotnet sln "$ProjectName.sln" remove src/UI/Web/Blazor/WebApp/App/App.csproj 2>$null
+        dotnet sln "$ProjectName.sln" remove src/UI/Web/Blazor/WebApp/App.Client/App.Client.csproj 2>$null
+        dotnet sln "$ProjectName.sln" remove src/UI/Web/Blazor/Wasm/BlazorWasm.csproj 2>$null
+        # Remove ProjectReference from AppHost
+        $appHostCsproj = Join-Path $TargetDir "src/Aspire/AppHost/AppHost.csproj"
+        $appHostContent = Get-Content $appHostCsproj -Raw
+        $appHostContent = $appHostContent -replace '<ProjectReference Include=".*?UI\\Web\\Blazor\\WebApp\\App\\App\.csproj" />', ''
+        Set-Content $appHostCsproj $appHostContent -NoNewline
+        $programContent = $programContent -replace '(?s)builder\.AddProject<Projects\.App>\("blazor-app"\).*?\.WithExternalHttpEndpoints\(\);', ''
+    }
+    # React
+    if ($UIWeb -ne "React") {
+        Remove-Item "src/UI/Web/React" -Recurse -Force -ErrorAction SilentlyContinue
+        $b = Get-Content "build-web-all.sh" -Raw; $b = $b -replace '(?s)# React.*?popd', ''; Set-Content "build-web-all.sh" $b -NoNewline
+        $programContent = $programContent -replace '(?s)builder\.AddNpmApp\("react-web".*?\.WithExternalHttpEndpoints\(\);', ''
+    }
+    # Vue
+    if ($UIWeb -ne "Vue") {
+        Remove-Item "src/UI/Web/Vue" -Recurse -Force -ErrorAction SilentlyContinue
+        $b = Get-Content "build-web-all.sh" -Raw; $b = $b -replace '(?s)# Vue.*?popd', ''; Set-Content "build-web-all.sh" $b -NoNewline
+        $programContent = $programContent -replace '(?s)builder\.AddNpmApp\("vue-web".*?\.WithExternalHttpEndpoints\(\);', ''
+    }
+}
+Set-Content $aspireProgram $programContent -NoNewline
+
+# ============================================================
 # Configure appsettings.json
 # ============================================================
 
 Write-Step "⚙️" "Configurando appsettings.json..."
 
-$appSettingsPath = Join-Path $TargetDir "src/Api/appsettings.json"
+$appSettingsPath = Join-Path $TargetDir "src/Server/Api/appsettings.json"
 $appSettings = Get-Content $appSettingsPath -Raw | ConvertFrom-Json
 
 # -- Database --
 $appSettings.AppSettings.Infrastructure.Database.DatabaseType = $Database
 
 $connectionStrings = @{
-    "InMemory"   = ""
     "SqlServer"  = "Server=localhost,1433;Database=$ProjectName;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;"
     "Oracle"     = "User Id=appuser;Password=AppPass123;Data Source=localhost:1521/FREEPDB1;"
     "PostgreSQL" = "Host=localhost;Port=5433;Database=$ProjectName;Username=postgres;Password=PostgresPass123;"
@@ -330,9 +444,9 @@ $dbFileMap = @{
 }
 
 foreach ($db in $dbFileMap.Keys) {
-    $filePath = Join-Path $TargetDir "src/Api/$($dbFileMap[$db])"
+    $filePath = Join-Path $TargetDir "src/Server/Api/$($dbFileMap[$db])"
     if (Test-Path $filePath) {
-        if ($Database -eq "InMemory" -or $Database -ne $db) {
+        if ($Database -ne $db) {
             Remove-Item $filePath -Force
         }
     }
@@ -340,9 +454,7 @@ foreach ($db in $dbFileMap.Keys) {
 
 
 # -- MongoDB --
-if ($MongoDB -eq "Yes") {
-  $appSettings.AppSettings.Infrastructure.MongoDB.ConnectionString = "mongodb://admin:admin@localhost:27017/$ProjectName"
-}
+$appSettings.AppSettings.Infrastructure.MongoDB.ConnectionString = "mongodb://admin:admin@localhost:27017/$ProjectName"
 
 # -- RabbitMQ --
 if ($Queue -eq "Yes") {
@@ -363,12 +475,8 @@ if ($Telemetry -eq "Yes") {
 }
 
 # -- Event Sourcing --
-if ($EventSourcing -eq "Yes") {
-    $appSettings.AppSettings.Infrastructure.EventSourcing.Enabled = $true
-    $appSettings.AppSettings.Infrastructure.EventSourcing.ConnectionString = "Host=localhost;Database=${ProjectName}Events;Username=postgres;Password=postgres"
-} else {
-    $appSettings.AppSettings.Infrastructure.EventSourcing.Enabled = $false
-}
+$appSettings.AppSettings.Infrastructure.EventSourcing.Enabled = $true
+$appSettings.AppSettings.Infrastructure.EventSourcing.ConnectionString = "Host=localhost;Database=${ProjectName}Events;Username=postgres;Password=postgres;Port=5432"
 
 # Save appsettings.json (ConvertTo-Json in PS 5.1 uses non-standard indentation; normalize to 2-space)
 $jsonContent = $appSettings | ConvertTo-Json -Depth 20
@@ -388,16 +496,13 @@ Set-Content $appSettingsPath $jsonContent -Encoding UTF8
 # Enable optional features in Program.cs
 # ============================================================
 
-$programPath = Join-Path $TargetDir "src/Api/Program.cs"
+$programPath = Join-Path $TargetDir "src/Server/Api/Program.cs"
 $programContent = Get-Content $programPath -Raw
 
-if ($MongoDB -eq "Yes") {
     Write-Step "🍃" "Habilitando MongoDB no Program.cs..."
     $programContent = $programContent -replace '// (builder\.Services\.AddMongo<Program>\(\);)', '$1'
-
-  Write-Step "🌱" "Habilitando seed inicial do MongoDB no Program.cs..."
-  $programContent = $programContent -replace '// (await MongoDbSeeder\.SeedAsync\(scope\.ServiceProvider\);)', '$1'
-}
+    Write-Step "🌱" "Habilitando seed inicial do MongoDB no Program.cs..."
+    $programContent = $programContent -replace '// (await MongoDbSeeder\.SeedAsync\(scope\.ServiceProvider\);)', '$1'
 
 if ($Queue -eq "Yes") {
     Write-Step "📨" "Habilitando RabbitMQ no Program.cs..."
@@ -415,7 +520,7 @@ Set-Content $programPath $programContent -NoNewline
 # Generate docker-compose.yml
 # ============================================================
 
-$needsCompose = ($Database -ne "InMemory") -or ($MongoDB -eq "Yes") -or ($Queue -eq "Yes") -or ($Telemetry -eq "Yes") -or ($EventSourcing -eq "Yes")
+$needsCompose = ($true) -or ($MongoDB -eq "Yes") -or ($Queue -eq "Yes") -or ($Telemetry -eq "Yes") -or ($EventSourcing -eq "Yes")
 
 if ($needsCompose) {
     Write-Step "🐳" "Gerando docker-compose.yml..."
@@ -677,6 +782,136 @@ if ($needsCompose) {
       retries: 5
 "@)
         $volumes.Add("  postgres-events-data:")
+    }
+
+    # ── Redis (Always needed by API) ──
+    [void]$services.AppendLine(@"
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+"@)
+
+    # ── API ──
+    $isEventSourcing = if ($EventSourcing -eq "Yes") { "true" } else { "false" }
+    $isTelemetry = if ($Telemetry -eq "Yes") { "true" } else { "false" }
+
+    $dependsOn = [System.Text.StringBuilder]::new()
+    [void]$dependsOn.AppendLine("    depends_on:")
+    [void]$dependsOn.AppendLine("      redis: { condition: service_healthy }")
+    if ($Queue -eq "Yes") { [void]$dependsOn.AppendLine("      rabbitmq: { condition: service_healthy }") }
+    if ($MongoDB -eq "Yes") { [void]$dependsOn.AppendLine("      mongo: { condition: service_healthy }") }
+    if ($Telemetry -eq "Yes") {
+        [void]$dependsOn.AppendLine("      jaeger: { condition: service_healthy }")
+        [void]$dependsOn.AppendLine("      prometheus: { condition: service_healthy }")
+    }
+
+    [void]$services.AppendLine(@"
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: src/Server/Api/Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - AppSettings__Infrastructure__Database__DatabaseType=$Database
+      - AppSettings__Infrastructure__Database__ConnectionString=$DbConn
+      - AppSettings__Infrastructure__EventSourcing__Enabled=$isEventSourcing
+      - AppSettings__Infrastructure__EventSourcing__ConnectionString=$DbEventsConn
+      - AppSettings__Infrastructure__Redis__ConnectionString=redis:6379
+      - AppSettings__Infrastructure__RabbitMQ__ConnectionString=amqp://guest:guest@rabbitmq:5672
+      - AppSettings__Infrastructure__MongoDB__ConnectionString=mongodb://admin:admin@mongo:27017/$ProjectName
+      - AppSettings__Infrastructure__Telemetry__Enabled=$isTelemetry
+      - AppSettings__Infrastructure__Telemetry__Jaeger__Host=jaeger
+      - AppSettings__Infrastructure__Telemetry__Jaeger__Port=4317
+      - AppSettings__Infrastructure__Telemetry__Jaeger__UseGrpc=true
+$($dependsOn.ToString().TrimEnd())
+    networks:
+      - app-network
+"@)
+
+    # ── Web Projects ──
+    if ($UIWeb -ne "None") {
+        if ($UIWeb -eq "All" -or $UIWeb -eq "Angular") {
+            [void]$services.AppendLine(@"
+  angular-web:
+    container_name: web-angular
+    build:
+      context: src/UI/Web/Angular
+      dockerfile: Dockerfile
+    environment:
+      - API_URL=http://localhost:5000
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+    networks:
+      - app-network
+"@)
+        }
+        if ($UIWeb -eq "All" -or $UIWeb -eq "React") {
+            [void]$services.AppendLine(@"
+  react-web:
+    container_name: web-react
+    build:
+      context: src/UI/Web/React
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5000
+    depends_on:
+      - api
+    networks:
+      - app-network
+"@)
+        }
+        if ($UIWeb -eq "All" -or $UIWeb -eq "Vue") {
+            [void]$services.AppendLine(@"
+  vue-web:
+    container_name: web-vue
+    build:
+      context: src/UI/Web/Vue
+      dockerfile: Dockerfile
+    ports:
+      - "5174:80"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5000
+    depends_on:
+      - api
+    networks:
+      - app-network
+"@)
+        }
+        if ($UIWeb -eq "All" -or $UIWeb -eq "Blazor") {
+            [void]$services.AppendLine(@"
+  blazor-app:
+    container_name: web-blazor
+    build:
+      context: .
+      dockerfile: src/UI/Web/Blazor/WebApp/App/Dockerfile
+    ports:
+      - "5188:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ApiBaseUrl=http://api:8080
+    depends_on:
+      - api
+    networks:
+      - app-network
+"@)
+        }
     }
 
     # ── Network ──
@@ -951,13 +1186,13 @@ Write-Host "  $stepNum. dotnet build" -ForegroundColor White
 $stepNum++
 
 if ($Database -ne "InMemory") {
-    Write-Host "  $stepNum. dotnet ef migrations add InitialCreate --project src/Data --startup-project src/Api" -ForegroundColor White
+    Write-Host "  $stepNum. dotnet ef migrations add InitialCreate --project src/Server/Data --startup-project src/Server/Api" -ForegroundColor White
     $stepNum++
-    Write-Host "  $stepNum. dotnet ef database update --project src/Data --startup-project src/Api" -ForegroundColor White
+    Write-Host "  $stepNum. dotnet ef database update --project src/Server/Data --startup-project src/Server/Api" -ForegroundColor White
     $stepNum++
 }
 
-Write-Host "  $stepNum. dotnet run --project src/Api" -ForegroundColor White
+Write-Host "  $stepNum. dotnet run --project src/Server/Api" -ForegroundColor White
 $stepNum++
 
 Write-Host ""

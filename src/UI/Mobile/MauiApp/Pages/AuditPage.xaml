@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EnterpriseTemplate.MauiApp.Pages.AuditPage"
+             Title="Auditoria"
+             BackgroundColor="#F8FAFC">
+
+    <RefreshView x:Name="RefreshView" Refreshing="OnRefreshing" RefreshColor="#0284c7">
+        <VerticalStackLayout Padding="20" Spacing="16">
+            <Label Text="Logs de Auditoria" FontSize="22" FontAttributes="Bold" TextColor="#0F172A" />
+
+            <ActivityIndicator x:Name="LoadingIndicator" Color="#0284c7" IsRunning="True" IsVisible="True" />
+
+            <CollectionView x:Name="AuditList" IsVisible="False">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="0,4" BackgroundColor="White" CornerRadius="20" Padding="16" HasShadow="True">
+                            <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Frame BackgroundColor="#F0F9FF" CornerRadius="8" Padding="8,4" HasShadow="False">
+                                            <Label Text="{Binding EventType}" FontSize="11" FontAttributes="Bold" TextColor="#0284c7" />
+                                        </Frame>
+                                        <Label Text="{Binding AggregateType}" FontSize="13" FontAttributes="Bold" TextColor="#0F172A" VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                    <Label Text="{Binding UserId, StringFormat='Por: {0}'}" FontSize="12" TextColor="#64748B" Margin="0,4,0,0" />
+                                </VerticalStackLayout>
+
+                                <Label Grid.Column="1" Text="{Binding OccurredOn, StringFormat='{0:dd/MM HH:mm}'}" FontSize="11" TextColor="#94A3B8" HorizontalOptions="End" />
+                                
+                                <Label Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding AggregateId, StringFormat='ID: {0}'}" FontSize="10" TextColor="#94A3B8" Margin="0,8,0,0" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+    </RefreshView>
+</ContentPage>

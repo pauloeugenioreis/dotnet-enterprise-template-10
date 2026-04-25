@@ -81,16 +81,16 @@ show_menu() {
 
 show_yesno() {
     local title="$1"
-    local default_yes="${2:-false}"
-
-    local default=2
-    if [ "$default_yes" = "true" ]; then
-        default=1
-    fi
+    local default_is_yes="${2:-false}"
 
     local result
-    result=$(show_menu "$title" "$default" "Sim" "Não")
-    [ "$result" -eq 1 ]
+    if [ "$default_is_yes" = "true" ]; then
+        result=$(show_menu "$title" 1 "Sim" "Não")
+        [ "$result" -eq 1 ]
+    else
+        result=$(show_menu "$title" 1 "Não" "Sim")
+        [ "$result" -eq 2 ]
+    fi
 }
 
 # ============================================================
@@ -129,19 +129,20 @@ OPT_QUEUE=""
 OPT_MONGODB=""
 OPT_STORAGE=""
 OPT_TELEMETRY=""
-OPT_EVENTSOURCING=""
 OPT_GITINIT=""
+OPT_UI_MOBILE=""
+OPT_UI_WEB=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         --database) OPT_DATABASE="$2"; shift 2 ;;
 
         --queue) OPT_QUEUE="$2"; shift 2 ;;
-        --mongodb) OPT_MONGODB="$2"; shift 2 ;;
         --storage) OPT_STORAGE="$2"; shift 2 ;;
         --telemetry) OPT_TELEMETRY="$2"; shift 2 ;;
-        --event-sourcing) OPT_EVENTSOURCING="$2"; shift 2 ;;
         --git-init) OPT_GITINIT="$2"; shift 2 ;;
+        --ui-mobile) OPT_UI_MOBILE="$2"; shift 2 ;;
+        --ui-web) OPT_UI_WEB="$2"; shift 2 ;;
         *) echo "Opção desconhecida: $1"; exit 1 ;;
     esac
 done
@@ -167,27 +168,20 @@ if [ "$IS_INTERACTIVE" = true ]; then
 
     write_section "Banco de Dados"
     DB_CHOICE=$(show_menu "Qual banco de dados utilizar?" 1 \
-        "InMemory (sem container Docker)" \
+        "PostgreSQL" \
         "SQL Server" \
         "Oracle" \
-        "PostgreSQL" \
         "MySQL")
 
     case $DB_CHOICE in
-        1) DATABASE="InMemory" ;;
+        1) DATABASE="PostgreSQL" ;;
         2) DATABASE="SqlServer" ;;
         3) DATABASE="Oracle" ;;
-        4) DATABASE="PostgreSQL" ;;
-        5) DATABASE="MySQL" ;;
+        4) DATABASE="MySQL" ;;
     esac
 
 
-    write_section "NoSQL"
-    if show_yesno "Habilitar MongoDB (document store)?"; then
-        MONGODB="yes"
-    else
-        MONGODB="no"
-    fi
+    MONGODB="yes"
 
     write_section "Mensageria"
     if show_yesno "Habilitar RabbitMQ (fila de mensagens)?"; then
@@ -217,12 +211,39 @@ if [ "$IS_INTERACTIVE" = true ]; then
         TELEMETRY="no"
     fi
 
-    write_section "Event Sourcing"
-    if show_yesno "Habilitar Event Sourcing (Marten + PostgreSQL)?"; then
-        EVENTSOURCING="yes"
-    else
-        EVENTSOURCING="no"
-    fi
+    EVENTSOURCING="yes"
+
+    write_section "UI - Web"
+    WEB_CHOICE=$(show_menu "Quais tecnologias Web deseja manter?" 1 \
+        "Nenhum" \
+        "Angular" \
+        "Blazor" \
+        "React" \
+        "Vue" \
+        "Todas")
+    case $WEB_CHOICE in
+        1) UI_WEB="none" ;;
+        2) UI_WEB="angular" ;;
+        3) UI_WEB="blazor" ;;
+        4) UI_WEB="react" ;;
+        5) UI_WEB="vue" ;;
+        6) UI_WEB="all" ;;
+    esac
+
+    write_section "UI - Mobile"
+    MOBILE_CHOICE=$(show_menu "Quais tecnologias Mobile deseja manter?" 1 \
+        "Nenhuma" \
+        "Flutter" \
+        "MAUI" \
+        "React Native" \
+        "Todas")
+    case $MOBILE_CHOICE in
+        1) UI_MOBILE="none" ;;
+        2) UI_MOBILE="flutter" ;;
+        3) UI_MOBILE="maui" ;;
+        4) UI_MOBILE="reactnative" ;;
+        5) UI_MOBILE="all" ;;
+    esac
 
     write_section "Git"
     if show_yesno "Inicializar repositório Git?" "true"; then
@@ -243,27 +264,28 @@ if [ "$IS_INTERACTIVE" = true ]; then
     printf "  ${CYAN}  RabbitMQ:       %-38s${NC}\n" "$QUEUE"
     printf "  ${CYAN}  Storage:        %-38s${NC}\n" "$STORAGE"
     printf "  ${CYAN}  Telemetria:     %-38s${NC}\n" "$TELEMETRY"
-    printf "  ${CYAN}  Event Sourcing: %-38s${NC}\n" "$EVENTSOURCING"
     printf "  ${CYAN}  Git Init:       %-38s${NC}\n" "$GITINIT"
+    printf "  ${CYAN}  UI Mobile:      %-38s${NC}\n" "$UI_MOBILE"
+    printf "  ${CYAN}  UI Web:         %-38s${NC}\n" "$UI_WEB"
     echo -e "  ${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
     echo ""
 
-    read -rp "  Confirmar e criar projeto? (S/N) [S]: " confirm
-    if [ "$confirm" = "N" ] || [ "$confirm" = "n" ]; then
+    if ! show_yesno "Confirmar e criar projeto?" "true"; then
         echo ""
         echo -e "  ${RED}Operação cancelada.${NC}"
         exit 0
     fi
 else
     # Apply defaults for non-interactive mode
-    DATABASE="${OPT_DATABASE:-InMemory}"
+    DATABASE="${OPT_DATABASE:-PostgreSQL}"
 
-    MONGODB="${OPT_MONGODB:-no}"
+    MONGODB="yes"
     QUEUE="${OPT_QUEUE:-no}"
     STORAGE="${OPT_STORAGE:-None}"
     TELEMETRY="${OPT_TELEMETRY:-no}"
-    EVENTSOURCING="${OPT_EVENTSOURCING:-no}"
     GITINIT="${OPT_GITINIT:-yes}"
+    UI_MOBILE="${OPT_UI_MOBILE:-none}"
+    UI_WEB="${OPT_UI_WEB:-none}"
 fi
 
 # Normalize to lowercase for comparisons
@@ -290,7 +312,12 @@ fi
 
 # Copy template
 write_step "📋" "Copiando template..."
-cp -r "$TEMPLATE_DIR" "$TARGET_DIR"
+if command -v rsync >/dev/null 2>&1; then
+    rsync -av --exclude='node_modules' --exclude='bin' --exclude='obj' --exclude='.git' "$TEMPLATE_DIR/" "$TARGET_DIR/"
+else
+    cp -r "$TEMPLATE_DIR" "$TARGET_DIR"
+    find "$TARGET_DIR" \( -name "node_modules" -o -name "bin" -o -name "obj" \) -type d -exec rm -rf {} +
+fi
 
 cd "$TARGET_DIR"
 
@@ -310,12 +337,96 @@ find . -type f \( -name "*.cs" -o -name "*.csproj" -o -name "*.sln" -o -name "*.
     -exec sed -i "s/ProjectTemplate/$PROJECT_NAME/g" {} +
 
 # ============================================================
+# UI Cleanup
+# ============================================================
+
+write_step "🧹" "Limpando frameworks de UI não selecionados..."
+
+# -- Mobile --
+if [ "$UI_MOBILE" = "none" ]; then
+    rm -rf src/UI/Mobile
+    rm -f run-mobile.sh run-mobile.ps1 build-mobile-all.sh build-mobile-all.ps1
+    dotnet sln "$PROJECT_NAME.sln" remove src/UI/Mobile/MauiApp/MauiApp.csproj 2>/dev/null || true
+elif [ "$UI_MOBILE" != "all" ]; then
+    if [ "$UI_MOBILE" != "flutter" ]; then
+        rm -rf src/UI/Mobile/FlutterApp
+        sed -i '/# Flutter/,/popd/d' build-mobile-all.sh 2>/dev/null || true
+        sed -i '/run_flutter/,/^}/d' run-mobile.sh 2>/dev/null || true
+        sed -i '/1) ${CYAN}Flutter/,/;;/d' run-mobile.sh 2>/dev/null || true
+    fi
+    if [ "$UI_MOBILE" != "maui" ]; then
+        rm -rf src/UI/Mobile/MauiApp
+        sed -i '/# MAUI/,/MauiApp.csproj/d' build-mobile-all.sh 2>/dev/null || true
+        sed -i '/run_maui/,/^}/d' run-mobile.sh 2>/dev/null || true
+        sed -i '/3) ${CYAN}MAUI/,/;;/d' run-mobile.sh 2>/dev/null || true
+        dotnet sln "$PROJECT_NAME.sln" remove src/UI/Mobile/MauiApp/MauiApp.csproj 2>/dev/null || true
+    fi
+    if [ "$UI_MOBILE" != "reactnative" ]; then
+        rm -rf src/UI/Mobile/ReactNativeApp
+        sed -i '/# React Native/,/popd/d' build-mobile-all.sh 2>/dev/null || true
+        sed -i '/run_react_native/,/^}/d' run-mobile.sh 2>/dev/null || true
+        sed -i '/2) ${CYAN}React Native/,/;;/d' run-mobile.sh 2>/dev/null || true
+    fi
+fi
+
+# -- Web --
+ASPIRE_PROGRAM="src/Aspire/AppHost/Program.cs"
+
+if [ "$UI_WEB" = "none" ]; then
+    rm -rf src/UI/Web
+    rm -f build-web-all.sh build-web-all.ps1
+    dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App/App.csproj 2>/dev/null || true
+    dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App.Client/App.Client.csproj 2>/dev/null || true
+    dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/Wasm/BlazorWasm.csproj 2>/dev/null || true
+    sed -i '/UI.Web.Blazor.WebApp.App.App.csproj/d' src/Aspire/AppHost/AppHost.csproj
+    # Remove all web from Aspire
+    sed -i '/\/\/ Web Projects/,/builder.AddNpmApp/d' "$ASPIRE_PROGRAM"
+elif [ "$UI_WEB" != "all" ]; then
+    # Angular
+    if [ "$UI_WEB" != "angular" ]; then
+        rm -rf src/UI/Web/Angular
+        sed -i '/# Angular/,/popd/d' build-web-all.sh 2>/dev/null || true
+        sed -i '/builder.AddNpmApp("angular-web"/,/ExternalHttpEndpoints();/d' "$ASPIRE_PROGRAM"
+    fi
+    # Blazor
+    if [ "$UI_WEB" != "blazor" ]; then
+        rm -rf src/UI/Web/Blazor
+        sed -i '/# Blazor/,/App.csproj/d' build-web-all.sh 2>/dev/null || true
+        dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App/App.csproj 2>/dev/null || true
+        dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App.Client/App.Client.csproj 2>/dev/null || true
+        dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/Wasm/BlazorWasm.csproj 2>/dev/null || true
+        sed -i '/UI.Web.Blazor.WebApp.App.App.csproj/d' src/Aspire/AppHost/AppHost.csproj
+        sed -i '/builder.AddProject<Projects.App>("blazor-app")/,/ExternalHttpEndpoints();/d' "$ASPIRE_PROGRAM"
+    fi
+    # React
+    if [ "$UI_WEB" != "react" ]; then
+        rm -rf src/UI/Web/React
+        sed -i '/# React/,/popd/d' build-web-all.sh 2>/dev/null || true
+        sed -i '/builder.AddNpmApp("react-web"/,/ExternalHttpEndpoints();/d' "$ASPIRE_PROGRAM"
+    fi
+    # Vue
+    if [ "$UI_WEB" != "vue" ]; then
+        rm -rf src/UI/Web/Vue
+        sed -i '/# Vue/,/popd/d' build-web-all.sh 2>/dev/null || true
+        sed -i '/builder.AddNpmApp("vue-web"/,/ExternalHttpEndpoints();/d' "$ASPIRE_PROGRAM"
+    fi
+fi
+
+# Update Aspire launchSettings.json with correct DB_TYPE
+ASPIRE_LAUNCH="src/Aspire/AppHost/Properties/launchSettings.json"
+if [ -f "$ASPIRE_LAUNCH" ]; then
+    write_step "🚀" "Configurando DB_TYPE no Aspire launchSettings.json..."
+    # Add DB_TYPE to environmentVariables in both http and https profiles
+    sed -i "/\"environmentVariables\": {/a \ \ \ \ \ \ \ \ \"DB_TYPE\": \"${DATABASE,,}\"," "$ASPIRE_LAUNCH"
+fi
+
+# ============================================================
 # Configure appsettings.json
 # ============================================================
 
 write_step "⚙️" "Configurando appsettings.json..."
 
-APPSETTINGS="$TARGET_DIR/src/Api/appsettings.json"
+APPSETTINGS="$TARGET_DIR/src/Server/Api/appsettings.json"
 
 # Helper: update JSON value using sed (works without jq)
 json_set() {
@@ -338,9 +449,6 @@ json_set() {
 json_set "DatabaseType" "$DATABASE" "$APPSETTINGS"
 
 case $DATABASE in
-    "InMemory")
-        DB_CONN=""
-        ;;
     "SqlServer")
         DB_CONN="Server=localhost,1433;Database=$PROJECT_NAME;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;"
         ;;
@@ -368,18 +476,20 @@ infra['Database']['ConnectionString'] = '$DB_CONN'
 
 if '$QUEUE' == 'yes':
     infra['RabbitMQ']['ConnectionString'] = 'amqp://guest:guest@localhost:5672/'
-if '$MONGODB' == 'yes':
-  infra['MongoDB']['ConnectionString'] = 'mongodb://admin:admin@localhost:27017/$PROJECT_NAME'
+infra['MongoDB']['ConnectionString'] = 'mongodb://admin:admin@localhost:27017/$PROJECT_NAME'
+
 if '$STORAGE' != 'None':
     infra['Storage']['Provider'] = '$STORAGE'
+
 if '$TELEMETRY' == 'yes':
     infra['Telemetry']['Enabled'] = True
     infra['Telemetry']['Providers'] = ['Jaeger', 'Prometheus']
 else:
     infra['Telemetry']['Enabled'] = False
+
 if '$EVENTSOURCING' == 'yes':
     infra['EventSourcing']['Enabled'] = True
-    infra['EventSourcing']['ConnectionString'] = 'Host=localhost;Database=${PROJECT_NAME}Events;Username=postgres;Password=postgres'
+    infra['EventSourcing']['ConnectionString'] = 'Host=localhost;Database=' + '$PROJECT_NAME' + 'Events;Username=postgres;Password=postgres;Port=5434'
 else:
     infra['EventSourcing']['Enabled'] = False
 with open('$APPSETTINGS', 'w') as f:
@@ -417,8 +527,11 @@ else
 
     # Event Sourcing
     if [ "$EVENTSOURCING" = "yes" ]; then
-        json_set "Enabled" "true" "$APPSETTINGS"
-        json_set "ConnectionString" "Host=localhost;Database=${PROJECT_NAME}Events;Username=postgres;Password=postgres" "$APPSETTINGS"
+        # Use a more specific replacement for EventSourcing ConnectionString to avoid global sed issues
+        sed -i "/\"EventSourcing\":/,/}/ s|\"Enabled\": *[^,}]*|\"Enabled\": true|" "$APPSETTINGS"
+        sed -i "/\"EventSourcing\":/,/}/ s|\"ConnectionString\": *\"[^\"]*\"|\"ConnectionString\": \"Host=localhost;Database=${PROJECT_NAME}Events;Username=postgres;Password=postgres;Port=5434\"|" "$APPSETTINGS"
+    else
+        sed -i "/\"EventSourcing\":/,/}/ s|\"Enabled\": *[^,}]*|\"Enabled\": false|" "$APPSETTINGS"
     fi
 fi
 
@@ -431,9 +544,9 @@ declare -A DB_FILES=(
 )
 
 for db in "${!DB_FILES[@]}"; do
-    filepath="$TARGET_DIR/src/Api/${DB_FILES[$db]}"
+    filepath="$TARGET_DIR/src/Server/Api/${DB_FILES[$db]}"
     if [ -f "$filepath" ]; then
-        if [ "$DATABASE" = "InMemory" ] || [ "$DATABASE" != "$db" ]; then
+        if [ "$DATABASE" != "$db" ]; then
             rm -f "$filepath"
         fi
     fi
@@ -443,15 +556,12 @@ done
 # Enable optional features in Program.cs
 # ============================================================
 
-PROGRAM_CS="$TARGET_DIR/src/Api/Program.cs"
+PROGRAM_CS="$TARGET_DIR/src/Server/Api/Program.cs"
 
-if [ "$MONGODB" = "yes" ]; then
-    write_step "🍃" "Habilitando MongoDB no Program.cs..."
-    sed -i 's|^// \(builder\.Services\.AddMongo<Program>();\)|\1|' "$PROGRAM_CS"
-
-  write_step "🌱" "Habilitando seed inicial do MongoDB no Program.cs..."
-  sed -i 's|^\([[:space:]]*\)// \(await MongoDbSeeder\.SeedAsync(scope\.ServiceProvider);\)|\1\2|' "$PROGRAM_CS"
-fi
+write_step "🍃" "Habilitando MongoDB no Program.cs..."
+sed -i 's|^// \(builder\.Services\.AddMongo<Program>();\)|\1|' "$PROGRAM_CS"
+write_step "🌱" "Habilitando seed inicial do MongoDB no Program.cs..."
+sed -i 's|^\([[:space:]]*\)// \(await MongoDbSeeder\.SeedAsync(scope\.ServiceProvider);\)|\1\2|' "$PROGRAM_CS"
 
 if [ "$QUEUE" = "yes" ]; then
     write_step "📨" "Habilitando RabbitMQ no Program.cs..."
@@ -593,16 +703,16 @@ COMPOSE_DB
 
     # ── MongoDB ──
     if [ "$MONGODB" = "yes" ]; then
-        cat >> "$COMPOSE_FILE" << 'COMPOSE_MONGO'
+        cat >> "$COMPOSE_FILE" << COMPOSE_MONGO
   mongo:
     image: mongo:7
     container_name: mongo
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=MongoRootPass123
+      - MONGO_INITDB_ROOT_PASSWORD=admin
       - MONGO_INITDB_DATABASE=$PROJECT_NAME
-      - MONGO_APP_USERNAME=appuser
-      - MONGO_APP_PASSWORD=AppPass123
+      - MONGO_APP_USERNAME=admin
+      - MONGO_APP_PASSWORD=admin
     ports:
       - "27017:27017"
     volumes:
@@ -611,7 +721,7 @@ COMPOSE_DB
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mongosh", "mongodb://admin:MongoRootPass123@localhost:27017/admin", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "mongodb://admin:admin@localhost:27017/admin", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -735,7 +845,7 @@ COMPOSE_TELEMETRY
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - postgres-events-data:/var/lib/postgresql/data
     networks:
@@ -751,12 +861,157 @@ COMPOSE_ES
   postgres-events-data:"
     fi
 
-    # ── Network ──
-    cat >> "$COMPOSE_FILE" << 'COMPOSE_NETWORK'
+    # ── Redis (Always needed by API) ──
+    cat >> "$COMPOSE_FILE" << 'COMPOSE_REDIS'
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+COMPOSE_REDIS
+
+    # ── API ──
+    cat >> "$COMPOSE_FILE" << COMPOSE_API
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: src/Server/Api/Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - AppSettings__Infrastructure__Database__DatabaseType=$DATABASE
+      - AppSettings__Infrastructure__Database__ConnectionString=$(
+          case "$DATABASE" in
+            "SqlServer")  echo "Server=sqlserver,1433;Database=${PROJECT_NAME};User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;" ;;
+            "Oracle")     echo "User Id=appuser;Password=AppPass123;Data Source=oracle:1521/FREEPDB1;" ;;
+            "PostgreSQL")  echo "Host=postgres;Port=5432;Database=${PROJECT_NAME};Username=postgres;Password=PostgresPass123;" ;;
+            "MySQL")       echo "Server=mysql;Port=3306;Database=${PROJECT_NAME};User=appuser;Password=AppPass123;" ;;
+          esac
+        )
+      - AppSettings__Infrastructure__EventSourcing__Enabled=$( [ "$EVENTSOURCING" = "yes" ] && echo "true" || echo "false" )
+      - AppSettings__Infrastructure__EventSourcing__ConnectionString=Host=postgres-events;Database=${PROJECT_NAME}Events;Username=postgres;Password=postgres;Port=5432
+      - AppSettings__Infrastructure__Redis__ConnectionString=redis:6379
+      - AppSettings__Infrastructure__RabbitMQ__ConnectionString=amqp://guest:guest@rabbitmq:5672
+      - AppSettings__Infrastructure__MongoDB__ConnectionString=mongodb://admin:admin@mongo:27017/$PROJECT_NAME
+      - AppSettings__Infrastructure__Telemetry__Enabled=$( [ "$TELEMETRY" = "yes" ] && echo "true" || echo "false" )
+      - AppSettings__Infrastructure__Telemetry__Jaeger__Host=jaeger
+      - AppSettings__Infrastructure__Telemetry__Jaeger__Port=4317
+      - AppSettings__Infrastructure__Telemetry__Jaeger__UseGrpc=true
+    depends_on:
+      redis: { condition: service_healthy }
+COMPOSE_API
+
+    if [ "$QUEUE" = "yes" ]; then
+        echo "      rabbitmq: { condition: service_healthy }" >> "$COMPOSE_FILE"
+    fi
+    if [ "$MONGODB" = "yes" ]; then
+        echo "      mongo: { condition: service_healthy }" >> "$COMPOSE_FILE"
+    fi
+    if [ "$TELEMETRY" = "yes" ]; then
+        echo "      jaeger: { condition: service_healthy }" >> "$COMPOSE_FILE"
+        echo "      prometheus: { condition: service_healthy }" >> "$COMPOSE_FILE"
+    fi
+
+    cat >> "$COMPOSE_FILE" << 'COMPOSE_API_END'
+    networks:
+      - app-network
+
+COMPOSE_API_END
+
+    # ── Web Projects ──
+    if [ "$UI_WEB" != "none" ]; then
+        if [ "$UI_WEB" = "all" ] || [ "$UI_WEB" = "angular" ]; then
+            cat >> "$COMPOSE_FILE" << 'COMPOSE_WEB_ANGULAR'
+  angular-web:
+    container_name: web-angular
+    build:
+      context: src/UI/Web/Angular
+      dockerfile: Dockerfile
+    environment:
+      - API_URL=http://localhost:5000
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+    networks:
+      - app-network
+
+COMPOSE_WEB_ANGULAR
+        fi
+        if [ "$UI_WEB" = "all" ] || [ "$UI_WEB" = "react" ]; then
+            cat >> "$COMPOSE_FILE" << 'COMPOSE_WEB_REACT'
+  react-web:
+    container_name: web-react
+    build:
+      context: src/UI/Web/React
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5000
+    depends_on:
+      - api
+    networks:
+      - app-network
+
+COMPOSE_WEB_REACT
+        fi
+        if [ "$UI_WEB" = "all" ] || [ "$UI_WEB" = "vue" ]; then
+            cat >> "$COMPOSE_FILE" << 'COMPOSE_WEB_VUE'
+  vue-web:
+    container_name: web-vue
+    build:
+      context: src/UI/Web/Vue
+      dockerfile: Dockerfile
+    ports:
+      - "5174:80"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5000
+    depends_on:
+      - api
+    networks:
+      - app-network
+
+COMPOSE_WEB_VUE
+        fi
+        if [ "$UI_WEB" = "all" ] || [ "$UI_WEB" = "blazor" ]; then
+            cat >> "$COMPOSE_FILE" << 'COMPOSE_WEB_BLAZOR'
+  blazor-app:
+    container_name: web-blazor
+    build:
+      context: .
+      dockerfile: src/UI/Web/Blazor/WebApp/App/Dockerfile
+    ports:
+      - "5188:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ApiBaseUrl=http://api:8080
+    depends_on:
+      - api
+    networks:
+      - app-network
+
+COMPOSE_WEB_BLAZOR
+        fi
+    fi
+
+    # ── Networks ──
+    cat >> "$COMPOSE_FILE" << 'COMPOSE_NETWORKS_FOOTER'
 networks:
   app-network:
     driver: bridge
-COMPOSE_NETWORK
+COMPOSE_NETWORKS_FOOTER
 
     # ── Volumes ──
     if [ -n "$VOLUMES_LIST" ]; then
@@ -1009,13 +1264,13 @@ echo -e "  $STEP. dotnet build"
 STEP=$((STEP+1))
 
 if [ "$DATABASE" != "InMemory" ]; then
-    echo -e "  $STEP. dotnet ef migrations add InitialCreate --project src/Data --startup-project src/Api"
+    echo -e "  $STEP. dotnet ef migrations add InitialCreate --project src/Server/Data --startup-project src/Server/Api"
     STEP=$((STEP+1))
-    echo -e "  $STEP. dotnet ef database update --project src/Data --startup-project src/Api"
+    echo -e "  $STEP. dotnet ef database update --project src/Server/Data --startup-project src/Server/Api"
     STEP=$((STEP+1))
 fi
 
-echo -e "  $STEP. dotnet run --project src/Api"
+echo -e "  $STEP. dotnet run --project src/Server/Api"
 STEP=$((STEP+1))
 
 echo ""

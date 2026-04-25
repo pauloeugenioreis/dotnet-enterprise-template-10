@@ -1,0 +1,140 @@
+@page "/dashboard"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@using BlazorApp.Components.UI
+@using BlazorApp.Client.Services
+@using ProjectTemplate.Shared.Models
+@using System.Globalization
+@inject IOrderService OrderService
+@inject NavigationManager Navigation
+@rendermode InteractiveAuto
+
+<div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div class="mb-16">
+        <h1 class="text-6xl font-black text-gray-900 tracking-tighter">Dashboard</h1>
+        <p class="text-gray-500 mt-4 font-medium text-xl">Performance em tempo real.</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-16">
+        <!-- Monthly Sales -->
+        <div class="bg-white p-10 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-50 flex flex-col gap-6">
+            <div class="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 shadow-sm border border-rose-100/50">
+                <span class="text-3xl">📈</span>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Vendas Totais</p>
+                <p class="text-4xl font-black text-gray-900 tracking-tighter">
+                    @if (statistics == null) { <span class="animate-pulse">...</span> }
+                    else { @(statistics.TotalRevenue.ToString("C2", new CultureInfo("pt-BR"))) }
+                </p>
+            </div>
+        </div>
+
+        <!-- Total Orders -->
+        <div class="bg-white p-10 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-50 flex flex-col gap-6">
+            <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 shadow-sm border border-blue-100/50">
+                <span class="text-3xl">👤</span>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Total de Pedidos</p>
+                <p class="text-4xl font-black text-gray-900 tracking-tighter">
+                    @if (statistics == null) { <span class="animate-pulse">...</span> }
+                    else { @statistics.TotalOrders }
+                </p>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="bg-white p-10 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-50 flex flex-col gap-6">
+            <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 shadow-sm border border-emerald-100/50">
+                <span class="text-3xl">✅</span>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Status do Sistema</p>
+                <p class="text-4xl font-black text-gray-900 tracking-tighter">Operacional</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Latest Orders Section -->
+    <div class="bg-white rounded-[3.5rem] shadow-2xl shadow-gray-200/60 border border-gray-50 overflow-hidden">
+        <div class="p-12 border-b border-gray-50 flex justify-between items-center">
+            <h2 class="text-3xl font-black text-gray-900 tracking-tight">Últimos Pedidos</h2>
+            <button @onclick='() => Navigation.NavigateTo("/orders")' class="text-[10px] font-black text-primary-600 uppercase tracking-[0.2em] hover:bg-primary-50 px-6 py-3 rounded-xl transition-all">
+                Ver Todos
+            </button>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50/30">
+                        <th class="px-12 py-8 text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">Pedido</th>
+                        <th class="px-12 py-8 text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">Cliente</th>
+                        <th class="px-12 py-8 text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @if (recentOrders == null)
+                    {
+                        @for (int i = 0; i < 5; i++)
+                        {
+                            <tr>
+                                <td colspan="3" class="px-12 py-8 animate-pulse bg-gray-50/50"></td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        @foreach (var order in recentOrders)
+                        {
+                            <tr class="hover:bg-gray-50/30 transition-colors group">
+                                <td class="px-12 py-10">
+                                    <span class="font-black text-gray-900 tracking-tight text-lg">#@order.OrderNumber</span>
+                                </td>
+                                <td class="px-12 py-10">
+                                    <span class="font-bold text-gray-500 text-lg">@order.CustomerName</span>
+                                </td>
+                                <td class="px-12 py-10">
+                                    <span class="font-black text-primary-600 text-xl tracking-tight">R$ @order.Total.ToString("N2", new CultureInfo("pt-BR"))</span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<OrderResponseDto>? recentOrders;
+    private OrderStatisticsDto? statistics;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try 
+        {
+            var statsTask = OrderService.GetStatisticsAsync();
+            var ordersTask = OrderService.GetPagedAsync(1, 5);
+
+            await Task.WhenAll(statsTask, ordersTask);
+            
+            statistics = await statsTask;
+            recentOrders = (await ordersTask).Items.ToList();
+        }
+        catch 
+        {
+            // Fallback mock para demonstração se a API demorar
+            recentOrders = new List<OrderResponseDto>
+            {
+                new() { OrderNumber = "ORD-20260423-F03F1948", CustomerName = "Rodrigo Costa", Total = 12666.40m, CreatedAt = DateTime.Now },
+                new() { OrderNumber = "ORD-20260423-23CDED6B", CustomerName = "Amanda Almeida", Total = 17192.75m, CreatedAt = DateTime.Now },
+                new() { OrderNumber = "ORD-20260423-6B7AEA86", CustomerName = "Beatriz Oliveira", Total = 3805.73m, CreatedAt = DateTime.Now },
+                new() { OrderNumber = "ORD-20260423-39AF0E83", CustomerName = "Lucas Oliveira", Total = 6355.67m, CreatedAt = DateTime.Now },
+                new() { OrderNumber = "ORD-20260423-C91CB95C", CustomerName = "Bruno Santos", Total = 1497.99m, CreatedAt = DateTime.Now }
+            };
+        }
+    }
+}

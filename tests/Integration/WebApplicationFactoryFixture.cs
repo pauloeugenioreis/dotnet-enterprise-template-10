@@ -1,3 +1,4 @@
+using ProjectTemplate.Shared.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,6 +35,19 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>, IAsy
     {
         await _dbContainer.StartAsync();
         
+        // Use environment variables to ensure overrides are picked up by Program.cs
+        // This is necessary because Program.cs reloads configuration from files
+        // and calls .AddEnvironmentVariables() at the end.
+        var connString = _dbContainer.GetConnectionString();
+        System.Environment.SetEnvironmentVariable("AppSettings__Infrastructure__EventSourcing__Enabled", "true");
+        System.Environment.SetEnvironmentVariable("AppSettings__Infrastructure__EventSourcing__Provider", "Custom");
+        System.Environment.SetEnvironmentVariable("AppSettings__Infrastructure__EventSourcing__ConnectionString", connString);
+        System.Environment.SetEnvironmentVariable("AppSettings__Infrastructure__Database__DatabaseType", "PostgreSQL");
+        System.Environment.SetEnvironmentVariable("AppSettings__Infrastructure__Database__ConnectionString", connString);
+        System.Environment.SetEnvironmentVariable("AppSettings__Authentication__Enabled", "false");
+        System.Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+        System.Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", "Testing");
+
         // Trigger host creation and ensure database is created
         using var scope = Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -41,32 +55,23 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>, IAsy
         SeedTestData(db);
     }
 
-    public new async ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         await _dbContainer.StopAsync();
+        await base.DisposeAsync();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         // Set environment to Testing to disable Swagger in Program.cs
         builder.UseEnvironment("Testing");
-
-        // Add test configuration with valid JWT secret
+        
         builder.ConfigureAppConfiguration((context, config) =>
         {
             config.AddInMemoryCollection(new Dictionary<string, string>
             {
                 ["Authentication:Enabled"] = "false",
-                ["AppSettings:Authentication:Enabled"] = "false",
-                ["AppSettings:Infrastructure:Database:DatabaseType"] = "PostgreSQL",
-                ["AppSettings:Infrastructure:Database:ConnectionString"] = _dbContainer.GetConnectionString(),
-                ["AppSettings:Infrastructure:EventSourcing:Enabled"] = "true",
-                ["AppSettings:Infrastructure:EventSourcing:Mode"] = "Hybrid",
-                ["AppSettings:Infrastructure:EventSourcing:Provider"] = "Custom",
-                ["AppSettings:Infrastructure:EventSourcing:EnableAuditApi"] = "true",
-                ["AppSettings:Infrastructure:EventSourcing:StoreMetadata"] = "true",
-                ["AppSettings:Infrastructure:EventSourcing:AuditEntities:0"] = "Order",
-                ["AppSettings:Infrastructure:EventSourcing:AuditEntities:1"] = "Product"
+                ["AppSettings:Authentication:Enabled"] = "false"
             }!);
         });
 
@@ -120,6 +125,33 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>, IAsy
                 StoreMetadata = true,
                 AuditEntities = new List<string> { "Order", "Product" }
             });
+
+            // Overwrite ApplicationDbContext to disable EnableRetryOnFailure during tests.
+            // This is required because the retrying strategy does not support manual transactions (BeginTransactionAsync),
+            // which are used in OrderService.cs.
+            // We purge ALL services related to DbContext to ensure a truly clean re-registration.
+            var toRemove = services.Where(d => 
+                d.ServiceType.FullName?.Contains("EntityFrameworkCore") == true || 
+                d.ServiceType.Name.Contains("DbContext") ||
+                d.ServiceType.Name.Contains("IDbContext")).ToList();
+            
+            foreach (var descriptor in toRemove)
+            {
+                services.Remove(descriptor);
+            }
+
+            var connectionString = _dbContainer.GetConnectionString();
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseNpgsql(connectionString, npgsqlOptions =>
+                {
+                    npgsqlOptions.CommandTimeout(60);
+                    // Retries are disabled by not calling EnableRetryOnFailure
+                });
+            });
+
+            // Re-register the base DbContext mapping needed by some repositories
+            services.AddScoped<DbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
             // Configure API Versioning for tests
             services.AddApiVersioning(options =>

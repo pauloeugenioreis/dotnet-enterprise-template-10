@@ -46,7 +46,7 @@ new-project.bat
 cd ..\MeuProjeto
 ```
 
-> 💡 O script apresenta menus interativos para escolher banco de dados, mensageria (RabbitMQ), cloud storage, telemetria e event sourcing. Também suporta modo não-interativo para CI/CD — veja [scripts/README.md](scripts/README.md) para detalhes.
+> 💡 O script apresenta menus interativos para escolher banco de dados, mensageria (RabbitMQ), cloud storage, telemetria e **frontends UI** (Web: Angular/Blazor/React/Vue — Mobile: Flutter/MAUI/React Native). **MongoDB e Event Sourcing são habilitados automaticamente** em todos os projetos. Para modo não-interativo (CI/CD), veja [scripts/README.md](scripts/README.md) para detalhes.
 
 ---
 
@@ -54,7 +54,7 @@ cd ..\MeuProjeto
 
 > Se você usou o script interativo acima, o banco já foi configurado automaticamente. Esta seção é para ajustes manuais.
 
-Edite `src/Api/appsettings.json` e ajuste a connection string para seu ambiente:
+Edite `src/Server/Api/appsettings.json` e ajuste a connection string para seu ambiente:
 
 ```json
 {
@@ -71,9 +71,9 @@ Edite `src/Api/appsettings.json` e ajuste a connection string para seu ambiente:
 
 > Para PostgreSQL, MySQL e Oracle, veja [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md).
 
-### MongoDB (opcional)
+### MongoDB
 
-Se você escolher MongoDB no script de criação, o template também gera o container, a connection string e o seed inicial.
+O template habilita MongoDB automaticamente em todos os projetos gerados, incluindo o container Docker, a connection string e o seed inicial.
 
 - **Connection string padrão de desenvolvimento**: `mongodb://admin:admin@localhost:27017/<SeuProjeto>`
 - **Usuário do container**: `admin`
@@ -88,11 +88,19 @@ Mais detalhes em [docs/MONGODB-GUIDE.md](docs/MONGODB-GUIDE.md).
 
 ## 🏃 3. Executar a Aplicação
 
-### Opção A: .NET CLI (Desenvolvimento)
+### Opção A: Launcher interativo (Recomendado)
+
+Use o script `run.sh` / `run.ps1` na raiz do projeto — ele apresenta um menu para escolher entre rodar diretamente via `dotnet run` ou via **Aspire** (com todos os containers):
 
 ```bash
-cd src/Api
-dotnet run
+./run.sh         # Linux/Mac
+.\run.ps1        # Windows
+```
+
+### Opção B: .NET CLI direto
+
+```bash
+dotnet run --project src/Server/Api
 ```
 
 Acesse:
@@ -105,9 +113,8 @@ Acesse:
 O sistema cria automaticamente um usuário administrador:
 
 ```text
-Username: admin
+Email: admin@projecttemplate.com
 Password: Admin@2026!Secure
-Email:    admin@projecttemplate.com
 ```
 
 > ⚠️ **IMPORTANTE**: Altere esta senha em produção!
@@ -119,7 +126,7 @@ Email:    admin@projecttemplate.com
 curl -X POST https://localhost:3060/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "usernameOrEmail": "admin",
+    "email": "admin@projecttemplate.com",
     "password": "Admin@2026!Secure"
   }'
 
@@ -130,31 +137,34 @@ curl -X GET https://localhost:3060/api/auth/me \
 
 Swagger: `https://localhost:3060/swagger`
 
-### Opção B: Visual Studio
+### Opção C: Visual Studio
 
 1. Abra `MeuProjeto.sln`
-2. Defina `Api` como projeto de inicialização
+2. Defina `Api` (ou `AppHost` para Aspire) como projeto de inicialização
 3. Pressione F5
 
-### Opção C: VS Code
+### Opção D: VS Code
 
 1. Abra a pasta do projeto
-2. Pressione F5 (debug)
-3. Ou use terminal: `dotnet run --project src/Api/Api.csproj`
+2. Pressione F5 (debug via `.vscode/launch.json`)
+3. Ou use terminal: `dotnet run --project src/Server/Api`
 
-### Opção D: .NET Aspire (Orquestração Moderna) 🚀
+### Opção E: .NET Aspire (Orquestração)
 
-Esta é a forma recomendada para desenvolvimento local. O Aspire irá subir automaticamente todos os containers necessários (PostgreSQL, Redis, RabbitMQ, MongoDB) e fornecer um dashboard de observabilidade.
+O Aspire sobe automaticamente todos os containers (PostgreSQL, Redis, RabbitMQ, MongoDB) e fornece um dashboard de observabilidade.
 
-1. Navegue até o projeto AppHost:
+```bash
+dotnet run --project src/Aspire/AppHost
+```
 
-   ```bash
-   cd src/AppHost
-   dotnet run
-   ```
+Acesse o dashboard em `http://localhost:18888`.
 
-2. Abra o dashboard no link que aparecerá no terminal (geralmente `http://localhost:18888`).
-3. No dashboard, você verá os logs, métricas e o status de todos os containers e da API.
+### Aplicativos Mobile
+
+```bash
+./run-mobile.sh   # Linux/Mac
+.\run-mobile.ps1  # Windows
+```
 
 ---
 
@@ -277,7 +287,7 @@ cd scripts/linux
 
 ### 1. Criar a entidade
 
-`src/Domain/Entities/Product.cs`:
+`src/Server/Domain/Entities/Product.cs`:
 
 ```csharp
 namespace MeuProjeto.Domain.Entities;
@@ -292,7 +302,7 @@ public class Product : EntityBase
 
 ### 2. Adicionar ao DbContext
 
-`src/Data/Context/ApplicationDbContext.cs`:
+`src/Server/Data/Context/ApplicationDbContext.cs`:
 
 ```csharp
 public DbSet<Product> Products { get; set; }
@@ -301,14 +311,14 @@ public DbSet<Product> Products { get; set; }
 ### 3. Criar migration (EF Core)
 
 ```bash
-cd src/Api
+cd src/Server/Api
 dotnet ef migrations add AddProduct --project ../Data/Data.csproj
 dotnet ef database update
 ```
 
 ### 4. Criar Interface e Repositório concreto
 
-`src/Domain/Interfaces/IProductRepository.cs`:
+`src/Server/Domain/Interfaces/IProductRepository.cs`:
 
 ```csharp
 namespace MeuProjeto.Domain.Interfaces;
@@ -319,7 +329,7 @@ public interface IProductRepository : IRepository<Product>
 }
 ```
 
-`src/Data/Repository/ProductRepository.cs`:
+`src/Server/Data/Repository/ProductRepository.cs`:
 
 ```csharp
 namespace MeuProjeto.Data.Repository;
@@ -334,7 +344,7 @@ public class ProductRepository : Repository<Product>, IProductRepository
 
 ### 5. Criar Interface e Service concreto
 
-`src/Domain/Interfaces/IProductService.cs`:
+`src/Server/Domain/Interfaces/IProductService.cs`:
 
 ```csharp
 namespace MeuProjeto.Domain.Interfaces;
@@ -345,7 +355,7 @@ public interface IProductService : IService<Product>
 }
 ```
 
-`src/Application/Services/ProductService.cs`:
+`src/Server/Application/Services/ProductService.cs`:
 
 ```csharp
 namespace MeuProjeto.Application.Services;
@@ -363,7 +373,7 @@ public class ProductService : Service<Product>, IProductService
 
 ### 6. Criar o Controller
 
-`src/Api/Controllers/ProductController.cs`:
+`src/Server/Api/Controllers/ProductController.cs`:
 
 ```csharp
 namespace MeuProjeto.Api.Controllers;
@@ -422,7 +432,7 @@ Teste os endpoints criados!
 
 Para trocar de ORM, **não use appsettings.json**:
 
-1. Abra `src/Infrastructure/Extensions/DatabaseExtension.cs`
+1. Abra `src/Server/Infrastructure/Extensions/DatabaseExtension.cs`
 2. Comente a linha do EF Core (linha ~26)
 3. Descomente a linha do ORM desejado (Dapper, NHibernate ou Linq2Db)
 
@@ -493,7 +503,7 @@ docker build -t meuprojeto-api:latest .
 ### Hot Reload
 
 ```bash
-dotnet watch --project src/Api/Api.csproj
+dotnet watch --project src/Server/Api/Api.csproj
 ```
 
 ### Ver logs estruturados
@@ -516,12 +526,12 @@ O template já inclui `.vscode/launch.json` configurado. Pressione F5!
 ## ✅ Checklist de Início
 
 - [ ] .NET 10 SDK instalado
-- [ ] Projeto criado com script de inicialização
+- [ ] Projeto criado com `new-project.sh` (banco, mensageria, UI selecionados)
 - [ ] Connection string configurada
-- [ ] Aplicação executando (dotnet run)
-- [ ] Swagger acessível
-- [ ] Primeira entidade criada
-- [ ] Migration aplicada
+- [ ] Aplicação executando (`./run.sh` ou `dotnet run`)
+- [ ] Swagger acessível em `https://localhost:3060/swagger`
+- [ ] Login com credenciais padrão testado
+- [ ] Primeira entidade criada e migration aplicada
 - [ ] Primeiro controller testado
 
 ---

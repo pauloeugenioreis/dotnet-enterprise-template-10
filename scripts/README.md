@@ -15,7 +15,7 @@ Scripts utilitários para facilitar o desenvolvimento e testes do projeto.
 
 ## 🐳 new-project
 
-Script interativo para criar um novo projeto a partir do template com configuração automática de banco de dados, mensageria, storage, telemetria e event sourcing.
+Script interativo para criar um novo projeto a partir do template com configuração automática de banco de dados, mensageria, storage, telemetria e frontends UI. **MongoDB e Event Sourcing são habilitados automaticamente** em todos os projetos gerados.
 
 ### Modo Interativo
 
@@ -39,11 +39,16 @@ O script apresenta um menu com opções para configurar o projeto:
 ── Observabilidade ──
   [1] Sim (Jaeger + Prometheus + Grafana)   [2] Não (padrão)
 
-── Event Sourcing ──
-  [1] Sim (Marten + PostgreSQL)   [2] Não (padrão)
+── Frontend Web ──
+  [1] Nenhum (padrão)   [2] Angular   [3] Blazor   [4] React   [5] Vue   [6] Todos
+
+── App Mobile ──
+  [1] Nenhum (padrão)   [2] Flutter   [3] MAUI   [4] React Native   [5] Todos
 
 ── Git ──
   [1] Sim (padrão)   [2] Não
+
+✅ MongoDB e Event Sourcing são habilitados automaticamente em todos os projetos.
 ```
 
 ### Windows (PowerShell)
@@ -55,7 +60,7 @@ cd scripts
 .\new-project.ps1
 
 # Modo não-interativo (CI/CD)
-.\new-project.ps1 -ProjectName "MeuProjeto" -Database PostgreSQL -Queue Yes -Storage Azure -Telemetry Yes -EventSourcing No -GitInit Yes
+.\new-project.ps1 -ProjectName "MeuProjeto" -Database PostgreSQL -Queue Yes -Storage Azure -Telemetry Yes -GitInit Yes
 ```
 
 ### Windows (Batch)
@@ -77,19 +82,22 @@ chmod +x new-project.sh
 ./new-project.sh
 
 # Modo não-interativo (CI/CD)
-./new-project.sh MeuProjeto --database PostgreSQL --queue yes --storage Azure --telemetry yes --event-sourcing no --git-init yes
+./new-project.sh MeuProjeto --database PostgreSQL --queue yes --storage Azure --telemetry yes --git-init yes
 ```
 
 ### Parâmetros (modo não-interativo)
 
 | Parâmetro | Valores | Padrão |
-|-----------|---------|--------|
+| --------- | --------- | -------- |
 | Database | `InMemory`, `SqlServer`, `Oracle`, `PostgreSQL`, `MySQL` | `InMemory` |
 | Queue | `Yes`, `No` | `No` |
 | Storage | `None`, `Azure`, `Aws`, `Google` | `None` |
 | Telemetry | `Yes`, `No` | `No` |
-| EventSourcing | `Yes`, `No` | `No` |
+| UiWeb | `None`, `Angular`, `Blazor`, `React`, `Vue`, `All` | `None` |
+| UiMobile | `None`, `Flutter`, `Maui`, `ReactNative`, `All` | `None` |
 | GitInit | `Yes`, `No` | `Yes` |
+
+> **MongoDB** e **Event Sourcing** são sempre habilitados — não possuem flag de controle.
 
 ### O que o script faz
 

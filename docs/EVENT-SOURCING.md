@@ -789,7 +789,7 @@ error CS0246: The type or namespace name 'Marten' could not be found
 
 ```bash
 
-cd src/Infrastructure
+cd src/Server/Infrastructure
 dotnet add package Marten --version 8.3.0
 dotnet restore
 

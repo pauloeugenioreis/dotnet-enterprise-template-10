@@ -1,0 +1,42 @@
+@inherits LayoutComponentBase
+@using BlazorApp.Components.UI
+@using Microsoft.AspNetCore.Components.Authorization
+
+<div class="flex h-screen bg-gray-100 overflow-hidden font-sans">
+    <LoadingBar />
+
+    <AuthorizeView>
+        <Authorized>
+            <!-- Sidebar -->
+            <aside class="w-72 bg-white shadow-2xl relative flex flex-col z-20">
+                <NavMenu />
+            </aside>
+
+            <!-- Main Content Area -->
+            <div class="flex-1 overflow-auto bg-gray-50/50 relative">
+                <div class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-40 pointer-events-none"></div>
+                <main class="relative z-10 min-h-full">
+                    <div class="p-10">
+                        @Body
+                    </div>
+                </main>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            <main class="flex-1 overflow-y-auto bg-white">
+                @Body
+            </main>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private bool IsLoginOrRegisterPage()
+    {
+        var relativePath = Navigation.ToBaseRelativePath(Navigation.Uri);
+        return relativePath.StartsWith("login", StringComparison.OrdinalIgnoreCase) || 
+               relativePath.StartsWith("register", StringComparison.OrdinalIgnoreCase);
+    }
+}

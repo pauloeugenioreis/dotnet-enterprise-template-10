@@ -1,6 +1,6 @@
 ---
 description: "Use when creating or modifying domain entities, interfaces, validators, DTOs, or exceptions. Covers Clean Architecture domain layer rules."
-applyTo: "src/Domain/**"
+applyTo: "src/Server/Domain/**"
 ---
 
 # Domain Layer Rules

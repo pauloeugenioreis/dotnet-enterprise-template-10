@@ -1,9 +1,10 @@
+using ProjectTemplate.Shared.Models;
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using ProjectTemplate.Domain.Dtos;
+using ProjectTemplate.Shared.Models;
 using ProjectTemplate.Domain.Exceptions;
 using ProjectTemplate.Domain.Interfaces;
 using Xunit;
@@ -14,7 +15,8 @@ namespace ProjectTemplate.Integration.Tests.Controllers;
 /// Integration tests for CustomerReviewController.
 /// Uses an in-memory implementation of ICustomerReviewService to keep tests deterministic in CI.
 /// </summary>
-public class CustomerReviewControllerTests : IClassFixture<WebApplicationFactoryFixture>
+[Collection("Integration Tests")]
+public class CustomerReviewControllerTests
 {
     private readonly HttpClient _client;
 
@@ -59,9 +61,9 @@ public class CustomerReviewControllerTests : IClassFixture<WebApplicationFactory
         payload.Should().NotBeNull();
         payload!.Items.Should().NotBeNull();
         payload.Items.Should().HaveCount(1);
-        payload.Page.Should().Be(1);
+        payload.PageNumber.Should().Be(1);
         payload.PageSize.Should().Be(1);
-        payload.Total.Should().BeGreaterThanOrEqualTo(1);
+        payload.TotalCount.Should().BeGreaterThanOrEqualTo(1);
     }
 
     [Fact]
@@ -197,8 +199,8 @@ public class CustomerReviewControllerTests : IClassFixture<WebApplicationFactory
     private sealed record PagedResult<T>
     {
         public List<T> Items { get; init; } = [];
-        public long Total { get; init; }
-        public int Page { get; init; }
+        public long TotalCount { get; init; }
+        public int PageNumber { get; init; }
         public int PageSize { get; init; }
         public int TotalPages { get; init; }
     }

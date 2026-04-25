@@ -1,0 +1,121 @@
+<div class="p-10 max-w-7xl mx-auto space-y-10 animate-in fade-in duration-700">
+  <!-- Header -->
+  <header class="flex justify-between items-end">
+    <div>
+      <h1 class="text-6xl font-black text-gray-900 tracking-tighter">Customer Reviews</h1>
+      <p class="text-gray-500 mt-4 font-medium text-xl">Gerenciamento e moderação de avaliações (MongoDB).</p>
+    </div>
+    <div class="flex gap-4">
+      <div class="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 flex gap-2">
+        <button (click)="isApproved.set(undefined); loadReviews()" 
+                [class]="!isApproved() ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-50'"
+                class="px-6 py-2 rounded-xl font-bold transition-all">Todos</button>
+        <button (click)="isApproved.set(true); loadReviews()" 
+                [class]="isApproved() === true ? 'bg-green-600 text-white' : 'text-gray-500 hover:bg-gray-50'"
+                class="px-6 py-2 rounded-xl font-bold transition-all">Aprovados</button>
+        <button (click)="isApproved.set(false); loadReviews()" 
+                [class]="isApproved() === false ? 'bg-amber-500 text-white' : 'text-gray-500 hover:bg-gray-50'"
+                class="px-6 py-2 rounded-xl font-bold transition-all">Pendentes</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Filters -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="relative group">
+      <input type="text" [(ngModel)]="productName" (keyup.enter)="loadReviews()"
+             placeholder="Buscar por produto..."
+             class="w-full pl-14 pr-6 py-5 bg-white border-none rounded-3xl shadow-xl shadow-gray-200/50 font-bold text-gray-700 focus:ring-2 focus:ring-primary-500 transition-all outline-none">
+      <span class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-primary-500 transition-colors">🔍</span>
+    </div>
+
+    <div class="relative group">
+      <select [(ngModel)]="minRating" (change)="loadReviews()"
+              class="w-full pl-14 pr-6 py-5 bg-white border-none rounded-3xl shadow-xl shadow-gray-200/50 font-bold text-gray-700 focus:ring-2 focus:ring-primary-500 transition-all outline-none appearance-none">
+        <option [ngValue]="undefined">Mínimo de Estrelas</option>
+        <option [ngValue]="1">⭐ 1+ Estrela</option>
+        <option [ngValue]="2">⭐⭐ 2+ Estrelas</option>
+        <option [ngValue]="3">⭐⭐⭐ 3+ Estrelas</option>
+        <option [ngValue]="4">⭐⭐⭐⭐ 4+ Estrelas</option>
+        <option [ngValue]="5">⭐⭐⭐⭐⭐ 5 Estrelas</option>
+      </select>
+      <span class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-primary-500 transition-colors">⭐</span>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="flex flex-col items-center justify-center py-32 space-y-6">
+    <div class="w-16 h-16 border-4 border-primary-100 border-t-primary-600 rounded-full animate-spin"></div>
+    <p class="text-gray-400 font-black animate-pulse">CARREGANDO AVALIAÇÕES...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && reviews().length === 0" class="bg-white rounded-[3rem] p-32 text-center shadow-2xl shadow-gray-100 border border-gray-50">
+    <div class="text-8xl mb-8">📭</div>
+    <h3 class="text-3xl font-black text-gray-900">Nenhuma avaliação encontrada</h3>
+    <p class="text-gray-400 mt-4 font-medium">Tente ajustar seus filtros para encontrar o que procura.</p>
+  </div>
+
+  <!-- Content Grid -->
+  <div *ngIf="!loading() && reviews().length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+    <div *ngFor="let review of reviews()" 
+         class="bg-white p-8 rounded-[2.5rem] shadow-xl hover:shadow-2xl transition-all border border-gray-50 flex flex-col justify-between group">
+      
+      <div>
+        <div class="flex justify-between items-start mb-6">
+          <div class="flex gap-0.5">
+            <span *ngFor="let s of getStars(review.rating)" class="text-amber-400 text-lg">★</span>
+            <span *ngFor="let s of getEmptyStars(review.rating)" class="text-gray-100 text-lg">★</span>
+          </div>
+          <span *ngIf="review.isVerifiedPurchase" 
+                class="bg-green-50 text-green-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+            Verificado
+          </span>
+        </div>
+
+        <h4 class="text-xl font-black text-gray-900 mb-2 leading-tight group-hover:text-primary-600 transition-colors">{{ review.title }}</h4>
+        <p class="text-gray-500 text-sm font-medium line-clamp-3 mb-6">{{ review.comment }}</p>
+      </div>
+
+      <div class="space-y-6">
+        <div class="flex items-center gap-4 py-4 border-t border-gray-50">
+          <div class="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 font-black text-xs">
+            {{ review.customerName[0].toUpperCase() }}
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-black text-gray-900 truncate">{{ review.customerName }}</p>
+            <p class="text-[10px] text-gray-400 font-bold uppercase truncate">{{ review.productName }}</p>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button *ngIf="!review.isApproved" (click)="handleApprove(review.id, true)"
+                  class="flex-1 py-3 bg-green-50 text-green-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-green-600 hover:text-white transition-all shadow-sm">
+            Aprovar
+          </button>
+          <button *ngIf="review.isApproved" (click)="handleApprove(review.id, false)"
+                  class="flex-1 py-3 bg-amber-50 text-amber-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-500 hover:text-white transition-all shadow-sm">
+            Rejeitar
+          </button>
+          <button (click)="handleDelete(review.id)"
+                  class="p-3 bg-rose-50 text-rose-600 rounded-xl font-black hover:bg-rose-600 hover:text-white transition-all shadow-sm">
+            🗑️
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <footer *ngIf="!loading() && totalCount() > pageSize()" class="flex justify-center pt-10">
+    <div class="bg-white p-2 rounded-2xl shadow-xl border border-gray-50 flex gap-2">
+      <button [disabled]="page() === 1" (click)="page.set(page() - 1); loadReviews()"
+              class="px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest disabled:opacity-30 enabled:hover:bg-gray-50 transition-all">Anterior</button>
+      <div class="px-6 py-3 flex items-center font-black text-primary-600 text-xs">
+        PÁGINA {{ page() }}
+      </div>
+      <button [disabled]="reviews().length < pageSize()" (click)="page.set(page() + 1); loadReviews()"
+              class="px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest disabled:opacity-30 enabled:hover:bg-gray-50 transition-all">Próxima</button>
+    </div>
+  </footer>
+</div>

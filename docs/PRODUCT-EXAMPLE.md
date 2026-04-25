@@ -77,7 +77,7 @@ public record ProductResponseDto
 - **FluentValidation** com regras por campo:
 
 | Campo | Regra |
-|-------|-------|
+| ------- | ------- |
 | `Name` | Obrigatório, máx. 200 caracteres |
 | `Description` | Opcional, máx. 2.000 caracteres |
 | `Price` | Deve ser > 0 |
@@ -97,7 +97,7 @@ public DbSet<Product> Products { get; set; }
 #### Endpoints Disponíveis
 
 | Método | Rota | Descrição |
-|--------|------|-----------|
+| -------- | ------ | ----------- |
 | `GET` | `/api/v1/product` | Lista produtos com filtros opcionais (`isActive`, `category`) e paginação opcional (`page`, `pageSize`) |
 | `GET` | `/api/v1/product/{id}` | Busca produto por ID (retorna `ProductResponseDto`) |
 | `POST` | `/api/v1/product` | Cria novo produto a partir de `CreateProductRequest` |
@@ -160,14 +160,14 @@ public async Task<ActionResult> ExportToExcelAsync(
 
 ```bash
 cd template
-dotnet ef migrations add AddProduct --project src/Data --startup-project src/Api
-dotnet ef database update --project src/Data --startup-project src/Api
+dotnet ef migrations add AddProduct --project src/Server/Data --startup-project src/Server/Api
+dotnet ef database update --project src/Server/Data --startup-project src/Server/Api
 ```
 
 ### 2. Executar a API
 
 ```bash
-dotnet run --project src/Api
+dotnet run --project src/Server/Api
 ```
 
 ### 3. Acessar Swagger

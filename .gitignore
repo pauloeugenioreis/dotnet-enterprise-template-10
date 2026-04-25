@@ -96,3 +96,35 @@ secrets.json
 .sonarqube/
 .sonar/
 .scannerwork/
+node_modules/
+dist/
+build/
+.expo/
+.next/
+.idea/
+.vscode/
+*.log
+.env*
+.DS_Store
+
+# Frameworks Caches
+.angular/
+.vite/
+**/node_modules/
+**/dist/
+**/build/
+.cache/
+
+# Flutter/Mobile specifics
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+**/android/local.properties
+**/android/key.properties
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+**/ios/Flutter/.last_build_id
+**/*.flutter-plugins*

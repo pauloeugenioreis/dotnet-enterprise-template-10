@@ -2,7 +2,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ProjectTemplate.Application.Services;
-using ProjectTemplate.Domain.Dtos;
+using ProjectTemplate.Shared.Models;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Exceptions;
 using ProjectTemplate.Domain.Interfaces;
