@@ -223,6 +223,15 @@ case $choice in
     2)
         select_database
         clean_environment
+
+        # Verifica node_modules para projetos UI
+        for ui in Angular React Vue; do
+            if [ -d "src/UI/Web/$ui" ] && [ ! -d "src/UI/Web/$ui/node_modules" ]; then
+                echo -e "${YELLOW}📦 Instalando dependências para $ui (isso pode levar alguns minutos)...${NC}"
+                (cd "src/UI/Web/$ui" && npm install)
+            fi
+        done
+
         echo -e "\n${YELLOW}🔥 Iniciando via AppHost (Aspire) com $DB_TYPE...${NC}"
         DB_TYPE=$DB_TYPE dotnet run --project src/Aspire/AppHost
         ;;

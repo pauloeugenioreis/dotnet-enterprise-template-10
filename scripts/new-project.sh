@@ -312,7 +312,12 @@ fi
 
 # Copy template
 write_step "📋" "Copiando template..."
-cp -r "$TEMPLATE_DIR" "$TARGET_DIR"
+if command -v rsync >/dev/null 2>&1; then
+    rsync -av --exclude='node_modules' --exclude='bin' --exclude='obj' --exclude='.git' "$TEMPLATE_DIR/" "$TARGET_DIR/"
+else
+    cp -r "$TEMPLATE_DIR" "$TARGET_DIR"
+    find "$TARGET_DIR" \( -name "node_modules" -o -name "bin" -o -name "obj" \) -type d -exec rm -rf {} +
+fi
 
 cd "$TARGET_DIR"
 

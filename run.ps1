@@ -256,6 +256,18 @@ switch ($choice) {
     "2" {
         Select-Database
         Clean-Environment
+
+        # Verifica node_modules para projetos UI
+        foreach ($ui in @("Angular", "React", "Vue")) {
+            $uiPath = "src/UI/Web/$ui"
+            if ((Test-Path $uiPath) -and -not (Test-Path "$uiPath/node_modules")) {
+                Write-Host "$($YELLOW)📦 Instalando dependências para $ui (isso pode levar alguns minutos)...$($NC)"
+                Push-Location $uiPath
+                npm install
+                Pop-Location
+            }
+        }
+
         Write-Host "`n$($YELLOW)🔥 Iniciando via AppHost (Aspire) com $script:DB_TYPE...$($NC)"
         $env:DB_TYPE = $script:DB_TYPE
         dotnet run --project src/Aspire/AppHost
