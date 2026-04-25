@@ -46,6 +46,9 @@ var api = builder.AddProject<Projects.Api>("api")
     .WithEnvironment("AppSettings__Infrastructure__Database__DatabaseType", dbType)
     .WithEnvironment("AppSettings__Infrastructure__Database__ConnectionString", projectDb)
     .WithEnvironment("AppSettings__Infrastructure__EventSourcing__ConnectionString", eventsDb)
+    .WithEnvironment("AppSettings__Infrastructure__MongoDB__ConnectionString", mongodb)
+    .WithEnvironment("AppSettings__Infrastructure__Redis__ConnectionString", redis)
+    .WithEnvironment("AppSettings__Infrastructure__RabbitMQ__ConnectionString", rabbitmq)
     .WithExternalHttpEndpoints();
 
 // Web Projects
