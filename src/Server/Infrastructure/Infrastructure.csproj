@@ -61,19 +61,19 @@
     <PackageReference Include="MongoDB.Driver" Version="2.30.0" />
 
     <!-- Observability (OpenTelemetry) -->
-    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.15.2" />
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.2" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.2" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.15.3" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.3" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.3" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.1" />
     <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.10" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.15.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1" />
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.15.1" />
 
     <!-- Telemetry Exporters -->
     <!-- OpenTelemetry.Exporter.Jaeger REMOVED - Deprecated/Legacy -->
     <!-- Use OpenTelemetry.Exporter.OpenTelemetryProtocol instead (already included above) -->
-    <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.15.2" />
+    <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.15.3" />
     <!-- Using latest available version (1.14.0-beta.1 - no stable version yet) -->
     <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.14.0-beta.1" />
     <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.7.0" />

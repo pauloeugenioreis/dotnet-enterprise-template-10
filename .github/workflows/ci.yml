@@ -50,7 +50,7 @@ jobs:
 
     - name: 📝 Run markdownlint
       run: |
-        npx --yes markdownlint-cli@0.41.0 "**/*.md" --ignore "**/node_modules/**" --ignore "**/bin/**" --ignore "**/obj/**"
+        npx --yes markdownlint-cli@0.42.0 "**/*.md" --ignore "**/node_modules/**" --ignore "**/bin/**" --ignore "**/obj/**"
 
     - name: 🔧 Setup .NET
       uses: actions/setup-dotnet@v4
@@ -165,7 +165,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./Dockerfile
+        file: ./src/Server/Api/Dockerfile
         push: false  # Apenas build, sem publicar
         tags: ${{ env.DOCKER_IMAGE }}:latest
         cache-from: type=gha
