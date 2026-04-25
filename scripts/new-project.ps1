@@ -11,9 +11,6 @@ param(
 
 
     [ValidateSet("Yes", "No")]
-    [string]$MongoDB,
-
-    [ValidateSet("Yes", "No")]
     [string]$Queue,
 
     [ValidateSet("None", "Azure", "Aws", "Google")]
@@ -22,8 +19,6 @@ param(
     [ValidateSet("Yes", "No")]
     [string]$Telemetry,
 
-    [ValidateSet("Yes", "No")]
-    [string]$EventSourcing,
 
     [ValidateSet("Yes", "No")]
     [string]$GitInit
@@ -137,11 +132,9 @@ function Show-YesNo {
 # ============================================================
 
 $isInteractive = -not ($PSBoundParameters.ContainsKey('Database') -or
-                        $PSBoundParameters.ContainsKey('MongoDB') -or
                         $PSBoundParameters.ContainsKey('Queue') -or
                         $PSBoundParameters.ContainsKey('Storage') -or
                         $PSBoundParameters.ContainsKey('Telemetry') -or
-                        $PSBoundParameters.ContainsKey('EventSourcing') -or
                         $PSBoundParameters.ContainsKey('GitInit'))
 
 # ============================================================
@@ -169,9 +162,6 @@ if ($isInteractive) {
     }
 
 
-    Write-Section "NoSQL"
-    $useMongo = Show-YesNo -Title "Habilitar MongoDB (document store)?"
-    $MongoDB = if ($useMongo) { "Yes" } else { "No" }
 
     Write-Section "Mensageria"
     $useQueue = Show-YesNo -Title "Habilitar RabbitMQ (fila de mensagens)?"
@@ -196,9 +186,6 @@ if ($isInteractive) {
     $useTelemetry = Show-YesNo -Title "Habilitar Telemetria (Jaeger + Prometheus + Grafana)?"
     $Telemetry = if ($useTelemetry) { "Yes" } else { "No" }
 
-    Write-Section "Event Sourcing"
-    $useEventSourcing = Show-YesNo -Title "Habilitar Event Sourcing (Marten + PostgreSQL)?"
-    $EventSourcing = if ($useEventSourcing) { "Yes" } else { "No" }
 
     Write-Section "Git"
     $doGitInit = Show-YesNo -Title "Inicializar repositório Git?" -DefaultYes $true
@@ -212,11 +199,9 @@ if ($isInteractive) {
     Write-Host "  ║  Projeto:        $($ProjectName.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Banco de Dados: $($Database.PadRight(38))║" -ForegroundColor Cyan
 
-    Write-Host "  ║  MongoDB:        $($MongoDB.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  RabbitMQ:       $($Queue.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Storage:        $($Storage.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Telemetria:     $($Telemetry.PadRight(38))║" -ForegroundColor Cyan
-    Write-Host "  ║  Event Sourcing: $($EventSourcing.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Git Init:       $($GitInit.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
@@ -228,14 +213,14 @@ if ($isInteractive) {
         exit 0
     }
 } else {
+    $MongoDB = "Yes"
+    $EventSourcing = "Yes"
     # Apply defaults for non-interactive mode
     if (-not $Database) { $Database = "InMemory" }
 
-    if (-not $MongoDB) { $MongoDB = "No" }
     if (-not $Queue) { $Queue = "No" }
     if (-not $Storage) { $Storage = "None" }
     if (-not $Telemetry) { $Telemetry = "No" }
-    if (-not $EventSourcing) { $EventSourcing = "No" }
     if (-not $GitInit) { $GitInit = "Yes" }
 }
 
@@ -340,9 +325,7 @@ foreach ($db in $dbFileMap.Keys) {
 
 
 # -- MongoDB --
-if ($MongoDB -eq "Yes") {
-  $appSettings.AppSettings.Infrastructure.MongoDB.ConnectionString = "mongodb://admin:admin@localhost:27017/$ProjectName"
-}
+$appSettings.AppSettings.Infrastructure.MongoDB.ConnectionString = "mongodb://localhost:27017/$ProjectName"
 
 # -- RabbitMQ --
 if ($Queue -eq "Yes") {
@@ -363,12 +346,8 @@ if ($Telemetry -eq "Yes") {
 }
 
 # -- Event Sourcing --
-if ($EventSourcing -eq "Yes") {
-    $appSettings.AppSettings.Infrastructure.EventSourcing.Enabled = $true
-    $appSettings.AppSettings.Infrastructure.EventSourcing.ConnectionString = "Host=localhost;Database=${ProjectName}Events;Username=postgres;Password=postgres"
-} else {
-    $appSettings.AppSettings.Infrastructure.EventSourcing.Enabled = $false
-}
+$appSettings.AppSettings.Infrastructure.EventSourcing.Enabled = $true
+$appSettings.AppSettings.Infrastructure.EventSourcing.ConnectionString = "Host=localhost;Database=${ProjectName}Events;Username=postgres;Password=postgres;Port=5432"
 
 # Save appsettings.json (ConvertTo-Json in PS 5.1 uses non-standard indentation; normalize to 2-space)
 $jsonContent = $appSettings | ConvertTo-Json -Depth 20
@@ -391,13 +370,10 @@ Set-Content $appSettingsPath $jsonContent -Encoding UTF8
 $programPath = Join-Path $TargetDir "src/Server/Api/Program.cs"
 $programContent = Get-Content $programPath -Raw
 
-if ($MongoDB -eq "Yes") {
     Write-Step "🍃" "Habilitando MongoDB no Program.cs..."
     $programContent = $programContent -replace '// (builder\.Services\.AddMongo<Program>\(\);)', '$1'
-
-  Write-Step "🌱" "Habilitando seed inicial do MongoDB no Program.cs..."
-  $programContent = $programContent -replace '// (await MongoDbSeeder\.SeedAsync\(scope\.ServiceProvider\);)', '$1'
-}
+    Write-Step "🌱" "Habilitando seed inicial do MongoDB no Program.cs..."
+    $programContent = $programContent -replace '// (await MongoDbSeeder\.SeedAsync\(scope\.ServiceProvider\);)', '$1'
 
 if ($Queue -eq "Yes") {
     Write-Step "📨" "Habilitando RabbitMQ no Program.cs..."

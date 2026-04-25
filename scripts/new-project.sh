@@ -137,10 +137,8 @@ while [[ $# -gt 0 ]]; do
         --database) OPT_DATABASE="$2"; shift 2 ;;
 
         --queue) OPT_QUEUE="$2"; shift 2 ;;
-        --mongodb) OPT_MONGODB="$2"; shift 2 ;;
         --storage) OPT_STORAGE="$2"; shift 2 ;;
         --telemetry) OPT_TELEMETRY="$2"; shift 2 ;;
-        --event-sourcing) OPT_EVENTSOURCING="$2"; shift 2 ;;
         --git-init) OPT_GITINIT="$2"; shift 2 ;;
         *) echo "Opção desconhecida: $1"; exit 1 ;;
     esac
@@ -182,12 +180,7 @@ if [ "$IS_INTERACTIVE" = true ]; then
     esac
 
 
-    write_section "NoSQL"
-    if show_yesno "Habilitar MongoDB (document store)?"; then
-        MONGODB="yes"
-    else
-        MONGODB="no"
-    fi
+    MONGODB="yes"
 
     write_section "Mensageria"
     if show_yesno "Habilitar RabbitMQ (fila de mensagens)?"; then
@@ -217,12 +210,7 @@ if [ "$IS_INTERACTIVE" = true ]; then
         TELEMETRY="no"
     fi
 
-    write_section "Event Sourcing"
-    if show_yesno "Habilitar Event Sourcing (Marten + PostgreSQL)?"; then
-        EVENTSOURCING="yes"
-    else
-        EVENTSOURCING="no"
-    fi
+    EVENTSOURCING="yes"
 
     write_section "Git"
     if show_yesno "Inicializar repositório Git?" "true"; then
@@ -258,11 +246,11 @@ else
     # Apply defaults for non-interactive mode
     DATABASE="${OPT_DATABASE:-InMemory}"
 
-    MONGODB="${OPT_MONGODB:-no}"
+    MONGODB="yes"
     QUEUE="${OPT_QUEUE:-no}"
     STORAGE="${OPT_STORAGE:-None}"
     TELEMETRY="${OPT_TELEMETRY:-no}"
-    EVENTSOURCING="${OPT_EVENTSOURCING:-no}"
+    EVENTSOURCING="yes"
     GITINIT="${OPT_GITINIT:-yes}"
 fi
 
@@ -369,19 +357,25 @@ infra['Database']['ConnectionString'] = '$DB_CONN'
 if '$QUEUE' == 'yes':
     infra['RabbitMQ']['ConnectionString'] = 'amqp://guest:guest@localhost:5672/'
 if '$MONGODB' == 'yes':
-  infra['MongoDB']['ConnectionString'] = 'mongodb://admin:admin@localhost:27017/$PROJECT_NAME'
+    infra['MongoDB']['ConnectionString'] = 'mongodb://localhost:27017/$PROJECT_NAME'
+else:
+    infra['MongoDB']['ConnectionString'] = 'mongodb://localhost:27017/$PROJECT_NAME'
+
 if '$STORAGE' != 'None':
     infra['Storage']['Provider'] = '$STORAGE'
+
 if '$TELEMETRY' == 'yes':
     infra['Telemetry']['Enabled'] = True
     infra['Telemetry']['Providers'] = ['Jaeger', 'Prometheus']
 else:
     infra['Telemetry']['Enabled'] = False
+
 if '$EVENTSOURCING' == 'yes':
     infra['EventSourcing']['Enabled'] = True
-    infra['EventSourcing']['ConnectionString'] = 'Host=localhost;Database=${PROJECT_NAME}Events;Username=postgres;Password=postgres'
+    infra['EventSourcing']['ConnectionString'] = 'Host=localhost;Database=${PROJECT_NAME}Events;Username=postgres;Password=postgres;Port=5432'
 else:
     infra['EventSourcing']['Enabled'] = False
+    infra['EventSourcing']['ConnectionString'] = 'Host=localhost;Database=${PROJECT_NAME}Events;Username=postgres;Password=postgres;Port=5432'
 with open('$APPSETTINGS', 'w') as f:
     json.dump(data, f, indent=2, ensure_ascii=False)
 "
@@ -416,10 +410,8 @@ else
     fi
 
     # Event Sourcing
-    if [ "$EVENTSOURCING" = "yes" ]; then
-        json_set "Enabled" "true" "$APPSETTINGS"
-        json_set "ConnectionString" "Host=localhost;Database=${PROJECT_NAME}Events;Username=postgres;Password=postgres" "$APPSETTINGS"
-    fi
+    json_set "Enabled" "true" "$APPSETTINGS"
+    json_set "ConnectionString" "Host=localhost;Database=${PROJECT_NAME}Events;Username=postgres;Password=postgres;Port=5432" "$APPSETTINGS"
 fi
 
 # Remove database-specific appsettings files that don't match
@@ -445,13 +437,10 @@ done
 
 PROGRAM_CS="$TARGET_DIR/src/Server/Api/Program.cs"
 
-if [ "$MONGODB" = "yes" ]; then
-    write_step "🍃" "Habilitando MongoDB no Program.cs..."
-    sed -i 's|^// \(builder\.Services\.AddMongo<Program>();\)|\1|' "$PROGRAM_CS"
-
-  write_step "🌱" "Habilitando seed inicial do MongoDB no Program.cs..."
-  sed -i 's|^\([[:space:]]*\)// \(await MongoDbSeeder\.SeedAsync(scope\.ServiceProvider);\)|\1\2|' "$PROGRAM_CS"
-fi
+write_step "🍃" "Habilitando MongoDB no Program.cs..."
+sed -i 's|^// \(builder\.Services\.AddMongo<Program>();\)|\1|' "$PROGRAM_CS"
+write_step "🌱" "Habilitando seed inicial do MongoDB no Program.cs..."
+sed -i 's|^\([[:space:]]*\)// \(await MongoDbSeeder\.SeedAsync(scope\.ServiceProvider);\)|\1\2|' "$PROGRAM_CS"
 
 if [ "$QUEUE" = "yes" ]; then
     write_step "📨" "Habilitando RabbitMQ no Program.cs..."
