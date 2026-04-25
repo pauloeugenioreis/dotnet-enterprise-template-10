@@ -84,181 +84,101 @@ Este template fornece uma estrutura completa e moderna para desenvolvimento de A
 
 ```text
 ProjectTemplate/
-├── .devcontainer/                                # Ambiente Dev Container e Codespaces
-│   ├── devcontainer.json
-│   ├── docker-compose.devcontainer.yml
-│   └── Dockerfile
-├── .github/                                      # Automações, instruções e skills do projeto
-│   ├── workflows/
-│   │   ├── ci.yml
-│   │   └── docs-check.yml
-│   ├── instructions/
-│   ├── skills/
-│   └── prompts/
-├── .k8s/                                         # Kubernetes manifests
-│   ├── namespace.yaml
-│   ├── configmap.yaml
-│   ├── deployment.yaml
-│   ├── service.yaml
-│   ├── ingress.yaml
-│   └── kustomization.yaml
+├── .devcontainer/                     # Dev Container / GitHub Codespaces
+├── .github/                           # CI/CD workflows, instruções e prompts
+├── .k8s/                              # Kubernetes manifests (namespace, configmap, deploy, service, ingress)
+├── .vscode/                           # Configurações de debug/launch para VS Code
+│
 ├── src/
-│   ├── Api/                                      # Camada de apresentação (Controllers, Program.cs)
-│   │   ├── Controllers/                          # Controllers da API
-│   │   │   └── ApiControllerBase.cs              # Base controller com métodos helper
-│   │   ├── appsettings.json                      # Configurações base
-│   │   ├── appsettings.*.json                    # Configurações por ambiente/provider
-│   │   └── Program.cs                            # Entry point da aplicação (com seeding automático)
+│   ├── Aspire/
+│   │   ├── AppHost/                   # Orquestrador .NET Aspire (containers e recursos)
+│   │   └── ServiceDefaults/           # Configurações padrão Aspire (OTel, HealthChecks)
 │   │
-│   ├── AppHost/                                  # Orquestrador .NET Aspire (Containers e Infra)
-│   │   └── Program.cs                            # Definição de recursos (Postgres, Redis, etc.)
+│   ├── Server/                        # Backend — Clean Architecture
+│   │   ├── Api/                       # Controllers, Program.cs, appsettings
+│   │   ├── Application/               # Services e lógica de negócio
+│   │   ├── Domain/                    # Entities, Interfaces, Exceptions, AppSettings
+│   │   ├── Data/                      # Repositories, DbContext, Seeders, Migrations
+│   │   └── Infrastructure/            # Extensions, Middleware, Filters, Services externos
 │   │
-│   ├── ServiceDefaults/                          # Configurações padrão Aspire (OTel, HealthChecks)
-│   │   └── Extensions.cs                         # Extensões compartilhadas para todos os serviços
+│   ├── Shared/                        # Modelos e utilitários compartilhados entre camadas/UIs
 │   │
-│   ├── Application/                              # Camada de aplicação (Services, Business Logic)
-│   │   └── Services/                             # Application services
-│   │
-│   ├── Domain/                                   # Camada de domínio (Entities, Interfaces)
-│   │   ├── Entities/                             # Entidades de negócio
-│   │   ├── Interfaces/                           # Contratos e interfaces
-│   │   │   ├── IRepository.cs                    # Interface genérica de repositório
-│   │   │   ├── IService.cs                       # Interface genérica de serviço
-│   │   │   ├── IQueueService.cs                  # Interface para message queue
-│   │   │   ├── IStorageService.cs                # Interface para cloud storage
-│   │   │   └── IExceptionNotificationService.cs  # Interface para notificações
-│   │   ├── Exceptions/                           # Exceções customizadas
-│   │   │   └── DomainExceptions.cs               # BusinessException, NotFoundException, ValidationException
-│   │   └── AppSettings.cs                        # Configurações fortemente tipadas
-│   │
-│   ├── Data/                                     # Camada de dados (Repositories, Context, Seeders)
-│   │   ├── Context/                              # DbContext do EF Core
-│   │   │   └── ApplicationDbContext.cs
-│   │   ├── Repository/                           # Implementação dos repositórios
-│   │   │   └── Repository.cs                     # Repositório genérico base
-│   │   └── Seeders/                              # Database seeders
-│   │       └── DbSeeder.cs                       # Seed de dados iniciais (150 produtos, 120 pedidos)
-│   │
-│   └── Infrastructure/                           # Camada de infraestrutura (Extensions, Middleware, Services)
-│       ├── Extensions/                           # Extension methods modulares
-│       │   ├── InfrastructureExtensions.cs       # Orquestrador principal
-│       │   ├── AppSettingsExtension.cs           # Validação de configurações
-│       │   ├── DatabaseExtension.cs              # Configuração de banco de dados
-│       │   ├── HealthChecksExtension.cs          # Health checks
-│       │   ├── DependencyInjectionExtension.cs   # Scrutor auto-registration
-│       │   ├── ResilienceExtension.cs            # Resiliência com Polly v8
-│       │   ├── MongoExtension.cs                 # MongoDB support
-│       │   ├── QuartzExtension.cs                # Background jobs (Quartz.NET)
-│       │   ├── RabbitMqExtension.cs              # Message queue (RabbitMQ)
-│       │   ├── StorageExtension.cs               # Cloud storage (Google/Azure/AWS)
-│       │   ├── AuthenticationExtension.cs        # JWT Authentication
-│       │   ├── ApiVersioningExtension.cs         # API Versioning
-│       │   ├── LoggingExtensions.cs              # Google Cloud Logging
-│       │   ├── SwaggerExtension.cs               # Swagger customizado
-│       │   └── ExceptionHandlerExtension.cs      # Exception handler registration
-│       │
-│       ├── Middleware/                           # Middleware customizado
-│       │   └── GlobalExceptionHandler.cs         # Tratamento global de exceções
-│       │
-│       ├── Filters/                              # Action filters
-│       │   └── ValidationFilter.cs               # Validação automática com FluentValidation
-│       │
-│       ├── Services/                             # Serviços de infraestrutura
-│       │   ├── QueueService.cs                   # Implementação RabbitMQ
-│       │   ├── GoogleCloudStorageService.cs      # Implementação Google Cloud Storage
-│       │   ├── AzureBlobStorageService.cs        # Implementação Azure Blob Storage
-│       │   ├── AwsS3StorageService.cs            # Implementação AWS S3
-│       │   └── ExceptionNotificationService.cs   # Notificações de exceção
+│   └── UI/                            # Frontends opcionais (escolhidos no new-project)
+│       ├── Web/
+│       │   ├── Angular/
+│       │   ├── Blazor/
+│       │   ├── React/
+│       │   └── Vue/
+│       └── Mobile/
+│           ├── FlutterApp/
+│           ├── MauiApp/
+│           └── ReactNativeApp/
 │
 ├── tests/
-│   ├── UnitTests/                    # Testes unitários (xUnit + Moq + FluentAssertions)
-│   │   ├── Controllers/              # Testes de controllers
-│   │   ├── Services/                 # Testes de serviços
-│   │   ├── EventSourcing/            # Testes de event sourcing
-│   │   ├── UnitTests.csproj          # Projeto de testes unitários
-│   │   └── README.md                 # Documentação dos testes
-│   │
-│   ├── Integration/                  # Testes de integração com Testcontainers (Postgres Real)
-│   │   ├── Controllers/              # Testes de integração dos controllers
-│   │   ├── Support/                  # Configuração e utilitários de testes
-│   │   ├── Integration.csproj        # Projeto de testes de integração
-│   │   └── README.md                 # Documentação de testes de integração
-│   │
-│   └── ArchitectureTests/            # Testes de arquitetura (ArchUnitNET / NetArchTest)
-│       ├── LayerTests.cs             # Validação de isolamento de camadas
-│       ├── DesignRulesTests.cs       # Validação de padrões e nomes
-│       └── ArchitectureTests.csproj  # Projeto de testes de arquitetura
+│   ├── UnitTests/                     # xUnit + Moq + FluentAssertions
+│   ├── Integration/                   # Testcontainers (PostgreSQL real)
+│   └── ArchitectureTests/             # ArchUnitNET — isolamento de camadas e padrões
 │
-├── docs/                             # Documentação adicional
-│   ├── examples/                     # Arquivos de exemplo (.http e cenários)
-│   ├── ARCHITECTURE.md               # Arquitetura Clean Architecture
-│   ├── README.md                     # Índice da documentação
-│   ├── FEATURES.md                   # Recursos avançados (MongoDB, Queue, Jobs, etc.)
-│   ├── ORM-GUIDE.md                  # Guia de ORMs
-│   ├── MONGODB-GUIDE.md              # Guia de uso do MongoDB
-│   ├── DATA-ANNOTATIONS-GUIDE.md     # Guia de Data Annotations e Swagger
-│   ├── PRODUCT-EXAMPLE.md            # Exemplo completo de produto
-│   ├── CONFIGURATION-GUIDE.md        # Guia de Configuração (IOptions<T>)
-│   ├── AUTHENTICATION.md             # Autenticação JWT & OAuth2
-│   ├── SECURITY.md                   # Segurança da API
-│   ├── RATE-LIMITING.md              # Rate Limiting
-│   ├── EVENT-SOURCING.md             # Event Sourcing
-│   ├── TELEMETRY.md                  # Observabilidade
-│   ├── TESTING-DATABASES.md          # Testes multi-banco
-│   ├── KUBERNETES.md                 # Guia de deploy Kubernetes
-│   ├── CICD.md                       # CI/CD
-│   └── SONARCLOUD.md                 # SonarCloud
+├── docs/                              # Guias técnicos detalhados
+│   ├── examples/                      # Arquivos .http e cenários de exemplo
+│   └── *.md                           # ARCHITECTURE, FEATURES, ORM-GUIDE, etc.
 │
-├── monitoring/                       # Stack de observabilidade local
-│   ├── grafana/
-│   └── prometheus/
-├── scripts/                          # Scripts de automação
-│   ├── event-sourcing/
-│   ├── linux/                        # Scripts bash (Minikube deploy/destroy/tests)
-│   ├── mongo-init/
-│   ├── windows/                      # Scripts PowerShell e Batch
-│   ├── new-project.sh                # Script Linux/Mac de inicialização
-│   ├── new-project.ps1               # Script PowerShell de inicialização
-│   ├── new-project.bat               # Script Windows CMD de inicialização
-│   └── README.md
+├── monitoring/                        # Configurações de Grafana e Prometheus
+├── scripts/                           # Scripts de automação
+│   ├── linux/                         # Scripts bash (minikube, testes, sonar)
+│   ├── windows/                       # Scripts PowerShell/Batch equivalentes
+│   ├── new-project.sh / .ps1 / .bat   # Criação de novo projeto (interativo/CI)
+│   └── mongo-init/                    # Inicialização do container MongoDB
 │
-├── compose-observability.yml         # Compose da stack de observabilidade
-├── Dockerfile                        # Multi-stage build
-├── docker-compose.yml                # Compose para desenvolvimento
-├── cspell.config.yaml                # Configuração do cspell
-├── package.json                      # Dependências de tooling de documentação
-├── global.json                       # Versão do .NET SDK
-├── ProjectTemplate.sln               # Solution file
-└── .gitignore                        # Git ignore configurado
+├── run.sh / run.ps1                   # Launcher principal (API direta ou via Aspire)
+├── run-mobile.sh / run-mobile.ps1     # Launcher para apps mobile (Flutter, MAUI, React Native)
+├── build-web-all.sh / .ps1            # Build de todos os frontends web
+├── build-mobile-all.sh / .ps1         # Build de todos os apps mobile
+├── compose-observability.yml          # Stack de observabilidade (Jaeger, Prometheus, Grafana)
+├── docker-compose.yml                 # Compose completo para desenvolvimento
+├── global.json                        # Versão do .NET SDK
+└── ProjectTemplate.sln                # Solution file
 ```
 
 ---
 
 ## 🚀 Como Usar o Template
 
-### Opção 1: Usando Script PowerShell (Recomendado para Windows)
-
-```powershell
-cd template/scripts
-.\new-project.ps1
-```
-
-### Opção 2: Usando Script Bash (Linux/Mac)
+### Opção 1: Script Bash (Linux/Mac)
 
 ```bash
-cd template/scripts
+cd scripts
 chmod +x new-project.sh
 ./new-project.sh
 ```
 
-### Opção 3: Usando Script Batch (Windows CMD)
+### Opção 2: Script PowerShell (Windows)
+
+```powershell
+cd scripts
+.\new-project.ps1
+```
+
+### Opção 3: Script Batch (Windows CMD)
 
 ```cmd
-cd template\scripts
+cd scripts
 new-project.bat
 ```
 
-> 💡 Os scripts são interativos — apresentam menus para configurar banco de dados, mensageria, cloud storage, telemetria e event sourcing. Para modo não-interativo (CI/CD), veja [scripts/README.md](scripts/README.md).
+> 💡 Os scripts são interativos e apresentam menus para configurar: banco de dados, MongoDB, mensageria, cloud storage, telemetria, event sourcing e **frontends UI** (Web: Angular/Blazor/React/Vue — Mobile: Flutter/MAUI/React Native). Para modo não-interativo (CI/CD), veja [scripts/README.md](scripts/README.md).
+
+### Executar o projeto após criação
+
+```bash
+# API direta (dotnet run) ou via Aspire — menu interativo
+./run.sh         # Linux/Mac
+.\run.ps1        # Windows
+
+# Apps mobile (Flutter, MAUI, React Native)
+./run-mobile.sh  # Linux/Mac
+.\run-mobile.ps1 # Windows
+```
 
 ---
 
@@ -394,6 +314,8 @@ Edite `src/Server/Api/appsettings.json` e configure o tipo de banco e a connecti
 
 ```bash
 dotnet restore
+```
+
 ### 5. Compile o Projeto
 
 ```bash
@@ -488,6 +410,52 @@ O template inclui health checks configurados:
 - `/health/ready` - Readiness check (para Kubernetes)
 
 Para adicionar health checks personalizados, edite `src/Server/Infrastructure/Extensions/HealthChecksExtension.cs`
+
+---
+
+## 🖥️ Camada UI (Web & Mobile)
+
+O template inclui frontends opcionais que são selecionados durante a criação do projeto via `new-project.sh`.
+
+### Web
+
+| Framework | Caminho               | Launcher            |
+| --------- | --------------------- | ------------------- |
+| Angular   | `src/UI/Web/Angular/` | `run.sh` → Aspire   |
+| Blazor    | `src/UI/Web/Blazor/`  | `run.sh` → Aspire   |
+| React     | `src/UI/Web/React/`   | `run.sh` → Aspire   |
+| Vue       | `src/UI/Web/Vue/`     | `run.sh` → Aspire   |
+
+Para fazer build de todos os frontends web de uma vez:
+
+```bash
+./build-web-all.sh   # Linux/Mac
+.\build-web-all.ps1  # Windows
+```
+
+### Mobile
+
+| Framework    | Caminho                        |
+| ------------ | ------------------------------ |
+| Flutter      | `src/UI/Mobile/FlutterApp/`    |
+| MAUI         | `src/UI/Mobile/MauiApp/`       |
+| React Native | `src/UI/Mobile/ReactNativeApp/`|
+
+Para executar apps mobile:
+
+```bash
+./run-mobile.sh   # Linux/Mac
+.\run-mobile.ps1  # Windows
+```
+
+Para fazer build de todos:
+
+```bash
+./build-mobile-all.sh   # Linux/Mac
+.\build-mobile-all.ps1  # Windows
+```
+
+> Os frontends se comunicam com a API em `http://localhost:5266`. A URL da API pode ser configurada em cada projeto de UI.
 
 ---
 
@@ -738,40 +706,6 @@ Use ILogger para logging estruturado:
 ```csharp
 _logger.LogInformation("Processing request for {Id}", id);
 _logger.LogError(ex, "Error processing {Id}", id);
-```
-
----
-
-## 🐳 Docker
-
-Para criar uma imagem Docker do seu projeto:
-
-```dockerfile
-# Dockerfile
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-WORKDIR /src
-COPY ["src/Server/Api/Api.csproj", "src/Server/Api/"]
-COPY ["src/Server/Application/Application.csproj", "src/Server/Application/"]
-COPY ["src/Server/Data/Data.csproj", "src/Server/Data/"]
-COPY ["src/Server/Domain/Domain.csproj", "src/Server/Domain/"]
-COPY ["src/Server/Infrastructure/Infrastructure.csproj", "src/Server/Infrastructure/"]
-RUN dotnet restore "src/Server/Api/Api.csproj"
-COPY . .
-WORKDIR "/src/src/Server/Api"
-RUN dotnet build "Api.csproj" -c Release -o /app/build
-
-FROM build AS publish
-RUN dotnet publish "Api.csproj" -c Release -o /app/publish
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "MeuProjeto.Api.dll"]
 ```
 
 ---

@@ -67,6 +67,8 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 | **[docs/RATE-LIMITING.md](docs/RATE-LIMITING.md)**             | 4 estratégias de Rate Limiting                  | Controle de taxa de requisições         |
 | **[docs/EVENT-SOURCING.md](docs/EVENT-SOURCING.md)**           | Event Sourcing com Marten + PostgreSQL          | Auditoria e time travel                 |
 | **[docs/TELEMETRY.md](docs/TELEMETRY.md)**                     | OpenTelemetry, Jaeger, Prometheus, Grafana      | Configurar observabilidade              |
+| **[docs/UI-GUIDE.md](docs/UI-GUIDE.md)**                       | Angular, Blazor, React, Vue — integração API    | Desenvolver frontends Web               |
+| **[docs/MOBILE-GUIDE.md](docs/MOBILE-GUIDE.md)**               | Flutter, MAUI, React Native — setup e debug     | Desenvolver apps Mobile                 |
 | **[docs/TESTING-DATABASES.md](docs/TESTING-DATABASES.md)**     | Testes multi-banco de dados                     | Validar suporte a 4+ bancos             |
 | **[docs/KUBERNETES.md](docs/KUBERNETES.md)**                   | Deploy no Kubernetes                            | Deploy em produção ou local             |
 | **[docs/CICD.md](docs/CICD.md)**                               | GitHub Actions, Azure DevOps, GitLab CI         | Configurar CI/CD                        |
@@ -148,6 +150,20 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 3. Descomente: RabbitMQ.Client em Infrastructure.csproj
 4. Ative: `builder.AddRabbitMq()` em Program.cs
 
+### "Quero desenvolver um frontend Web"
+
+1. Selecione o framework desejado ao rodar `new-project.sh`
+2. Os frontends ficam em `src/UI/Web/<Framework>/`
+3. Execute via `./run.sh` (Aspire orquestra tudo) ou `./build-web-all.sh` para build
+4. A API está disponível em `http://localhost:5266`
+
+### "Quero desenvolver um app Mobile"
+
+1. Selecione Flutter, MAUI ou React Native ao rodar `new-project.sh`
+2. Os apps ficam em `src/UI/Mobile/<Framework>/`
+3. Execute via `./run-mobile.sh` (Linux/Mac) ou `.\run-mobile.ps1` (Windows)
+4. A API está disponível em `http://localhost:5266`
+
 ### "Preciso de help com erros"
 
 1. Veja: [QUICK-START.md](QUICK-START.md) - Seção "Problemas Comuns"
@@ -160,58 +176,41 @@ Bem-vindo ao template! Este índice ajuda você a navegar pela documentação co
 ## 📂 Estrutura de Arquivos
 
 ```text
-template/
-├── 📄 README.md               # Documentação principal
-├── 📄 QUICK-START.md               # Início rápido
-├── 📄 LICENSE                      # Licença MIT
-├── 📄 INDEX.md                     # Este arquivo
-├── 📄 .env.example                 # Exemplo de variáveis de ambiente
-├── 📄 .gitignore                   # Git ignore
-├── 📄 global.json                  # SDK do .NET
-├── 📄 ProjectTemplate.sln          # Solution file
-├── 📄 Dockerfile                   # Docker image
-├── 📄 docker-compose.yml           # Docker compose
+ProjectTemplate/
+├── 📄 README.md / QUICK-START.md / INDEX.md
+├── 📄 global.json / ProjectTemplate.sln / docker-compose.yml
+├── 📄 run.sh / run.ps1                    # Launcher principal (API ou Aspire)
+├── 📄 run-mobile.sh / run-mobile.ps1      # Launcher mobile
+├── 📄 build-web-all.sh / build-mobile-all.sh
 │
-├── 📁 docs/                   # Documentação adicional
-│   ├── 📄 ARCHITECTURE.md          # Arquitetura detalhada
-│   ├── 📄 FEATURES.md              # Recursos avançados
-│   ├── 📄 ORM-GUIDE.md             # Guia de ORMs
-│   ├── 📄 TELEMETRY.md             # Telemetria e observabilidade
-│   ├── 📄 RATE-LIMITING.md         # Rate limiting
-│   ├── 📄 EVENT-SOURCING.md        # Event sourcing
-│   ├── 📄 AUTHENTICATION.md        # JWT & OAuth2
-│   ├── 📄 CICD.md                  # CI/CD pipelines
-│   ├── 📄 KUBERNETES.md            # Guia Kubernetes
-│   └── 📁 examples/                # Exemplos práticos
+├── 📁 src/
+│   ├── 📁 Aspire/
+│   │   ├── 📁 AppHost/                    # Orquestrador .NET Aspire
+│   │   └── 📁 ServiceDefaults/            # OTel, Health Checks padrão
+│   ├── 📁 Server/                         # Backend — Clean Architecture
+│   │   ├── 📁 Api/
+│   │   ├── 📁 Application/
+│   │   ├── 📁 Domain/
+│   │   ├── 📁 Data/
+│   │   └── 📁 Infrastructure/
+│   ├── 📁 Shared/                         # Modelos compartilhados
+│   └── 📁 UI/
+│       ├── 📁 Web/ (Angular / Blazor / React / Vue)
+│       └── 📁 Mobile/ (Flutter / MAUI / React Native)
 │
-├── 📁 src/                    # Código fonte
-│   ├── 📁 Api/                     # Camada de apresentação
-│   ├── 📁 AppHost/                 # Orquestrador .NET Aspire
-│   ├── 📁 ServiceDefaults/         # Configurações padrão Aspire
-│   ├── 📁 Application/             # Camada de aplicação
-│   ├── 📁 Domain/                  # Camada de domínio
-│   ├── 📁 Data/                    # Camada de dados
-│   └── 📁 Infrastructure/          # Camada de infraestrutura
+├── 📁 tests/
+│   ├── 📁 Integration/                    # Testcontainers
+│   ├── 📁 UnitTests/
+│   └── 📁 ArchitectureTests/
 │
-├── 📁 tests/                  # Testes
-│   ├── 📁 Integration/             # Testes de integração (Testcontainers)
-│   ├── 📁 UnitTests/               # Testes unitários
-│   └── 📁 ArchitectureTests/       # Testes de arquitetura
+├── 📁 docs/                               # Guias técnicos detalhados
+│   └── 📁 examples/
 │
-├── 📁 .k8s/                   # Kubernetes manifests
-│   ├── 📄 namespace.yaml
-│   ├── 📄 configmap.yaml
-│   ├── 📄 deployment.yaml
-│   ├── 📄 service.yaml
-│   ├── 📄 ingress.yaml
-│   └── 📄 kustomization.yaml
-│
-└── 📁 scripts/                # Scripts de automação
-    ├── 📁 linux/                   # Scripts bash
-    ├── 📁 windows/                 # Scripts PowerShell/Batch
-    ├── 📄 new-project.sh
-    ├── 📄 new-project.ps1
-    └── 📄 new-project.bat
+├── 📁 .k8s/                               # Kubernetes manifests
+└── 📁 scripts/
+    ├── 📁 linux/ / 📁 windows/
+    ├── 📄 new-project.sh / .ps1 / .bat
+    └── 📁 mongo-init/
 ```
 
 ---
@@ -225,12 +224,14 @@ template/
 - **NHibernate**: [ORM-GUIDE.md](docs/ORM-GUIDE.md#nhibernate)
 - **Docker**: [QUICK-START.md](QUICK-START.md#4-executar-com-docker-opcional)
 - **Kubernetes**: [KUBERNETES.md](docs/KUBERNETES.md)
-- **Redis**: [README.md](README.md#redis-recomendado-para-producao)
-- **MongoDB**: [FEATURES.md](docs/FEATURES.md#1-mongodb)
+- **MongoDB**: [MONGODB-GUIDE.md](docs/MONGODB-GUIDE.md)
 - **Quartz.NET**: [FEATURES.md](docs/FEATURES.md#2-quartznet)
 - **RabbitMQ**: [FEATURES.md](docs/FEATURES.md#3-rabbitmq)
-- **JWT Auth**: [FEATURES.md](docs/FEATURES.md#5-jwt-authentication)
+- **JWT Auth**: [AUTHENTICATION.md](docs/AUTHENTICATION.md)
 - **API Versioning**: [FEATURES.md](docs/FEATURES.md#6-api-versioning)
+- **Angular / React / Vue / Blazor**: `src/UI/Web/<Framework>/`
+- **Flutter / MAUI / React Native**: `src/UI/Mobile/<Framework>/`
+- **.NET Aspire**: `src/Aspire/AppHost/`
 
 ### Por Tarefa
 
@@ -260,65 +261,4 @@ template/
 
 ---
 
-## 📈 Próximos Passos
-
-Depois de dominar o básico:
-
-1. **Explore recursos avançados**: Health checks, observability, rate limiting
-2. **Configure CI/CD**: GitHub Actions, Azure DevOps
-3. **Adicione testes**: Unit tests, integration tests, e2e tests
-4. **Implemente features**: Auth, file upload, background jobs
-5. **Otimize performance**: Caching, compression, query optimization
-6. **Monitore em produção**: Application Insights, Prometheus, Grafana
-
----
-
-## 🎓 Recursos de Aprendizado
-
-### Clean Architecture
-
-- [The Clean Architecture - Uncle Bob](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-- [Clean Architecture with .NET](https://jasontaylor.dev/clean-architecture-getting-started/)
-
-### ASP.NET Core
-
-- [Microsoft Learn - ASP.NET Core](https://learn.microsoft.com/aspnet/core/)
-- [ASP.NET Core Best Practices](https://docs.microsoft.com/aspnet/core/fundamentals/best-practices)
-
-### Kubernetes
-
-- [Kubernetes for .NET Developers](https://docs.microsoft.com/dotnet/architecture/kubernetes/)
-- [Kubernetes Documentation](https://kubernetes.io/docs/)
-
-### ORMs
-
-- [Entity Framework Core Documentation](https://docs.microsoft.com/ef/core/)
-- [Dapper Tutorial](https://github.com/DapperLib/Dapper)
-
----
-
-## ✅ Checklist de Uso
-
-### Primeiro Uso
-
-- [ ] Li o [QUICK-START.md](QUICK-START.md)
-- [ ] Criei meu primeiro projeto
-- [ ] Configurei o banco de dados
-- [ ] Executei a aplicação
-- [ ] Acessei o Swagger
-- [ ] Criei minha primeira entidade
-
-### Antes de Deploy
-
-- [ ] Li o [KUBERNETES.md](docs/KUBERNETES.md)
-- [ ] Testei localmente com Minikube
-- [ ] Configurei variáveis de ambiente (`.env`)
-- [ ] Configurei secrets (senhas, tokens)
-- [ ] Executei todos os testes
-- [ ] Revisei logs e health checks
-
----
-
-## 🎉 Conclusão
-
-Este índice deve ajudá-lo a navegar pela documentação do template. Comece pelo [QUICK-START.md](QUICK-START.md) e explore conforme necessário!
+Comece pelo [QUICK-START.md](QUICK-START.md) e navegue pelos guias em [docs/](docs/README.md) conforme necessário.

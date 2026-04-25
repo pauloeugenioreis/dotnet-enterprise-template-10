@@ -9,16 +9,19 @@ Esta pasta contém documentação técnica adicional e guias especializados para
 | Documento | Descrição | Quando Usar |
 | ----------- | ----------- | ------------- |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Clean Architecture, diagramas de camadas, princípios SOLID | Entender a arquitetura do projeto |
-| [FEATURES.md](FEATURES.md) | MongoDB, Quartz, RabbitMQ, Storage, Logging, Swagger | Habilitar recursos avançados |
+| [FEATURES.md](FEATURES.md) | RabbitMQ, Quartz, Storage, Logging, Swagger, Aspire | Habilitar recursos avançados |
+| [MONGODB-GUIDE.md](MONGODB-GUIDE.md) | Seed automático, autenticação do container e troubleshooting | Configurar e usar MongoDB |
 | [ORM-GUIDE.md](ORM-GUIDE.md) | EF Core, Dapper, ADO.NET — como alternar e comparações | Escolher ou alternar ORM |
+| [EVENT-SOURCING.md](EVENT-SOURCING.md) | Marten + PostgreSQL, auditoria, time travel | Entender o event sourcing embutido |
 | [CONFIGURATION-GUIDE.md](CONFIGURATION-GUIDE.md) | IOptions\<T\>, validação de configurações, boas práticas | Acessar configurações no código |
+| [DATA-ANNOTATIONS-GUIDE.md](DATA-ANNOTATIONS-GUIDE.md) | Validação de AppSettings com Data Annotations no startup | Validar configurações obrigatórias |
 | [AUTHENTICATION.md](AUTHENTICATION.md) | JWT, OAuth2 (Google, Microsoft, GitHub), refresh tokens | Configurar autenticação |
 | [SECURITY.md](SECURITY.md) | Headers de segurança, CORS, HTTPS, proteção contra ataques | Revisar segurança da API |
 | [RATE-LIMITING.md](RATE-LIMITING.md) | Fixed Window, Sliding Window, Token Bucket, Concurrency — inclui decisão arquitetural | Controle de taxa de requisições |
-| [EVENT-SOURCING.md](EVENT-SOURCING.md) | Marten + PostgreSQL, auditoria, time travel | Habilitar event sourcing |
 | [TELEMETRY.md](TELEMETRY.md) | OpenTelemetry, Jaeger, Prometheus, Grafana | Configurar observabilidade |
+| [UI-GUIDE.md](UI-GUIDE.md) | Angular, Blazor, React, Vue — integração com a API | Desenvolver frontends Web |
+| [MOBILE-GUIDE.md](MOBILE-GUIDE.md) | Flutter, MAUI, React Native — setup, endpoints e debug | Desenvolver apps Mobile |
 | [TESTING-DATABASES.md](TESTING-DATABASES.md) | Testar com SQL Server, Oracle, PostgreSQL, MySQL | Validar suporte multi-banco |
-| [DATA-ANNOTATIONS-GUIDE.md](DATA-ANNOTATIONS-GUIDE.md) | Anotações XML para documentação Swagger | Documentar endpoints |
 | [KUBERNETES.md](KUBERNETES.md) | Deploy local (Minikube) e produção (AKS, EKS, GKE) | Deploy em Kubernetes |
 | [CICD.md](CICD.md) | GitHub Actions, Azure DevOps, GitLab CI | Configurar CI/CD |
 | [SONARCLOUD.md](SONARCLOUD.md) | Análise de qualidade de código | Configurar SonarCloud |
@@ -50,15 +53,18 @@ docs/
 ├── README.md                    # Este arquivo (índice)
 ├── ARCHITECTURE.md              # Arquitetura Clean Architecture
 ├── FEATURES.md                  # Recursos avançados
+├── MONGODB-GUIDE.md             # Guia MongoDB (seed, auth, troubleshooting)
 ├── ORM-GUIDE.md                 # Guia de ORMs
+├── EVENT-SOURCING.md            # Event Sourcing (Marten + PostgreSQL)
 ├── CONFIGURATION-GUIDE.md       # Guia de Configuração (IOptions<T>)
+├── DATA-ANNOTATIONS-GUIDE.md    # Validação de AppSettings
 ├── AUTHENTICATION.md            # Autenticação JWT & OAuth2
 ├── SECURITY.md                  # Segurança da API
 ├── RATE-LIMITING.md             # Rate Limiting (inclui ADR)
-├── EVENT-SOURCING.md            # Event Sourcing
 ├── TELEMETRY.md                 # Observabilidade
+├── UI-GUIDE.md                  # Frontends Web (Angular, Blazor, React, Vue)
+├── MOBILE-GUIDE.md              # Apps Mobile (Flutter, MAUI, React Native)
 ├── TESTING-DATABASES.md         # Testes multi-banco
-├── DATA-ANNOTATIONS-GUIDE.md    # Documentação Swagger
 ├── KUBERNETES.md                # Deploy Kubernetes
 ├── CICD.md                      # CI/CD
 ├── SONARCLOUD.md                # SonarCloud
@@ -67,23 +73,6 @@ docs/
     ├── ORDER-EXAMPLE.md         # Exemplo: Order
     └── event-sourcing.http      # HTTP requests Event Sourcing
 ```
-
-### Documentos Futuros
-
-Planejamos adicionar:
-
-- **AUTHENTICATION.md** - Guia de autenticação (JWT, OAuth2)
-
-- **MONITORING.md** - Monitoramento e observabilidade
-- **TESTING.md** - Estratégias de testes
-- **PERFORMANCE.md** - Otimização de performance
-- **SECURITY.md** - Boas práticas de segurança
-- **CI-CD.md** - Pipelines de CI/CD
-- **MIGRATION.md** - Migração de projetos existentes
-
-### Documentos Recentes
-
-- ✅ **[CONFIGURATION-GUIDE.md](CONFIGURATION-GUIDE.md)** - Guia de Configuração com IOptions<T> (NOVO!)
 
 ---
 
@@ -242,10 +231,10 @@ Ao criar nova documentação:
 
 ## 📊 Estatísticas
 
-- **Documentos**: 3 guias técnicos + 1 guia de configuração
-- **Linhas**: ~4000+ linhas de documentação
-- **Exemplos de código**: 60+ snippets
-- **Tópicos cobertos**: IOptions<T>, ORMs, Kubernetes, Docker, Clean Architecture
+- **Documentos**: 19 guias técnicos + 2 exemplos
+- **Linhas**: ~12.000+ linhas de documentação
+- **Exemplos de código**: 80+ snippets
+- **Tópicos cobertos**: Clean Architecture, ORMs, MongoDB, Event Sourcing, Auth, Security, UI/Mobile, Kubernetes, CI/CD
 
 ---
 

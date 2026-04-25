@@ -66,21 +66,44 @@ Este guia explica como configurar e usar o SonarCloud para análise de qualidade
 
 ## GitHub Actions
 
-### 1. Configurar Secrets
+### 1. Habilitar o job SonarCloud (obrigatório)
+
+O job `sonarcloud` no CI só é executado quando a variável de repositório `SONAR_ENABLED` vale `true`. Sem ela, o job é ignorado silenciosamente — mesmo com o `SONAR_TOKEN` configurado.
 
 No repositório GitHub:
 
-1. **Settings** → **Secrets and variables** → **Actions**
+1. **Settings** → **Secrets and variables** → **Actions** → aba **Variables**
+2. Clique em **"New repository variable"**
+3. Adicione:
+   - **Name**: `SONAR_ENABLED`
+   - **Value**: `true`
+
+> Esta variável controla se a análise roda. Mantê-la como `false` (ou ausente) é útil para forks e repositórios recém-criados que ainda não têm o SonarCloud configurado.
+
+### 2. Configurar o Secret do Token
+
+1. **Settings** → **Secrets and variables** → **Actions** → aba **Secrets**
 2. Clique em **"New repository secret"**
 3. Adicione:
    - **Name**: `SONAR_TOKEN`
-   - **Value**: Cole o token do SonarCloud
+   - **Value**: Cole o token gerado no SonarCloud (passo anterior)
 
-### 2. Pipeline Configurado
+### 3. Pipeline Configurado
 
-O pipeline GitHub Actions já está configurado em `.github/workflows/ci.yml` com o job `sonarcloud`.
+O pipeline GitHub Actions já está configurado em `.github/workflows/ci.yml` com o job `sonarcloud`. A condição completa é:
 
-### 3. Executar Análise
+```yaml
+if: (github.event_name != 'pull_request' ||
+     github.event.pull_request.head.repo.full_name == github.repository) &&
+    vars.SONAR_ENABLED == 'true'
+```
+
+Isso garante que:
+
+- PRs de forks externos **não** executam o job (sem acesso ao token)
+- O job só roda quando `SONAR_ENABLED` está explicitamente habilitado
+
+### 4. Executar Análise
 
 A análise é executada automaticamente em:
 

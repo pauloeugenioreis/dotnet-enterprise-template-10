@@ -46,7 +46,7 @@ new-project.bat
 cd ..\MeuProjeto
 ```
 
-> 💡 O script apresenta menus interativos para escolher banco de dados, mensageria (RabbitMQ), cloud storage, telemetria e event sourcing. Também suporta modo não-interativo para CI/CD — veja [scripts/README.md](scripts/README.md) para detalhes.
+> 💡 O script apresenta menus interativos para escolher banco de dados, mensageria (RabbitMQ), cloud storage, telemetria e **frontends UI** (Web: Angular/Blazor/React/Vue — Mobile: Flutter/MAUI/React Native). **MongoDB e Event Sourcing são habilitados automaticamente** em todos os projetos. Para modo não-interativo (CI/CD), veja [scripts/README.md](scripts/README.md) para detalhes.
 
 ---
 
@@ -71,9 +71,9 @@ Edite `src/Server/Api/appsettings.json` e ajuste a connection string para seu am
 
 > Para PostgreSQL, MySQL e Oracle, veja [docs/ORM-GUIDE.md](docs/ORM-GUIDE.md).
 
-### MongoDB (opcional)
+### MongoDB
 
-Se você escolher MongoDB no script de criação, o template também gera o container, a connection string e o seed inicial.
+O template habilita MongoDB automaticamente em todos os projetos gerados, incluindo o container Docker, a connection string e o seed inicial.
 
 - **Connection string padrão de desenvolvimento**: `mongodb://admin:admin@localhost:27017/<SeuProjeto>`
 - **Usuário do container**: `admin`
@@ -88,11 +88,19 @@ Mais detalhes em [docs/MONGODB-GUIDE.md](docs/MONGODB-GUIDE.md).
 
 ## 🏃 3. Executar a Aplicação
 
-### Opção A: .NET CLI (Desenvolvimento)
+### Opção A: Launcher interativo (Recomendado)
+
+Use o script `run.sh` / `run.ps1` na raiz do projeto — ele apresenta um menu para escolher entre rodar diretamente via `dotnet run` ou via **Aspire** (com todos os containers):
 
 ```bash
-cd src/Server/Api
-dotnet run
+./run.sh         # Linux/Mac
+.\run.ps1        # Windows
+```
+
+### Opção B: .NET CLI direto
+
+```bash
+dotnet run --project src/Server/Api
 ```
 
 Acesse:
@@ -129,31 +137,34 @@ curl -X GET https://localhost:3060/api/auth/me \
 
 Swagger: `https://localhost:3060/swagger`
 
-### Opção B: Visual Studio
+### Opção C: Visual Studio
 
 1. Abra `MeuProjeto.sln`
-2. Defina `Api` como projeto de inicialização
+2. Defina `Api` (ou `AppHost` para Aspire) como projeto de inicialização
 3. Pressione F5
 
-### Opção C: VS Code
+### Opção D: VS Code
 
 1. Abra a pasta do projeto
-2. Pressione F5 (debug)
-3. Ou use terminal: `dotnet run --project src/Server/Api/Api.csproj`
+2. Pressione F5 (debug via `.vscode/launch.json`)
+3. Ou use terminal: `dotnet run --project src/Server/Api`
 
-### Opção D: .NET Aspire (Orquestração Moderna) 🚀
+### Opção E: .NET Aspire (Orquestração)
 
-Esta é a forma recomendada para desenvolvimento local. O Aspire irá subir automaticamente todos os containers necessários (PostgreSQL, Redis, RabbitMQ, MongoDB) e fornecer um dashboard de observabilidade.
+O Aspire sobe automaticamente todos os containers (PostgreSQL, Redis, RabbitMQ, MongoDB) e fornece um dashboard de observabilidade.
 
-1. Navegue até o projeto AppHost:
+```bash
+dotnet run --project src/Aspire/AppHost
+```
 
-   ```bash
-   cd src/Aspire/AppHost
-   dotnet run
-   ```
+Acesse o dashboard em `http://localhost:18888`.
 
-2. Abra o dashboard no link que aparecerá no terminal (geralmente `http://localhost:18888`).
-3. No dashboard, você verá os logs, métricas e o status de todos os containers e da API.
+### Aplicativos Mobile
+
+```bash
+./run-mobile.sh   # Linux/Mac
+.\run-mobile.ps1  # Windows
+```
 
 ---
 
@@ -515,12 +526,12 @@ O template já inclui `.vscode/launch.json` configurado. Pressione F5!
 ## ✅ Checklist de Início
 
 - [ ] .NET 10 SDK instalado
-- [ ] Projeto criado com script de inicialização
+- [ ] Projeto criado com `new-project.sh` (banco, mensageria, UI selecionados)
 - [ ] Connection string configurada
-- [ ] Aplicação executando (dotnet run)
-- [ ] Swagger acessível
-- [ ] Primeira entidade criada
-- [ ] Migration aplicada
+- [ ] Aplicação executando (`./run.sh` ou `dotnet run`)
+- [ ] Swagger acessível em `https://localhost:3060/swagger`
+- [ ] Login com credenciais padrão testado
+- [ ] Primeira entidade criada e migration aplicada
 - [ ] Primeiro controller testado
 
 ---

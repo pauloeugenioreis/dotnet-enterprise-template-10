@@ -438,7 +438,7 @@ foreach ($db in $dbFileMap.Keys) {
 
 
 # -- MongoDB --
-$appSettings.AppSettings.Infrastructure.MongoDB.ConnectionString = "mongodb://localhost:27017/$ProjectName"
+$appSettings.AppSettings.Infrastructure.MongoDB.ConnectionString = "mongodb://admin:admin@localhost:27017/$ProjectName"
 
 # -- RabbitMQ --
 if ($Queue -eq "Yes") {

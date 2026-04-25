@@ -18,14 +18,14 @@ dotnet build src/UI/Mobile/MauiApp/MauiApp.csproj
 echo -e "\n${GREEN}Building Flutter...${NC}"
 pushd src/UI/Mobile/FlutterApp
 flutter pub get
-# flutter build apk --debug # Uncomment to actually build
+flutter build apk --debug
 popd
 
 # React Native (Expo)
 echo -e "\n${GREEN}Building React Native (Expo)...${NC}"
 pushd src/UI/Mobile/ReactNativeApp
 npm install
-# npx expo export # Uncomment to actually build
+npx expo export
 popd
 
-echo -e "\n${BLUE}All mobile builds completed (or dependencies installed) successfully!${NC}"
+echo -e "\n${BLUE}All mobile builds completed successfully!${NC}"

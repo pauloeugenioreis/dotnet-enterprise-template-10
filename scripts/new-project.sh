@@ -450,10 +450,7 @@ infra['Database']['ConnectionString'] = '$DB_CONN'
 
 if '$QUEUE' == 'yes':
     infra['RabbitMQ']['ConnectionString'] = 'amqp://guest:guest@localhost:5672/'
-if '$MONGODB' == 'yes':
-    infra['MongoDB']['ConnectionString'] = 'mongodb://localhost:27017/$PROJECT_NAME'
-else:
-    infra['MongoDB']['ConnectionString'] = 'mongodb://localhost:27017/$PROJECT_NAME'
+infra['MongoDB']['ConnectionString'] = 'mongodb://admin:admin@localhost:27017/$PROJECT_NAME'
 
 if '$STORAGE' != 'None':
     infra['Storage']['Provider'] = '$STORAGE'
@@ -682,10 +679,10 @@ COMPOSE_DB
     container_name: mongo
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=MongoRootPass123
+      - MONGO_INITDB_ROOT_PASSWORD=admin
       - MONGO_INITDB_DATABASE=$PROJECT_NAME
-      - MONGO_APP_USERNAME=appuser
-      - MONGO_APP_PASSWORD=AppPass123
+      - MONGO_APP_USERNAME=admin
+      - MONGO_APP_PASSWORD=admin
     ports:
       - "27017:27017"
     volumes:
@@ -694,7 +691,7 @@ COMPOSE_DB
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mongosh", "mongodb://admin:MongoRootPass123@localhost:27017/admin", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "mongodb://admin:admin@localhost:27017/admin", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
