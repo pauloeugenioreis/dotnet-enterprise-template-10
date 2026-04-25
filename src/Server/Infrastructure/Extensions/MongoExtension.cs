@@ -7,8 +7,6 @@ using ProjectTemplate.Data.Repository.Mongo;
 using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
-using ProjectTemplate.Data;
-using ProjectTemplate.Application;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
 
@@ -25,22 +23,27 @@ public static class MongoExtension
     public static IServiceCollection AddMongo<TProgram>(this IServiceCollection services)
     {
         services.AddSingleton<IMongoClient>(sp => CreateMongoClient<TProgram>(
+            sp.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>(),
             sp.GetRequiredService<IOptions<AppSettings>>(),
             sp.GetRequiredService<ILogger<TProgram>>()));
 
         // Register default IMongoDatabase resolved from connection string
         services.AddSingleton(sp =>
         {
+            var config = sp.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>();
             var appSettings = sp.GetRequiredService<IOptions<AppSettings>>().Value;
             var client = sp.GetRequiredService<IMongoClient>();
-            var connectionString = appSettings.Infrastructure?.MongoDB?.ConnectionString;
+            
+            // Priority: 1. Aspire/Docker-Compose injected, 2. AppSettings, 3. Fallback
+            var connectionString = config.GetConnectionString("mongodb") 
+                                 ?? appSettings.Infrastructure?.MongoDB?.ConnectionString;
 
             var mongoUrl = new MongoUrl(string.IsNullOrWhiteSpace(connectionString)
-                ? "mongodb://null-mongodb-for-development:27017"
+                ? "mongodb://localhost:27017"
                 : connectionString);
 
             var databaseName = string.IsNullOrWhiteSpace(mongoUrl.DatabaseName)
-                ? "projecttemplate"
+                ? "ProjectTemplate"
                 : mongoUrl.DatabaseName;
 
             return client.GetDatabase(databaseName);
@@ -49,7 +52,7 @@ public static class MongoExtension
         // Register MongoDB repositories and services via Scrutor
         // Scans for all IMongoRepository<T> implementations and registers them
         services.Scan(scan => scan
-            .FromAssembliesOf(typeof(DataAssemblyMarker))
+            .FromAssembliesOf(typeof(MongoRepository<>))
             .AddClasses(classes => classes.AssignableTo(typeof(IMongoRepository<>)))
             .AsMatchingInterface()
             .WithScopedLifetime()
@@ -60,7 +63,7 @@ public static class MongoExtension
 
         // Register MongoDB-backed services (e.g., CustomerReviewService → ICustomerReviewService)
         services.Scan(scan => scan
-            .FromAssembliesOf(typeof(ApplicationAssemblyMarker))
+            .FromAssembliesOf(typeof(Application.Services.CustomerReviewService))
             .AddClasses(classes => classes.AssignableTo<ICustomerReviewService>())
             .AsImplementedInterfaces()
             .WithScopedLifetime()
@@ -70,6 +73,7 @@ public static class MongoExtension
     }
 
     private static IMongoClient CreateMongoClient<TProgram>(
+        Microsoft.Extensions.Configuration.IConfiguration config,
         IOptions<AppSettings> settings,
         ILogger<TProgram> logger)
     {
@@ -78,7 +82,8 @@ public static class MongoExtension
 
         try
         {
-            var connectionString = appSettings.Infrastructure?.MongoDB?.ConnectionString;
+            var connectionString = config.GetConnectionString("mongodb") 
+                                 ?? appSettings.Infrastructure?.MongoDB?.ConnectionString;
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 logger.LogWarning("MongoDB connection string is empty.");
@@ -88,8 +93,8 @@ public static class MongoExtension
                     throw new InvalidOperationException("MongoDB connection string cannot be empty in production.");
                 }
 
-                logger.LogWarning("Using null MongoDB client for development.");
-                return new MongoClient("mongodb://null-mongodb-for-development:27017");
+                logger.LogWarning("Using localhost MongoDB client for development.");
+                return new MongoClient("mongodb://localhost:27017");
             }
 
             var mongoUrl = new MongoUrl(connectionString);
@@ -114,8 +119,8 @@ public static class MongoExtension
                 throw;
             }
 
-            logger.LogWarning("Returning fallback MongoClient for development.");
-            return new MongoClient("mongodb://null-mongodb-for-development:27017");
+            logger.LogWarning("Returning fallback localhost MongoClient for development.");
+            return new MongoClient("mongodb://localhost:27017");
         }
     }
 }
