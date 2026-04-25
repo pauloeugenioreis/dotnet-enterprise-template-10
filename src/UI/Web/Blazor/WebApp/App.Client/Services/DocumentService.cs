@@ -1,18 +1,44 @@
 using BlazorApp.Client.Services.Base;
 using ProjectTemplate.Shared.Models;
+using System.Net.Http.Json;
 
 namespace BlazorApp.Client.Services;
 
 public interface IDocumentService
 {
-    Task<PagedResponse<DocumentResponseDto>> GetPagedAsync(int page = 1, int pageSize = 10, CancellationToken ct = default);
+    Task<DocumentUploadResponse> UploadAsync(string fileName, string contentType, Stream stream, CancellationToken ct = default);
+    Task<(Stream Stream, string ContentType)> DownloadAsync(string fileName, CancellationToken ct = default);
+    Task DeleteAsync(string fileName, CancellationToken ct = default);
 }
 
 public class DocumentService(IHttpClientFactory httpClientFactory, LocalStorageService localStorage) 
     : BaseService(httpClientFactory, localStorage, "api/v1/document"), IDocumentService
 {
-    public Task<PagedResponse<DocumentResponseDto>> GetPagedAsync(int page = 1, int pageSize = 10, CancellationToken ct = default)
+    public async Task<DocumentUploadResponse> UploadAsync(string fileName, string contentType, Stream stream, CancellationToken ct = default)
     {
-        return GetAsync<PagedResponse<DocumentResponseDto>>($"{ResourcePath}?pageNumber={page}&pageSize={pageSize}", ct);
+        await AddAuthHeaderAsync();
+        var content = new MultipartFormDataContent();
+        var fileContent = new StreamContent(stream);
+        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+        content.Add(fileContent, "file", fileName);
+
+        var response = await Http.PostAsync($"{ResourcePath}/upload", content, ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<DocumentUploadResponse>(cancellationToken: ct) ?? new();
+    }
+
+    public async Task<(Stream Stream, string ContentType)> DownloadAsync(string fileName, CancellationToken ct = default)
+    {
+        await AddAuthHeaderAsync();
+        var response = await Http.GetAsync($"{ResourcePath}/{fileName}", ct);
+        response.EnsureSuccessStatusCode();
+        var stream = await response.Content.ReadAsStreamAsync(ct);
+        var contentType = response.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";
+        return (stream, contentType);
+    }
+
+    public async Task DeleteAsync(string fileName, CancellationToken ct = default)
+    {
+        await DeleteRequestAsync($"{ResourcePath}/{fileName}", ct);
     }
 }

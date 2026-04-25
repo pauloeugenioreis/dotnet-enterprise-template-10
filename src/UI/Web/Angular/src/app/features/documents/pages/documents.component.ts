@@ -1,17 +1,67 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+import { FormsModule } from '@angular/forms';
+import { DocumentService } from '../../../core/services/data-services';
+
 @Component({
   selector: 'app-documents',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './documents.component.html'
 })
 export class DocumentsComponent {
-  mockDocs = [
-    { name: 'Contrato_SLA_Enterprise.pdf', size: '2.4 MB', date: '22/04/2026' },
-    { name: 'Relatorio_Faturamento_Q1.pdf', size: '1.8 MB', date: '20/04/2026' },
-    { name: 'Manual_Usuario_v2.pdf', size: '4.2 MB', date: '15/04/2026' },
-    { name: 'Termos_Privacidade.pdf', size: '0.8 MB', date: '10/04/2026' },
-  ];
+  private documentService = inject(DocumentService);
+  
+  fileName = signal('');
+  uploading = signal(false);
+  processing = signal(false);
+
+  onFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.uploadFile(file);
+    }
+  }
+
+  uploadFile(file: File) {
+    this.uploading.set(true);
+    this.documentService.upload(file).subscribe({
+      next: (res) => {
+        this.fileName.set(res.fileName);
+        this.uploading.set(false);
+        // Toast success logic could go here
+      },
+      error: () => this.uploading.set(false)
+    });
+  }
+
+  downloadFile() {
+    if (!this.fileName()) return;
+    this.processing.set(true);
+    this.documentService.download(this.fileName()).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = this.fileName();
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.processing.set(false);
+      },
+      error: () => this.processing.set(false)
+    });
+  }
+
+  deleteFile() {
+    if (!this.fileName()) return;
+    this.processing.set(true);
+    this.documentService.delete(this.fileName()).subscribe({
+      next: () => {
+        this.fileName.set('');
+        this.processing.set(false);
+      },
+      error: () => this.processing.set(false)
+    });
+  }
 }

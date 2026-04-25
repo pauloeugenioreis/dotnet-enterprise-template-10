@@ -79,3 +79,14 @@ export const auditService = {
     return apiClient.get(url).then(res => res.data);
   },
 };
+export const documentService = {
+  upload: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient.post('/api/v1/Document/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then(res => res.data);
+  },
+  download: (fileName: string) => apiClient.get(`/api/v1/Document/${fileName}`, { responseType: 'blob' }),
+  delete: (fileName: string) => apiClient.delete(`/api/v1/Document/${fileName}`),
+};

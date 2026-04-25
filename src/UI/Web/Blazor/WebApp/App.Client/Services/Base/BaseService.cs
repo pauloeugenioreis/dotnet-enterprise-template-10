@@ -8,7 +8,7 @@ public abstract class BaseService(IHttpClientFactory httpClientFactory, LocalSto
     protected readonly HttpClient Http = httpClientFactory.CreateClient("ApiGateway");
     protected readonly string? ResourcePath = resourcePath;
 
-    private async Task AddAuthHeaderAsync()
+    protected async Task AddAuthHeaderAsync()
     {
         try 
         {

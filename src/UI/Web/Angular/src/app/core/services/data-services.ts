@@ -80,3 +80,19 @@ export class AuditService extends BaseService {
     return this.http.get<PagedResponse<DomainEvent>>(url);
   }
 }
+@Injectable({ providedIn: 'root' })
+export class DocumentService extends BaseService {
+  upload(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<any>(`${this.baseUrl}/api/v1/Document/upload`, formData);
+  }
+
+  download(fileName: string) {
+    return this.http.get(`${this.baseUrl}/api/v1/Document/${fileName}`, { responseType: 'blob' });
+  }
+
+  delete(fileName: string) {
+    return this.http.delete(`${this.baseUrl}/api/v1/Document/${fileName}`);
+  }
+}

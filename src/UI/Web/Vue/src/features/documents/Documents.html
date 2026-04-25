@@ -1,4 +1,4 @@
-<div class="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-4xl mx-auto">
+<div class="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-4xl mx-auto py-10">
   <div class="mb-16 text-center">
     <h1 class="text-6xl font-black text-gray-900 tracking-tighter">Cloud Storage</h1>
     <p class="text-gray-500 mt-4 font-medium text-xl">Upload, download e gerenciamento direto de arquivos.</p>
@@ -8,23 +8,20 @@
     <!-- Upload Section -->
     <div class="bg-white p-12 rounded-[3.5rem] shadow-2xl shadow-gray-200/60 border border-gray-50 flex flex-col items-center gap-8 group">
       <div class="w-32 h-32 bg-primary-50 rounded-[2.5rem] flex items-center justify-center text-primary-600 transition-transform group-hover:scale-110 duration-500">
-        @if (uploading()) {
-          <div class="w-12 h-12 border-4 border-primary-100 border-t-primary-600 rounded-full animate-spin"></div>
-        } @else {
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-          </svg>
-        }
+        <div v-if="uploading" class="w-12 h-12 border-4 border-primary-100 border-t-primary-600 rounded-full animate-spin"></div>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
       </div>
       
       <div class="text-center">
         <h3 class="text-2xl font-black text-gray-900 mb-2">Novo Upload</h3>
-        <p class="text-gray-400 text-sm font-medium">Arraste ou selecione um arquivo</p>
+        <p class="text-gray-400 text-sm font-medium">Selecione um arquivo para subir</p>
       </div>
 
-      <label class="w-full">
-        <input type="file" class="hidden" (change)="onFileSelected($event)" [disabled]="uploading()">
-        <div class="w-full py-5 bg-gray-900 text-white rounded-2xl font-black text-center cursor-pointer hover:bg-black transition-all shadow-lg shadow-gray-200 active:scale-95">
+      <label class="w-full cursor-pointer">
+        <input type="file" class="hidden" @change="handleFileSelected" :disabled="uploading">
+        <div class="w-full py-5 bg-gray-900 text-white rounded-2xl font-black text-center hover:bg-black transition-all shadow-lg shadow-gray-200 active:scale-95">
           Selecionar Arquivo
         </div>
       </label>
@@ -41,16 +38,16 @@
         <div class="relative">
           <input 
             type="text" 
-            [(ngModel)]="fileName"
+            v-model="fileName"
             placeholder="ex: contrato_v1.pdf"
-            class="w-full px-6 py-5 bg-gray-50 border-none rounded-2xl font-bold text-gray-700 placeholder:text-gray-300 focus:ring-2 focus:ring-primary-500 transition-all"
+            class="w-full px-6 py-5 bg-gray-50 border-none rounded-2xl font-bold text-gray-700 placeholder:text-gray-300 focus:ring-2 focus:ring-primary-500 transition-all outline-none"
           >
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <button 
-            (click)="downloadFile()"
-            [disabled]="!fileName() || processing()"
+            @click="handleDownload"
+            :disabled="!fileName || processing"
             class="py-5 bg-primary-50 text-primary-600 rounded-2xl font-black hover:bg-primary-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -60,8 +57,8 @@
           </button>
           
           <button 
-            (click)="deleteFile()"
-            [disabled]="!fileName() || processing()"
+            @click="handleDelete"
+            :disabled="!fileName || processing"
             class="py-5 bg-rose-50 text-rose-600 rounded-2xl font-black hover:bg-rose-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -72,12 +69,10 @@
         </div>
       </div>
 
-      @if (processing()) {
-        <div class="flex items-center justify-center gap-3 text-primary-600 font-bold animate-pulse">
-          <div class="w-2 h-2 bg-primary-600 rounded-full"></div>
-          Processando...
-        </div>
-      }
+      <div v-if="processing" class="flex items-center justify-center gap-3 text-primary-600 font-bold animate-pulse">
+        <div class="w-2 h-2 bg-primary-600 rounded-full"></div>
+        Processando...
+      </div>
     </div>
   </div>
 </div>

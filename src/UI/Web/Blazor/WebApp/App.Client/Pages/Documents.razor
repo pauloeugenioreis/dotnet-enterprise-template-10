@@ -2,225 +2,152 @@
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
 @using BlazorApp.Client.Services
-@using BlazorApp.Components.UI
 @using ProjectTemplate.Shared.Models
+@using System.IO
 @inject IDocumentService DocumentService
+@inject IJSRuntime JSRuntime
 @rendermode InteractiveAuto
 
-<div class="mb-8 flex justify-between items-end">
-    <div>
-        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Documentos</h1>
-        <p class="text-gray-500 mt-2">Armazene e compartilhe arquivos com segurança.</p>
+<div class="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-4xl mx-auto">
+    <div class="mb-16 text-center">
+        <h1 class="text-6xl font-black text-gray-900 tracking-tighter">Cloud Storage</h1>
+        <p class="text-gray-500 mt-4 font-medium text-xl">Upload, download e gerenciamento direto de arquivos.</p>
     </div>
-    <button class="bg-primary-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0l-4-4m4 4V4" />
-        </svg>
-        Upload de Arquivo
-    </button>
-</div>
 
-<div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-    <!-- Storage Sidebar -->
-    <div class="lg:col-span-1 space-y-6">
-        <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
-            <h3 class="font-bold text-gray-800 mb-4">Armazenamento</h3>
-            <div class="relative pt-1">
-                <div class="flex mb-2 items-center justify-between">
-                    <div>
-                        <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-primary-600 bg-primary-50">
-                            75% Usado
-                        </span>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-xs font-semibold inline-block text-primary-600">
-                            15.2 GB / 20 GB
-                        </span>
-                    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <!-- Upload Section -->
+        <div class="bg-white p-12 rounded-[3.5rem] shadow-2xl shadow-gray-200/60 border border-gray-50 flex flex-col items-center gap-8 group">
+            <div class="w-32 h-32 bg-primary-50 rounded-[2.5rem] flex items-center justify-center text-primary-600 transition-transform group-hover:scale-110 duration-500">
+                @if (uploading)
+                {
+                    <div class="w-12 h-12 border-4 border-primary-100 border-t-primary-600 rounded-full animate-spin"></div>
+                }
+                else
+                {
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                }
+            </div>
+            
+            <div class="text-center">
+                <h3 class="text-2xl font-black text-gray-900 mb-2">Novo Upload</h3>
+                <p class="text-gray-400 text-sm font-medium">Selecione um arquivo para subir</p>
+            </div>
+
+            <label class="w-full">
+                <InputFile OnChange="HandleFileSelected" class="hidden" disabled="@uploading" />
+                <div class="w-full py-5 bg-gray-900 text-white rounded-2xl font-black text-center cursor-pointer hover:bg-black transition-all shadow-lg shadow-gray-200 active:scale-95">
+                    Selecionar Arquivo
                 </div>
-                <div class="overflow-hidden h-2 mb-4 text-xs flex rounded-full bg-gray-100">
-                    <div style="width:75%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary-600"></div>
+            </label>
+        </div>
+
+        <!-- Management Section -->
+        <div class="bg-white p-12 rounded-[3.5rem] shadow-2xl shadow-gray-200/60 border border-gray-50 flex flex-col gap-8">
+            <div>
+                <h3 class="text-2xl font-black text-gray-900 mb-2">Gerenciar Arquivo</h3>
+                <p class="text-gray-400 text-sm font-medium">Digite o nome do arquivo para as ações</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        @bind="fileName"
+                        placeholder="ex: contrato_v1.pdf"
+                        class="w-full px-6 py-5 bg-gray-50 border-none rounded-2xl font-bold text-gray-700 placeholder:text-gray-300 focus:ring-2 focus:ring-primary-500 transition-all"
+                    >
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <button 
+                        @onclick="HandleDownload"
+                        disabled="@(string.IsNullOrEmpty(fileName) || processing)"
+                        class="py-5 bg-primary-50 text-primary-600 rounded-2xl font-black hover:bg-primary-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download
+                    </button>
+                    
+                    <button 
+                        @onclick="HandleDelete"
+                        disabled="@(string.IsNullOrEmpty(fileName) || processing)"
+                        class="py-5 bg-rose-50 text-rose-600 rounded-2xl font-black hover:bg-rose-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Deletar
+                    </button>
                 </div>
             </div>
-            <p class="text-[10px] text-gray-400 leading-relaxed italic">Você está quase atingindo o limite do seu plano Enterprise.</p>
-        </div>
 
-        <div class="bg-gray-900 p-6 rounded-[2rem] shadow-xl text-white relative overflow-hidden group">
-            <div class="absolute -right-8 -top-8 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"></div>
-            <h3 class="font-bold text-lg mb-2 relative z-10">Precisa de mais?</h3>
-            <p class="text-gray-400 text-xs mb-4 relative z-10">Faça upgrade para o plano Ilimitado e tenha espaço infinito.</p>
-            <button class="w-full py-2 bg-white text-gray-900 text-xs font-black rounded-xl hover:bg-gray-100 transition-all relative z-10">Upgrade Now</button>
-        </div>
-    </div>
-
-    <!-- Files Table -->
-    <div class="lg:col-span-3">
-        <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
-            @if (documents == null)
+            @if (processing)
             {
-                <div class="p-20 flex flex-col items-center justify-center gap-4">
-                    <div class="w-12 h-12 border-4 border-primary-100 border-t-primary-600 rounded-full animate-spin"></div>
-                    <p class="text-gray-400 text-sm font-medium">Lendo arquivos...</p>
+                <div class="flex items-center justify-center gap-3 text-primary-600 font-bold animate-pulse">
+                    <div class="w-2 h-2 bg-primary-600 rounded-full"></div>
+                    Processando...
                 </div>
-            }
-            else
-            {
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="text-[11px] uppercase tracking-wider text-gray-400 border-b border-gray-100 bg-gray-50/30">
-                                <th class="px-8 py-5 font-bold">Arquivo</th>
-                                <th class="px-8 py-5 font-bold">Tipo</th>
-                                <th class="px-8 py-5 font-bold">Tamanho</th>
-                                <th class="px-8 py-5 font-bold">Última Modif.</th>
-                                <th class="px-8 py-5 font-bold"></th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-50">
-                            @foreach (var doc in documents.Items)
-                            {
-                                <tr class="hover:bg-gray-50/50 transition-all group">
-                                    <td class="px-8 py-5">
-                                        <div class="flex items-center gap-4">
-                                            <div class="w-10 h-10 @GetFileIconBg(doc.Type) rounded-xl flex items-center justify-center @GetFileIconColor(doc.Type) shadow-sm group-hover:scale-110 transition-transform">
-                                                @GetFileIcon(doc.Type)
-                                            </div>
-                                            <div>
-                                                <p class="font-bold text-gray-800 text-sm">@doc.Name</p>
-                                                <p class="text-[10px] text-gray-400">@doc.Category</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-8 py-5">
-                                        <span class="text-xs text-gray-500 font-mono uppercase">@doc.Type</span>
-                                    </td>
-                                    <td class="px-8 py-5">
-                                        <span class="text-xs text-gray-500">@FormatSize(doc.Size)</span>
-                                    </td>
-                                    <td class="px-8 py-5">
-                                        <span class="text-xs text-gray-500">@doc.CreatedAt.ToString("dd/MM/yyyy")</span>
-                                    </td>
-                                    <td class="px-8 py-5 text-right">
-                                        <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button class="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                </svg>
-                                            </button>
-                                            <button class="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-
-                <Pagination 
-                    T="DocumentResponseDto"
-                    CurrentPage="@currentPage"
-                    TotalPages="@documents.TotalPages"
-                    HasNextPage="@documents.HasNextPage"
-                    HasPreviousPage="@documents.HasPreviousPage"
-                    OnPageChanged="ChangePage" />
             }
         </div>
     </div>
 </div>
 
 @code {
-    private PagedResponse<DocumentResponseDto>? documents;
-    private int currentPage = 1;
+    private string? fileName;
+    private bool uploading;
+    private bool processing;
 
-    protected override async Task OnInitializedAsync()
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
-        await LoadDocuments();
+        var file = e.File;
+        if (file != null)
+        {
+            uploading = true;
+            try 
+            {
+                using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10MB
+                var result = await DocumentService.UploadAsync(file.Name, file.ContentType, stream);
+                fileName = result.FileName;
+            }
+            finally 
+            {
+                uploading = false;
+            }
+        }
     }
 
-    private async Task LoadDocuments()
+    private async Task HandleDownload()
     {
-        documents = null;
+        if (string.IsNullOrEmpty(fileName)) return;
+        processing = true;
         try 
         {
-            documents = await DocumentService.GetPagedAsync(currentPage, 10);
+            var (stream, contentType) = await DocumentService.DownloadAsync(fileName);
+            using var streamRef = new DotNetStreamReference(stream: stream);
+            await JSRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
         }
-        catch (Exception)
+        finally 
         {
-            documents = GetMockDocuments();
+            processing = false;
         }
     }
 
-    private async Task ChangePage(int newPage)
+    private async Task HandleDelete()
     {
-        currentPage = newPage;
-        await LoadDocuments();
-    }
-
-    private string FormatSize(long bytes)
-    {
-        string[] skus = { "B", "KB", "MB", "GB" };
-        double len = bytes;
-        int add = 0;
-        while (len >= 1024 && add < skus.Length - 1)
+        if (string.IsNullOrEmpty(fileName)) return;
+        processing = true;
+        try 
         {
-            add++;
-            len /= 1024;
+            await DocumentService.DeleteAsync(fileName);
+            fileName = null;
         }
-        return $"{len:0.##} {skus[add]}";
-    }
-
-    private RenderFragment GetFileIcon(string type) => builder =>
-    {
-        switch (type?.ToLower())
+        finally 
         {
-            case "pdf":
-                builder.AddMarkupContent(0, "<svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z' /></svg>");
-                break;
-            case "xls":
-            case "xlsx":
-                builder.AddMarkupContent(0, "<svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 00-2-2V5a2 2 0 002-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 00-2 2z' /></svg>");
-                break;
-            default:
-                builder.AddMarkupContent(0, "<svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' /></svg>");
-                break;
+            processing = false;
         }
-    };
-
-    private string GetFileIconBg(string type) => type?.ToLower() switch
-    {
-        "pdf" => "bg-rose-50",
-        "xls" or "xlsx" => "bg-emerald-50",
-        "png" or "jpg" => "bg-indigo-50",
-        _ => "bg-gray-50"
-    };
-
-    private string GetFileIconColor(string type) => type?.ToLower() switch
-    {
-        "pdf" => "text-rose-600",
-        "xls" or "xlsx" => "text-emerald-600",
-        "png" or "jpg" => "text-indigo-600",
-        _ => "text-gray-600"
-    };
-
-    private PagedResponse<DocumentResponseDto> GetMockDocuments()
-    {
-        return new PagedResponse<DocumentResponseDto>
-        {
-            Items = new List<DocumentResponseDto>
-            {
-                new() { Name = "Relatório Anual 2025", Type = "pdf", Size = 1024 * 1024 * 5, Category = "Finanças", CreatedAt = DateTime.Now.AddDays(-1) },
-                new() { Name = "Planilha de Vendas Q1", Type = "xls", Size = 1024 * 512, Category = "Vendas", CreatedAt = DateTime.Now.AddDays(-3) },
-                new() { Name = "Logo Enterprise HighRes", Type = "png", Size = 1024 * 2048, Category = "Branding", CreatedAt = DateTime.Now.AddDays(-7) },
-                new() { Name = "Contrato de Prestação de Serviços", Type = "pdf", Size = 1024 * 128, Category = "Jurídico", CreatedAt = DateTime.Now.AddDays(-15) }
-            },
-            TotalCount = 4,
-            TotalPages = 1,
-            PageNumber = 1,
-            PageSize = 10
-        };
     }
 }
