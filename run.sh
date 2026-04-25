@@ -24,7 +24,7 @@ clean_environment() {
         
         if [ ! -z "$cont_ids" ]; then
             for id in $cont_ids; do
-                echo -e "  - Removendo container teimoso ($id) na porta $port"
+                echo -e "  - Removendo container ($id) na porta $port"
                 docker rm -f $id > /dev/null 2>&1
             done
         fi
@@ -60,18 +60,36 @@ clean_environment() {
 
 # --- BANCO DE DADOS DINÂMICO ---
 select_database() {
-    echo ""
-    echo -e "${YELLOW}==========================================${NC}"
-    echo -e "${YELLOW}  SELECIONE O BANCO DE DADOS PRINCIPAL    ${NC}"
-    echo -e "${YELLOW}==========================================${NC}"
-    echo "1) PostgreSQL (Padrão)"
-    echo "2) SQL Server"
-    echo "3) MySQL"
-    echo "4) Oracle"
-    echo "=========================================="
-    read -p "Escolha uma opção [1-4]: " db_opt
+    # Verifica quais bancos estão presentes no docker-compose.yml
+    HAS_POSTGRES=$(grep -q "postgres:" docker-compose.yml && echo "yes" || echo "no")
+    HAS_MSSQL=$(grep -q "mssql:" docker-compose.yml && echo "yes" || echo "no")
+    HAS_MYSQL=$(grep -q "mysql:" docker-compose.yml && echo "yes" || echo "no")
+    HAS_ORACLE=$(grep -q "oracle:" docker-compose.yml && echo "yes" || echo "no")
 
-    case $db_opt in
+    AVAILABLE_DBS=""
+    [ "$HAS_POSTGRES" == "yes" ] && AVAILABLE_DBS="$AVAILABLE_DBS 1"
+    [ "$HAS_MSSQL" == "yes" ] && AVAILABLE_DBS="$AVAILABLE_DBS 2"
+    [ "$HAS_MYSQL" == "yes" ] && AVAILABLE_DBS="$AVAILABLE_DBS 3"
+    [ "$HAS_ORACLE" == "yes" ] && AVAILABLE_DBS="$AVAILABLE_DBS 4"
+
+    DB_COUNT=$(echo $AVAILABLE_DBS | wc -w)
+
+    if [ "$DB_COUNT" -eq "1" ]; then
+        DB_CHOICE=$(echo $AVAILABLE_DBS | tr -d ' ')
+        echo -e "${CYAN}ℹ️ Banco de dados detectado automaticamente baseado no docker-compose.yml.${NC}"
+    else
+        echo -e "\n=========================================="
+        echo -e "  SELECIONE O BANCO DE DADOS PRINCIPAL    "
+        echo -e "=========================================="
+        echo -e "1) PostgreSQL (Padrão)"
+        echo -e "2) SQL Server"
+        echo -e "3) MySQL"
+        echo -e "4) Oracle"
+        echo -e "=========================================="
+        read -p "Escolha uma opção [1-4]: " DB_CHOICE
+    fi
+
+    case $DB_CHOICE in
         2) 
             DB_TYPE="sqlserver"
             DB_SERVICE="sqlserver"

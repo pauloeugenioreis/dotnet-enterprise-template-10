@@ -22,13 +22,31 @@ show_header() {
 }
 
 check_backend() {
-    # Seleção de Banco de Dados
-    echo -e "\nEscolha o Banco de Dados Principal:"
-    echo -e "1) ${CYAN}PostgreSQL${NC} (Padrão)"
-    echo -e "2) ${CYAN}SQL Server${NC}"
-    echo -e "3) ${CYAN}MySQL${NC}"
-    echo -e "4) ${CYAN}Oracle${NC}"
-    read -p "Escolha uma opção [1-4]: " DB_OPTION
+    # Verifica quais bancos estão presentes no docker-compose.yml
+    HAS_POSTGRES=$(grep -q "postgres:" docker-compose.yml && echo "yes" || echo "no")
+    HAS_MSSQL=$(grep -q "mssql:" docker-compose.yml && echo "yes" || echo "no")
+    HAS_MYSQL=$(grep -q "mysql:" docker-compose.yml && echo "yes" || echo "no")
+    HAS_ORACLE=$(grep -q "oracle:" docker-compose.yml && echo "yes" || echo "no")
+
+    AVAILABLE_DBS=""
+    [ "$HAS_POSTGRES" == "yes" ] && AVAILABLE_DBS="$AVAILABLE_DBS 1"
+    [ "$HAS_MSSQL" == "yes" ] && AVAILABLE_DBS="$AVAILABLE_DBS 2"
+    [ "$HAS_MYSQL" == "yes" ] && AVAILABLE_DBS="$AVAILABLE_DBS 3"
+    [ "$HAS_ORACLE" == "yes" ] && AVAILABLE_DBS="$AVAILABLE_DBS 4"
+
+    DB_COUNT=$(echo $AVAILABLE_DBS | wc -w)
+
+    if [ "$DB_COUNT" -eq "1" ]; then
+        DB_OPTION=$(echo $AVAILABLE_DBS | tr -d ' ')
+        echo -e "${CYAN}ℹ️ Banco de dados detectado automaticamente baseado no docker-compose.yml.${NC}"
+    else
+        echo -e "\nEscolha o Banco de Dados Principal:"
+        echo -e "1) ${CYAN}PostgreSQL${NC} (Padrão)"
+        echo -e "2) ${CYAN}SQL Server${NC}"
+        echo -e "3) ${CYAN}MySQL${NC}"
+        echo -e "4) ${CYAN}Oracle${NC}"
+        read -p "Escolha uma opção [1-4]: " DB_OPTION
+    fi
     
     case $DB_OPTION in
         2) DB_TYPE="sqlserver"; DB_SERVICE="sqlserver";

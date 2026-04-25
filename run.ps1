@@ -25,7 +25,7 @@ function Clean-Environment {
         
         if ($cont_ids) {
             foreach ($id in $cont_ids) {
-                Write-Host "  - Removendo container teimoso ($id) na porta $port"
+                Write-Host "  - Removendo container ($id) na porta $port"
                 docker rm -f $id 2>$null | Out-Null
             }
         }
@@ -95,17 +95,36 @@ function Clean-Environment {
 
 function Select-Database {
     Write-Host ""
-    Write-Host "$($YELLOW)==========================================$($NC)"
-    Write-Host "$($YELLOW)  SELECIONE O BANCO DE DADOS PRINCIPAL    $($NC)"
-    Write-Host "$($YELLOW)==========================================$($NC)"
-    Write-Host "1) PostgreSQL (Padrão)"
-    Write-Host "2) SQL Server"
-    Write-Host "3) MySQL"
-    Write-Host "4) Oracle"
-    Write-Host "=========================================="
-    $db_opt = Read-Host "Escolha uma opção [1-4]"
+    # Verifica quais bancos estão presentes no docker-compose.yml
+    $composeContent = Get-Content "docker-compose.yml" -Raw
+    $hasPostgres = $composeContent -match "postgres:"
+    $hasMssql = $composeContent -match "mssql:"
+    $hasMysql = $composeContent -match "mysql:"
+    $hasOracle = $composeContent -match "oracle:"
 
-    switch ($db_opt) {
+    $availableDbs = @()
+    if ($hasPostgres) { $availableDbs += "1" }
+    if ($hasMssql) { $availableDbs += "2" }
+    if ($hasMysql) { $availableDbs += "3" }
+    if ($hasOracle) { $availableDbs += "4" }
+
+    if ($availableDbs.Count -eq 1) {
+        $dbChoice = $availableDbs[0]
+        Write-Host "ℹ️ Banco de dados detectado automaticamente baseado no docker-compose.yml." -ForegroundColor Cyan
+    }
+    else {
+        Write-Host "`n=========================================="
+        Write-Host "  SELECIONE O BANCO DE DADOS PRINCIPAL    "
+        Write-Host "=========================================="
+        Write-Host "1) PostgreSQL (Padrão)"
+        Write-Host "2) SQL Server"
+        Write-Host "3) MySQL"
+        Write-Host "4) Oracle"
+        Write-Host "=========================================="
+        $dbChoice = Read-Host "Escolha uma opção [1-4]"
+    }
+
+    switch ($dbChoice) {
         "2" {
             $script:DB_TYPE = "sqlserver"
             $script:DB_SERVICE = "sqlserver"

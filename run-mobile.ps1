@@ -14,12 +14,31 @@ function Show-Header {
 
 function Check-Backend {
     # Seleção de Banco de Dados
-    Write-Host "`nEscolha o Banco de Dados Principal:"
-    Write-Host "1) PostgreSQL (Padrão)" -ForegroundColor Cyan
-    Write-Host "2) SQL Server" -ForegroundColor Cyan
-    Write-Host "3) MySQL" -ForegroundColor Cyan
-    Write-Host "4) Oracle" -ForegroundColor Cyan
-    $dbOption = Read-Host "Escolha uma opção [1-4]"
+    # Verifica quais bancos estão presentes no docker-compose.yml
+    $composeContent = Get-Content "docker-compose.yml" -Raw
+    $hasPostgres = $composeContent -match "postgres:"
+    $hasMssql = $composeContent -match "mssql:"
+    $hasMysql = $composeContent -match "mysql:"
+    $hasOracle = $composeContent -match "oracle:"
+
+    $availableDbs = @()
+    if ($hasPostgres) { $availableDbs += "1" }
+    if ($hasMssql) { $availableDbs += "2" }
+    if ($hasMysql) { $availableDbs += "3" }
+    if ($hasOracle) { $availableDbs += "4" }
+
+    if ($availableDbs.Count -eq 1) {
+        $dbOption = $availableDbs[0]
+        Write-Host "ℹ️ Banco de dados detectado automaticamente baseado no docker-compose.yml." -ForegroundColor Cyan
+    }
+    else {
+        Write-Host "`nEscolha o Banco de Dados Principal:"
+        Write-Host "1) PostgreSQL (Padrão)" -ForegroundColor Cyan
+        Write-Host "2) SQL Server" -ForegroundColor Cyan
+        Write-Host "3) MySQL" -ForegroundColor Cyan
+        Write-Host "4) Oracle" -ForegroundColor Cyan
+        $dbOption = Read-Host "Escolha uma opção [1-4]"
+    }
     
     $dbType = switch ($dbOption) {
         "2" { "sqlserver" }

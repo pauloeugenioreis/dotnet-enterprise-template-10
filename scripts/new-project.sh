@@ -476,10 +476,9 @@ else:
 
 if '$EVENTSOURCING' == 'yes':
     infra['EventSourcing']['Enabled'] = True
-    infra['EventSourcing']['ConnectionString'] = 'Host=localhost;Database=${PROJECT_NAME}Events;Username=postgres;Password=postgres;Port=5432'
+    infra['EventSourcing']['ConnectionString'] = 'Host=localhost;Database=' + '$PROJECT_NAME' + 'Events;Username=postgres;Password=postgres;Port=5434'
 else:
     infra['EventSourcing']['Enabled'] = False
-    infra['EventSourcing']['ConnectionString'] = 'Host=localhost;Database=${PROJECT_NAME}Events;Username=postgres;Password=postgres;Port=5432'
 with open('$APPSETTINGS', 'w') as f:
     json.dump(data, f, indent=2, ensure_ascii=False)
 "
@@ -514,8 +513,13 @@ else
     fi
 
     # Event Sourcing
-    json_set "Enabled" "true" "$APPSETTINGS"
-    json_set "ConnectionString" "Host=localhost;Database=${PROJECT_NAME}Events;Username=postgres;Password=postgres;Port=5432" "$APPSETTINGS"
+    if [ "$EVENTSOURCING" = "yes" ]; then
+        # Use a more specific replacement for EventSourcing ConnectionString to avoid global sed issues
+        sed -i "/\"EventSourcing\":/,/}/ s|\"Enabled\": *[^,}]*|\"Enabled\": true|" "$APPSETTINGS"
+        sed -i "/\"EventSourcing\":/,/}/ s|\"ConnectionString\": *\"[^\"]*\"|\"ConnectionString\": \"Host=localhost;Database=${PROJECT_NAME}Events;Username=postgres;Password=postgres;Port=5434\"|" "$APPSETTINGS"
+    else
+        sed -i "/\"EventSourcing\":/,/}/ s|\"Enabled\": *[^,}]*|\"Enabled\": false|" "$APPSETTINGS"
+    fi
 fi
 
 # Remove database-specific appsettings files that don't match
@@ -828,7 +832,7 @@ COMPOSE_TELEMETRY
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - postgres-events-data:/var/lib/postgresql/data
     networks:
@@ -876,7 +880,7 @@ COMPOSE_REDIS
       - AppSettings__Infrastructure__Database__DatabaseType=$DATABASE
       - AppSettings__Infrastructure__Database__ConnectionString=$DB_CONN
       - AppSettings__Infrastructure__EventSourcing__Enabled=$( [ "$EVENTSOURCING" = "yes" ] && echo "true" || echo "false" )
-      - AppSettings__Infrastructure__EventSourcing__ConnectionString=$DB_EVENTS_CONN
+      - AppSettings__Infrastructure__EventSourcing__ConnectionString=Host=postgres-events;Database=${PROJECT_NAME}Events;Username=postgres;Password=postgres;Port=5432
       - AppSettings__Infrastructure__Redis__ConnectionString=redis:6379
       - AppSettings__Infrastructure__RabbitMQ__ConnectionString=amqp://guest:guest@rabbitmq:5672
       - AppSettings__Infrastructure__MongoDB__ConnectionString=mongodb://admin:admin@mongo:27017/$PROJECT_NAME
