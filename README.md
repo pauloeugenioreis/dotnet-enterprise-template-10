@@ -8,8 +8,8 @@
 [![Testcontainers](https://img.shields.io/badge/Testcontainers-Latest-2496ED?logo=docker&logoColor=white)](docs/TESTING-DATABASES.md)
 [![Polly](https://img.shields.io/badge/Polly-v8-9B4F96?logo=polly&logoColor=white)](docs/FEATURES.md)
 [![RabbitMQ](https://img.shields.io/badge/RabbitMQ-7-FF6600?logo=rabbitmq&logoColor=white)](docs/FEATURES.md)
-[![SQL Server](https://img.shields.io/badge/SQL_Server-2022-CC2927?logo=microsoftsqlserver&logoColor=white)](docs/ORM-GUIDE.md)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)](docs/ORM-GUIDE.md)
+[![SQL Server](https://img.shields.io/badge/SQL_Server-2022-CC2927?logo=microsoftsqlserver&logoColor=white)](docs/ORM-GUIDE.md)
 [![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white)](docs/ORM-GUIDE.md)
 [![Oracle](https://img.shields.io/badge/Oracle-Free-F80000?logo=oracle&logoColor=white)](docs/ORM-GUIDE.md)
 [![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?logo=mongodb&logoColor=white)](docs/FEATURES.md)
@@ -234,8 +234,8 @@ Edite `src/Server/Api/appsettings.json` e ajuste a connection string:
     "AppSettings": {
         "Infrastructure": {
             "Database": {
-                "DatabaseType": "InMemory",
-                "ConnectionString": ""
+                "DatabaseType": "PostgreSQL",
+                "ConnectionString": "Host=localhost;Port=5433;Database=MeuProjeto;Username=postgres;Password=PostgresPass123;"
             }
         }
     }

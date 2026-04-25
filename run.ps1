@@ -148,6 +148,10 @@ switch ($choice) {
     "1" {
         Select-Database
         Clean-Environment
+
+        # Define o nome do projeto baseado no diretório atual (necessário para o docker-compose)
+        $env:PROJECT_NAME = Split-Path (Get-Location) -Leaf
+
         Write-Host "`n$($GREEN)🚀 Iniciando via Docker Compose com $script:DB_TYPE...$($NC)"
         
         $DB_CONTAINERS = $script:DB_SERVICE
@@ -162,7 +166,24 @@ switch ($choice) {
         $env:DB_CONNECTION_STRING = $script:DB_CONN
         $env:DB_EVENTS_CONNECTION_STRING = $script:DB_EVENTS_CONN
 
-        docker-compose up -d --build $DB_CONTAINERS redis rabbitmq mongodb jaeger prometheus grafana api angular-web react-web vue-web blazor-app welcome
+        # Inicia apenas os serviços que existem no docker-compose.yml
+        # Isso garante que no template ele respeite o banco escolhido, 
+        # e no projeto gerado ele funcione mesmo com serviços removidos.
+        $CORE_SERVICES = @("api", "redis", "rabbitmq", "mongodb", "jaeger", "prometheus", "grafana", "angular-web", "react-web", "vue-web", "blazor-app")
+        $composeContent = Get-Content "docker-compose.yml" -Raw
+        $START_LIST = @()
+        
+        # Adiciona containers de banco se existirem no compose
+        foreach ($service in $DB_CONTAINERS.Split(" ")) {
+            if ($composeContent -match "^  $service:") { $START_LIST += $service }
+        }
+        # Adiciona demais serviços se existirem no compose
+        foreach ($service in $CORE_SERVICES) {
+            if ($composeContent -match "^  $service:") { $START_LIST += $service }
+        }
+
+        # Inicia apenas os serviços identificados
+        docker-compose up -d --build $START_LIST
         
         Write-Host "`n$($BLUE)----------------------------------------------------------------$($NC)"
         Write-Host "$($GREEN)🚀 Ambiente Docker Iniciado!$($NC)"
@@ -171,16 +192,22 @@ switch ($choice) {
         Write-Host "$($CYAN)Aguardando serviços subirem... aqui estão os links de acesso:$($NC)"
         Write-Host "🚀 Aplicações (Frontends & API)"
         Write-Host "API (.NET 10):       http://localhost:5000"
-        Write-Host "Angular:             http://localhost:4200"
-        Write-Host "React:               http://localhost:5173"
-        Write-Host "Vue:                 http://localhost:5174"
-        Write-Host "Blazor WebApp:       http://localhost:5188"
+        
+        if (Test-Path "src/UI/Web/Angular") { Write-Host "Angular:             http://localhost:4200" }
+        if (Test-Path "src/UI/Web/React") { Write-Host "React:               http://localhost:5173" }
+        if (Test-Path "src/UI/Web/Vue") { Write-Host "Vue:                 http://localhost:5174" }
+        if (Test-Path "src/UI/Web/Blazor") { Write-Host "Blazor WebApp:       http://localhost:5188" }
+        
         Write-Host " "
         Write-Host "📊 Observabilidade & Infraestrutura"
-        Write-Host "Grafana:             http://localhost:3000"
-        Write-Host "Jaeger:              http://localhost:16686"
-        Write-Host "RabbitMQ Management: http://localhost:15672"
-        Write-Host "Prometheus:          http://localhost:9090"
+        
+        # Verifica serviços de infra no docker-compose.yml
+        $composeContent = Get-Content "docker-compose.yml" -Raw
+        if ($composeContent -match "grafana:") { Write-Host "Grafana:             http://localhost:3000" }
+        if ($composeContent -match "jaeger:") { Write-Host "Jaeger:              http://localhost:16686" }
+        if ($composeContent -match "rabbitmq:") { Write-Host "RabbitMQ Management: http://localhost:15672" }
+        if ($composeContent -match "prometheus:") { Write-Host "Prometheus:          http://localhost:9090" }
+        
         Write-Host "$($BLUE)----------------------------------------------------------------$($NC)"
 
         Write-Host "`n$($YELLOW)⏳ Verificando saúde da API... (isso pode levar um minuto)$($NC)"

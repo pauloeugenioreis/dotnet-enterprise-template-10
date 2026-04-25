@@ -114,6 +114,10 @@ case $choice in
     1)
         select_database
         clean_environment
+        
+        # Define o nome do projeto baseado no diretório atual (necessário para o docker-compose)
+        export PROJECT_NAME=$(basename "$(pwd)")
+        
         echo -e "\n${GREEN}🚀 Iniciando via Docker Compose com $DB_TYPE...${NC}"
         
         # Determina containers de banco
@@ -124,10 +128,34 @@ case $choice in
             DB_CONTAINERS="postgres postgres-events"
         fi
 
+        # Inicia apenas os serviços que existem no docker-compose.yml
+        # Isso garante que no template ele respeite o banco escolhido, 
+        # e no projeto gerado ele funcione mesmo com serviços removidos.
+        CORE_SERVICES="api redis rabbitmq mongodb jaeger prometheus grafana angular-web react-web vue-web blazor-app"
+        START_LIST=""
+        for service in $DB_CONTAINERS $CORE_SERVICES; do
+            if grep -q "^  $service:" docker-compose.yml; then
+                START_LIST="$START_LIST $service"
+            fi
+        done
+
         DB_TYPE=$DB_TYPE \
         DB_CONNECTION_STRING="$DB_CONN" \
         DB_EVENTS_CONNECTION_STRING="$DB_EVENTS_CONN" \
-        docker-compose up -d --build $DB_CONTAINERS redis rabbitmq mongodb jaeger prometheus grafana api angular-web react-web vue-web blazor-app welcome
+
+        echo -e "\n${YELLOW}🛠️ Compilando serviços sequencialmente para garantir estabilidade...${NC}"
+        for service in $START_LIST; do
+            echo -e "${CYAN}Compilando: $service...${NC}"
+            docker-compose build $service
+            if [ $? -ne 0 ]; then
+                echo -e "\n${RED}❌ Falha ao compilar o serviço: $service${NC}"
+                echo -e "${YELLOW}Dica: Tente rodar 'docker-compose build $service' manualmente para ver o erro detalhado.${NC}"
+                exit 1
+            fi
+        done
+
+        echo -e "\n${GREEN}🚀 Subindo containers...${NC}"
+        docker-compose up -d $START_LIST
         
         echo -e "\n${BLUE}----------------------------------------------------------------${NC}"
         echo -e "${GREEN}🚀 Ambiente Docker Iniciado!${NC}"
@@ -136,16 +164,21 @@ case $choice in
         echo -e "${CYAN}Aguardando serviços subirem... aqui estão os links de acesso:${NC}"
         echo -e "🚀 Aplicações (Frontends & API)"
         echo -e "API (.NET 10):       http://localhost:5000"
-        echo -e "Angular:             http://localhost:4200"
-        echo -e "React:               http://localhost:5173"
-        echo -e "Vue:                 http://localhost:5174"
-        echo -e "Blazor WebApp:       http://localhost:5188"
+        
+        [ -d "src/UI/Web/Angular" ] && echo -e "Angular:             http://localhost:4200"
+        [ -d "src/UI/Web/React" ] && echo -e "React:               http://localhost:5173"
+        [ -d "src/UI/Web/Vue" ] && echo -e "Vue:                 http://localhost:5174"
+        [ -d "src/UI/Web/Blazor" ] && echo -e "Blazor WebApp:       http://localhost:5188"
+        
         echo -e " "
         echo -e "📊 Observabilidade & Infraestrutura"
-        echo -e "Grafana:             http://localhost:3000"
-        echo -e "Jaeger:              http://localhost:16686"
-        echo -e "RabbitMQ Management: http://localhost:15672"
-        echo -e "Prometheus:          http://localhost:9090"
+        
+        # Verifica serviços de infra no docker-compose.yml
+        if grep -q "grafana:" docker-compose.yml; then echo -e "Grafana:             http://localhost:3000"; fi
+        if grep -q "jaeger:" docker-compose.yml; then echo -e "Jaeger:              http://localhost:16686"; fi
+        if grep -q "rabbitmq:" docker-compose.yml; then echo -e "RabbitMQ Management: http://localhost:15672"; fi
+        if grep -q "prometheus:" docker-compose.yml; then echo -e "Prometheus:          http://localhost:9090"; fi
+        
         echo -e "${BLUE}----------------------------------------------------------------${NC}"
 
         echo -e "\n${YELLOW}⏳ Verificando saúde da API... (isso pode levar um minuto)${NC}"

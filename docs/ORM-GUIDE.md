@@ -24,7 +24,7 @@ Este documento fornece instruções detalhadas sobre como trocar o ORM padrão (
 
 ## 📋 ORMs Suportados
 
-1. **Entity Framework Core** (✅ Habilitado por Padrão - InMemory/SQL Server)
+1. **Entity Framework Core** (✅ Habilitado por Padrão - PostgreSQL/SQL Server)
 2. **Dapper** (✅ Habilitado por Padrão - Alta Performance)
 3. **ADO.NET** (✅ Habilitado por Padrão - Controle Total)
 4. **NHibernate** (✅ Implementado - Pacotes Comentados)
@@ -45,7 +45,7 @@ Este documento fornece instruções detalhadas sobre como trocar o ORM padrão (
 
 Cada ORM usa sua **interface específica** para evitar conflitos:
 
-- **`IRepository<Product>`** → Entity Framework Core (padrão, InMemory para testes)
+- **`IRepository<Product>`** → Entity Framework Core (padrão, PostgreSQL/SQL Server)
 - **`IProductDapperRepository`** → Dapper (alta performance, SQL Server)
 - **`IProductAdoRepository`** → ADO.NET (controle total, SQL Server)
 
@@ -174,8 +174,8 @@ Essa tabela resume o trade-off de cada opção antes de mergulhar nas seções d
 Entity Framework Core está sempre habilitado como **ORM primário** do projeto.
 
 - **`IRepository<Product>`** sempre resolve para **EF Core**
-- **InMemory** para testes (rápido, sem banco real)
-- **SQL Server** para produção (configurável via `DatabaseType`)
+- **PostgreSQL/SQL Server** para produção (configurável via `DatabaseType`)
+- **InMemory** para testes unitários (rápido, sem banco real)
 
 ### Quando Usar
 
@@ -750,7 +750,7 @@ public class ProductLinq2DbRepository : IRepository<Product>
 
 ### ✅ O que está habilitado por padrão?
 
-1. **Entity Framework Core** - CRUD normal, InMemory em testes
+1. **Entity Framework Core** - CRUD normal, PostgreSQL por padrão
 2. **Dapper** - Queries de alta performance
 3. **ADO.NET** - Controle total sobre SQL
 
@@ -1014,7 +1014,7 @@ Os testes usam **EF Core InMemory** por padrão, independentemente de quantos OR
 ```csharp
 public class ProductServiceTests
 {
-    private readonly Mock<IRepository<Product>> _mockRepo;  // EF Core (InMemory)
+    private readonly Mock<IRepository<Product>> _mockRepo;
 
     [Fact]
     public async Task GetByIdAsync_ReturnsProduct()

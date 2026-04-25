@@ -81,16 +81,16 @@ show_menu() {
 
 show_yesno() {
     local title="$1"
-    local default_yes="${2:-false}"
-
-    local default=2
-    if [ "$default_yes" = "true" ]; then
-        default=1
-    fi
+    local default_is_yes="${2:-false}"
 
     local result
-    result=$(show_menu "$title" "$default" "Sim" "Não")
-    [ "$result" -eq 1 ]
+    if [ "$default_is_yes" = "true" ]; then
+        result=$(show_menu "$title" 1 "Sim" "Não")
+        [ "$result" -eq 1 ]
+    else
+        result=$(show_menu "$title" 1 "Não" "Sim")
+        [ "$result" -eq 2 ]
+    fi
 }
 
 # ============================================================
@@ -168,18 +168,16 @@ if [ "$IS_INTERACTIVE" = true ]; then
 
     write_section "Banco de Dados"
     DB_CHOICE=$(show_menu "Qual banco de dados utilizar?" 1 \
-        "InMemory (sem container Docker)" \
+        "PostgreSQL" \
         "SQL Server" \
         "Oracle" \
-        "PostgreSQL" \
         "MySQL")
 
     case $DB_CHOICE in
-        1) DATABASE="InMemory" ;;
+        1) DATABASE="PostgreSQL" ;;
         2) DATABASE="SqlServer" ;;
         3) DATABASE="Oracle" ;;
-        4) DATABASE="PostgreSQL" ;;
-        5) DATABASE="MySQL" ;;
+        4) DATABASE="MySQL" ;;
     esac
 
 
@@ -215,24 +213,9 @@ if [ "$IS_INTERACTIVE" = true ]; then
 
     EVENTSOURCING="yes"
 
-    write_section "UI - Mobile"
-    MOBILE_CHOICE=$(show_menu "Quais tecnologias Mobile deseja manter?" 5 \
-        "Nenhuma" \
-        "Flutter" \
-        "MAUI" \
-        "React Native" \
-        "Todas")
-    case $MOBILE_CHOICE in
-        1) UI_MOBILE="none" ;;
-        2) UI_MOBILE="flutter" ;;
-        3) UI_MOBILE="maui" ;;
-        4) UI_MOBILE="reactnative" ;;
-        5) UI_MOBILE="all" ;;
-    esac
-
     write_section "UI - Web"
-    WEB_CHOICE=$(show_menu "Quais tecnologias Web deseja manter?" 6 \
-        "Nenhuma" \
+    WEB_CHOICE=$(show_menu "Quais tecnologias Web deseja manter?" 1 \
+        "Nenhum" \
         "Angular" \
         "Blazor" \
         "React" \
@@ -245,6 +228,21 @@ if [ "$IS_INTERACTIVE" = true ]; then
         4) UI_WEB="react" ;;
         5) UI_WEB="vue" ;;
         6) UI_WEB="all" ;;
+    esac
+
+    write_section "UI - Mobile"
+    MOBILE_CHOICE=$(show_menu "Quais tecnologias Mobile deseja manter?" 1 \
+        "Nenhuma" \
+        "Flutter" \
+        "MAUI" \
+        "React Native" \
+        "Todas")
+    case $MOBILE_CHOICE in
+        1) UI_MOBILE="none" ;;
+        2) UI_MOBILE="flutter" ;;
+        3) UI_MOBILE="maui" ;;
+        4) UI_MOBILE="reactnative" ;;
+        5) UI_MOBILE="all" ;;
     esac
 
     write_section "Git"
@@ -272,23 +270,22 @@ if [ "$IS_INTERACTIVE" = true ]; then
     echo -e "  ${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
     echo ""
 
-    read -rp "  Confirmar e criar projeto? (S/N) [S]: " confirm
-    if [ "$confirm" = "N" ] || [ "$confirm" = "n" ]; then
+    if ! show_yesno "Confirmar e criar projeto?" "true"; then
         echo ""
         echo -e "  ${RED}Operação cancelada.${NC}"
         exit 0
     fi
 else
     # Apply defaults for non-interactive mode
-    DATABASE="${OPT_DATABASE:-InMemory}"
+    DATABASE="${OPT_DATABASE:-PostgreSQL}"
 
     MONGODB="yes"
     QUEUE="${OPT_QUEUE:-no}"
     STORAGE="${OPT_STORAGE:-None}"
     TELEMETRY="${OPT_TELEMETRY:-no}"
     GITINIT="${OPT_GITINIT:-yes}"
-    UI_MOBILE="${OPT_UI_MOBILE:-all}"
-    UI_WEB="${OPT_UI_WEB:-all}"
+    UI_MOBILE="${OPT_UI_MOBILE:-none}"
+    UI_WEB="${OPT_UI_WEB:-none}"
 fi
 
 # Normalize to lowercase for comparisons
@@ -343,14 +340,28 @@ write_step "🧹" "Limpando frameworks de UI não selecionados..."
 # -- Mobile --
 if [ "$UI_MOBILE" = "none" ]; then
     rm -rf src/UI/Mobile
+    rm -f run-mobile.sh run-mobile.ps1 build-mobile-all.sh build-mobile-all.ps1
     dotnet sln "$PROJECT_NAME.sln" remove src/UI/Mobile/MauiApp/MauiApp.csproj 2>/dev/null || true
 elif [ "$UI_MOBILE" != "all" ]; then
-    [ "$UI_MOBILE" != "flutter" ] && rm -rf src/UI/Mobile/FlutterApp
-    [ "$UI_MOBILE" != "maui" ] && {
+    if [ "$UI_MOBILE" != "flutter" ]; then
+        rm -rf src/UI/Mobile/FlutterApp
+        sed -i '/# Flutter/,/popd/d' build-mobile-all.sh 2>/dev/null || true
+        sed -i '/run_flutter/,/^}/d' run-mobile.sh 2>/dev/null || true
+        sed -i '/1) ${CYAN}Flutter/,/;;/d' run-mobile.sh 2>/dev/null || true
+    fi
+    if [ "$UI_MOBILE" != "maui" ]; then
         rm -rf src/UI/Mobile/MauiApp
+        sed -i '/# MAUI/,/MauiApp.csproj/d' build-mobile-all.sh 2>/dev/null || true
+        sed -i '/run_maui/,/^}/d' run-mobile.sh 2>/dev/null || true
+        sed -i '/3) ${CYAN}MAUI/,/;;/d' run-mobile.sh 2>/dev/null || true
         dotnet sln "$PROJECT_NAME.sln" remove src/UI/Mobile/MauiApp/MauiApp.csproj 2>/dev/null || true
-    }
-    [ "$UI_MOBILE" != "reactnative" ] && rm -rf src/UI/Mobile/ReactNativeApp
+    fi
+    if [ "$UI_MOBILE" != "reactnative" ]; then
+        rm -rf src/UI/Mobile/ReactNativeApp
+        sed -i '/# React Native/,/popd/d' build-mobile-all.sh 2>/dev/null || true
+        sed -i '/run_react_native/,/^}/d' run-mobile.sh 2>/dev/null || true
+        sed -i '/2) ${CYAN}React Native/,/;;/d' run-mobile.sh 2>/dev/null || true
+    fi
 fi
 
 # -- Web --
@@ -358,6 +369,7 @@ ASPIRE_PROGRAM="src/Aspire/AppHost/Program.cs"
 
 if [ "$UI_WEB" = "none" ]; then
     rm -rf src/UI/Web
+    rm -f build-web-all.sh build-web-all.ps1
     dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App/App.csproj 2>/dev/null || true
     dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App.Client/App.Client.csproj 2>/dev/null || true
     dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/Wasm/BlazorWasm.csproj 2>/dev/null || true
@@ -368,11 +380,13 @@ elif [ "$UI_WEB" != "all" ]; then
     # Angular
     if [ "$UI_WEB" != "angular" ]; then
         rm -rf src/UI/Web/Angular
+        sed -i '/# Angular/,/popd/d' build-web-all.sh 2>/dev/null || true
         sed -i '/builder.AddNpmApp("angular-web"/,/ExternalHttpEndpoints();/d' "$ASPIRE_PROGRAM"
     fi
     # Blazor
     if [ "$UI_WEB" != "blazor" ]; then
         rm -rf src/UI/Web/Blazor
+        sed -i '/# Blazor/,/App.csproj/d' build-web-all.sh 2>/dev/null || true
         dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App/App.csproj 2>/dev/null || true
         dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App.Client/App.Client.csproj 2>/dev/null || true
         dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/Wasm/BlazorWasm.csproj 2>/dev/null || true
@@ -382,11 +396,13 @@ elif [ "$UI_WEB" != "all" ]; then
     # React
     if [ "$UI_WEB" != "react" ]; then
         rm -rf src/UI/Web/React
+        sed -i '/# React/,/popd/d' build-web-all.sh 2>/dev/null || true
         sed -i '/builder.AddNpmApp("react-web"/,/ExternalHttpEndpoints();/d' "$ASPIRE_PROGRAM"
     fi
     # Vue
     if [ "$UI_WEB" != "vue" ]; then
         rm -rf src/UI/Web/Vue
+        sed -i '/# Vue/,/popd/d' build-web-all.sh 2>/dev/null || true
         sed -i '/builder.AddNpmApp("vue-web"/,/ExternalHttpEndpoints();/d' "$ASPIRE_PROGRAM"
     fi
 fi
@@ -420,9 +436,6 @@ json_set() {
 json_set "DatabaseType" "$DATABASE" "$APPSETTINGS"
 
 case $DATABASE in
-    "InMemory")
-        DB_CONN=""
-        ;;
     "SqlServer")
         DB_CONN="Server=localhost,1433;Database=$PROJECT_NAME;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;"
         ;;
@@ -516,7 +529,7 @@ declare -A DB_FILES=(
 for db in "${!DB_FILES[@]}"; do
     filepath="$TARGET_DIR/src/Server/Api/${DB_FILES[$db]}"
     if [ -f "$filepath" ]; then
-        if [ "$DATABASE" = "InMemory" ] || [ "$DATABASE" != "$db" ]; then
+        if [ "$DATABASE" != "$db" ]; then
             rm -f "$filepath"
         fi
     fi
@@ -673,7 +686,7 @@ COMPOSE_DB
 
     # ── MongoDB ──
     if [ "$MONGODB" = "yes" ]; then
-        cat >> "$COMPOSE_FILE" << 'COMPOSE_MONGO'
+        cat >> "$COMPOSE_FILE" << COMPOSE_MONGO
   mongo:
     image: mongo:7
     container_name: mongo
@@ -831,12 +844,150 @@ COMPOSE_ES
   postgres-events-data:"
     fi
 
-    # ── Network ──
-    cat >> "$COMPOSE_FILE" << 'COMPOSE_NETWORK'
+    # ── Redis (Always needed by API) ──
+    cat >> "$COMPOSE_FILE" << 'COMPOSE_REDIS'
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+COMPOSE_REDIS
+
+    # ── API ──
+    cat >> "$COMPOSE_FILE" << COMPOSE_API
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: src/Server/Api/Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - AppSettings__Infrastructure__Database__DatabaseType=$DATABASE
+      - AppSettings__Infrastructure__Database__ConnectionString=$DB_CONN
+      - AppSettings__Infrastructure__EventSourcing__Enabled=$( [ "$EVENTSOURCING" = "yes" ] && echo "true" || echo "false" )
+      - AppSettings__Infrastructure__EventSourcing__ConnectionString=$DB_EVENTS_CONN
+      - AppSettings__Infrastructure__Redis__ConnectionString=redis:6379
+      - AppSettings__Infrastructure__RabbitMQ__ConnectionString=amqp://guest:guest@rabbitmq:5672
+      - AppSettings__Infrastructure__MongoDB__ConnectionString=mongodb://admin:admin@mongo:27017/$PROJECT_NAME
+      - AppSettings__Infrastructure__Telemetry__Enabled=$( [ "$TELEMETRY" = "yes" ] && echo "true" || echo "false" )
+      - AppSettings__Infrastructure__Telemetry__Jaeger__Host=jaeger
+      - AppSettings__Infrastructure__Telemetry__Jaeger__Port=4317
+      - AppSettings__Infrastructure__Telemetry__Jaeger__UseGrpc=true
+    depends_on:
+      redis: { condition: service_healthy }
+COMPOSE_API
+
+    if [ "$QUEUE" = "yes" ]; then
+        echo "      rabbitmq: { condition: service_healthy }" >> "$COMPOSE_FILE"
+    fi
+    if [ "$MONGODB" = "yes" ]; then
+        echo "      mongo: { condition: service_healthy }" >> "$COMPOSE_FILE"
+    fi
+    if [ "$TELEMETRY" = "yes" ]; then
+        echo "      jaeger: { condition: service_healthy }" >> "$COMPOSE_FILE"
+        echo "      prometheus: { condition: service_healthy }" >> "$COMPOSE_FILE"
+    fi
+
+    cat >> "$COMPOSE_FILE" << 'COMPOSE_API_END'
+    networks:
+      - app-network
+
+COMPOSE_API_END
+
+    # ── Web Projects ──
+    if [ "$UI_WEB" != "none" ]; then
+        if [ "$UI_WEB" = "all" ] || [ "$UI_WEB" = "angular" ]; then
+            cat >> "$COMPOSE_FILE" << 'COMPOSE_WEB_ANGULAR'
+  angular-web:
+    container_name: web-angular
+    build:
+      context: src/UI/Web/Angular
+      dockerfile: Dockerfile
+    environment:
+      - API_URL=http://localhost:5000
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+    networks:
+      - app-network
+
+COMPOSE_WEB_ANGULAR
+        fi
+        if [ "$UI_WEB" = "all" ] || [ "$UI_WEB" = "react" ]; then
+            cat >> "$COMPOSE_FILE" << 'COMPOSE_WEB_REACT'
+  react-web:
+    container_name: web-react
+    build:
+      context: src/UI/Web/React
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5000
+    depends_on:
+      - api
+    networks:
+      - app-network
+
+COMPOSE_WEB_REACT
+        fi
+        if [ "$UI_WEB" = "all" ] || [ "$UI_WEB" = "vue" ]; then
+            cat >> "$COMPOSE_FILE" << 'COMPOSE_WEB_VUE'
+  vue-web:
+    container_name: web-vue
+    build:
+      context: src/UI/Web/Vue
+      dockerfile: Dockerfile
+    ports:
+      - "5174:80"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5000
+    depends_on:
+      - api
+    networks:
+      - app-network
+
+COMPOSE_WEB_VUE
+        fi
+        if [ "$UI_WEB" = "all" ] || [ "$UI_WEB" = "blazor" ]; then
+            cat >> "$COMPOSE_FILE" << 'COMPOSE_WEB_BLAZOR'
+  blazor-app:
+    container_name: web-blazor
+    build:
+      context: .
+      dockerfile: src/UI/Web/Blazor/WebApp/App/Dockerfile
+    ports:
+      - "5188:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ApiBaseUrl=http://api:8080
+    depends_on:
+      - api
+    networks:
+      - app-network
+
+COMPOSE_WEB_BLAZOR
+        fi
+    fi
+
+    # ── Networks ──
+    cat >> "$COMPOSE_FILE" << 'COMPOSE_NETWORKS_FOOTER'
 networks:
   app-network:
     driver: bridge
-COMPOSE_NETWORK
+COMPOSE_NETWORKS_FOOTER
 
     # ── Volumes ──
     if [ -n "$VOLUMES_LIST" ]; then
