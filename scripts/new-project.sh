@@ -407,6 +407,14 @@ elif [ "$UI_WEB" != "all" ]; then
     fi
 fi
 
+# Update Aspire launchSettings.json with correct DB_TYPE
+ASPIRE_LAUNCH="src/Aspire/AppHost/Properties/launchSettings.json"
+if [ -f "$ASPIRE_LAUNCH" ]; then
+    write_step "🚀" "Configurando DB_TYPE no Aspire launchSettings.json..."
+    # Add DB_TYPE to environmentVariables in both http and https profiles
+    sed -i "/\"environmentVariables\": {/a \ \ \ \ \ \ \ \ \"DB_TYPE\": \"${DATABASE,,}\"," "$ASPIRE_LAUNCH"
+fi
+
 # ============================================================
 # Configure appsettings.json
 # ============================================================
