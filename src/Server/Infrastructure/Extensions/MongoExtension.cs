@@ -7,6 +7,8 @@ using ProjectTemplate.Data.Repository.Mongo;
 using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
+using ProjectTemplate.Data;
+using ProjectTemplate.Application;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
 
@@ -47,7 +49,7 @@ public static class MongoExtension
         // Register MongoDB repositories and services via Scrutor
         // Scans for all IMongoRepository<T> implementations and registers them
         services.Scan(scan => scan
-            .FromAssembliesOf(typeof(MongoRepository<>))
+            .FromAssembliesOf(typeof(DataAssemblyMarker))
             .AddClasses(classes => classes.AssignableTo(typeof(IMongoRepository<>)))
             .AsMatchingInterface()
             .WithScopedLifetime()
@@ -58,7 +60,7 @@ public static class MongoExtension
 
         // Register MongoDB-backed services (e.g., CustomerReviewService → ICustomerReviewService)
         services.Scan(scan => scan
-            .FromAssembliesOf(typeof(Application.Services.CustomerReviewService))
+            .FromAssembliesOf(typeof(ApplicationAssemblyMarker))
             .AddClasses(classes => classes.AssignableTo<ICustomerReviewService>())
             .AsImplementedInterfaces()
             .WithScopedLifetime()

@@ -19,6 +19,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     { name: 'Pedidos', path: '/orders', icon: '🛍️' },
     { name: 'Auditoria', path: '/audit', icon: '🛡️' },
     { name: 'Documentos', path: '/documents', icon: '📄' },
+    { name: 'Avaliações', path: '/reviews', icon: '⭐' },
   ];
 
   const userEmail = user?.email || 'admin@projecttemplate.com';

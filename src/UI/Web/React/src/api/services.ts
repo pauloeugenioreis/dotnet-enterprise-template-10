@@ -90,3 +90,18 @@ export const documentService = {
   download: (fileName: string) => apiClient.get(`/api/v1/Document/${fileName}`, { responseType: 'blob' }),
   delete: (fileName: string) => apiClient.delete(`/api/v1/Document/${fileName}`),
 };
+
+export const customerReviewService = {
+  getReviews: (page = 1, pageSize = 10, productName?: string, minRating?: number, isApproved?: boolean) => {
+    let url = `/api/v1/CustomerReview?page=${page}&pageSize=${pageSize}`;
+    if (productName) url += `&productName=${encodeURIComponent(productName)}`;
+    if (minRating) url += `&minRating=${minRating}`;
+    if (isApproved !== undefined) url += `&isApproved=${isApproved}`;
+    return apiClient.get(url).then(res => res.data);
+  },
+  getById: (id: string) => apiClient.get(`/api/v1/CustomerReview/${id}`).then(res => res.data),
+  create: (review: any) => apiClient.post('/api/v1/CustomerReview', review).then(res => res.data),
+  update: (id: string, review: any) => apiClient.put(`/api/v1/CustomerReview/${id}`, review),
+  approve: (id: string, isApproved: boolean) => apiClient.patch(`/api/v1/CustomerReview/${id}/approve`, { isApproved }),
+  delete: (id: string) => apiClient.delete(`/api/v1/CustomerReview/${id}`),
+};

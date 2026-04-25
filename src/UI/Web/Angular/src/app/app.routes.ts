@@ -5,6 +5,7 @@ import { AuditComponent } from './features/audit/pages/audit.component';
 import { ProductsComponent } from './features/products/pages/products.component';
 import { OrdersComponent } from './features/orders/pages/orders.component';
 import { DocumentsComponent } from './features/documents/pages/documents.component';
+import { ReviewsComponent } from './features/reviews/pages/reviews.component';
 import { MainLayoutComponent } from './shared/components/layout/main-layout.component';
 import { authGuard } from './core/guards/auth.guard';
 
@@ -20,6 +21,7 @@ export const routes: Routes = [
       { path: 'products', component: ProductsComponent },
       { path: 'orders', component: OrdersComponent },
       { path: 'documents', component: DocumentsComponent },
+      { path: 'reviews', component: ReviewsComponent },
       { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
     ]
   },

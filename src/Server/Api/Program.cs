@@ -35,7 +35,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-
 // Add Swagger with JWT authentication (skip in Testing environment to avoid version conflicts)
 if (!builder.Environment.IsEnvironment("Testing"))
 {
@@ -45,6 +44,9 @@ if (!builder.Environment.IsEnvironment("Testing"))
 // Add infrastructure services
 builder.Services.AddInfrastructureServices(builder.Configuration, builder.Environment);
 
+// Add MongoDB (NoSQL document store)
+builder.Services.AddMongo<Program>();
+
 // ============================================================
 // OPTIONAL FEATURES — Uncomment to enable
 // See docs/FEATURES.md for configuration details
@@ -52,9 +54,6 @@ builder.Services.AddInfrastructureServices(builder.Configuration, builder.Enviro
 
 // Add Custom Logging (structured JSON + Google Cloud Logging)
 // builder.AddCustomLogging();
-
-// Add MongoDB (NoSQL document store)
-// builder.Services.AddMongo<Program>();
 
 // Add Quartz.NET (background job scheduler)
 // builder.Services.AddCustomizedQuartz((q, settings) =>
@@ -90,7 +89,7 @@ if (app.Environment.IsDevelopment())
     var retryPipeline = new ResiliencePipelineBuilder()
         .AddRetry(new RetryStrategyOptions
         {
-            ShouldHandle = new PredicateBuilder().Handle<Exception>(ex => 
+            ShouldHandle = new PredicateBuilder().Handle<Exception>(ex =>
                 // Don't retry if the error is "Object already exists" (ORA-00955)
                 !ex.Message.Contains("ORA-00955")),
             Delay = TimeSpan.FromSeconds(5),
@@ -121,7 +120,7 @@ if (app.Environment.IsDevelopment())
         // Run seeder
         var eventStore = scope.ServiceProvider.GetRequiredService<IEventStore>();
 
-        try 
+        try
         {
             // Get AppSettings from DI
             var appSettings = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<ProjectTemplate.Domain.AppSettings>>().Value;
@@ -133,14 +132,14 @@ if (app.Environment.IsDevelopment())
                 var builder = new Npgsql.NpgsqlConnectionStringBuilder(pgConnString);
                 var targetDb = builder.Database;
                 builder.Database = "postgres"; // Connect to admin DB
-                
+
                 using var conn = new Npgsql.NpgsqlConnection(builder.ConnectionString);
                 await conn.OpenAsync(token);
-                
+
                 using var cmd = conn.CreateCommand();
                 cmd.CommandText = $"SELECT 1 FROM pg_database WHERE datname = '{targetDb}'";
                 var exists = await cmd.ExecuteScalarAsync(token) != null;
-                
+
                 if (!exists)
                 {
                     Console.WriteLine($"ℹ️ Creating PostgreSQL database '{targetDb}'...");

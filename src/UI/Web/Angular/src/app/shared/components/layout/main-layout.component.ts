@@ -25,6 +25,7 @@ export class MainLayoutComponent {
     { name: 'Pedidos', path: '/orders', icon: '🛍️' },
     { name: 'Auditoria', path: '/audit', icon: '🛡️' },
     { name: 'Documentos', path: '/documents', icon: '📄' },
+    { name: 'Avaliações', path: '/reviews', icon: '⭐' },
   ];
 
   handleLogout() {

@@ -7,6 +7,7 @@ import Audit from './features/audit/Audit';
 import Products from './features/products/Products';
 import Orders from './features/orders/Orders';
 import Documents from './features/documents/Documents';
+import Reviews from './features/reviews/Reviews';
 import MainLayout from './layouts/MainLayout';
 import { useAuthStore } from './store/useAuthStore';
 
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
           <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
+          <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/login" />} />
         </Routes>
       </BrowserRouter>

@@ -1,6 +1,39 @@
 import { Injectable } from '@angular/core';
 import { BaseService } from './base.service';
-import { PagedResponse, OrderResponse, DomainEvent } from '../../shared/models/models';
+import { PagedResponse, OrderResponse, DomainEvent, CustomerReviewResponse, CreateCustomerReviewRequest, ApproveCustomerReviewRequest } from '../../shared/models/models';
+
+// ... (existing code)
+
+@Injectable({ providedIn: 'root' })
+export class CustomerReviewService extends BaseService {
+  getReviews(page = 1, pageSize = 10, productName = '', minRating?: number, isApproved?: boolean) {
+    let url = `${this.baseUrl}/api/v1/CustomerReview?page=${page}&pageSize=${pageSize}`;
+    if (productName) url += `&productName=${encodeURIComponent(productName)}`;
+    if (minRating) url += `&minRating=${minRating}`;
+    if (isApproved !== undefined) url += `&isApproved=${isApproved}`;
+    return this.http.get<PagedResponse<CustomerReviewResponse>>(url);
+  }
+
+  getById(id: string) {
+    return this.http.get<CustomerReviewResponse>(`${this.baseUrl}/api/v1/CustomerReview/${id}`);
+  }
+
+  create(review: CreateCustomerReviewRequest) {
+    return this.http.post<CustomerReviewResponse>(`${this.baseUrl}/api/v1/CustomerReview`, review);
+  }
+
+  update(id: string, review: CreateCustomerReviewRequest) {
+    return this.http.put(`${this.baseUrl}/api/v1/CustomerReview/${id}`, review);
+  }
+
+  approve(id: string, isApproved: boolean) {
+    return this.http.patch(`${this.baseUrl}/api/v1/CustomerReview/${id}/approve`, { isApproved } as ApproveCustomerReviewRequest);
+  }
+
+  delete(id: string) {
+    return this.http.delete(`${this.baseUrl}/api/v1/CustomerReview/${id}`);
+  }
+}
 
 @Injectable({ providedIn: 'root' })
 export class OrderService extends BaseService {
