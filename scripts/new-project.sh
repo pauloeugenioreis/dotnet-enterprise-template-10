@@ -878,7 +878,14 @@ COMPOSE_REDIS
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - AppSettings__Infrastructure__Database__DatabaseType=$DATABASE
-      - AppSettings__Infrastructure__Database__ConnectionString=$DB_CONN
+      - AppSettings__Infrastructure__Database__ConnectionString=$(
+          case "$DATABASE" in
+            "SqlServer")  echo "Server=sqlserver,1433;Database=${PROJECT_NAME};User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;" ;;
+            "Oracle")     echo "User Id=appuser;Password=AppPass123;Data Source=oracle:1521/FREEPDB1;" ;;
+            "PostgreSQL")  echo "Host=postgres;Port=5432;Database=${PROJECT_NAME};Username=postgres;Password=PostgresPass123;" ;;
+            "MySQL")       echo "Server=mysql;Port=3306;Database=${PROJECT_NAME};User=appuser;Password=AppPass123;" ;;
+          esac
+        )
       - AppSettings__Infrastructure__EventSourcing__Enabled=$( [ "$EVENTSOURCING" = "yes" ] && echo "true" || echo "false" )
       - AppSettings__Infrastructure__EventSourcing__ConnectionString=Host=postgres-events;Database=${PROJECT_NAME}Events;Username=postgres;Password=postgres;Port=5432
       - AppSettings__Infrastructure__Redis__ConnectionString=redis:6379
