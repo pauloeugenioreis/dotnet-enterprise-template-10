@@ -48,10 +48,13 @@ public class ProductRepository : HybridRepository<Product>, IProductRepository
 
         var total = await query.CountAsync(cancellationToken);
 
+        query = query
+            .OrderByDescending(p => p.CreatedAt)
+            .ThenByDescending(p => p.UpdatedAt);
+
         if (page.HasValue && pageSize.HasValue)
         {
             query = query
-                .OrderBy(p => p.Id)
                 .Skip((page.Value - 1) * pageSize.Value)
                 .Take(pageSize.Value);
         }

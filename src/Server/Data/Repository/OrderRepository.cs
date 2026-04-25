@@ -65,7 +65,9 @@ public class OrderRepository : HybridRepository<Order>, IOrderRepository
 
         var total = await query.CountAsync(cancellationToken);
 
-        query = query.OrderByDescending(o => o.CreatedAt);
+        query = query
+            .OrderByDescending(o => o.CreatedAt)
+            .ThenByDescending(o => o.UpdatedAt);
 
         if (page.HasValue && pageSize.HasValue)
         {
