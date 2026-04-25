@@ -20,6 +20,16 @@ public static class AppSettingsExtension
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        // Map orchestration-injected connection strings (Aspire/Docker) to our Options pattern
+        services.PostConfigure<AppSettings>(options =>
+        {
+            var mongoConn = configuration.GetConnectionString("mongodb");
+            if (!string.IsNullOrEmpty(mongoConn))
+            {
+                options.Infrastructure.MongoDB.ConnectionString = mongoConn;
+            }
+        });
+
         // Register settings as singleton for easy injection
         services.AddSingleton(sp =>
             sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<AppSettings>>().Value);

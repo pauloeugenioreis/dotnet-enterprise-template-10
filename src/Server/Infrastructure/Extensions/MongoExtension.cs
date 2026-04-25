@@ -23,20 +23,15 @@ public static class MongoExtension
     public static IServiceCollection AddMongo<TProgram>(this IServiceCollection services)
     {
         services.AddSingleton<IMongoClient>(sp => CreateMongoClient<TProgram>(
-            sp.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>(),
             sp.GetRequiredService<IOptions<AppSettings>>(),
             sp.GetRequiredService<ILogger<TProgram>>()));
 
         // Register default IMongoDatabase resolved from connection string
         services.AddSingleton(sp =>
         {
-            var config = sp.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>();
             var appSettings = sp.GetRequiredService<IOptions<AppSettings>>().Value;
             var client = sp.GetRequiredService<IMongoClient>();
-            
-            // Priority: 1. Aspire/Docker-Compose injected, 2. AppSettings, 3. Fallback
-            var connectionString = config.GetConnectionString("mongodb") 
-                                 ?? appSettings.Infrastructure?.MongoDB?.ConnectionString;
+            var connectionString = appSettings.Infrastructure?.MongoDB?.ConnectionString;
 
             var mongoUrl = new MongoUrl(string.IsNullOrWhiteSpace(connectionString)
                 ? "mongodb://localhost:27017"
@@ -73,7 +68,6 @@ public static class MongoExtension
     }
 
     private static IMongoClient CreateMongoClient<TProgram>(
-        Microsoft.Extensions.Configuration.IConfiguration config,
         IOptions<AppSettings> settings,
         ILogger<TProgram> logger)
     {
@@ -82,8 +76,7 @@ public static class MongoExtension
 
         try
         {
-            var connectionString = config.GetConnectionString("mongodb") 
-                                 ?? appSettings.Infrastructure?.MongoDB?.ConnectionString;
+            var connectionString = appSettings.Infrastructure?.MongoDB?.ConnectionString;
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 logger.LogWarning("MongoDB connection string is empty.");
