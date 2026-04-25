@@ -1,18 +1,18 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrderService, ProductService } from '../../../core/services/data-services';
 import { OrderResponse, ProductResponse } from '../../../shared/models/models';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
-import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { DrawerComponent } from '../../../shared/components/drawer/drawer.component';
 import { OrderDetailsModalComponent } from '../components/order-details-modal/order-details-modal.component';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule, DropdownComponent, PaginationComponent, ModalComponent, OrderDetailsModalComponent],
+  imports: [CommonModule, FormsModule, DropdownComponent, PaginationComponent, DrawerComponent, OrderDetailsModalComponent],
   templateUrl: './orders.component.html'
 })
 export class OrdersComponent implements OnInit, OnDestroy {
@@ -24,6 +24,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
   orders = signal<OrderResponse[]>([]);
   products = signal<ProductResponse[]>([]);
   loading = signal(true);
+  
+  // Product Infinite Scroll
+  productPage = signal(1);
+  productLoading = signal(false);
+  hasMoreProducts = signal(true);
   
   // Filters
   searchTerm = '';
@@ -93,10 +98,30 @@ export class OrdersComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadProducts() {
-    this.productService.getProducts(1, 100).subscribe({
-      next: (res) => this.products.set(res.items)
+  loadProducts(isLoadMore = false) {
+    if (this.productLoading() || (!this.hasMoreProducts() && isLoadMore)) return;
+
+    this.productLoading.set(true);
+    this.productService.getProducts(this.productPage(), 20, '', true).subscribe({
+      next: (res) => {
+        const newItems = res.items || [];
+        if (isLoadMore) {
+          this.products.set([...this.products(), ...newItems]);
+        } else {
+          this.products.set(newItems);
+        }
+        this.hasMoreProducts.set(newItems.length === 20);
+        if (this.hasMoreProducts()) {
+          this.productPage.update(p => p + 1);
+        }
+        this.productLoading.set(false);
+      },
+      error: () => this.productLoading.set(false)
     });
+  }
+
+  loadMoreProducts() {
+    this.loadProducts(true);
   }
 
   onSearchChange(value: string) {
@@ -197,6 +222,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
     if (product) {
       this.formData.items[index].productId = product.id;
       this.formData.items[index].unitPrice = product.price;
+      // Trigger change detection by creating a new reference for the items array
+      this.formData.items = [...this.formData.items];
     }
   }
 
@@ -228,10 +255,10 @@ export class OrdersComponent implements OnInit, OnDestroy {
     }
   }
 
-  get productOptions() {
-    return this.products().map(p => ({
+  productOptions = computed(() => 
+    this.products().map(p => ({
       label: `${p.name} - R$ ${p.price}`,
       value: p.id.toString()
-    }));
-  }
+    }))
+  );
 }

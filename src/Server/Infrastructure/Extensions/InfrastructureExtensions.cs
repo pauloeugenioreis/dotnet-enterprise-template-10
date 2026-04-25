@@ -88,6 +88,9 @@ public static class InfrastructureExtensions
 
     public static IApplicationBuilder UseInfrastructureMiddleware(this IApplicationBuilder app)
     {
+        // Global Exception Handler
+        app.UseMiddleware<ProjectTemplate.Infrastructure.Middleware.ExceptionMiddleware>();
+
         // CORS
         app.UseCors("DefaultCorsPolicy");
 

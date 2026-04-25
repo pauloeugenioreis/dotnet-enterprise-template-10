@@ -38,9 +38,7 @@ public class OrderService : Service<Order>, IOrderService
         {
             throw new ValidationException("Order must have at least one item");
         }
-        await using var transaction = await _orderRepository.BeginTransactionAsync(cancellationToken);
-
-        try
+        return await _orderRepository.ExecuteInTransactionAsync(async (ct) =>
         {
             // Create order entity
             var order = new Order
@@ -60,7 +58,7 @@ public class OrderService : Service<Order>, IOrderService
             // Process items
             foreach (var itemDto in dto.Items)
             {
-                var product = await _productRepository.GetByIdAsync(itemDto.ProductId, cancellationToken);
+                var product = await _productRepository.GetByIdAsync(itemDto.ProductId, ct);
 
                 if (product == null)
                 {
@@ -93,7 +91,7 @@ public class OrderService : Service<Order>, IOrderService
 
                 // Update product stock
                 product.Stock -= itemDto.Quantity;
-                await _productRepository.UpdateAsync(product, cancellationToken);
+                await _productRepository.UpdateAsync(product, ct);
             }
 
             // Calculate totals
@@ -103,20 +101,14 @@ public class OrderService : Service<Order>, IOrderService
             order.Total = order.Subtotal + order.Tax + order.ShippingCost;
 
             // Save order
-            var createdOrder = await _orderRepository.AddAsync(order, cancellationToken);
-            await _orderRepository.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
+            var createdOrder = await _orderRepository.AddAsync(order, ct);
+            await _orderRepository.SaveChangesAsync(ct);
 
             _logger.LogInformation("Order {OrderNumber} created for {CustomerEmail}. Total: {Total:C}",
                 order.OrderNumber, order.CustomerEmail, order.Total);
 
             return MapToResponseDto(createdOrder);
-        }
-        catch
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+        }, cancellationToken);
     }
 
     public async Task<OrderResponseDto> UpdateOrderStatusAsync(long id, UpdateOrderStatusDto dto, CancellationToken cancellationToken = default)

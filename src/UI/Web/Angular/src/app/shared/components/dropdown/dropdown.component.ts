@@ -21,7 +21,10 @@ export class DropdownComponent {
   @Input() labelOverride: string | null = null;
   @Input() direction: 'up' | 'down' = 'down';
   
+  @Input() loading: boolean = false;
+  
   @Output() valueChange = new EventEmitter<any>();
+  @Output() loadMore = new EventEmitter<void>();
 
   isOpen = signal(false);
 
@@ -38,6 +41,13 @@ export class DropdownComponent {
   select(option: DropdownOption) {
     this.valueChange.emit(option.value);
     this.isOpen.set(false);
+  }
+
+  handleScroll(event: Event) {
+    const target = event.target as HTMLElement;
+    if (target.scrollTop + target.clientHeight >= target.scrollHeight - 10) {
+      this.loadMore.emit();
+    }
   }
 
   @HostListener('document:mousedown', ['$event'])

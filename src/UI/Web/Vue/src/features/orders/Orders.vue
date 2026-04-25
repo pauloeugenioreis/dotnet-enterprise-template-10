@@ -42,7 +42,7 @@ const fetchProducts = async (isLoadMore = false) => {
   
   productLoading.value = true;
   try {
-    const data = await productService.getAll({ page: productPage.value, pageSize: 20 });
+    const data = await productService.getAll({ page: productPage.value, pageSize: 20, isActive: true });
     const newItems = Array.isArray(data) ? data : (data?.items || []);
     
     if (isLoadMore) {

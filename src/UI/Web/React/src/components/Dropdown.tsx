@@ -14,6 +14,8 @@ interface DropdownProps {
   variant?: 'filter' | 'form' | 'primary';
   labelOverride?: string;
   direction?: 'up' | 'down';
+  onLoadMore?: () => void;
+  loading?: boolean;
 }
 
 export default function Dropdown({ 
@@ -24,12 +26,21 @@ export default function Dropdown({
   className = '', 
   variant = 'filter',
   labelOverride,
-  direction = 'down'
+  direction = 'down',
+  onLoadMore,
+  loading = false
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = options.find(opt => opt.value === value);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    if (target.scrollTop + target.clientHeight >= target.scrollHeight - 10) {
+      onLoadMore?.();
+    }
+  };
 
   const paddingClass = (variant === 'filter' || variant === 'primary') ? 'py-4' : 'py-3';
   const roundedClass = variant === 'filter' ? 'rounded-3xl' : 'rounded-2xl';
@@ -69,7 +80,7 @@ export default function Dropdown({
 
       {isOpen && (
         <div className={`absolute z-50 w-full ${direction === 'up' ? 'bottom-full mb-3' : 'mt-3'} bg-white border border-gray-50 rounded-[2rem] shadow-2xl shadow-gray-200/50 py-3 overflow-hidden animate-in fade-in zoom-in-95 duration-200`}>
-          <div className="max-h-60 overflow-y-auto">
+          <div className="max-h-60 overflow-y-auto" onScroll={handleScroll}>
             {options.map((option) => (
               <button
                 key={option.value}
@@ -87,6 +98,12 @@ export default function Dropdown({
                 {option.label}
               </button>
             ))}
+            
+            {loading && (
+              <div className="px-8 py-4 flex justify-center">
+                <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
           </div>
         </div>
       )}

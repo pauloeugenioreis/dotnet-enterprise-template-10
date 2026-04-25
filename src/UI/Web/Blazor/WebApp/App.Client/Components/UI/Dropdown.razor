@@ -1,5 +1,7 @@
 @namespace BlazorApp.Components.UI
 @using Microsoft.AspNetCore.Components.Web
+@inject IJSRuntime JS
+@implements IAsyncDisposable
 
 <div class="relative @ClassName">
     <button type="button"
@@ -17,7 +19,7 @@
     @if (IsOpen)
     {
         <div class="absolute z-50 w-full @(Direction == "up" ? "bottom-full mb-3" : "mt-3") bg-white border border-gray-50 rounded-[2rem] shadow-2xl shadow-gray-200/50 py-3 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div class="max-h-60 overflow-y-auto">
+            <div @ref="scrollContainer" class="max-h-60 overflow-y-auto">
                 @foreach (var option in Options)
                 {
                     <button type="button"
@@ -25,6 +27,13 @@
                             class="w-full text-left px-8 py-4 text-[10px] font-black uppercase tracking-widest transition-colors @(Value?.ToString() == option.Value?.ToString() ? "bg-primary-50 text-primary-600" : "text-gray-500 hover:bg-gray-50")">
                         @option.Label
                     </button>
+                }
+
+                @if (Loading)
+                {
+                    <div class="px-8 py-4 flex justify-center">
+                        <div class="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
                 }
             </div>
         </div>
@@ -41,12 +50,37 @@
     [Parameter] public string? PaddingClassOverride { get; set; }
     [Parameter] public string? LabelOverride { get; set; }
     [Parameter] public string Direction { get; set; } = "down";
+    [Parameter] public bool Loading { get; set; } = false;
+    [Parameter] public EventCallback OnLoadMore { get; set; }
 
     private bool IsOpen { get; set; }
+    private ElementReference scrollContainer;
+    private DotNetObjectReference<Dropdown>? objRef;
 
     private DropdownOption? SelectedOption => Options.FirstOrDefault(o => o.Value?.ToString() == Value?.ToString());
 
-    private void Toggle() => IsOpen = !IsOpen;
+    private async Task Toggle()
+    {
+        IsOpen = !IsOpen;
+        if (IsOpen)
+        {
+            // Give time for the container to render
+            await Task.Delay(100);
+            objRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("setupScrollHandler", scrollContainer, objRef);
+        }
+    }
+
+    [JSInvokable]
+    public async Task HandleLoadMore()
+    {
+        await OnLoadMore.InvokeAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        objRef?.Dispose();
+    }
 
     private async Task Select(DropdownOption option)
     {

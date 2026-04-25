@@ -117,4 +117,38 @@ public class Repository<TEntity>(DbContext context) : IRepository<TEntity>, ITra
         var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         return new EfRepositoryTransaction(transaction);
     }
+
+    public virtual async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action, CancellationToken cancellationToken = default)
+    {
+        if (!context.Database.IsRelational())
+        {
+            await action(cancellationToken);
+            return;
+        }
+
+        var strategy = context.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async (ct) =>
+        {
+            await using var transaction = await context.Database.BeginTransactionAsync(ct);
+            await action(ct);
+            await transaction.CommitAsync(ct);
+        }, cancellationToken);
+    }
+
+    public virtual async Task<T> ExecuteInTransactionAsync<T>(Func<CancellationToken, Task<T>> action, CancellationToken cancellationToken = default)
+    {
+        if (!context.Database.IsRelational())
+        {
+            return await action(cancellationToken);
+        }
+
+        var strategy = context.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async (ct) =>
+        {
+            await using var transaction = await context.Database.BeginTransactionAsync(ct);
+            var result = await action(ct);
+            await transaction.CommitAsync(ct);
+            return result;
+        }, cancellationToken);
+    }
 }

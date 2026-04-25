@@ -25,9 +25,10 @@
             </button>
             <button 
                 @onclick="OpenNew"
-                class="bg-primary-600 hover:bg-primary-700 text-white font-black px-8 py-4 rounded-2xl shadow-lg shadow-primary-600/20 transition-all active:scale-95"
+                class="bg-primary-600 hover:bg-primary-700 text-white font-black px-10 py-5 rounded-3xl shadow-xl shadow-primary-600/20 transition-all active:scale-95 flex items-center gap-3"
             >
-                + Novo Pedido
+                <span class="text-xl">+</span>
+                <span>Novo Pedido</span>
             </button>
         </div>
   </header>
@@ -127,9 +128,9 @@
               </td>
               <td class="px-10 py-8">
                 <div class="flex gap-2">
-                  <button @onclick="() => OpenDetails(order)" title="Visualizar" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-blue-50 rounded-xl text-blue-600 transition-all active:scale-90">🔍</button>
-                  <button @onclick="() => OpenEdit(order)" title="Editar" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-primary-50 rounded-xl text-primary-600 transition-all active:scale-90">✏️</button>
-                  <button @onclick="() => DeleteOrder(order.Id)" title="Excluir" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-rose-50 rounded-xl text-rose-600 transition-all active:scale-90">🗑️</button>
+                  <button @onclick="() => OpenDetails(order)" title="Visualizar" class="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-blue-50 rounded-2xl text-blue-600 transition-all active:scale-90">🔍</button>
+                  <button @onclick="() => OpenEdit(order)" title="Editar" class="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-primary-50 rounded-2xl text-primary-600 transition-all active:scale-90">✏️</button>
+                  <button @onclick="() => DeleteOrder(order.Id)" title="Excluir" class="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-rose-50 rounded-2xl text-rose-600 transition-all active:scale-90">🗑️</button>
                 </div>
               </td>
             </tr>
@@ -294,8 +295,8 @@
                 var createRequest = new CreateOrderRequest
                 {
                     CustomerName = order.CustomerName,
-                    CustomerEmail = "cliente@exemplo.com", // Placeholder
-                    ShippingAddress = "Endereço Padrão", // Placeholder
+                    CustomerEmail = order.CustomerEmail,
+                    ShippingAddress = order.ShippingAddress,
                     Items = order.Items.Select(i => new OrderItemDto(i.ProductId, i.Quantity, i.UnitPrice)).ToList()
                 };
                 await OrderService.CreateAsync(createRequest);

@@ -1,5 +1,5 @@
 import { useOrders } from './useOrders';
-import Modal from '../../components/Modal';
+import Drawer from '../../components/Drawer';
 import Pagination from '../../components/Pagination';
 import Dropdown from '../../components/Dropdown';
 import OrderDetailsModal from './components/OrderDetailsModal';
@@ -12,7 +12,9 @@ export default function Orders() {
     status, setStatus, searchTerm, setSearchTerm, startDate, setStartDate, endDate, setEndDate,
     
     // Data from hooks
-    productsData,
+    products,
+    loadMoreProducts,
+    isProductsLoading,
     
     // Modal & Form State
     isModalOpen, setIsModalOpen,
@@ -51,9 +53,10 @@ export default function Orders() {
           </button>
           <button
             onClick={handleOpenNew}
-            className="bg-primary-600 hover:bg-primary-700 text-white font-black px-8 py-4 rounded-2xl shadow-lg shadow-primary-600/20 transition-all active:scale-95"
+            className="bg-primary-600 hover:bg-primary-700 text-white font-black px-10 py-5 rounded-3xl shadow-xl shadow-primary-600/20 transition-all active:scale-95 flex items-center gap-3"
           >
-            + Novo Pedido
+            <span className="text-xl">+</span>
+            <span>Novo Pedido</span>
           </button>
         </div>
       </header>
@@ -162,21 +165,21 @@ export default function Orders() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleViewDetails(order)}
-                      className="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-blue-50 rounded-xl text-blue-600 transition-all active:scale-90"
+                      className="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-blue-50 rounded-2xl text-blue-600 transition-all active:scale-90"
                       title="Ver Detalhes"
                     >
                       🔍
                     </button>
                     <button
                       onClick={() => handleEdit(order)}
-                      className="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-primary-50 rounded-xl text-primary-600 transition-all active:scale-90"
+                      className="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-primary-50 rounded-2xl text-primary-600 transition-all active:scale-90"
                       title="Editar"
                     >
                       ✏️
                     </button>
                     <button
                       onClick={() => handleCancel(order.id)}
-                      className={`w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-rose-50 rounded-xl text-rose-600 transition-all active:scale-90 ${order.status === 'Cancelled' ? 'opacity-20 cursor-not-allowed' : ''}`}
+                      className={`w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-rose-50 rounded-2xl text-rose-600 transition-all active:scale-90 ${order.status === 'Cancelled' ? 'opacity-20 cursor-not-allowed' : ''}`}
                       disabled={order.status === 'Cancelled'}
                       title="Cancelar"
                     >
@@ -198,98 +201,131 @@ export default function Orders() {
         />
       </div>
 
-      <Modal
+      <Drawer
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={editingId ? 'Editar Pedido' : 'Novo Pedido'}
+        subtitle={editingId ? 'Atualize as informações do pedido' : 'Cadastre um novo pedido no sistema'}
+        footer={
+          <div className="flex gap-4">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="flex-1 bg-white border border-gray-100 text-gray-400 font-black py-5 rounded-3xl hover:bg-gray-50 transition-all active:scale-95 flex items-center justify-center tracking-widest text-[10px] uppercase"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={formData.items.length === 0}
+              className="flex-[2] bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-5 rounded-3xl shadow-xl shadow-primary-600/20 transition-all active:scale-95 flex items-center justify-center gap-3 tracking-widest text-[10px] uppercase"
+            >
+              <span>{editingId ? 'Salvar Alterações' : 'Criar Pedido'}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+            </button>
+          </div>
+        }
       >
-        <div className="space-y-6 max-h-[70vh] overflow-y-auto px-2">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Cliente</label>
-              <input
-                className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl outline-none font-bold text-gray-900"
-                value={formData.customerName}
-                onChange={e => setFormData({ ...formData, customerName: e.target.value })}
-                placeholder="Nome"
-              />
+        <div className="space-y-10">
+          {/* Seção: Informações do Cliente */}
+          <div className="space-y-6">
+            <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Informações do Cliente</p>
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Nome Completo</label>
+                <input
+                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold text-gray-900 focus:bg-white focus:border-primary-200 focus:ring-4 focus:ring-primary-500/5 transition-all"
+                  value={formData.customerName}
+                  onChange={e => setFormData({ ...formData, customerName: e.target.value })}
+                  placeholder="Nome do cliente"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">E-mail de Contato</label>
+                <input
+                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold text-gray-900 focus:bg-white focus:border-primary-200 focus:ring-4 focus:ring-primary-500/5 transition-all"
+                  value={formData.customerEmail}
+                  onChange={e => setFormData({ ...formData, customerEmail: e.target.value })}
+                  placeholder="email@exemplo.com"
+                />
+              </div>
             </div>
+          </div>
+
+          {/* Seção: Endereço */}
+          <div className="space-y-6">
+            <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Endereço de Entrega</p>
             <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">E-mail</label>
               <input
-                className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl outline-none font-bold text-gray-900"
-                value={formData.customerEmail}
-                onChange={e => setFormData({ ...formData, customerEmail: e.target.value })}
-                placeholder="email@exemplo.com"
+                className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold text-gray-900 focus:bg-white focus:border-primary-200 focus:ring-4 focus:ring-primary-500/5 transition-all"
+                value={formData.shippingAddress}
+                onChange={e => setFormData({ ...formData, shippingAddress: e.target.value })}
+                placeholder="Rua, Número, Cidade - UF, CEP"
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Endereço de Entrega</label>
-            <input
-              className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl outline-none font-bold text-gray-900"
-              value={formData.shippingAddress}
-              onChange={e => setFormData({ ...formData, shippingAddress: e.target.value })}
-              placeholder="Rua, Número, Cidade - UF"
-            />
-          </div>
-
-          <div className="border-t border-gray-50 pt-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-black text-gray-900 uppercase tracking-widest text-xs">Itens do Pedido</h3>
+          {/* Seção: Itens */}
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Itens do Pedido</p>
               <button
                 onClick={handleAddItem}
-                className="text-primary-600 font-black text-xs uppercase tracking-widest hover:underline"
+                className="text-primary-600 font-black text-[10px] uppercase tracking-widest hover:text-primary-700 flex items-center gap-2 group"
               >
-                + Adicionar Item
+                <span className="text-lg group-hover:scale-125 transition-transform">+</span>
+                Adicionar Item
               </button>
             </div>
 
             <div className="space-y-4">
               {formData.items.map((item, index) => (
-                <div key={index} className="flex gap-3 items-end">
+                <div key={index} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex gap-4 items-end animate-fade-in">
                   <div className="flex-1">
+                    <label className="block text-[8px] font-black uppercase tracking-widest text-gray-300 mb-1">Produto</label>
                     <Dropdown
                       variant="form"
                       className="w-full"
                       value={item.productId?.toString()}
                       onChange={val => handleItemChange(index, 'productId', val)}
                       placeholder="Selecionar Produto"
-                      options={productsData?.items.map((p: any) => ({
+                      options={products.map((p: any) => ({
                         label: `${p.name} - R$ ${p.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
                         value: p.id.toString()
-                      })) || []}
+                      }))}
+                      onLoadMore={loadMoreProducts}
+                      loading={isProductsLoading}
                     />
                   </div>
-                  <div className="w-20">
+                  <div className="w-24">
+                    <label className="block text-[8px] font-black uppercase tracking-widest text-gray-300 mb-1">Qtd</label>
                     <input
                       type="number"
-                      className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl outline-none font-bold text-sm text-gray-900"
+                      className="w-full px-4 py-3 bg-white border border-gray-100 rounded-xl outline-none font-bold text-sm text-gray-900 focus:border-primary-200 transition-all"
                       value={item.quantity}
                       onChange={e => handleItemChange(index, 'quantity', parseInt(e.target.value))}
+                      min="1"
                     />
                   </div>
                   <button
                     onClick={() => handleRemoveItem(index)}
-                    className="p-3 text-red-400 hover:text-red-600"
+                    className="w-10 h-10 flex items-center justify-center text-red-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                   >
                     ✕
                   </button>
                 </div>
               ))}
+
+              {formData.items.length === 0 && (
+                <div className="text-center py-10 border-2 border-dashed border-gray-100 rounded-[2rem]">
+                  <p className="text-gray-300 text-sm font-medium italic">Nenhum item adicionado ao pedido.</p>
+                </div>
+              )}
             </div>
           </div>
-
-          <button
-            onClick={handleSubmit}
-            disabled={formData.items.length === 0}
-            className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-black py-5 rounded-2xl shadow-xl shadow-primary-600/20 transition-all active:scale-95 mt-6"
-          >
-            Finalizar Pedido
-          </button>
         </div>
-      </Modal>
+      </Drawer>
 
       <OrderDetailsModal
         isOpen={isDetailsOpen}

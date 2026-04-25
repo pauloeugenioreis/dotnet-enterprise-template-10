@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orderService, OrderResponse } from '../../api/services';
-import { useProducts } from '../products/useProducts';
+import { useInfiniteProducts } from '../products/useInfiniteProducts';
 
 export function useOrders() {
-  const { data: productsData } = useProducts();
+  const { products, loadMore, hasMore, isLoadingMore } = useInfiniteProducts();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [status, setStatus] = useState<string>('');
@@ -117,7 +117,7 @@ export function useOrders() {
   const handleItemChange = (index: number, field: string, value: any) => {
     const newItems = [...formData.items];
     if (field === 'productId') {
-      const product = productsData?.items.find((p: any) => p.id === parseInt(value));
+      const product = products.find((p: any) => p.id === parseInt(value));
       newItems[index] = {
         ...newItems[index],
         productId: parseInt(value),
@@ -176,8 +176,11 @@ export function useOrders() {
     createOrder: createMutation.mutateAsync,
     isCreating: createMutation.isPending,
     
-    // Data
-    productsData,
+    // Infinite Scroll Data
+    products,
+    loadMoreProducts: loadMore,
+    hasMoreProducts: hasMore,
+    isProductsLoading: isLoadingMore,
     
     // Modal & Form State
     isModalOpen,

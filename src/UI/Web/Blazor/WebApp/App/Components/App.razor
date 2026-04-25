@@ -12,6 +12,9 @@
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    },
                     colors: {
                         primary: {
                             50: '#f0f9ff',
@@ -50,6 +53,14 @@
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Dados");
             XLSX.writeFile(workbook, filename);
+        }
+        window.setupScrollHandler = (element, dotNetHelper) => {
+            if (!element) return;
+            element.onscroll = () => {
+                if (element.scrollTop + element.clientHeight >= element.scrollHeight - 10) {
+                    dotNetHelper.invokeMethodAsync('HandleLoadMore');
+                }
+            };
         }
     </script>
     <script src="js/file-helpers.js"></script>

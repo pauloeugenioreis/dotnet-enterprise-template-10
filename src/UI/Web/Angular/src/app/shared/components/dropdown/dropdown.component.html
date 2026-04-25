@@ -17,7 +17,7 @@
 
   <div *ngIf="isOpen()" 
        [class]="'absolute z-50 w-full ' + (direction === 'up' ? 'bottom-full mb-3' : 'mt-3') + ' bg-white border border-gray-50 rounded-[2rem] shadow-2xl shadow-gray-200/50 py-3 overflow-hidden animate-in fade-in zoom-in-95 duration-200'">
-    <div class="max-h-60 overflow-y-auto">
+    <div class="max-h-60 overflow-y-auto" (scroll)="handleScroll($event)">
       <button
         *ngFor="let option of options"
         type="button"
@@ -26,6 +26,11 @@
       >
         {{ option.label }}
       </button>
+
+      <!-- Loading Indicator -->
+      <div *ngIf="loading" class="px-8 py-4 flex justify-center">
+        <div class="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
     </div>
   </div>
 </div>

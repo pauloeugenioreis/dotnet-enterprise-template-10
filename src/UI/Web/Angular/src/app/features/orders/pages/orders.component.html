@@ -14,9 +14,10 @@
       </button>
       <button
         (click)="openNew()"
-        class="bg-primary-600 hover:bg-primary-700 text-white font-black px-8 py-4 rounded-2xl shadow-lg shadow-primary-600/20 transition-all active:scale-95"
+        class="bg-primary-600 hover:bg-primary-700 text-white font-black px-10 py-5 rounded-3xl shadow-xl shadow-primary-600/20 transition-all active:scale-95 flex items-center gap-3"
       >
-        + Novo Pedido
+        <span class="text-xl">+</span>
+        <span>Novo Pedido</span>
       </button>
     </div>
   </header>
@@ -115,15 +116,15 @@
               </td>
               <td class="px-10 py-8">
                 <div class="flex gap-2">
-                  <button (click)="viewDetails(order)" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-blue-50 rounded-xl text-blue-600 transition-all active:scale-90" title="Ver Detalhes">
+                  <button (click)="viewDetails(order)" class="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-blue-50 rounded-2xl text-blue-600 transition-all active:scale-90" title="Ver Detalhes">
                     🔍
                   </button>
-                  <button (click)="openEdit(order)" class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-primary-50 rounded-xl text-primary-600 transition-all active:scale-90" title="Editar">
+                  <button (click)="openEdit(order)" class="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-primary-50 rounded-2xl text-primary-600 transition-all active:scale-90" title="Editar">
                     ✏️
                   </button>
                   <button
                     (click)="cancelOrder(order)"
-                    class="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-rose-50 rounded-xl text-rose-600 transition-all active:scale-90"
+                    class="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-rose-50 rounded-2xl text-rose-600 transition-all active:scale-90"
                     [class.opacity-20]="order.status === 'Cancelled'"
                     [disabled]="order.status === 'Cancelled'"
                     title="Cancelar"
@@ -149,113 +150,135 @@
   }
 </div>
 
-<!-- Order Modal -->
-<app-modal [show]="showModal" [title]="modalTitle" (close)="showModal = false">
-  <form (submit)="save()" class="space-y-8 max-h-[70vh] overflow-y-auto px-4 py-2">
-    <div class="grid grid-cols-2 gap-6">
-      <div class="space-y-3">
-        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Nome do Cliente</label>
-        <input
-          type="text"
-          [(ngModel)]="formData.customerName"
-          name="customerName"
-          class="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all"
-          placeholder="Ex: Bruno Silva"
-          required
-        />
-      </div>
-      <div class="space-y-3">
-        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">E-mail do Cliente</label>
-        <input
-          type="email"
-          [(ngModel)]="formData.customerEmail"
-          name="customerEmail"
-          class="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all"
-          placeholder="email@exemplo.com"
-          required
-        />
+<!-- Order Drawer -->
+<app-drawer 
+  [isOpen]="showModal" 
+  [title]="editingOrder ? 'Editar Pedido' : 'Novo Pedido'" 
+  [subtitle]="editingOrder ? 'Atualize as informações do pedido' : 'Cadastre um novo pedido no sistema'"
+  (onClose)="showModal = false"
+>
+  <div class="space-y-10">
+    <!-- Seção: Informações do Cliente -->
+    <div class="space-y-6">
+      <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Informações do Cliente</p>
+      <div class="grid grid-cols-1 gap-6">
+        <div class="space-y-2">
+          <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400">Nome Completo</label>
+          <input
+            type="text"
+            [(ngModel)]="formData.customerName"
+            name="customerName"
+            class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold text-gray-900 focus:bg-white focus:border-primary-200 focus:ring-4 focus:ring-primary-500/5 transition-all"
+            placeholder="Nome do cliente"
+            required
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400">E-mail de Contato</label>
+          <input
+            type="email"
+            [(ngModel)]="formData.customerEmail"
+            name="customerEmail"
+            class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold text-gray-900 focus:bg-white focus:border-primary-200 focus:ring-4 focus:ring-primary-500/5 transition-all"
+            placeholder="email@exemplo.com"
+            required
+          />
+        </div>
       </div>
     </div>
 
-    <div class="space-y-3">
-      <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Endereço de Entrega</label>
+    <!-- Seção: Endereço -->
+    <div class="space-y-6">
+      <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Endereço de Entrega</p>
       <input
         type="text"
         [(ngModel)]="formData.shippingAddress"
         name="shippingAddress"
-        class="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all"
-        placeholder="Rua, Número, Cidade - UF"
+        class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold text-gray-900 focus:bg-white focus:border-primary-200 focus:ring-4 focus:ring-primary-500/5 transition-all"
+        placeholder="Rua, Número, Cidade - UF, CEP"
         required
       />
     </div>
 
-    <div class="pt-6 border-t border-gray-100">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Itens do Pedido</h3>
+    <!-- Seção: Itens -->
+    <div class="space-y-6">
+      <div class="flex justify-between items-center">
+        <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Itens do Pedido</p>
         <button
           type="button"
           (click)="addItem()"
-          class="text-primary-600 font-black text-xs uppercase tracking-widest hover:underline"
+          class="text-primary-600 font-black text-[10px] uppercase tracking-widest hover:text-primary-700 flex items-center gap-2 group"
         >
-          + Adicionar Item
+          <span class="text-lg group-hover:scale-125 transition-transform">+</span>
+          Adicionar Item
         </button>
       </div>
 
       <div class="space-y-4">
         @for (item of formData.items; track $index) {
-          <div class="flex gap-4 items-end bg-gray-50/50 p-4 rounded-3xl">
+          <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex gap-4 items-end animate-fade-in">
             <div class="flex-1">
+              <label class="block text-[8px] font-black uppercase tracking-widest text-gray-300 mb-1">Produto</label>
               <app-dropdown
-                [options]="productOptions"
+                variant="form"
+                class="w-full"
+                [options]="productOptions()"
                 [value]="item.productId.toString()"
                 (valueChange)="onProductChange($index, $event)"
+                [loading]="productLoading()"
+                (loadMore)="loadMoreProducts()"
                 placeholder="Selecionar Produto"
               ></app-dropdown>
             </div>
             <div class="w-24">
+              <label class="block text-[8px] font-black uppercase tracking-widest text-gray-300 mb-1">Qtd</label>
               <input
                 type="number"
                 [(ngModel)]="item.quantity"
                 [name]="'qty-' + $index"
-                class="w-full px-4 py-4 bg-white border-none rounded-2xl outline-none font-bold text-gray-900 text-center"
+                class="w-full px-4 py-3 bg-white border border-gray-100 rounded-xl outline-none font-bold text-sm text-gray-900 focus:border-primary-200 transition-all text-center"
                 min="1"
               />
             </div>
             <button
               type="button"
               (click)="removeItem($index)"
-              class="p-4 text-red-400 hover:text-red-600 transition-colors"
+              class="w-10 h-10 flex items-center justify-center text-red-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
             >
               ✕
             </button>
           </div>
         }
         @if (formData.items.length === 0) {
-          <div class="text-center py-10 bg-gray-50/50 rounded-[2rem] border-2 border-dashed border-gray-100 text-gray-400 font-bold text-sm">
-            Nenhum item adicionado
+          <div class="text-center py-10 border-2 border-dashed border-gray-100 rounded-[2rem]">
+            <p class="text-gray-300 text-sm font-medium italic">Nenhum item adicionado ao pedido.</p>
           </div>
         }
       </div>
     </div>
+  </div>
 
-    <div class="pt-8 flex gap-4">
-      <button
-        type="button"
-        (click)="showModal = false"
-        class="flex-1 px-8 py-5 rounded-3xl font-black text-xs uppercase tracking-widest text-gray-400 hover:bg-gray-50 transition-all"
-      >
-        Cancelar
-      </button>
-      <button
-        type="submit"
-        [disabled]="formData.items.length === 0"
-        class="flex-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-black px-12 py-5 rounded-3xl shadow-xl shadow-primary-600/20 transition-all active:scale-95"
-      >
-        {{ editingOrder ? 'Salvar Alterações' : 'Finalizar Pedido' }}
-      </button>
-    </div>
-  </form>
-</app-modal>
+  <div footer class="flex gap-4 w-full">
+    <button
+      type="button"
+      (click)="showModal = false"
+      class="flex-1 bg-white border border-gray-100 text-gray-400 font-black py-5 rounded-3xl hover:bg-gray-50 transition-all active:scale-95 flex items-center justify-center tracking-widest text-[10px] uppercase"
+    >
+      Cancelar
+    </button>
+    <button
+      type="button"
+      (click)="save()"
+      [disabled]="formData.items.length === 0"
+      class="flex-[2] bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-5 rounded-3xl shadow-xl shadow-primary-600/20 transition-all active:scale-95 flex items-center justify-center gap-3 tracking-widest text-[10px] uppercase"
+    >
+      <span>{{ editingOrder ? 'Salvar Alterações' : 'Criar Pedido' }}</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+      </svg>
+    </button>
+  </div>
+</app-drawer>
 
 <app-order-details-modal
   [order]="selectedOrder()"
