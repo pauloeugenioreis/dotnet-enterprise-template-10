@@ -21,7 +21,13 @@ param(
 
 
     [ValidateSet("Yes", "No")]
-    [string]$GitInit
+    [string]$GitInit,
+
+    [ValidateSet("None", "Flutter", "Maui", "ReactNative", "All")]
+    [string]$UIMobile,
+
+    [ValidateSet("None", "Angular", "Blazor", "React", "Vue", "All")]
+    [string]$UIWeb
 )
 
 $ErrorActionPreference = "Stop"
@@ -135,7 +141,9 @@ $isInteractive = -not ($PSBoundParameters.ContainsKey('Database') -or
                         $PSBoundParameters.ContainsKey('Queue') -or
                         $PSBoundParameters.ContainsKey('Storage') -or
                         $PSBoundParameters.ContainsKey('Telemetry') -or
-                        $PSBoundParameters.ContainsKey('GitInit'))
+                        $PSBoundParameters.ContainsKey('GitInit') -or
+                        $PSBoundParameters.ContainsKey('UIMobile') -or
+                        $PSBoundParameters.ContainsKey('UIWeb'))
 
 # ============================================================
 # Collect Choices
@@ -187,6 +195,40 @@ if ($isInteractive) {
     $Telemetry = if ($useTelemetry) { "Yes" } else { "No" }
 
 
+    Write-Section "UI - Mobile"
+    $mobileChoice = Show-Menu -Title "Quais tecnologias Mobile deseja manter?" -Options @(
+        "Nenhuma",
+        "Flutter",
+        "MAUI",
+        "React Native",
+        "Todas"
+    ) -Default 5
+    $UIMobile = switch ($mobileChoice) {
+        1 { "None" }
+        2 { "Flutter" }
+        3 { "Maui" }
+        4 { "ReactNative" }
+        5 { "All" }
+    }
+
+    Write-Section "UI - Web"
+    $webChoice = Show-Menu -Title "Quais tecnologias Web deseja manter?" -Options @(
+        "Nenhuma",
+        "Angular",
+        "Blazor",
+        "React",
+        "Vue",
+        "Todas"
+    ) -Default 6
+    $UIWeb = switch ($webChoice) {
+        1 { "None" }
+        2 { "Angular" }
+        3 { "Blazor" }
+        4 { "React" }
+        5 { "Vue" }
+        6 { "All" }
+    }
+
     Write-Section "Git"
     $doGitInit = Show-YesNo -Title "Inicializar repositório Git?" -DefaultYes $true
     $GitInit = if ($doGitInit) { "Yes" } else { "No" }
@@ -203,6 +245,8 @@ if ($isInteractive) {
     Write-Host "  ║  Storage:        $($Storage.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Telemetria:     $($Telemetry.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ║  Git Init:       $($GitInit.PadRight(38))║" -ForegroundColor Cyan
+    Write-Host "  ║  UI Mobile:      $($UIMobile.PadRight(38))║" -ForegroundColor Cyan
+    Write-Host "  ║  UI Web:         $($UIWeb.PadRight(38))║" -ForegroundColor Cyan
     Write-Host "  ╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
 
@@ -222,6 +266,8 @@ if ($isInteractive) {
     if (-not $Storage) { $Storage = "None" }
     if (-not $Telemetry) { $Telemetry = "No" }
     if (-not $GitInit) { $GitInit = "Yes" }
+    if (-not $UIMobile) { $UIMobile = "All" }
+    if (-not $UIWeb) { $UIWeb = "All" }
 }
 
 # ============================================================
@@ -284,6 +330,73 @@ foreach ($file in $files) {
         Set-Content $file.FullName $content -NoNewline
     }
 }
+
+# ============================================================
+# UI Cleanup
+# ============================================================
+
+Write-Step "🧹" "Limpando frameworks de UI não selecionados..."
+
+# -- Mobile --
+if ($UIMobile -eq "None") {
+    Remove-Item "src/UI/Mobile" -Recurse -Force -ErrorAction SilentlyContinue
+    dotnet sln "$ProjectName.sln" remove src/UI/Mobile/MauiApp/MauiApp.csproj 2>$null
+} elseif ($UIMobile -ne "All") {
+    if ($UIMobile -ne "Flutter") { Remove-Item "src/UI/Mobile/FlutterApp" -Recurse -Force -ErrorAction SilentlyContinue }
+    if ($UIMobile -ne "Maui") {
+        Remove-Item "src/UI/Mobile/MauiApp" -Recurse -Force -ErrorAction SilentlyContinue
+        dotnet sln "$ProjectName.sln" remove src/UI/Mobile/MauiApp/MauiApp.csproj 2>$null
+    }
+    if ($UIMobile -ne "ReactNative") { Remove-Item "src/UI/Mobile/ReactNativeApp" -Recurse -Force -ErrorAction SilentlyContinue }
+}
+
+# -- Web --
+$aspireProgram = Join-Path $TargetDir "src/Aspire/AppHost/Program.cs"
+$programContent = Get-Content $aspireProgram -Raw
+
+if ($UIWeb -eq "None") {
+    Remove-Item "src/UI/Web" -Recurse -Force -ErrorAction SilentlyContinue
+    dotnet sln "$ProjectName.sln" remove src/UI/Web/Blazor/WebApp/App/App.csproj 2>$null
+    dotnet sln "$ProjectName.sln" remove src/UI/Web/Blazor/WebApp/App.Client/App.Client.csproj 2>$null
+    dotnet sln "$ProjectName.sln" remove src/UI/Web/Blazor/Wasm/BlazorWasm.csproj 2>$null
+    # Remove ProjectReference from AppHost
+    $appHostCsproj = Join-Path $TargetDir "src/Aspire/AppHost/AppHost.csproj"
+    $appHostContent = Get-Content $appHostCsproj -Raw
+    $appHostContent = $appHostContent -replace '<ProjectReference Include=".*?UI\\Web\\Blazor\\WebApp\\App\\App\.csproj" />', ''
+    Set-Content $appHostCsproj $appHostContent -NoNewline
+    # Remove all web from Aspire (between comments)
+    $programContent = $programContent -replace '(?s)// Web Projects.*?// End Web Projects', '// Web UI Removed'
+} elseif ($UIWeb -ne "All") {
+    # Angular
+    if ($UIWeb -ne "Angular") {
+        Remove-Item "src/UI/Web/Angular" -Recurse -Force -ErrorAction SilentlyContinue
+        $programContent = $programContent -replace '(?s)builder\.AddNpmApp\("angular-web".*?\.WithExternalHttpEndpoints\(\);', ''
+    }
+    # Blazor
+    if ($UIWeb -ne "Blazor") {
+        Remove-Item "src/UI/Web/Blazor" -Recurse -Force -ErrorAction SilentlyContinue
+        dotnet sln "$ProjectName.sln" remove src/UI/Web/Blazor/WebApp/App/App.csproj 2>$null
+        dotnet sln "$ProjectName.sln" remove src/UI/Web/Blazor/WebApp/App.Client/App.Client.csproj 2>$null
+        dotnet sln "$ProjectName.sln" remove src/UI/Web/Blazor/Wasm/BlazorWasm.csproj 2>$null
+        # Remove ProjectReference from AppHost
+        $appHostCsproj = Join-Path $TargetDir "src/Aspire/AppHost/AppHost.csproj"
+        $appHostContent = Get-Content $appHostCsproj -Raw
+        $appHostContent = $appHostContent -replace '<ProjectReference Include=".*?UI\\Web\\Blazor\\WebApp\\App\\App\.csproj" />', ''
+        Set-Content $appHostCsproj $appHostContent -NoNewline
+        $programContent = $programContent -replace '(?s)builder\.AddProject<Projects\.App>\("blazor-app"\).*?\.WithExternalHttpEndpoints\(\);', ''
+    }
+    # React
+    if ($UIWeb -ne "React") {
+        Remove-Item "src/UI/Web/React" -Recurse -Force -ErrorAction SilentlyContinue
+        $programContent = $programContent -replace '(?s)builder\.AddNpmApp\("react-web".*?\.WithExternalHttpEndpoints\(\);', ''
+    }
+    # Vue
+    if ($UIWeb -ne "Vue") {
+        Remove-Item "src/UI/Web/Vue" -Recurse -Force -ErrorAction SilentlyContinue
+        $programContent = $programContent -replace '(?s)builder\.AddNpmApp\("vue-web".*?\.WithExternalHttpEndpoints\(\);', ''
+    }
+}
+Set-Content $aspireProgram $programContent -NoNewline
 
 # ============================================================
 # Configure appsettings.json

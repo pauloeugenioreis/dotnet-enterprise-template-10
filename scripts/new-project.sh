@@ -129,8 +129,9 @@ OPT_QUEUE=""
 OPT_MONGODB=""
 OPT_STORAGE=""
 OPT_TELEMETRY=""
-OPT_EVENTSOURCING=""
 OPT_GITINIT=""
+OPT_UI_MOBILE=""
+OPT_UI_WEB=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -140,6 +141,8 @@ while [[ $# -gt 0 ]]; do
         --storage) OPT_STORAGE="$2"; shift 2 ;;
         --telemetry) OPT_TELEMETRY="$2"; shift 2 ;;
         --git-init) OPT_GITINIT="$2"; shift 2 ;;
+        --ui-mobile) OPT_UI_MOBILE="$2"; shift 2 ;;
+        --ui-web) OPT_UI_WEB="$2"; shift 2 ;;
         *) echo "Opção desconhecida: $1"; exit 1 ;;
     esac
 done
@@ -212,6 +215,38 @@ if [ "$IS_INTERACTIVE" = true ]; then
 
     EVENTSOURCING="yes"
 
+    write_section "UI - Mobile"
+    MOBILE_CHOICE=$(show_menu "Quais tecnologias Mobile deseja manter?" 5 \
+        "Nenhuma" \
+        "Flutter" \
+        "MAUI" \
+        "React Native" \
+        "Todas")
+    case $MOBILE_CHOICE in
+        1) UI_MOBILE="none" ;;
+        2) UI_MOBILE="flutter" ;;
+        3) UI_MOBILE="maui" ;;
+        4) UI_MOBILE="reactnative" ;;
+        5) UI_MOBILE="all" ;;
+    esac
+
+    write_section "UI - Web"
+    WEB_CHOICE=$(show_menu "Quais tecnologias Web deseja manter?" 6 \
+        "Nenhuma" \
+        "Angular" \
+        "Blazor" \
+        "React" \
+        "Vue" \
+        "Todas")
+    case $WEB_CHOICE in
+        1) UI_WEB="none" ;;
+        2) UI_WEB="angular" ;;
+        3) UI_WEB="blazor" ;;
+        4) UI_WEB="react" ;;
+        5) UI_WEB="vue" ;;
+        6) UI_WEB="all" ;;
+    esac
+
     write_section "Git"
     if show_yesno "Inicializar repositório Git?" "true"; then
         GITINIT="yes"
@@ -231,8 +266,9 @@ if [ "$IS_INTERACTIVE" = true ]; then
     printf "  ${CYAN}  RabbitMQ:       %-38s${NC}\n" "$QUEUE"
     printf "  ${CYAN}  Storage:        %-38s${NC}\n" "$STORAGE"
     printf "  ${CYAN}  Telemetria:     %-38s${NC}\n" "$TELEMETRY"
-    printf "  ${CYAN}  Event Sourcing: %-38s${NC}\n" "$EVENTSOURCING"
     printf "  ${CYAN}  Git Init:       %-38s${NC}\n" "$GITINIT"
+    printf "  ${CYAN}  UI Mobile:      %-38s${NC}\n" "$UI_MOBILE"
+    printf "  ${CYAN}  UI Web:         %-38s${NC}\n" "$UI_WEB"
     echo -e "  ${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
     echo ""
 
@@ -250,8 +286,9 @@ else
     QUEUE="${OPT_QUEUE:-no}"
     STORAGE="${OPT_STORAGE:-None}"
     TELEMETRY="${OPT_TELEMETRY:-no}"
-    EVENTSOURCING="yes"
     GITINIT="${OPT_GITINIT:-yes}"
+    UI_MOBILE="${OPT_UI_MOBILE:-all}"
+    UI_WEB="${OPT_UI_WEB:-all}"
 fi
 
 # Normalize to lowercase for comparisons
@@ -296,6 +333,63 @@ mv ProjectTemplate.sln "$PROJECT_NAME.sln"
 
 find . -type f \( -name "*.cs" -o -name "*.csproj" -o -name "*.sln" -o -name "*.json" -o -name "*.yml" -o -name "*.yaml" -o -name "*.md" -o -name "*.props" \) \
     -exec sed -i "s/ProjectTemplate/$PROJECT_NAME/g" {} +
+
+# ============================================================
+# UI Cleanup
+# ============================================================
+
+write_step "🧹" "Limpando frameworks de UI não selecionados..."
+
+# -- Mobile --
+if [ "$UI_MOBILE" = "none" ]; then
+    rm -rf src/UI/Mobile
+    dotnet sln "$PROJECT_NAME.sln" remove src/UI/Mobile/MauiApp/MauiApp.csproj 2>/dev/null || true
+elif [ "$UI_MOBILE" != "all" ]; then
+    [ "$UI_MOBILE" != "flutter" ] && rm -rf src/UI/Mobile/FlutterApp
+    [ "$UI_MOBILE" != "maui" ] && {
+        rm -rf src/UI/Mobile/MauiApp
+        dotnet sln "$PROJECT_NAME.sln" remove src/UI/Mobile/MauiApp/MauiApp.csproj 2>/dev/null || true
+    }
+    [ "$UI_MOBILE" != "reactnative" ] && rm -rf src/UI/Mobile/ReactNativeApp
+fi
+
+# -- Web --
+ASPIRE_PROGRAM="src/Aspire/AppHost/Program.cs"
+
+if [ "$UI_WEB" = "none" ]; then
+    rm -rf src/UI/Web
+    dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App/App.csproj 2>/dev/null || true
+    dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App.Client/App.Client.csproj 2>/dev/null || true
+    dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/Wasm/BlazorWasm.csproj 2>/dev/null || true
+    sed -i '/UI\/Web\/Blazor\/WebApp\/App\/App.csproj/d' src/Aspire/AppHost/AppHost.csproj
+    # Remove all web from Aspire
+    sed -i '/\/\/ Web Projects/,/builder.AddNpmApp/d' "$ASPIRE_PROGRAM"
+elif [ "$UI_WEB" != "all" ]; then
+    # Angular
+    if [ "$UI_WEB" != "angular" ]; then
+        rm -rf src/UI/Web/Angular
+        sed -i '/builder.AddNpmApp("angular-web"/,/ExternalHttpEndpoints();/d' "$ASPIRE_PROGRAM"
+    fi
+    # Blazor
+    if [ "$UI_WEB" != "blazor" ]; then
+        rm -rf src/UI/Web/Blazor
+        dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App/App.csproj 2>/dev/null || true
+        dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/WebApp/App.Client/App.Client.csproj 2>/dev/null || true
+        dotnet sln "$PROJECT_NAME.sln" remove src/UI/Web/Blazor/Wasm/BlazorWasm.csproj 2>/dev/null || true
+        sed -i '/UI\/Web\/Blazor\/WebApp\/App\/App.csproj/d' src/Aspire/AppHost/AppHost.csproj
+        sed -i '/builder.AddProject<Projects.App>("blazor-app")/,/ExternalHttpEndpoints();/d' "$ASPIRE_PROGRAM"
+    fi
+    # React
+    if [ "$UI_WEB" != "react" ]; then
+        rm -rf src/UI/Web/React
+        sed -i '/builder.AddNpmApp("react-web"/,/ExternalHttpEndpoints();/d' "$ASPIRE_PROGRAM"
+    fi
+    # Vue
+    if [ "$UI_WEB" != "vue" ]; then
+        rm -rf src/UI/Web/Vue
+        sed -i '/builder.AddNpmApp("vue-web"/,/ExternalHttpEndpoints();/d' "$ASPIRE_PROGRAM"
+    fi
+fi
 
 # ============================================================
 # Configure appsettings.json
