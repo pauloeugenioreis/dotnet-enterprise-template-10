@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { FormsModule } from '@angular/forms';
-import { DocumentService } from '../../../core/services/data-services';
+import { DocumentService } from '../../../core/services/document.service';
 
 @Component({
   selector: 'app-documents',
@@ -17,8 +17,9 @@ export class DocumentsComponent {
   uploading = signal(false);
   processing = signal(false);
 
-  onFileSelected(event: any) {
-    const file: File = event.target.files[0];
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
     if (file) {
       this.uploadFile(file);
     }

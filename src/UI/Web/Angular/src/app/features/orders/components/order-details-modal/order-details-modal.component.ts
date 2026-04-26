@@ -1,8 +1,8 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
-import { OrderResponse } from '../../../../shared/models/models';
+import { OrderResponse } from '../../../../shared/models';
 import { DropdownComponent } from '../../../../shared/components/dropdown/dropdown.component';
-import { OrderService } from '../../../../core/services/data-services';
+import { OrderService } from '../../../../core/services/order.service';
 import { inject } from '@angular/core';
 import { DrawerComponent } from '../../../../shared/components/drawer/drawer.component';
 

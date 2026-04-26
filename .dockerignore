@@ -22,8 +22,8 @@ x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
-[Bb]in/
-[Oo]bj/
+**/[Bb]in/
+**/[Oo]bj/
 [Ll]og/
 [Ll]ogs/
 
@@ -48,7 +48,7 @@ project.fragment.lock.json
 artifacts/
 
 # Node modules (if using any JS tools)
-node_modules/
+**/node_modules/
 npm-debug.log
 yarn-error.log
 

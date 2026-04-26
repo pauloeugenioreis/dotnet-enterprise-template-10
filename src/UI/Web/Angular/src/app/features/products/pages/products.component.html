@@ -136,17 +136,25 @@
 
 <!-- Product Modal -->
 <app-modal [show]="showModal" [title]="modalTitle" (close)="showModal = false">
-  <form (submit)="save()" class="space-y-8">
+  <form #productForm="ngForm" (submit)="save()" class="space-y-8">
     <div class="space-y-3">
       <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Nome do Produto</label>
       <input
         type="text"
         [(ngModel)]="formData.name"
         name="name"
-        class="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all"
-        placeholder="Ex: Teclado Mecânico"
+        #nameField="ngModel"
         required
+        minlength="3"
+        [class]="'w-full px-8 py-5 bg-gray-50 border rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all ' + (nameField.invalid && nameField.touched ? 'border-red-300 bg-red-50/30' : 'border-transparent')"
+        placeholder="Ex: Teclado Mecânico"
       />
+      @if (nameField.invalid && nameField.touched) {
+        <span class="block text-[10px] text-red-500 font-bold ml-4">
+          @if (nameField.errors?.['required']) { Nome é obrigatório. }
+          @else if (nameField.errors?.['minlength']) { Mínimo de 3 caracteres. }
+        </span>
+      }
     </div>
 
     <div class="grid grid-cols-2 gap-6">
@@ -156,10 +164,14 @@
           type="text"
           [(ngModel)]="formData.category"
           name="category"
-          class="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all"
-          placeholder="Ex: Hardware"
+          #categoryField="ngModel"
           required
+          [class]="'w-full px-8 py-5 bg-gray-50 border rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all ' + (categoryField.invalid && categoryField.touched ? 'border-red-300 bg-red-50/30' : 'border-transparent')"
+          placeholder="Ex: Hardware"
         />
+        @if (categoryField.invalid && categoryField.touched) {
+          <span class="block text-[10px] text-red-500 font-bold ml-4">Categoria é obrigatória.</span>
+        }
       </div>
       <div class="space-y-3">
         <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Preço (R$)</label>
@@ -167,9 +179,16 @@
           type="number"
           [(ngModel)]="formData.price"
           name="price"
-          class="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all"
+          #priceField="ngModel"
           required
+          min="0.01"
+          placeholder="0,00"
+          title="Preço do produto"
+          [class]="'w-full px-8 py-5 bg-gray-50 border rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all ' + (priceField.invalid && priceField.touched ? 'border-red-300 bg-red-50/30' : 'border-transparent')"
         />
+        @if (priceField.invalid && priceField.touched) {
+          <span class="block text-[10px] text-red-500 font-bold ml-4">Preço deve ser maior que zero.</span>
+        }
       </div>
     </div>
 
@@ -180,9 +199,16 @@
           type="number"
           [(ngModel)]="formData.stock"
           name="stock"
-          class="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all"
+          #stockField="ngModel"
           required
+          min="0"
+          placeholder="0"
+          title="Quantidade em estoque"
+          [class]="'w-full px-8 py-5 bg-gray-50 border rounded-3xl outline-none font-bold text-gray-900 focus:ring-2 focus:ring-primary-600/10 transition-all ' + (stockField.invalid && stockField.touched ? 'border-red-300 bg-red-50/30' : 'border-transparent')"
         />
+        @if (stockField.invalid && stockField.touched) {
+          <span class="block text-[10px] text-red-500 font-bold ml-4">Estoque não pode ser negativo.</span>
+        }
       </div>
       <div class="space-y-3">
         <label class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 ml-4">Status</label>
@@ -191,6 +217,7 @@
             type="checkbox"
             [(ngModel)]="formData.isActive"
             name="isActive"
+            title="Produto Ativo"
             class="w-6 h-6 rounded-lg text-primary-600 focus:ring-primary-600/20 border-none bg-gray-200"
           />
           <span class="text-xs font-black uppercase tracking-widest text-gray-600">Produto Ativo</span>

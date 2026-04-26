@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
-import { OrderService } from '../../../core/services/data-services';
+import { OrderService } from '../../../core/services/order.service';
 
 @Component({
   selector: 'app-dashboard',

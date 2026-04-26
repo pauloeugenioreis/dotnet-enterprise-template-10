@@ -1,42 +1,49 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { BaseService } from './base.service';
-import { AuthResponse, User } from '../../shared/models/models';
+import { StorageService } from './storage.service';
+import { AuthResponse, LoginRequest, User } from '../../shared/models';
 import { tap } from 'rxjs';
+
+const TOKEN_KEY = 'auth_token';
+const USER_KEY = 'auth_user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService extends BaseService {
+  protected override entityPath = 'api/auth';
+  private storage = inject(StorageService);
+
   currentUser = signal<User | null>(null);
 
   constructor() {
     super();
-    const token = localStorage.getItem('auth_token');
-    const userStr = localStorage.getItem('auth_user');
-    if (token && userStr) {
-      try {
-        this.currentUser.set(JSON.parse(userStr));
-      } catch {
-        this.logout();
-      }
+    const token = this.storage.get(TOKEN_KEY);
+    const user = this.storage.getObject<User>(USER_KEY);
+    if (token && user) {
+      this.currentUser.set(user);
     }
   }
 
-  login(credentials: any) {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/api/auth/login`, credentials).pipe(
+  login(credentials: LoginRequest) {
+    return this.http.post<AuthResponse>(`${this.fullUrl}/login`, credentials).pipe(
       tap(response => {
-        localStorage.setItem('auth_token', response.accessToken);
-        localStorage.setItem('auth_user', JSON.stringify(response.user));
+        this.storage.set(TOKEN_KEY, response.accessToken);
+        this.storage.setObject(USER_KEY, response.user);
         this.currentUser.set(response.user);
       })
     );
   }
 
   logout() {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
+    this.storage.remove(TOKEN_KEY);
+    this.storage.remove(USER_KEY);
     this.currentUser.set(null);
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('auth_token');
+    return !!this.storage.get(TOKEN_KEY);
+  }
+
+  getToken(): string | null {
+    return this.storage.get(TOKEN_KEY);
   }
 }

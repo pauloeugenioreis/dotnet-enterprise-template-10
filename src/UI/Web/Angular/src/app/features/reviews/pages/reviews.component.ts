@@ -1,8 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CustomerReviewService } from '../../../core/services/data-services';
-import { CustomerReviewResponse } from '../../../shared/models/models';
+import { CustomerReviewService } from '../../../core/services/customer-review.service';
+import { CustomerReviewResponse } from '../../../shared/models';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-reviews',
@@ -12,6 +13,7 @@ import { CustomerReviewResponse } from '../../../shared/models/models';
 })
 export class ReviewsComponent implements OnInit {
   private reviewService = inject(CustomerReviewService);
+  private notification = inject(NotificationService);
 
   reviews = signal<CustomerReviewResponse[]>([]);
   loading = signal(false);
@@ -53,11 +55,14 @@ export class ReviewsComponent implements OnInit {
   }
 
   handleDelete(id: string) {
-    if (confirm('Tem certeza que deseja excluir esta avaliação?')) {
-      this.reviewService.delete(id).subscribe(() => {
-        this.loadReviews();
-      });
-    }
+    this.notification.confirm('Tem certeza que deseja excluir esta avaliação?').subscribe(confirmed => {
+      if (confirmed) {
+        this.reviewService.delete(id).subscribe(() => {
+          this.notification.success('Avaliação excluída com sucesso');
+          this.loadReviews();
+        });
+      }
+    });
   }
 
   getStars(rating: number): number[] {

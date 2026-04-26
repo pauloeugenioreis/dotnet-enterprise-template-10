@@ -157,9 +157,9 @@ case $choice in
             fi
         done
 
-        DB_TYPE=$DB_TYPE \
-        DB_CONNECTION_STRING="$DB_CONN" \
-        DB_EVENTS_CONNECTION_STRING="$DB_EVENTS_CONN" \
+        export DB_TYPE=$DB_TYPE
+        export DB_CONNECTION_STRING="$DB_CONN"
+        export DB_EVENTS_CONNECTION_STRING="$DB_EVENTS_CONN"
 
         echo -e "\n${YELLOW}🛠️ Compilando serviços sequencialmente para garantir estabilidade...${NC}"
         for service in $START_LIST; do

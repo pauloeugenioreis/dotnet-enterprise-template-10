@@ -1,8 +1,8 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuditService } from '../../../core/services/data-services';
-import { DomainEvent } from '../../../shared/models/models';
+import { AuditService } from '../../../core/services/audit.service';
+import { DomainEvent } from '../../../shared/models';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';

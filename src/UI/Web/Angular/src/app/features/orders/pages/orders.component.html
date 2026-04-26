@@ -111,7 +111,7 @@
               </td>
               <td class="px-10 py-8">
                 <span [class]="'px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest ' + getStatusClass(order.status)">
-                  {{ order.status }}
+                  {{ getStatusLabel(order.status) }}
                 </span>
               </td>
               <td class="px-10 py-8">
@@ -125,8 +125,8 @@
                   <button
                     (click)="cancelOrder(order)"
                     class="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-rose-50 rounded-2xl text-rose-600 transition-all active:scale-90"
-                    [class.opacity-20]="order.status === 'Cancelled'"
-                    [disabled]="order.status === 'Cancelled'"
+                    [class.opacity-20]="order.status === OrderStatus.Cancelled"
+                    [disabled]="order.status === OrderStatus.Cancelled"
                     title="Cancelar"
                   >
                     🗑️
@@ -151,13 +151,13 @@
 </div>
 
 <!-- Order Drawer -->
-<app-drawer 
-  [isOpen]="showModal" 
-  [title]="editingOrder ? 'Editar Pedido' : 'Novo Pedido'" 
+<app-drawer
+  [isOpen]="showModal"
+  [title]="editingOrder ? 'Editar Pedido' : 'Novo Pedido'"
   [subtitle]="editingOrder ? 'Atualize as informações do pedido' : 'Cadastre um novo pedido no sistema'"
   (onClose)="showModal = false"
 >
-  <div class="space-y-10">
+  <form #orderForm="ngForm" class="space-y-10">
     <!-- Seção: Informações do Cliente -->
     <div class="space-y-6">
       <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Informações do Cliente</p>
@@ -168,10 +168,18 @@
             type="text"
             [(ngModel)]="formData.customerName"
             name="customerName"
-            class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold text-gray-900 focus:bg-white focus:border-primary-200 focus:ring-4 focus:ring-primary-500/5 transition-all"
-            placeholder="Nome do cliente"
+            #customerNameField="ngModel"
             required
+            minlength="3"
+            placeholder="Nome do cliente"
+            [class]="'w-full px-6 py-4 bg-gray-50 border rounded-2xl outline-none font-bold text-gray-900 focus:bg-white focus:ring-4 focus:ring-primary-500/5 transition-all ' + (customerNameField.invalid && customerNameField.touched ? 'border-red-300 bg-red-50/30' : 'border-gray-100 focus:border-primary-200')"
           />
+          @if (customerNameField.invalid && customerNameField.touched) {
+            <span class="block text-[10px] text-red-500 font-bold ml-2">
+              @if (customerNameField.errors?.['required']) { Nome é obrigatório. }
+              @else if (customerNameField.errors?.['minlength']) { Mínimo de 3 caracteres. }
+            </span>
+          }
         </div>
         <div class="space-y-2">
           <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400">E-mail de Contato</label>
@@ -179,10 +187,18 @@
             type="email"
             [(ngModel)]="formData.customerEmail"
             name="customerEmail"
-            class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold text-gray-900 focus:bg-white focus:border-primary-200 focus:ring-4 focus:ring-primary-500/5 transition-all"
-            placeholder="email@exemplo.com"
+            #customerEmailField="ngModel"
             required
+            email
+            placeholder="email@exemplo.com"
+            [class]="'w-full px-6 py-4 bg-gray-50 border rounded-2xl outline-none font-bold text-gray-900 focus:bg-white focus:ring-4 focus:ring-primary-500/5 transition-all ' + (customerEmailField.invalid && customerEmailField.touched ? 'border-red-300 bg-red-50/30' : 'border-gray-100 focus:border-primary-200')"
           />
+          @if (customerEmailField.invalid && customerEmailField.touched) {
+            <span class="block text-[10px] text-red-500 font-bold ml-2">
+              @if (customerEmailField.errors?.['required']) { E-mail é obrigatório. }
+              @else if (customerEmailField.errors?.['email']) { Informe um e-mail válido. }
+            </span>
+          }
         </div>
       </div>
     </div>
@@ -194,10 +210,14 @@
         type="text"
         [(ngModel)]="formData.shippingAddress"
         name="shippingAddress"
-        class="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold text-gray-900 focus:bg-white focus:border-primary-200 focus:ring-4 focus:ring-primary-500/5 transition-all"
-        placeholder="Rua, Número, Cidade - UF, CEP"
+        #shippingAddressField="ngModel"
         required
+        placeholder="Rua, Número, Cidade - UF, CEP"
+        [class]="'w-full px-6 py-4 bg-gray-50 border rounded-2xl outline-none font-bold text-gray-900 focus:bg-white focus:ring-4 focus:ring-primary-500/5 transition-all ' + (shippingAddressField.invalid && shippingAddressField.touched ? 'border-red-300 bg-red-50/30' : 'border-gray-100 focus:border-primary-200')"
       />
+      @if (shippingAddressField.invalid && shippingAddressField.touched) {
+        <span class="block text-[10px] text-red-500 font-bold ml-2">Endereço de entrega é obrigatório.</span>
+      }
     </div>
 
     <!-- Seção: Itens -->
@@ -236,8 +256,10 @@
                 type="number"
                 [(ngModel)]="item.quantity"
                 [name]="'qty-' + $index"
+                title="Quantidade"
                 class="w-full px-4 py-3 bg-white border border-gray-100 rounded-xl outline-none font-bold text-sm text-gray-900 focus:border-primary-200 transition-all text-center"
                 min="1"
+                required
               />
             </div>
             <button
@@ -256,7 +278,7 @@
         }
       </div>
     </div>
-  </div>
+  </form>
 
   <div footer class="flex gap-4 w-full">
     <button
@@ -269,8 +291,7 @@
     <button
       type="button"
       (click)="save()"
-      [disabled]="formData.items.length === 0"
-      class="flex-[2] bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-5 rounded-3xl shadow-xl shadow-primary-600/20 transition-all active:scale-95 flex items-center justify-center gap-3 tracking-widest text-[10px] uppercase"
+      class="flex-[2] bg-primary-600 hover:bg-primary-700 text-white font-black py-5 rounded-3xl shadow-xl shadow-primary-600/20 transition-all active:scale-95 flex items-center justify-center gap-3 tracking-widest text-[10px] uppercase"
     >
       <span>{{ editingOrder ? 'Salvar Alterações' : 'Criar Pedido' }}</span>
       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
