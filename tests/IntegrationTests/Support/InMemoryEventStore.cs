@@ -7,7 +7,7 @@ using System.Threading;
 using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 
-namespace ProjectTemplate.Integration.Tests.Support;
+namespace ProjectTemplate.IntegrationTests.Support;
 
 /// <summary>
 /// Lightweight in-memory implementation of <see cref="IEventStore"/> used by integration tests.

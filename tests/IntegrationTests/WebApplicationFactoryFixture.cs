@@ -13,11 +13,11 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using ProjectTemplate.Data.Context;
 using ProjectTemplate.Domain;
 using ProjectTemplate.Domain.Interfaces;
-using ProjectTemplate.Integration.Tests.Support;
+using ProjectTemplate.IntegrationTests.Support;
 using Testcontainers.PostgreSql;
 using Xunit;
 
-namespace ProjectTemplate.Integration.Tests;
+namespace ProjectTemplate.IntegrationTests;
 
 /// <summary>
 /// Custom WebApplicationFactory for integration tests with real PostgreSQL via Testcontainers

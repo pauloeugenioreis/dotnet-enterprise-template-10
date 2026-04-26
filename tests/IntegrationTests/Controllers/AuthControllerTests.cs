@@ -13,10 +13,10 @@ using Microsoft.Extensions.Options;
 using ProjectTemplate.Shared.Models;
 using ProjectTemplate.Domain.Exceptions;
 using ProjectTemplate.Domain.Interfaces;
-using ProjectTemplate.Integration.Tests.Support;
+using ProjectTemplate.IntegrationTests.Support;
 using Xunit;
 
-namespace ProjectTemplate.Integration.Tests.Controllers;
+namespace ProjectTemplate.IntegrationTests.Controllers;
 
 /// <summary>
 /// Integration tests for AuthController using a deterministic in-memory auth service.

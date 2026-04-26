@@ -9,7 +9,7 @@ using ProjectTemplate.Domain.Exceptions;
 using ProjectTemplate.Domain.Interfaces;
 using Xunit;
 
-namespace ProjectTemplate.Integration.Tests.Controllers;
+namespace ProjectTemplate.IntegrationTests.Controllers;
 
 /// <summary>
 /// Integration tests for CustomerReviewController.

@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace ProjectTemplate.Integration.Tests;
+namespace ProjectTemplate.IntegrationTests;
 
 [CollectionDefinition("Integration Tests")]
 public class IntegrationTestCollection : ICollectionFixture<WebApplicationFactoryFixture>

@@ -5,7 +5,7 @@ using FluentAssertions;
 using ProjectTemplate.Shared.Models;
 using Xunit;
 
-namespace ProjectTemplate.Integration.Tests.Controllers;
+namespace ProjectTemplate.IntegrationTests.Controllers;
 
 /// <summary>
 /// Integration tests for ProductController

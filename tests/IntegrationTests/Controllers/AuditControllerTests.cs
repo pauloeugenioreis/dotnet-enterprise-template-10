@@ -13,7 +13,7 @@ using ProjectTemplate.Domain.Entities;
 using ProjectTemplate.Domain.Interfaces;
 using Xunit;
 
-namespace ProjectTemplate.Integration.Tests.Controllers;
+namespace ProjectTemplate.IntegrationTests.Controllers;
 
 /// <summary>
 /// Integration tests for AuditController to guarantee the Event Sourcing surface stays functional.
