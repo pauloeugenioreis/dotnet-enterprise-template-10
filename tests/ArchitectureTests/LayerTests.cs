@@ -14,68 +14,74 @@ public class LayerTests
     [Fact]
     public void DomainLayer_ShouldNotHaveDependencies_OnOtherLayers()
     {
-        // Arrange
         var domainAssembly = typeof(ProjectTemplate.Domain.Entities.EntityBase).Assembly;
 
-        // Act
         var result = Types
             .InAssembly(domainAssembly)
             .ShouldNot()
             .HaveDependencyOnAny(ApplicationNamespace, InfrastructureNamespace, DataNamespace, ApiNamespace)
             .GetResult();
 
-        // Assert
         Assert.True(result.IsSuccessful, "A camada de Domínio não deve referenciar outras camadas.");
     }
 
     [Fact]
-    public void ApplicationLayer_ShouldNotHaveDependencies_OnInfrastructureOrData()
+    public void ApplicationLayer_ShouldOnlyDependOn_DomainAndShared()
     {
-        // Arrange
         var applicationAssembly = typeof(ProjectTemplate.Application.Services.Service<>).Assembly;
 
-        // Act
         var result = Types
             .InAssembly(applicationAssembly)
             .ShouldNot()
             .HaveDependencyOnAny(InfrastructureNamespace, DataNamespace, ApiNamespace)
             .GetResult();
 
-        // Assert
-        Assert.True(result.IsSuccessful, "A camada de Aplicação não deve depender diretamente de Infrastructure ou Data.");
+        Assert.True(result.IsSuccessful,
+            "A camada de Application deve depender apenas de Domain e Shared. " +
+            "Dependências diretas em Data, Infrastructure ou Api violam a Clean Architecture.");
     }
 
     [Fact]
-    public void DataLayer_ShouldNotHaveDependencies_OnApi()
+    public void DataLayer_ShouldNotHaveDependencies_OnApiOrInfrastructure()
     {
-        // Arrange
         var dataAssembly = typeof(ProjectTemplate.Data.Context.ApplicationDbContext).Assembly;
 
-        // Act
         var result = Types
             .InAssembly(dataAssembly)
             .ShouldNot()
             .HaveDependencyOnAny(ApiNamespace, InfrastructureNamespace)
             .GetResult();
 
-        // Assert
         Assert.True(result.IsSuccessful, "A camada de Data não deve depender de Api ou Infrastructure.");
     }
 
     [Fact]
     public void InfrastructureLayer_ShouldNotHaveDependencies_OnApi()
     {
-        // Arrange
         var infrastructureAssembly = typeof(ProjectTemplate.Infrastructure.Extensions.InfrastructureExtensions).Assembly;
 
-        // Act
         var result = Types
             .InAssembly(infrastructureAssembly)
             .ShouldNot()
             .HaveDependencyOn(ApiNamespace)
             .GetResult();
 
-        // Assert
         Assert.True(result.IsSuccessful, "A camada de Infrastructure não deve depender da Api.");
+    }
+
+    [Fact]
+    public void SharedLayer_ShouldNotHaveDependencies_OnServerLayers()
+    {
+        var sharedAssembly = typeof(ProjectTemplate.Shared.Models.ExceptionContext).Assembly;
+
+        var result = Types
+            .InAssembly(sharedAssembly)
+            .ShouldNot()
+            .HaveDependencyOnAny(DomainNamespace, ApplicationNamespace, InfrastructureNamespace, DataNamespace, ApiNamespace)
+            .GetResult();
+
+        Assert.True(result.IsSuccessful,
+            "A camada Shared não deve depender de nenhuma camada do servidor. " +
+            "Shared deve ser agnóstica à arquitetura para poder ser referenciada por qualquer camada.");
     }
 }

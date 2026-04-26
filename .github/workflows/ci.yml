@@ -74,6 +74,9 @@ jobs:
     - name: 🧪 Run Unit Tests
       run: dotnet test tests/UnitTests/UnitTests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=unit-test-results.trx"
 
+    - name: 🧪 Run Architecture Tests
+      run: dotnet test tests/ArchitectureTests/ArchitectureTests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=architecture-test-results.trx"
+
     - name: 🧪 Run Integration Tests
       run: dotnet test tests/Integration/Integration.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=integration-test-results.trx"
 

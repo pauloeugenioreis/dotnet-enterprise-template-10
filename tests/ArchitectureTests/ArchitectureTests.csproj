@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Shared\Shared.csproj" />
     <ProjectReference Include="..\..\src\Server\Domain\Domain.csproj" />
     <ProjectReference Include="..\..\src\Server\Data\Data.csproj" />
     <ProjectReference Include="..\..\src\Server\Application\Application.csproj" />
