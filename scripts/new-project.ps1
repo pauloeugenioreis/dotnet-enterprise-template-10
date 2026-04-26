@@ -303,6 +303,11 @@ foreach ($item in $itemsToRemove) {
         Remove-Item -Path $item -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
+# Remove migrations do template para permitir que o usuário crie a sua própria InitialCreate
+$migrationsPath = Join-Path $TargetDir "src/Server/Data/Migrations"
+if (Test-Path $migrationsPath) {
+    Get-ChildItem -Path $migrationsPath -File | Remove-Item -Force -ErrorAction SilentlyContinue
+}
 # Remove scripts exclusivos do template
 $templateOnlyScripts = @(
     "scripts/new-project.ps1",
@@ -1162,38 +1167,10 @@ Write-Host "  ╔═════════════════════
 Write-Host "  ║  ✅ Projeto criado com sucesso!                          ║" -ForegroundColor Green
 Write-Host "  ╚══════════════════════════════════════════════════════════╝" -ForegroundColor Green
 Write-Host ""
-Write-Host "  Próximos passos:" -ForegroundColor Cyan
+Write-Host "  Próximos passos:" -ForegroundColor White
 Write-Host ""
-
-$stepNum = 1
-
-Write-Host "  $stepNum. cd $ProjectName" -ForegroundColor White
-$stepNum++
-
-if ($needsCompose) {
-    Write-Host "  $stepNum. docker-compose up -d" -ForegroundColor White
-    $stepNum++
-
-    if ($Database -eq "Oracle") {
-        Write-Host "     ⏳ Oracle pode levar ~60s para iniciar" -ForegroundColor DarkGray
-    }
-}
-
-Write-Host "  $stepNum. dotnet restore" -ForegroundColor White
-$stepNum++
-
-Write-Host "  $stepNum. dotnet build" -ForegroundColor White
-$stepNum++
-
-if ($Database -ne "InMemory") {
-    Write-Host "  $stepNum. dotnet ef migrations add InitialCreate --project src/Server/Data --startup-project src/Server/Api" -ForegroundColor White
-    $stepNum++
-    Write-Host "  $stepNum. dotnet ef database update --project src/Server/Data --startup-project src/Server/Api" -ForegroundColor White
-    $stepNum++
-}
-
-Write-Host "  $stepNum. dotnet run --project src/Server/Api" -ForegroundColor White
-$stepNum++
+Write-Host "  1. cd $ProjectName" -ForegroundColor White
+Write-Host "  2. .\run.ps1" -ForegroundColor White
 
 Write-Host ""
 Write-Host "  Serviços configurados:" -ForegroundColor Cyan

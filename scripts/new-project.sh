@@ -324,6 +324,8 @@ cd "$TARGET_DIR"
 # Cleanup
 write_step "🧹" "Limpando arquivos desnecessários..."
 rm -rf .git .gitignore
+# Remove migrations do template para permitir que o usuário crie a sua própria InitialCreate
+rm -rf src/Server/Data/Migrations/*
 # Remove scripts exclusivos do template
 rm -f scripts/new-project.ps1 scripts/new-project.sh scripts/new-project.bat
 rm -f scripts/windows/test-all-databases.ps1 scripts/linux/test-all-databases.sh
@@ -1240,40 +1242,13 @@ echo -e "  ${GREEN}╔═══════════════════�
 echo -e "  ${GREEN}║  ✅ Projeto criado com sucesso!                          ║${NC}"
 echo -e "  ${GREEN}╚══════════════════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "  ${CYAN}Próximos passos:${NC}"
+echo -e "  ${WHITE}Próximos passos:${NC}"
 echo ""
+echo -e "  1. cd $PROJECT_NAME"
+echo -e "  2. chmod +x run.sh"
+echo -e "  3. ./run.sh"
 
-STEP=1
-
-echo -e "  $STEP. cd $PROJECT_NAME"
-STEP=$((STEP+1))
-
-if [ "$NEEDS_COMPOSE" = true ]; then
-    echo -e "  $STEP. docker-compose up -d"
-    STEP=$((STEP+1))
-
-    if [ "$DATABASE" = "Oracle" ]; then
-        echo -e "     ${GRAY}⏳ Oracle pode levar ~60s para iniciar${NC}"
-    fi
-fi
-
-echo -e "  $STEP. dotnet restore"
-STEP=$((STEP+1))
-
-echo -e "  $STEP. dotnet build"
-STEP=$((STEP+1))
-
-if [ "$DATABASE" != "InMemory" ]; then
-    echo -e "  $STEP. dotnet ef migrations add InitialCreate --project src/Server/Data --startup-project src/Server/Api"
-    STEP=$((STEP+1))
-    echo -e "  $STEP. dotnet ef database update --project src/Server/Data --startup-project src/Server/Api"
-    STEP=$((STEP+1))
-fi
-
-echo -e "  $STEP. dotnet run --project src/Server/Api"
-STEP=$((STEP+1))
-
-echo ""
+echo -e "\n  ${GRAY}──────────────────────────────────────────────────────────${NC}"
 echo -e "  ${CYAN}Serviços configurados:${NC}"
 
 echo -e "    📊 Banco de Dados: $DATABASE"
