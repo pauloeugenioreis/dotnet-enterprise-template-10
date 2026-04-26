@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { orderService, OrderResponse } from '../../api/services';
+import { orderService } from '../../api/services/order.service';
+import { OrderResponse } from '../../types';
 import { useInfiniteProducts } from '../products/useInfiniteProducts';
 
 export function useOrders() {
@@ -15,16 +16,16 @@ export function useOrders() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['orders', page, pageSize, status, searchTerm, startDate, endDate],
-    queryFn: () => orderService.getOrders(page, pageSize, status, searchTerm, startDate, endDate),
+    queryFn: () => orderService.list(page, pageSize, { status, searchTerm, startDate, endDate }),
   });
 
   const createMutation = useMutation({
-    mutationFn: (order: any) => orderService.createOrder(order),
+    mutationFn: (order: any) => orderService.create(order),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['orders'] }),
   });
 
   const cancelMutation = useMutation({
-    mutationFn: (id: number) => orderService.deleteOrder(id),
+    mutationFn: (id: number | string) => orderService.cancel(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['orders'] }),
   });
 
@@ -40,8 +41,8 @@ export function useOrders() {
 
   const handleExport = async () => {
     try {
-      const response = await orderService.exportToExcel(status, searchTerm, startDate, endDate);
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const blob = await orderService.exportToExcel({ status, searchTerm, startDate, endDate });
+      const url = window.URL.createObjectURL(new Blob([blob]));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `Pedidos_${new Date().getTime()}.xlsx`);

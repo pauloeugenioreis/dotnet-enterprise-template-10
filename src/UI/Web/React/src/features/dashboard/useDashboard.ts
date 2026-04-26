@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { orderService } from '../../api/services';
+import { orderService } from '../../api/services/order.service';
 
 export function useDashboard() {
   const { data: orders, isLoading: ordersLoading } = useQuery({
     queryKey: ['orders-latest'],
-    queryFn: () => orderService.getOrders(1, 5),
+    queryFn: () => orderService.list(1, 5),
   });
 
   const { data: statistics, isLoading: statsLoading } = useQuery({

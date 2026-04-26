@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { productService } from '../../api/services';
+import { productService } from '../../api/services/product.service';
 
 export function useInfiniteProducts() {
   const {
@@ -10,7 +10,7 @@ export function useInfiniteProducts() {
     isLoading
   } = useInfiniteQuery({
     queryKey: ['products-infinite'],
-    queryFn: ({ pageParam = 1 }) => productService.getProducts(pageParam, 20, '', true),
+    queryFn: ({ pageParam = 1 }) => productService.list(pageParam as number, 20, { isActive: true }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       if (lastPage.items.length < 20) return undefined;

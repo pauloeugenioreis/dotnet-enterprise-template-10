@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { customerReviewService } from '../../api/services';
+import { customerReviewService } from '../../api/services/customer-review.service';
 
 export function useReviews() {
   const [reviews, setReviews] = useState<any[]>([]);
@@ -16,7 +16,7 @@ export function useReviews() {
   const loadReviews = async () => {
     setLoading(true);
     try {
-      const data = await customerReviewService.getReviews(page, pageSize, productName, minRating, isApproved);
+      const data = await customerReviewService.list(page, pageSize, { productName, minRating, isApproved });
       setReviews(data.items);
       setTotalCount(data.totalCount);
     } finally {

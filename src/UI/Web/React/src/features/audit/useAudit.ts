@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { auditService } from '../../api/services';
+import { auditService } from '../../api/services/audit.service';
 
 export function useAudit() {
   const [page, setPage] = useState(1);
@@ -13,7 +13,7 @@ export function useAudit() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['audit-logs', page, pageSize, entityType, eventType, userId, from, toDate],
-    queryFn: () => auditService.getAuditLogs(page, pageSize, entityType, eventType, userId, from, toDate),
+    queryFn: () => auditService.getAuditLogs(page, pageSize, { entityType, eventType, userId, from, toDate }),
   });
 
   return {

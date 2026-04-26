@@ -1,5 +1,6 @@
 import React from 'react';
-import { OrderResponse, orderService } from '../../../api/services';
+import { OrderResponse } from '../../../types';
+import { orderService } from '../../../api/services/order.service';
 import Dropdown from '../../../components/Dropdown';
 
 interface OrderDetailsModalProps {

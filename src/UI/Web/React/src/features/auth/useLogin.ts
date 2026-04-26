@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
-import { authService } from '../../api/services';
+import { authService } from '../../api/services/auth.service';
 
 export function useLogin() {
   const [email, setEmail] = useState('admin@projecttemplate.com');
@@ -14,7 +14,7 @@ export function useLogin() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await authService.login({ email, password });
+      const data = await authService.login({ email, password });
       setAuth(data.user, data.accessToken);
       navigate('/dashboard');
     } catch (error) {

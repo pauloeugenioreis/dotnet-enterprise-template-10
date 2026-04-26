@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { documentService } from '../../api/services';
+import { documentService } from '../../api/services/document.service';
 import { CloudUpload, Download, Trash2, FileCode } from 'lucide-react';
 
 export default function Documents() {

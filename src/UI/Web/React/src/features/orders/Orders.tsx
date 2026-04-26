@@ -3,7 +3,7 @@ import Drawer from '../../components/Drawer';
 import Pagination from '../../components/Pagination';
 import Dropdown from '../../components/Dropdown';
 import OrderDetailsModal from './components/OrderDetailsModal';
-import { OrderResponse } from '../../api/services';
+import { OrderResponse } from '../../types';
 
 export default function Orders() {
   const {

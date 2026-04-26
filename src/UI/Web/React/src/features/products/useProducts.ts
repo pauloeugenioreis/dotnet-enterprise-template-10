@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { productService } from '../../api/services';
+import { productService } from '../../api/services/product.service';
 
 export function useProducts() {
   const [page, setPage] = useState(1);
@@ -11,21 +11,21 @@ export function useProducts() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['products', page, pageSize, searchTerm, isActive],
-    queryFn: () => productService.getProducts(page, pageSize, searchTerm, isActive),
+    queryFn: () => productService.list(page, pageSize, { searchTerm, isActive }),
   });
 
   const createMutation = useMutation({
-    mutationFn: (product: any) => productService.createProduct(product),
+    mutationFn: (product: any) => productService.create(product),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, product }: { id: number, product: any }) => productService.updateProduct(id, product),
+    mutationFn: ({ id, product }: { id: number, product: any }) => productService.update(id, product),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => productService.deleteProduct(id),
+    mutationFn: (id: number) => productService.delete(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
   });
 
@@ -41,8 +41,8 @@ export function useProducts() {
 
   const handleExport = async () => {
     try {
-      const response = await productService.exportToExcel(searchTerm, isActive);
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const blob = await productService.exportToExcel({ searchTerm, isActive });
+      const url = window.URL.createObjectURL(new Blob([blob]));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `Produtos_${new Date().getTime()}.xlsx`);

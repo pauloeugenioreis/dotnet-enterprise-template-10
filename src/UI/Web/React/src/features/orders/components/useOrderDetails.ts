@@ -1,7 +1,7 @@
-import { orderService } from '../../../api/services';
+import { orderService } from '../../../api/services/order.service';
 
 export function useOrderDetails(onStatusUpdated: () => void) {
-  const handleStatusChange = async (orderId: number, newStatus: string) => {
+  const handleStatusChange = async (orderId: number | string, newStatus: string) => {
     try {
       await orderService.updateStatus(orderId, newStatus, 'Atualizado via Dashboard React');
       onStatusUpdated();
