@@ -1,22 +1,27 @@
 import { BaseService } from './BaseService';
-import api from '../api';
+import { OrderResponse, CreateOrderRequest, OrderStatistics } from '../../types';
 
-export class OrderService extends BaseService<any> {
+export class OrderService extends BaseService<OrderResponse, CreateOrderRequest, CreateOrderRequest> {
   constructor() {
     super('/api/v1/order');
   }
 
-  async updateStatus(id: number, status: string, note: string): Promise<void> {
-    await api.put(`${this.resourcePath}/${id}/status`, { status, note });
+  async updateStatus(id: number | string, status: string, note: string = 'Atualizado via Vue Dashboard'): Promise<void> {
+    await this.http.put(`${this.entityPath}/${id}/status`, { status, note });
   }
 
-  async exportToExcel(): Promise<void> {
-    await this.downloadFile(`${this.resourcePath}/ExportToExcel`, `Pedidos_${new Date().getTime()}.xlsx`);
+  async exportToExcel(filters: Record<string, any> = {}): Promise<void> {
+    const query = this.toQueryString(filters);
+    await this.downloadFile(`${this.entityPath}/ExportToExcel${query}`, `Pedidos_${new Date().getTime()}.xlsx`);
   }
 
-  async getStatistics(): Promise<any> {
-    const response = await api.get(`${this.resourcePath}/statistics`);
+  async getStatistics(): Promise<OrderStatistics> {
+    const response = await this.http.get<OrderStatistics>(`${this.entityPath}/statistics`);
     return response.data;
+  }
+
+  async cancel(id: number | string): Promise<void> {
+    await this.http.post(`${this.entityPath}/${id}/cancel`);
   }
 }
 

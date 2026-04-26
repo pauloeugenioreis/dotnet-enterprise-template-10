@@ -2,30 +2,20 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '../../store/auth';
-import axios from 'axios';
-import { config } from '../../config';
+import { useAuth } from '../../composables/api/useAuth';
 
 const email = ref('admin@projecttemplate.com');
 const password = ref('Admin@2026!Secure');
-const loading = ref(false);
-const router = useRouter();
-const authStore = useAuthStore();
+const { loading, login } = useAuth();
 
 const handleLogin = async () => {
-  loading.value = true;
   try {
-    const { data } = await axios.post(`${config.apiBaseUrl}/api/auth/login`, {
+    await login({
       email: email.value,
       password: password.value
     });
-    authStore.setAuth(data.user, data.accessToken);
-    router.push('/dashboard');
   } catch (error) {
     alert('Erro ao entrar');
-  } finally {
-    loading.value = false;
   }
 };
 </script>

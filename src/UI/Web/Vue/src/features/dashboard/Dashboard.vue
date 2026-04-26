@@ -16,7 +16,7 @@ const loading = ref(true);
 onMounted(async () => {
   try {
     const [ordersData, statsData] = await Promise.all([
-      orderService.getAll({ page: 1, pageSize: 5 }),
+      orderService.list(1, 5),
       orderService.getStatistics()
     ]);
     

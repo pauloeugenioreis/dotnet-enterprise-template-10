@@ -23,7 +23,7 @@ const selectedLog = ref<any>(null);
 const fetchAuditLogs = async () => {
   loading.value = true;
   try {
-    const data = await auditService.getAll({
+    const data = await auditService.getAuditLogs(page.value, pageSize.value, {
       page: page.value,
       pageSize: pageSize.value,
       entityType: entityType.value,

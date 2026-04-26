@@ -18,13 +18,11 @@ const isApproved = ref<boolean | undefined>(undefined);
 const loadReviews = async () => {
   loading.value = true;
   try {
-    const data = await customerReviewService.getReviews(
-      page.value, 
-      pageSize, 
-      productName.value, 
-      minRating.value, 
-      isApproved.value
-    );
+    const data = await customerReviewService.list(page.value, pageSize, {
+      productName: productName.value,
+      minRating: minRating.value,
+      isApproved: isApproved.value
+    });
     reviews.value = data.items;
     totalCount.value = data.totalCount;
   } finally {

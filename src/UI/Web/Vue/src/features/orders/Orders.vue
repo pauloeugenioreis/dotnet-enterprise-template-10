@@ -2,6 +2,8 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, computed } from 'vue';
+import { useOrders } from '../../composables/api/useOrders';
+import { useProducts } from '../../composables/api/useProducts';
 import { orderService } from '../../api/services/OrderService';
 import { productService } from '../../api/services/ProductService';
 import Dropdown from '../../components/Dropdown.vue';
@@ -10,11 +12,22 @@ import Modal from '../../components/Modal.vue';
 import Drawer from '../../components/Drawer.vue';
 import OrderDetailsModal from './components/OrderDetailsModal.vue';
 
-const orders = ref<any[]>([]);
-const loading = ref(true);
+const { 
+  orders, 
+  loading, 
+  totalCount, 
+  fetchOrders, 
+  cancelOrder 
+} = useOrders();
+
+const { 
+  products, 
+  fetchProducts: fetchAllProducts 
+} = useProducts();
+
 const page = ref(1);
 const pageSize = ref(10);
-const totalPages = ref(1);
+const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value));
 const searchTerm = ref('');
 const status = ref('');
 const startDate = ref('');
@@ -32,37 +45,15 @@ const isModalOpen = ref(false);
 const isDetailsOpen = ref(false);
 const selectedOrder = ref<any>(null);
 
-const products = ref<any[]>([]);
 const productPage = ref(1);
 const productLoading = ref(false);
 const hasMoreProducts = ref(true);
 
-const fetchProducts = async (isLoadMore = false) => {
-  if (productLoading.value || (!hasMoreProducts.value && isLoadMore)) return;
-  
-  productLoading.value = true;
-  try {
-    const data = await productService.getAll({ page: productPage.value, pageSize: 20, isActive: true });
-    const newItems = Array.isArray(data) ? data : (data?.items || []);
-    
-    if (isLoadMore) {
-      products.value = [...products.value, ...newItems];
-    } else {
-      products.value = newItems;
-    }
-    
-    hasMoreProducts.value = newItems.length === 20;
-    if (hasMoreProducts.value) productPage.value++;
-  } catch (error) {
-    console.error('Erro ao carregar produtos', error);
-  } finally {
-    productLoading.value = false;
-  }
-};
+// Removido o fetchProducts manual que conflita com o composable
 
 const handleLoadMoreProducts = () => {
   if (hasMoreProducts.value) {
-    fetchProducts(true);
+    fetchAllProducts(productPage.value + 1, 20, { isActive: true });
   }
 };
 
@@ -81,25 +72,16 @@ const productOptions = computed(() =>
   }))
 );
 
-const fetchOrders = async () => {
-  loading.value = true;
-  try {
-    const data = await orderService.getAll({
-      page: page.value,
-      pageSize: pageSize.value,
-      searchTerm: searchTerm.value,
-      status: status.value,
-      startDate: startDate.value,
-      endDate: endDate.value
-    });
-    orders.value = data?.items || [];
-    totalPages.value = data.totalPages;
-  } catch (error) {
-    console.error('Erro ao carregar pedidos', error);
-  } finally {
-    loading.value = false;
-  }
+const handleFetchOrders = () => {
+  fetchOrders(page.value, pageSize.value, {
+    searchTerm: searchTerm.value,
+    status: status.value,
+    startDate: startDate.value,
+    endDate: endDate.value
+  });
 };
+
+const fetchProductsList = () => fetchAllProducts(1, 100, { isActive: true });
 
 const handleExport = () => orderService.exportToExcel();
 
@@ -189,15 +171,15 @@ const getStatusClass = (status: string) => {
   }
 };
 
-watch([page, pageSize, status, startDate, endDate], fetchOrders);
+watch([page, pageSize, status, startDate, endDate], handleFetchOrders);
 watch(searchTerm, () => {
   page.value = 1;
-  fetchOrders();
+  handleFetchOrders();
 });
 
 onMounted(() => {
-  fetchOrders();
-  fetchProducts();
+  handleFetchOrders();
+  fetchProductsList();
 });
 </script>
 
