@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "src\Server\Data\Dat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "src\Server\Infrastructure\Infrastructure.csproj", "{E5F6A7B8-C9D0-1234-EFAB-CD5678901234}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Integration", "tests\Integration\Integration.csproj", "{F6A7B8C9-D0E1-2345-FABC-DE6789012345}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "tests\IntegrationTests\IntegrationTests.csproj", "{F6A7B8C9-D0E1-2345-FABC-DE6789012345}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "tests\UnitTests\UnitTests.csproj", "{B8C9D0E1-F2A3-4567-BCDE-FA8901234567}"
 EndProject

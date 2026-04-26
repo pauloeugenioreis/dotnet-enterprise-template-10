@@ -22,6 +22,7 @@ public class DocumentControllerTests
 
     public DocumentControllerTests(WebApplicationFactoryFixture factory)
     {
+        factory.ClearEventStore();
         var customFactory = factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>

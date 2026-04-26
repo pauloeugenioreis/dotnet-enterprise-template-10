@@ -22,6 +22,7 @@ public class CustomerReviewControllerTests
 
     public CustomerReviewControllerTests(WebApplicationFactoryFixture factory)
     {
+        factory.ClearEventStore();
         var customFactory = factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>

@@ -80,7 +80,7 @@ stages:
       displayName: 'Run Integration Tests'
       inputs:
         command: 'test'
-        projects: 'tests/Integration/Integration.csproj'
+        projects: 'tests/IntegrationTests/IntegrationTests.csproj'
         arguments: '--configuration $(buildConfiguration) --no-build --logger trx --collect:"XPlat Code Coverage"'
         publishTestResults: true
 

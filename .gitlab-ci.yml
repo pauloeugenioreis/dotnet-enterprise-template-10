@@ -98,7 +98,7 @@ test:integration:
     - build
   script:
     - echo "🧪 Running Integration Tests..."
-    - dotnet test tests/Integration/Integration.csproj
+    - dotnet test tests/IntegrationTests/IntegrationTests.csproj
         --configuration $BUILD_CONFIGURATION
         --no-build
         --logger "junit;LogFilePath=./test-results/integration-tests.xml"

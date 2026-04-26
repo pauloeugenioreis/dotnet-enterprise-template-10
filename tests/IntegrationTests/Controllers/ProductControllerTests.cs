@@ -278,4 +278,51 @@ public class ProductControllerTests
         payload.Should().NotBeNull();
         payload!.Stock.Should().Be(15);
     }
+
+    [Fact]
+    public async Task Delete_NonExistentProduct_ReturnsNotFound()
+    {
+        var response = await _client.DeleteAsync("/api/v1/Product/99999");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task Update_NonExistentProduct_ReturnsNotFound()
+    {
+        var payload = new UpdateProductRequest
+        {
+            Name = "Ghost Product",
+            Price = 10m,
+            Stock = 0,
+            Category = "Ghost",
+            IsActive = false
+        };
+
+        var response = await _client.PutAsJsonAsync("/api/v1/Product/99999", payload);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task UpdateStock_WithZeroQuantity_ReturnsBadRequest()
+    {
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/Product", new CreateProductRequest
+        {
+            Name = "Stock Validation Product",
+            Price = 5m,
+            Stock = 10,
+            Category = "Test",
+            IsActive = true
+        });
+        var created = await createResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
+
+        var response = await _client.PatchAsJsonAsync(
+            $"/api/v1/Product/{created!.Id}/stock",
+            new UpdateProductStockRequest { Quantity = 0 });
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response.Content.ReadAsStringAsync();
+        content.Should().Contain("Quantity");
+    }
 }

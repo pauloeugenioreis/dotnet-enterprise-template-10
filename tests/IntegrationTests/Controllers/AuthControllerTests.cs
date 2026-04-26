@@ -28,6 +28,7 @@ public class AuthControllerTests
 
     public AuthControllerTests(WebApplicationFactoryFixture factory)
     {
+        factory.ClearEventStore();
         var customFactory = factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>

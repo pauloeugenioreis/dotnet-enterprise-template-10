@@ -295,4 +295,151 @@ public class OrderControllerTests
         payload.Should().NotBeNull();
         payload!.Status.Should().Be("Cancelled");
     }
+
+    [Fact]
+    public async Task GetById_NonExistentOrder_ReturnsNotFound()
+    {
+        var response = await _client.GetAsync("/api/v1/Order/99999");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task Update_NonExistentOrder_ReturnsNotFound()
+    {
+        var payload = new UpdateOrderRequest
+        {
+            CustomerName = "Ghost Customer",
+            Status = "Pending"
+        };
+
+        var response = await _client.PutAsJsonAsync("/api/v1/Order/99999", payload);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_WithInvalidStatus_ReturnsBadRequest()
+    {
+        var product = new CreateProductRequest
+        {
+            Name = "Product for invalid status test",
+            Price = 20m,
+            Stock = 5,
+            Category = "test",
+            IsActive = true
+        };
+        var productResponse = await _client.PostAsJsonAsync("/api/v1/Product", product);
+        var createdProduct = await productResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
+
+        var orderDto = new CreateOrderRequest
+        {
+            CustomerName = "Status Test",
+            CustomerEmail = "statustest@example.com",
+            ShippingAddress = "Street 1",
+            Items = new List<OrderItemDto> { new(createdProduct!.Id, 1, 20m) }
+        };
+        var orderResponse = await _client.PostAsJsonAsync("/api/v1/Order", orderDto);
+        var createdOrder = await orderResponse.Content.ReadFromJsonAsync<OrderResponseDto>();
+
+        var response = await _client.PatchAsJsonAsync(
+            $"/api/v1/Order/{createdOrder!.Id}/status",
+            new UpdateOrderStatusDto("Dispatched", null));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response.Content.ReadAsStringAsync();
+        content.Should().Contain("Status must be one of");
+    }
+
+    [Fact]
+    public async Task Create_WithInsufficientStock_ReturnsBadRequest()
+    {
+        var product = new CreateProductRequest
+        {
+            Name = "Low Stock Product",
+            Price = 10m,
+            Stock = 1,
+            Category = "test",
+            IsActive = true
+        };
+        var productResponse = await _client.PostAsJsonAsync("/api/v1/Product", product);
+        var createdProduct = await productResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
+
+        var orderDto = new CreateOrderRequest
+        {
+            CustomerName = "Greedy Customer",
+            CustomerEmail = "greedy@example.com",
+            ShippingAddress = "Street 3",
+            Items = new List<OrderItemDto> { new(createdProduct!.Id, 5, 10m) }
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/v1/Order", orderDto);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response.Content.ReadAsStringAsync();
+        content.Should().Contain("Insufficient stock");
+    }
+
+    [Fact]
+    public async Task Create_WithInactiveProduct_ReturnsBadRequest()
+    {
+        var product = new CreateProductRequest
+        {
+            Name = "Soon Inactive Product",
+            Price = 15m,
+            Stock = 10,
+            Category = "test",
+            IsActive = true
+        };
+        var productResponse = await _client.PostAsJsonAsync("/api/v1/Product", product);
+        var createdProduct = await productResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
+
+        await _client.PatchAsJsonAsync(
+            $"/api/v1/Product/{createdProduct!.Id}/status",
+            new UpdateProductStatusRequest { IsActive = false });
+
+        var orderDto = new CreateOrderRequest
+        {
+            CustomerName = "Bad Customer",
+            CustomerEmail = "bad@example.com",
+            ShippingAddress = "Street 4",
+            Items = new List<OrderItemDto> { new(createdProduct.Id, 1, 15m) }
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/v1/Order", orderDto);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response.Content.ReadAsStringAsync();
+        content.Should().Contain("not available");
+    }
+
+    [Fact]
+    public async Task CreateOrder_VerifiesStockWasDeducted()
+    {
+        var product = new CreateProductRequest
+        {
+            Name = "Deductible Product",
+            Price = 25m,
+            Stock = 10,
+            Category = "test",
+            IsActive = true
+        };
+        var productResponse = await _client.PostAsJsonAsync("/api/v1/Product", product);
+        var createdProduct = await productResponse.Content.ReadFromJsonAsync<ProductResponseDto>();
+
+        var orderDto = new CreateOrderRequest
+        {
+            CustomerName = "Stock Check Customer",
+            CustomerEmail = "stockcheck@example.com",
+            ShippingAddress = "Street 5",
+            Items = new List<OrderItemDto> { new(createdProduct!.Id, 3, 25m) }
+        };
+        var orderResponse = await _client.PostAsJsonAsync("/api/v1/Order", orderDto);
+        orderResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+
+        var productAfter = await _client.GetAsync($"/api/v1/Product/{createdProduct.Id}");
+        var updated = await productAfter.Content.ReadFromJsonAsync<ProductResponseDto>();
+
+        updated!.Stock.Should().Be(7);
+    }
 }
