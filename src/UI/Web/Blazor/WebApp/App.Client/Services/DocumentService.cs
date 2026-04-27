@@ -11,12 +11,11 @@ public interface IDocumentService
     Task DeleteAsync(string fileName, CancellationToken ct = default);
 }
 
-public class DocumentService(IHttpClientFactory httpClientFactory, LocalStorageService localStorage) 
-    : BaseService(httpClientFactory, localStorage, "api/v1/document"), IDocumentService
+public class DocumentService(IHttpClientFactory httpClientFactory) 
+    : BaseService(httpClientFactory, "api/v1/document"), IDocumentService
 {
     public async Task<DocumentUploadResponse> UploadAsync(string fileName, string contentType, Stream stream, CancellationToken ct = default)
     {
-        await AddAuthHeaderAsync();
         var content = new MultipartFormDataContent();
         var fileContent = new StreamContent(stream);
         fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
@@ -29,7 +28,6 @@ public class DocumentService(IHttpClientFactory httpClientFactory, LocalStorageS
 
     public async Task<(Stream Stream, string ContentType)> DownloadAsync(string fileName, CancellationToken ct = default)
     {
-        await AddAuthHeaderAsync();
         var response = await Http.GetAsync($"{ResourcePath}/{fileName}", ct);
         response.EnsureSuccessStatusCode();
         var stream = await response.Content.ReadAsStreamAsync(ct);

@@ -10,30 +10,22 @@ public interface IAuthService
 }
 
 public class AuthService(IHttpClientFactory httpClientFactory, LocalStorageService localStorage) 
-    : BaseService(httpClientFactory, localStorage, "api/v1/auth"), IAuthService
+    : BaseService(httpClientFactory, "api/v1/auth"), IAuthService
 {
     public async Task<AuthResponseDto?> LoginAsync(LoginDto request)
     {
-        try 
+        var response = await PostAsync<LoginDto, AuthResponseDto>($"{ResourcePath}/login", request);
+        if (response != null)
         {
-            return await PostAsync<LoginDto, AuthResponseDto>($"{ResourcePath}/login", request);
+            await localStorage.SetItemAsync("authToken", response.AccessToken);
+            await localStorage.SetItemAsync("authUser", response.User);
         }
-        catch 
-        {
-            return null;
-        }
+        return response;
     }
 
     public async Task<bool> RegisterAsync(RegisterDto request)
     {
-        try
-        {
-            await PostAsync<RegisterDto, object>($"{ResourcePath}/register", request);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        await PostAsync<RegisterDto, object>($"{ResourcePath}/register", request);
+        return true;
     }
 }

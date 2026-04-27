@@ -7,16 +7,25 @@ public interface IProductService
 {
     Task<PagedResponse<ProductResponseDto>> GetPagedAsync(int page = 1, int pageSize = 10, string? searchTerm = null, bool? isActive = null, CancellationToken ct = default);
     Task DeleteAsync(long id, CancellationToken ct = default);
+    Task CreateAsync(CreateProductRequest dto, CancellationToken ct = default);
+    Task UpdateAsync(long id, UpdateProductRequest dto, CancellationToken ct = default);
 }
 
-public class ProductService(IHttpClientFactory httpClientFactory, LocalStorageService localStorage) 
-    : BaseService(httpClientFactory, localStorage, "api/v1/product"), IProductService
+public class ProductService(IHttpClientFactory httpClientFactory) 
+    : BaseService(httpClientFactory, "api/v1/product"), IProductService
 {
     public Task<PagedResponse<ProductResponseDto>> GetPagedAsync(int page = 1, int pageSize = 10, string? searchTerm = null, bool? isActive = null, CancellationToken ct = default)
     {
-        var url = $"{ResourcePath}?page={page}&pageSize={pageSize}";
-        if (!string.IsNullOrEmpty(searchTerm)) url += $"&searchTerm={Uri.EscapeDataString(searchTerm)}";
-        if (isActive.HasValue) url += $"&isActive={isActive.Value}";
-        return GetAsync<PagedResponse<ProductResponseDto>>(url, ct);
+        return GetPagedAsync<ProductResponseDto>(new { page, pageSize, searchTerm, isActive }, ct);
+    }
+
+    public Task CreateAsync(CreateProductRequest dto, CancellationToken ct = default)
+    {
+        return PostAsync<CreateProductRequest, ProductResponseDto>(ResourcePath!, dto, ct);
+    }
+
+    public Task UpdateAsync(long id, UpdateProductRequest dto, CancellationToken ct = default)
+    {
+        return PutAsync($"{ResourcePath}/{id}", dto, ct);
     }
 }

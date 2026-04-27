@@ -4,6 +4,8 @@ using BlazorApp.Client.Services.Base;
 using BlazorApp.Client.Services;
 using BlazorApp.Client.Auth;
 using Microsoft.AspNetCore.Components.Authorization;
+using MudBlazor.Services;
+using BlazorApp.Client.Services.Handlers;
 
 namespace BlazorApp.Client;
 
@@ -13,13 +15,18 @@ public static class DependencyInjection
     {
         services.AddAuthorizationCore();
         services.AddCascadingAuthenticationState();
+        services.AddMudServices();
         
         services.AddScoped<LoadingService>();
         services.AddTransient<LoadingHandler>();
+        services.AddTransient<AuthenticationHandler>();
+        services.AddTransient<ErrorHandler>();
 
         var httpClientBuilder = services.AddHttpClient("ApiGateway", client => 
             client.BaseAddress = new Uri(apiUrl))
-            .AddHttpMessageHandler<LoadingHandler>();
+            .AddHttpMessageHandler<LoadingHandler>()
+            .AddHttpMessageHandler<AuthenticationHandler>()
+            .AddHttpMessageHandler<ErrorHandler>();
 
         if (!OperatingSystem.IsBrowser())
         {

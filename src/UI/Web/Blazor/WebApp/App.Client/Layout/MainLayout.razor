@@ -3,6 +3,9 @@
 @using Microsoft.AspNetCore.Components.Authorization
 
 <div class="flex h-screen bg-gray-100 overflow-hidden font-sans">
+    <MudThemeProvider />
+    <MudDialogProvider />
+    <MudSnackbarProvider />
     <LoadingBar />
 
     <AuthorizeView>

@@ -8,7 +8,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
-@inject LocalStorageService LocalStorage
+@inject ISnackbar Snackbar
 @inject AuthenticationStateProvider AuthStateProvider
 @rendermode InteractiveAuto
 @attribute [AllowAnonymous]
@@ -104,18 +104,14 @@
             var result = await AuthService.LoginAsync(loginRequest);
             if (result != null && !string.IsNullOrEmpty(result.AccessToken))
             {
-                await LocalStorage.SetItemAsync("authToken", result.AccessToken);
                 ((CustomAuthenticationStateProvider)AuthStateProvider).NotifyUserAuthentication(result.AccessToken);
+                Snackbar.Add($"Bem-vindo, {result.User.FirstName}!", Severity.Success);
                 Navigation.NavigateTo("/");
-            }
-            else
-            {
-                errorMessage = "E-mail ou senha incorretos.";
             }
         }
         catch (Exception)
         {
-            errorMessage = "Ocorreu um erro ao tentar entrar. Tente novamente.";
+            // Erro tratado pelo ErrorHandler
         }
         finally
         {

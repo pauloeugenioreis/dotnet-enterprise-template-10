@@ -6,6 +6,7 @@
 @using System.Globalization
 @inject IOrderService OrderService
 @inject IJSRuntime JS
+@inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @rendermode InteractiveAuto
 
@@ -201,9 +202,9 @@
             orders = null;
             orders = await OrderService.GetPagedAsync(currentPage, pageSize, searchTerm, status?.ToString(), fromDate, toDate);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Erro ao carregar pedidos: {ex.Message}");
+            // Erro tratado pelo ErrorHandler global
         }
     }
 
@@ -303,12 +304,12 @@
             }
             
             showForm = false;
+            Snackbar.Add(isEdit ? "Pedido atualizado com sucesso!" : "Pedido criado com sucesso!", Severity.Success);
             await LoadOrders();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Erro ao salvar pedido: {ex.Message}");
-            await JS.InvokeVoidAsync("alert", $"Erro ao salvar: {ex.Message}");
+            // Erro tratado pelo ErrorHandler
         }
     }
 
@@ -319,13 +320,13 @@
 
         try 
         {
-            Console.WriteLine($"Excluindo pedido ID: {id}");
             await OrderService.DeleteAsync(id);
+            Snackbar.Add("Pedido excluído com sucesso.", Severity.Success);
             await LoadOrders();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Erro ao excluir pedido: {ex.Message}");
+            // Erro tratado pelo ErrorHandler
         }
     }
 

@@ -5,7 +5,7 @@ namespace BlazorApp.Client.Services;
 
 public interface IOrderService
 {
-    Task<PagedResponse<OrderResponseDto>> GetPagedAsync(int page = 1, int pageSize = 10, string? search = null, string? status = null, DateTime? from = null, DateTime? to = null, CancellationToken ct = default);
+    Task<PagedResponse<OrderResponseDto>> GetPagedAsync(int page = 1, int pageSize = 10, string? searchTerm = null, string? status = null, DateTime? from = null, DateTime? toDate = null, CancellationToken ct = default);
     Task<OrderStatisticsDto> GetStatisticsAsync(CancellationToken ct = default);
     Task DeleteAsync(long id, CancellationToken ct = default);
     Task CreateAsync(CreateOrderRequest dto, CancellationToken ct = default);
@@ -13,17 +13,12 @@ public interface IOrderService
     Task UpdateStatusAsync(long id, UpdateOrderStatusDto dto, CancellationToken ct = default);
 }
 
-public class OrderService(IHttpClientFactory httpClientFactory, LocalStorageService localStorage) 
-    : BaseService(httpClientFactory, localStorage, "api/v1/order"), IOrderService
+public class OrderService(IHttpClientFactory httpClientFactory) 
+    : BaseService(httpClientFactory, "api/v1/order"), IOrderService
 {
-    public Task<PagedResponse<OrderResponseDto>> GetPagedAsync(int page = 1, int pageSize = 10, string? search = null, string? status = null, DateTime? from = null, DateTime? to = null, CancellationToken ct = default)
+    public Task<PagedResponse<OrderResponseDto>> GetPagedAsync(int page = 1, int pageSize = 10, string? searchTerm = null, string? status = null, DateTime? from = null, DateTime? toDate = null, CancellationToken ct = default)
     {
-        var url = $"{ResourcePath}?page={page}&pageSize={pageSize}";
-        if (!string.IsNullOrEmpty(search)) url += $"&searchTerm={Uri.EscapeDataString(search)}";
-        if (!string.IsNullOrEmpty(status)) url += $"&status={status}";
-        if (from.HasValue) url += $"&from={from.Value:yyyy-MM-dd}";
-        if (to.HasValue) url += $"&toDate={to.Value:yyyy-MM-dd}";
-        return GetAsync<PagedResponse<OrderResponseDto>>(url, ct);
+        return GetPagedAsync<OrderResponseDto>(new { page, pageSize, searchTerm, status, from, toDate }, ct);
     }
 
     public Task<OrderStatisticsDto> GetStatisticsAsync(CancellationToken ct = default)
