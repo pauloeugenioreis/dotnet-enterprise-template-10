@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --port $PORT",
+    "start": "node -e \"const p=process.env.PORT||4200; require('child_process').spawn('npx', ['ng', 'serve', '--port', p], {stdio:'inherit', shell:true})\"",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
