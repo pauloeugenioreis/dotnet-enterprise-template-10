@@ -11,8 +11,8 @@ public interface IProductService
     Task UpdateAsync(long id, UpdateProductRequest dto, CancellationToken ct = default);
 }
 
-public class ProductService(IHttpClientFactory httpClientFactory) 
-    : BaseService(httpClientFactory, "api/v1/product"), IProductService
+public class ProductService(HttpClient http) 
+    : BaseService(http, "api/v1/product"), IProductService
 {
     public Task<PagedResponse<ProductResponseDto>> GetPagedAsync(int page = 1, int pageSize = 10, string? searchTerm = null, bool? isActive = null, CancellationToken ct = default)
     {

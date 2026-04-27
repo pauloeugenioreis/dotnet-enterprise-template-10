@@ -63,10 +63,10 @@ h1:focus {
 /* Print Styles */
 @media print {
     body * {
-        visibility: hidden;
+        visibility: hidden !important;
     }
     .print-area, .print-area * {
-        visibility: visible;
+        visibility: visible !important;
     }
     .print-area {
         position: absolute !important;
@@ -76,12 +76,14 @@ h1:focus {
         margin: 0 !important;
         padding: 0 !important;
         background: white !important;
+        display: block !important;
+        overflow: visible !important;
     }
-    /* Hide buttons and unnecessary elements during print */
-    .no-print {
+    .no-print, .no-print * {
         display: none !important;
+        visibility: hidden !important;
     }
-    /* Ensure colors are printed */
+    /* Force color printing */
     * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;

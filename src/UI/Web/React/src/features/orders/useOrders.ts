@@ -28,6 +28,14 @@ export function useOrders() {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number | string; data: any }) => orderService.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      notify.success('Pedido Atualizado', 'As informações foram salvas com sucesso.');
+    },
+  });
+
   const cancelMutation = useMutation({
     mutationFn: (id: number | string) => orderService.cancel(id),
     onSuccess: () => {
@@ -36,13 +44,11 @@ export function useOrders() {
     },
   });
 
-  const handleCancel = async (id: number) => {
-    if (window.confirm('Tem certeza que deseja cancelar este pedido?')) {
-      try {
-        await cancelMutation.mutateAsync(id);
-      } catch (error) {
-        // Erro já tratado no interceptor global
-      }
+  const cancelOrder = async (id: number | string) => {
+    try {
+      await cancelMutation.mutateAsync(id);
+    } catch (error) {
+      // Erro já tratado no interceptor global
     }
   };
 
@@ -89,8 +95,28 @@ export function useOrders() {
   });
 
   const handleSubmit = async () => {
+    if (formData.items.length === 0) {
+      notify.warning('Seleção Obrigatória', 'Adicione ao menos um item ao pedido.');
+      return;
+    }
+    if (formData.items.some(item => !item.productId)) {
+      notify.warning('Seleção Obrigatória', 'Selecione um produto para todos os itens.');
+      return;
+    }
+
     try {
-      await createMutation.mutateAsync(formData);
+      if (editingId) {
+        const order = data?.items?.find((o: any) => o.id === editingId);
+        await updateMutation.mutateAsync({
+          id: editingId,
+          data: {
+            ...formData,
+            status: order?.status || 'Pending'
+          }
+        });
+      } else {
+        await createMutation.mutateAsync(formData);
+      }
       setIsModalOpen(false);
       setFormData({ customerName: '', customerEmail: '', shippingAddress: '', items: [] });
     } catch (error) {
@@ -98,15 +124,20 @@ export function useOrders() {
     }
   };
 
-  const handleEdit = (order: any) => {
-    setEditingId(order.id);
-    setFormData({
-      customerName: order.customerName || '',
-      customerEmail: order.customerEmail || '',
-      shippingAddress: order.shippingAddress || '',
-      items: order.items || []
-    });
-    setIsModalOpen(true);
+  const handleEdit = async (order: any) => {
+    try {
+      const fullOrder = await orderService.getById(order.id);
+      setEditingId(fullOrder.id as any);
+      setFormData({
+        customerName: fullOrder.customerName || '',
+        customerEmail: fullOrder.customerEmail || '',
+        shippingAddress: fullOrder.shippingAddress || '',
+        items: fullOrder.items || []
+      });
+      setIsModalOpen(true);
+    } catch (error) {
+      notify.error('Erro ao buscar dados', 'Não foi possível carregar os itens do pedido.');
+    }
   };
 
   const handleAddItem = () => {
@@ -144,9 +175,14 @@ export function useOrders() {
     setIsModalOpen(true);
   };
 
-  const handleViewDetails = (order: OrderResponse) => {
-    setSelectedOrder(order);
-    setIsDetailsOpen(true);
+  const handleViewDetails = async (order: OrderResponse) => {
+    try {
+      const fullOrder = await orderService.getById(order.id);
+      setSelectedOrder(fullOrder);
+      setIsDetailsOpen(true);
+    } catch (error) {
+      notify.error('Erro ao buscar detalhes', 'Não foi possível carregar os dados do pedido.');
+    }
   };
 
   return {
@@ -180,7 +216,7 @@ export function useOrders() {
       setEndDate(date);
       setPage(1);
     },
-    handleCancel,
+    cancelOrder,
     handleExport,
     createOrder: createMutation.mutateAsync,
     isCreating: createMutation.isPending,
@@ -209,6 +245,7 @@ export function useOrders() {
     handleRemoveItem,
     handleItemChange,
     handleOpenNew,
-    handleViewDetails
+    handleViewDetails,
+    refresh: () => queryClient.invalidateQueries({ queryKey: ['orders'] })
   };
 }

@@ -252,9 +252,9 @@
                 startDate,
                 endDate);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Erro ao carregar logs: {ex.Message}");
+            _logs = new PagedResponse<DomainEvent> { Items = new List<DomainEvent>(), TotalCount = 0 };
         }
     }
 

@@ -1,0 +1,60 @@
+@namespace BlazorApp.Components.UI
+
+<MudDialog Class="rounded-3xl overflow-hidden">
+    <DialogContent>
+        <div class="flex flex-col items-center text-center p-8">
+            <div class="flex items-center justify-center w-14 h-14 bg-red-50 rounded-2xl mx-auto mb-6">
+                <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v4" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 17h.01" />
+                </svg>
+            </div>
+
+            <p class="text-gray-900 font-bold text-center text-base mb-8 leading-snug">@Title</p>
+
+            @if (!string.IsNullOrEmpty(ContentText))
+            {
+                <p class="text-gray-500 font-medium text-sm text-center -mt-4 mb-8 leading-relaxed">@ContentText</p>
+            }
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <div class="flex gap-3 w-full px-8 pb-8">
+            <button @onclick="Cancel" class="flex-1 px-6 py-3 rounded-2xl border border-gray-200 text-gray-600 font-bold text-sm hover:bg-gray-50 transition-colors active:scale-95">
+                @CancelText
+            </button>
+            <button @onclick="Submit" class="flex-1 px-6 py-3 rounded-2xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 transition-colors active:scale-95 shadow-lg shadow-red-600/30">
+                @ConfirmText
+            </button>
+        </div>
+    </DialogActions>
+</MudDialog>
+
+<style>
+    .mud-dialog {
+        max-width: 24rem !important;
+        border-radius: 1.5rem !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    .mud-dialog-content {
+        padding: 0 !important;
+    }
+
+    .mud-dialog-actions {
+        padding: 0 !important;
+    }
+</style>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string ContentText { get; set; } = "";
+    [Parameter] public string ConfirmText { get; set; } = "Confirmar";
+    [Parameter] public string CancelText { get; set; } = "Cancelar";
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    private void Cancel() => MudDialog.Cancel();
+}

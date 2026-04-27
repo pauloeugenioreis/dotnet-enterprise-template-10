@@ -32,8 +32,16 @@ body {
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
+    display: block !important;
+    overflow: visible !important;
   }
-  .no-print {
+  .no-print, .no-print * {
     display: none !important;
+    visibility: hidden !important;
+  }
+  /* Force color printing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }

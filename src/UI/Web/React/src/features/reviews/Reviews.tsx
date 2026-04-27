@@ -1,13 +1,31 @@
 import { useReviews } from './useReviews';
 import { Star, Search, Trash2, CheckCircle, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import ConfirmModal from '../../components/ConfirmModal';
 
 export default function Reviews() {
   const {
     reviews, loading, totalPages, page, setPage,
     productName, setProductName, minRating, setMinRating,
     isApproved, setIsApproved,
-    loadReviews, handleApprove, handleDelete, pageSize
+    loadReviews, handleApprove, deleteReview, pageSize
   } = useReviews();
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [reviewToDelete, setReviewToDelete] = useState<string | null>(null);
+
+  const handleDelete = (id: string) => {
+    setReviewToDelete(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (reviewToDelete) {
+      await deleteReview(reviewToDelete);
+      setIsDeleteModalOpen(false);
+      setReviewToDelete(null);
+    }
+  };
 
   return (
     <div className="p-10 max-w-7xl mx-auto space-y-10 animate-in fade-in duration-700">
@@ -175,6 +193,13 @@ export default function Reviews() {
           </div>
         </footer>
       )}
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        message="Deseja excluir esta avaliação?"
+        onConfirm={confirmDelete}
+        onCancel={() => setIsDeleteModalOpen(false)}
+      />
     </div>
   );
 }

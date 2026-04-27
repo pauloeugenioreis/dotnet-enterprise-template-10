@@ -1,5 +1,7 @@
 #!/bin/bash
 
+clear
+
 # Cores para o terminal
 CYAN='\033[0;36m'
 GREEN='\033[0;32m'

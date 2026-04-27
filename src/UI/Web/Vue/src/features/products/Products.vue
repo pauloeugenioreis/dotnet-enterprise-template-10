@@ -7,6 +7,10 @@ import { useProducts } from '../../composables/api/useProducts';
 import { productService } from '../../api/services/ProductService';
 import Pagination from '../../components/Pagination.vue';
 import Modal from '../../components/Modal.vue';
+import ConfirmModal from '../../components/ConfirmModal.vue';
+import { useToast } from 'vue-toastification';
+
+const toast = useToast();
 
 const { 
   products, 
@@ -60,13 +64,26 @@ const handleEdit = (product: any) => {
   isModalOpen.value = true;
 };
 
-const handleDelete = async (id: number) => {
-  if (!confirm('Excluir este produto?')) return;
-  try {
-    await deleteProduct(id);
-    handleFetchProducts();
-  } catch (error) {
-    // Erro tratado pelo interceptor
+const isDeleteModalOpen = ref(false);
+const productToDelete = ref<number | null>(null);
+
+const handleDelete = (id: number) => {
+  productToDelete.value = id;
+  isDeleteModalOpen.value = true;
+};
+
+const confirmDelete = async () => {
+  if (productToDelete.value) {
+    try {
+      await deleteProduct(productToDelete.value);
+      toast.success('Produto excluído com sucesso');
+      handleFetchProducts();
+    } catch (error) {
+      // Erro tratado pelo interceptor
+    } finally {
+      isDeleteModalOpen.value = false;
+      productToDelete.value = null;
+    }
   }
 };
 
@@ -80,11 +97,13 @@ const handleSubmit = async () => {
 
     if (editingId.value) {
       await productService.update(editingId.value, payload);
+      toast.success('Produto atualizado com sucesso');
     } else {
       await productService.create(payload);
+      toast.success('Produto criado com sucesso');
     }
     isModalOpen.value = false;
-    fetchProducts();
+    handleFetchProducts();
   } catch (error) {
     // Erro tratado pelo interceptor
   }

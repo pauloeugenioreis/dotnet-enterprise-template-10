@@ -7,8 +7,9 @@
 @inject IProductService ProductService
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 @inject NavigationManager Navigation
-@rendermode InteractiveAuto
+
 
 <div class="animate-in fade-in duration-700">
   <header class="flex justify-between items-end mb-16">
@@ -17,14 +18,14 @@
       <p class="text-gray-500 mt-4 font-medium text-xl">Catálogo completo de itens.</p>
     </div>
     <div class="flex gap-4">
-      <button 
+      <button
         @onclick="ExportToExcel"
         class="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md text-gray-400 hover:text-primary-600 transition-all active:scale-95"
         title="Exportar para Excel"
       >
         📊
       </button>
-      <button 
+      <button
         @onclick="OpenNew"
         class="bg-primary-600 hover:bg-primary-700 text-white font-black px-8 py-4 rounded-2xl shadow-lg shadow-primary-600/20 transition-all active:scale-95"
       >
@@ -41,7 +42,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </div>
-      <input 
+      <input
         type="text"
         placeholder="Buscar por nome ou categoria..."
         class="w-full pl-16 pr-8 py-5 bg-white border-none rounded-3xl shadow-xl shadow-gray-100/50 focus:ring-2 focus:ring-primary-600/20 outline-none transition-all font-bold text-gray-900 placeholder:text-gray-300"
@@ -50,7 +51,7 @@
         @onkeyup="HandleKeyUp"
       />
     </div>
-    
+
     <div class="flex bg-white p-2 rounded-[2rem] shadow-xl shadow-gray-100/50 gap-1">
       <button
         @onclick="() => SetStatusFilter(null)"
@@ -135,10 +136,10 @@
         </tbody>
       </table>
 
-      <Pagination 
-        Page="@currentPage" 
-        TotalPages="@products.TotalPages" 
-        TotalItems="@products.TotalCount" 
+      <Pagination
+        Page="@currentPage"
+        TotalPages="@products.TotalPages"
+        TotalItems="@products.TotalCount"
         PageSize="@pageSize"
         OnPageChanged="ChangePage"
         OnPageSizeChanged="ChangePageSize"
@@ -206,14 +207,14 @@
 
     private async Task LoadProducts()
     {
-        try 
+        try
         {
             products = null;
             products = await ProductService.GetPagedAsync(currentPage, pageSize, searchTerm, isActive);
         }
         catch (Exception)
         {
-            // Erro tratado pelo ErrorHandler global
+            products = new PagedResponse<ProductResponseDto> { Items = new List<ProductResponseDto>(), TotalCount = 0 };
         }
     }
 
@@ -285,12 +286,12 @@
 
     private async Task Save()
     {
-        try 
+        try
         {
             if (formData.Id > 0)
             {
-                await ProductService.UpdateAsync(formData.Id, new UpdateProductRequest 
-                { 
+                await ProductService.UpdateAsync(formData.Id, new UpdateProductRequest
+                {
                     Name = formData.Name,
                     Category = formData.Category,
                     Price = formData.Price,
@@ -300,8 +301,8 @@
             }
             else
             {
-                await ProductService.CreateAsync(new CreateProductRequest 
-                { 
+                await ProductService.CreateAsync(new CreateProductRequest
+                {
                     Name = formData.Name,
                     Category = formData.Category,
                     Price = formData.Price,
@@ -310,7 +311,7 @@
                 });
                 Snackbar.Add("Produto criado com sucesso!", Severity.Success);
             }
-            
+
             showModal = false;
             await LoadProducts();
         }
@@ -322,10 +323,17 @@
 
     private async Task DeleteProduct(long id)
     {
-        var confirmed = await JS.InvokeAsync<bool>("confirm", "Tem certeza que deseja excluir este produto?");
-        if (!confirmed) return;
+        var parameters = new DialogParameters<ConfirmationDialog>
+        {
+        { x => x.Title, "Deseja excluir este produto?" }
+        };
 
-        try 
+        var dialog = await DialogService.ShowAsync<ConfirmationDialog>("", parameters);
+        var result = await dialog.Result;
+
+        if (result == null || result.Canceled) return;
+
+        try
         {
             await ProductService.DeleteAsync(id);
             Snackbar.Add("Produto excluído com sucesso.", Severity.Success);

@@ -39,13 +39,11 @@ export function useProducts() {
     },
   });
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Tem certeza que deseja excluir este produto?')) {
-      try {
-        await deleteMutation.mutateAsync(id);
-      } catch (error) {
-        // Erro já tratado no interceptor
-      }
+  const deleteProduct = async (id: number) => {
+    try {
+      await deleteMutation.mutateAsync(id);
+    } catch (error) {
+      // Erro já tratado no interceptor
     }
   };
 
@@ -85,7 +83,7 @@ export function useProducts() {
       setIsActive(active);
       setPage(1);
     },
-    handleDelete,
+    deleteProduct,
     handleExport,
     createProduct: createMutation.mutateAsync,
     updateProduct: updateMutation.mutateAsync,

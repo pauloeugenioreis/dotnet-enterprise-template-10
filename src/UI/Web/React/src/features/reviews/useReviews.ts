@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { customerReviewService } from '../../api/services/customer-review.service';
+import { notify } from '../../utils/toast';
 
 export function useReviews() {
   const [reviews, setReviews] = useState<any[]>([]);
@@ -29,14 +30,22 @@ export function useReviews() {
   }, [page, isApproved, minRating]);
 
   const handleApprove = async (id: string, approve: boolean) => {
-    await customerReviewService.approve(id, approve);
-    loadReviews();
+    try {
+      await customerReviewService.approve(id, approve);
+      notify.success('Avaliação Atualizada', approve ? 'A avaliação foi aprovada.' : 'A aprovação foi removida.');
+      loadReviews();
+    } catch (error) {
+      notify.error('Erro na Operação', 'Não foi possível atualizar a avaliação.');
+    }
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir esta avaliação?')) {
+  const deleteReview = async (id: string) => {
+    try {
       await customerReviewService.delete(id);
+      notify.success('Avaliação Excluída', 'A avaliação foi removida permanentemente.');
       loadReviews();
+    } catch (error) {
+      notify.error('Erro na Operação', 'Não foi possível excluir a avaliação.');
     }
   };
 
@@ -57,7 +66,7 @@ export function useReviews() {
     setIsApproved,
     loadReviews,
     handleApprove,
-    handleDelete,
+    deleteReview,
     pageSize
   };
 }

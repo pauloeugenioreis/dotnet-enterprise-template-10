@@ -3,15 +3,15 @@ using ProjectTemplate.Shared.Models;
 
 namespace BlazorApp.Client.Services;
 
-public class CustomerReviewService(IHttpClientFactory httpClientFactory) 
-    : BaseService(httpClientFactory, "api/v1/CustomerReview"), ICustomerReviewService
+public class CustomerReviewService(HttpClient http) 
+    : BaseService(http, "api/v1/CustomerReview"), ICustomerReviewService
 {
     public Task<PagedResponse<CustomerReviewResponseDto>> GetReviewsAsync(int page = 1, int pageSize = 10, string? productName = null, int? minRating = null, bool? isApproved = null, CancellationToken ct = default)
     {
         return GetPagedAsync<CustomerReviewResponseDto>(new { page, pageSize, productName, minRating, isApproved }, ct);
     }
 
-    public Task<CustomerReviewResponseDto?> GetByIdAsync(string id, CancellationToken ct = default)
+    public Task<CustomerReviewResponseDto> GetByIdAsync(string id, CancellationToken ct = default)
     {
         return GetAsync<CustomerReviewResponseDto>($"{ResourcePath}/{id}", ct);
     }

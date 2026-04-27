@@ -5,6 +5,7 @@
 @using ProjectTemplate.Shared.Models
 @using System.Globalization
 @inject IOrderService OrderService
+@inject IDialogService DialogService
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
@@ -17,14 +18,14 @@
       <p class="text-gray-500 mt-4 font-medium text-xl">Histórico completo de transações.</p>
     </div>
         <div class="flex gap-4">
-            <button 
+            <button
                 @onclick="ExportToExcel"
                 class="p-5 bg-white border border-gray-100 rounded-[2rem] shadow-xl shadow-gray-200/50 text-gray-300 hover:text-primary-600 transition-all hover:scale-105 active:scale-95 group"
                 title="Exportar para Excel"
             >
                 📊
             </button>
-            <button 
+            <button
                 @onclick="OpenNew"
                 class="bg-primary-600 hover:bg-primary-700 text-white font-black px-10 py-5 rounded-3xl shadow-xl shadow-primary-600/20 transition-all active:scale-95 flex items-center gap-3"
             >
@@ -42,7 +43,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </div>
-      <input 
+      <input
         type="text"
         placeholder="Buscar pedido..."
         class="w-full pl-16 pr-8 py-5 bg-white border-none rounded-3xl shadow-xl shadow-gray-100/50 focus:ring-2 focus:ring-primary-600/20 outline-none transition-all font-bold text-gray-900 placeholder:text-gray-300"
@@ -55,8 +56,8 @@
     <div class="col-span-4 flex bg-white p-2 rounded-3xl shadow-xl shadow-gray-100/50 gap-2 items-center">
       <div class="flex-1 px-4 py-1">
         <label class="block text-[8px] font-black uppercase text-gray-400 leading-none mb-1">De</label>
-        <input 
-          type="date" 
+        <input
+          type="date"
           @bind="fromDate"
           @bind:after="LoadOrders"
           class="w-full bg-transparent border-none outline-none font-bold text-xs text-gray-900 cursor-pointer"
@@ -65,8 +66,8 @@
       <div class="w-px h-8 bg-gray-100"></div>
       <div class="flex-1 px-4 py-1">
         <label class="block text-[8px] font-black uppercase text-gray-400 leading-none mb-1">Até</label>
-        <input 
-          type="date" 
+        <input
+          type="date"
           @bind="toDate"
           @bind:after="LoadOrders"
           class="w-full bg-transparent border-none outline-none font-bold text-xs text-gray-900 cursor-pointer"
@@ -75,7 +76,7 @@
     </div>
 
     <div class="col-span-3">
-      <Dropdown 
+      <Dropdown
         Options="@statusOptions"
         @bind-Value="status"
         @bind-Value:after="LoadOrders"
@@ -83,7 +84,7 @@
     </div>
 
     <div class="col-span-2 flex justify-end">
-      <button 
+      <button
         @onclick="ClearFilters"
         class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-red-500 transition-colors flex items-center gap-2 group"
       >
@@ -131,7 +132,7 @@
                 <div class="flex gap-2">
                   <button @onclick="() => OpenDetails(order)" title="Visualizar" class="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-blue-50 rounded-2xl text-blue-600 transition-all active:scale-90">🔍</button>
                   <button @onclick="() => OpenEdit(order)" title="Editar" class="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-primary-50 rounded-2xl text-primary-600 transition-all active:scale-90">✏️</button>
-                  <button @onclick="() => DeleteOrder(order.Id)" title="Excluir" class="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-rose-50 rounded-2xl text-rose-600 transition-all active:scale-90">🗑️</button>
+                  <button @onclick="() => CancelOrder(order)" title="Cancelar" class="w-12 h-12 flex items-center justify-center bg-gray-50 hover:bg-rose-50 rounded-2xl text-rose-600 transition-all active:scale-90">🗑️</button>
                 </div>
               </td>
             </tr>
@@ -139,10 +140,10 @@
         </tbody>
       </table>
 
-      <Pagination 
-        Page="@currentPage" 
-        TotalPages="@orders.TotalPages" 
-        TotalItems="@orders.TotalCount" 
+      <Pagination
+        Page="@currentPage"
+        TotalPages="@orders.TotalPages"
+        TotalItems="@orders.TotalCount"
         PageSize="@pageSize"
         OnPageChanged="ChangePage"
         OnPageSizeChanged="ChangePageSize"
@@ -151,10 +152,10 @@
   }
 </div>
 
-<OrderDetailsModal 
-    Order="@selectedOrder" 
-    IsOpen="@showDetails" 
-    OnClose="() => showDetails = false" 
+<OrderDetailsModal
+    Order="@selectedOrder"
+    IsOpen="@showDetails"
+    OnClose="() => showDetails = false"
     OnStatusUpdated="LoadOrders"
 />
 
@@ -197,14 +198,14 @@
 
     private async Task LoadOrders()
     {
-        try 
+        try
         {
             orders = null;
             orders = await OrderService.GetPagedAsync(currentPage, pageSize, searchTerm, status?.ToString(), fromDate, toDate);
         }
         catch (Exception)
         {
-            // Erro tratado pelo ErrorHandler global
+            orders = new PagedResponse<OrderResponseDto> { Items = new List<OrderResponseDto>(), TotalCount = 0 };
         }
     }
 
@@ -263,22 +264,22 @@
         showForm = true;
     }
 
-    private void OpenDetails(OrderResponseDto order)
+    private async Task OpenDetails(OrderResponseDto order)
     {
-        selectedOrder = order;
+        selectedOrder = await OrderService.GetByIdAsync(order.Id);
         showDetails = true;
     }
 
     private async Task OpenEdit(OrderResponseDto order)
     {
-        selectedOrder = order;
+        selectedOrder = await OrderService.GetByIdAsync(order.Id);
         isEdit = true;
         showForm = true;
     }
 
     private async Task HandleSave(OrderResponseDto order)
     {
-        try 
+        try
         {
             if (isEdit)
             {
@@ -293,6 +294,12 @@
             }
             else
             {
+                if (order.Items.Any(i => i.ProductId <= 0))
+                {
+                    Snackbar.Add("Selecione um produto para todos os itens", Severity.Warning);
+                    return;
+                }
+
                 var createRequest = new CreateOrderRequest
                 {
                     CustomerName = order.CustomerName,
@@ -302,7 +309,7 @@
                 };
                 await OrderService.CreateAsync(createRequest);
             }
-            
+
             showForm = false;
             Snackbar.Add(isEdit ? "Pedido atualizado com sucesso!" : "Pedido criado com sucesso!", Severity.Success);
             await LoadOrders();
@@ -313,15 +320,31 @@
         }
     }
 
-    private async Task DeleteOrder(long id)
+    private async Task CancelOrder(OrderResponseDto order)
     {
-        var confirmed = await JS.InvokeAsync<bool>("confirm", "Tem certeza que deseja excluir este pedido?");
-        if (!confirmed) return;
+      if (string.Equals(order.Status, "Cancelled", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(order.Status, "Cancelado", StringComparison.OrdinalIgnoreCase))
+      {
+        return;
+      }
 
-        try 
+      var parameters = new DialogParameters<ConfirmationDialog>
+      {
+        { x => x.Title, "Deseja cancelar este pedido?" }
+      };
+
+      var dialog = await DialogService.ShowAsync<ConfirmationDialog>("", parameters);
+      var result = await dialog.Result;
+
+      if (result == null || result.Canceled)
+      {
+        return;
+      }
+
+        try
         {
-            await OrderService.DeleteAsync(id);
-            Snackbar.Add("Pedido excluído com sucesso.", Severity.Success);
+        await OrderService.UpdateStatusAsync(order.Id, new UpdateOrderStatusDto("Cancelled", "Cancelado pelo usuário"));
+        Snackbar.Add("Pedido cancelado com sucesso.", Severity.Success);
             await LoadOrders();
         }
         catch (Exception)

@@ -152,10 +152,10 @@
 
 <!-- Order Drawer -->
 <app-drawer
-  [isOpen]="showModal"
+  [isOpen]="showModal()"
   [title]="editingOrder ? 'Editar Pedido' : 'Novo Pedido'"
   [subtitle]="editingOrder ? 'Atualize as informações do pedido' : 'Cadastre um novo pedido no sistema'"
-  (onClose)="showModal = false"
+  (onClose)="showModal.set(false)"
 >
   <form #orderForm="ngForm" class="space-y-10">
     <!-- Seção: Informações do Cliente -->
@@ -283,7 +283,7 @@
   <div footer class="flex gap-4 w-full">
     <button
       type="button"
-      (click)="showModal = false"
+      (click)="showModal.set(false)"
       class="flex-1 bg-white border border-gray-100 text-gray-400 font-black py-5 rounded-3xl hover:bg-gray-50 transition-all active:scale-95 flex items-center justify-center tracking-widest text-[10px] uppercase"
     >
       Cancelar

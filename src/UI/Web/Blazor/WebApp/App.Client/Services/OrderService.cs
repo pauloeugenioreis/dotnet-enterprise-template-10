@@ -11,10 +11,11 @@ public interface IOrderService
     Task CreateAsync(CreateOrderRequest dto, CancellationToken ct = default);
     Task UpdateAsync(long id, UpdateOrderRequest dto, CancellationToken ct = default);
     Task UpdateStatusAsync(long id, UpdateOrderStatusDto dto, CancellationToken ct = default);
+    Task<OrderResponseDto> GetByIdAsync(long id, CancellationToken ct = default);
 }
 
-public class OrderService(IHttpClientFactory httpClientFactory) 
-    : BaseService(httpClientFactory, "api/v1/order"), IOrderService
+public class OrderService(HttpClient http) 
+    : BaseService(http, "api/v1/order"), IOrderService
 {
     public Task<PagedResponse<OrderResponseDto>> GetPagedAsync(int page = 1, int pageSize = 10, string? searchTerm = null, string? status = null, DateTime? from = null, DateTime? toDate = null, CancellationToken ct = default)
     {
@@ -39,5 +40,10 @@ public class OrderService(IHttpClientFactory httpClientFactory)
     public Task UpdateStatusAsync(long id, UpdateOrderStatusDto dto, CancellationToken ct = default)
     {
         return PatchAsync($"{ResourcePath}/{id}/status", dto, ct);
+    }
+
+    public Task<OrderResponseDto> GetByIdAsync(long id, CancellationToken ct = default)
+    {
+        return GetAsync<OrderResponseDto>($"{ResourcePath}/{id}", ct);
     }
 }

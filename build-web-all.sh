@@ -1,4 +1,5 @@
 #!/bin/bash
+clear
 
 # Script to build all Web projects in src/UI/Web
 set -e

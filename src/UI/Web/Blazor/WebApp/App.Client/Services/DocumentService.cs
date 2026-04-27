@@ -11,8 +11,8 @@ public interface IDocumentService
     Task DeleteAsync(string fileName, CancellationToken ct = default);
 }
 
-public class DocumentService(IHttpClientFactory httpClientFactory) 
-    : BaseService(httpClientFactory, "api/v1/document"), IDocumentService
+public class DocumentService(HttpClient http) 
+    : BaseService(http, "api/v1/document"), IDocumentService
 {
     public async Task<DocumentUploadResponse> UploadAsync(string fileName, string contentType, Stream stream, CancellationToken ct = default)
     {

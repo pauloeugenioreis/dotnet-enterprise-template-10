@@ -2,10 +2,11 @@ using System.Security.Claims;
 using System.Text.Json;
 using BlazorApp.Client.Services.Base;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.JSInterop;
 
 namespace BlazorApp.Client.Auth;
 
-public class CustomAuthenticationStateProvider(LocalStorageService localStorage) : AuthenticationStateProvider
+public class CustomAuthenticationStateProvider(LocalStorageService localStorage, IJSRuntime js) : AuthenticationStateProvider
 {
     private readonly ClaimsPrincipal _anonymous = new(new ClaimsIdentity());
 
@@ -13,6 +14,9 @@ public class CustomAuthenticationStateProvider(LocalStorageService localStorage)
     {
         try
         {
+            if (js.GetType().Name == "UnsupportedJavaScriptRuntime")
+                return new AuthenticationState(_anonymous);
+
             var token = await localStorage.GetItemAsync<string>("authToken");
 
             if (string.IsNullOrWhiteSpace(token))
@@ -20,8 +24,12 @@ public class CustomAuthenticationStateProvider(LocalStorageService localStorage)
 
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt")));
         }
-        catch
+        catch (Exception ex)
         {
+            if (!ex.Message.Contains("JavaScript interop calls cannot be issued at this time"))
+            {
+                Console.WriteLine($"[AuthStateProvider] Erro ao obter estado: {ex.Message}");
+            }
             return new AuthenticationState(_anonymous);
         }
     }

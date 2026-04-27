@@ -6,7 +6,7 @@ import { DestroyRef } from '@angular/core';
 import { OrderService } from '../../../core/services/order.service';
 import { ProductService } from '../../../core/services/product.service';
 import { FileDownloadService } from '../../../core/services/file-download.service';
-import { CreateOrderRequest, OrderItemRequest, OrderResponse, ProductResponse, OrderStatus } from '../../../shared/models';
+import { CreateOrderRequest, OrderItemRequest, OrderResponse, ProductResponse, OrderStatus, UpdateOrderRequest } from '../../../shared/models';
 import { NotificationService } from '../../../core/services/notification.service';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
@@ -52,7 +52,7 @@ export class OrdersComponent implements OnInit {
   totalPages = 0;
 
   // Modal State
-  showModal = false;
+  showModal = signal(false);
   showDetailsModal = signal(false);
   selectedOrder = signal<OrderResponse | null>(null);
   modalTitle = 'Novo Pedido';
@@ -107,7 +107,7 @@ export class OrdersComponent implements OnInit {
     if (this.productLoading() || (!this.hasMoreProducts() && isLoadMore)) return;
 
     this.productLoading.set(true);
-    this.productService.getProducts(this.productPage(), 20, '', true).subscribe({
+    this.productService.getProducts(this.productPage(), 100, '').subscribe({
       next: (res) => {
         const newItems = res.items || [];
         if (isLoadMore) {
@@ -115,7 +115,7 @@ export class OrdersComponent implements OnInit {
         } else {
           this.products.set(newItems);
         }
-        this.hasMoreProducts.set(newItems.length === 20);
+        this.hasMoreProducts.set(newItems.length === 100);
         if (this.hasMoreProducts()) {
           this.productPage.update(p => p + 1);
         }
@@ -175,33 +175,38 @@ export class OrdersComponent implements OnInit {
     this.editingOrder = null;
     this.modalTitle = 'Novo Pedido';
     this.formData = { customerName: '', customerEmail: '', shippingAddress: '', items: [] as OrderItemRequest[] };
-    this.showModal = true;
+    this.showModal.set(true);
   }
 
   viewDetails(order: OrderResponse) {
-    this.selectedOrder.set(order);
-    this.showDetailsModal.set(true);
+    this.orderService.getById(order.id).subscribe(fullOrder => {
+      this.selectedOrder.set(fullOrder);
+      this.showDetailsModal.set(true);
+    });
   }
 
   openEdit(order: OrderResponse) {
-    this.editingOrder = order;
-    this.modalTitle = 'Editar Pedido';
-    this.formData = {
-      customerName: order.customerName,
-      customerEmail: order.customerEmail || '',
-      shippingAddress: order.shippingAddress || '',
-      items: (order.items || []).map(item => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice
-      }))
-    };
-    this.showModal = true;
+    this.orderService.getById(order.id).subscribe(fullOrder => {
+      this.editingOrder = fullOrder;
+      this.modalTitle = 'Editar Pedido';
+      this.formData = {
+        customerName: fullOrder.customerName,
+        customerEmail: fullOrder.customerEmail || '',
+        shippingAddress: fullOrder.shippingAddress || '',
+        items: (fullOrder.items || []).map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice
+        }))
+      };
+      this.showModal.set(true);
+      this.loadProducts();
+    });
   }
 
   cancelOrder(order: OrderResponse) {
     if (order.status === OrderStatus.Cancelled) return;
-    this.notification.confirm('Tem certeza que deseja cancelar este pedido?').subscribe(confirmed => {
+    this.notification.confirm('Deseja cancelar este pedido?').subscribe(confirmed => {
       if (confirmed) {
         this.orderService.updateStatus(order.id, OrderStatus.Cancelled).subscribe({
           next: () => {
@@ -222,7 +227,7 @@ export class OrdersComponent implements OnInit {
   }
 
   onProductChange(index: number, productId: string) {
-    const product = this.products().find(p => p.id === productId);
+    const product = this.products().find(p => p.id.toString() === productId.toString());
     if (product) {
       this.formData.items[index].productId = product.id;
       this.formData.items[index].unitPrice = product.price;
@@ -244,13 +249,27 @@ export class OrdersComponent implements OnInit {
       return;
     }
 
-    const obs = this.editingOrder
-      ? this.orderService.update(this.editingOrder.id, this.formData)
-      : this.orderService.create(this.formData);
+    if (this.formData.items.some(item => !item.productId)) {
+      this.notification.warning('Selecione um produto para todos os itens');
+      return;
+    }
+
+    let obs;
+    if (this.editingOrder) {
+      const updateRequest: UpdateOrderRequest = {
+        customerName: this.formData.customerName,
+        status: this.editingOrder.status,
+        shippingAddress: this.formData.shippingAddress,
+        notes: '' // O formulário não tem campo de notas, mas o DTO pede
+      };
+      obs = this.orderService.update(this.editingOrder.id, updateRequest);
+    } else {
+      obs = this.orderService.create(this.formData);
+    }
 
     obs.subscribe({
       next: () => {
-        this.showModal = false;
+        this.showModal.set(false);
         this.notification.success(this.editingOrder ? 'Pedido atualizado com sucesso' : 'Pedido criado com sucesso');
         this.loadOrders();
       }

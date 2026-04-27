@@ -270,4 +270,12 @@
     :order="selectedOrder"
     @onStatusUpdated="fetchOrders"
   />
+
+  <!-- Modal Confirmação -->
+  <ConfirmModal
+    :isOpen="isCancelModalOpen"
+    message="Deseja cancelar este pedido?"
+    @confirm="confirmCancel"
+    @cancel="isCancelModalOpen = false"
+  />
 </div>

@@ -11,6 +11,10 @@ import Pagination from '../../components/Pagination.vue';
 import Modal from '../../components/Modal.vue';
 import Drawer from '../../components/Drawer.vue';
 import OrderDetailsModal from './components/OrderDetailsModal.vue';
+import ConfirmModal from '../../components/ConfirmModal.vue';
+import { useToast } from 'vue-toastification';
+
+const toast = useToast();
 
 const { 
   orders, 
@@ -49,11 +53,9 @@ const productPage = ref(1);
 const productLoading = ref(false);
 const hasMoreProducts = ref(true);
 
-// Removido o fetchProducts manual que conflita com o composable
-
 const handleLoadMoreProducts = () => {
   if (hasMoreProducts.value) {
-    fetchAllProducts(productPage.value + 1, 20, { isActive: true });
+    fetchAllProducts(productPage.value + 1, 100);
   }
 };
 
@@ -81,7 +83,7 @@ const handleFetchOrders = () => {
   });
 };
 
-const fetchProductsList = () => fetchAllProducts(1, 100, { isActive: true });
+const fetchProductsList = () => fetchAllProducts(1, 100);
 
 const handleExport = () => orderService.exportToExcel();
 
@@ -91,33 +93,57 @@ const handleOpenNew = () => {
   isModalOpen.value = true;
 };
 
-const handleEdit = (order: any) => {
-  editingId.value = order.id;
-  formData.value = {
-    customerName: order.customerName || '',
-    customerEmail: order.customerEmail || '',
-    shippingAddress: order.shippingAddress || '',
-    items: order.items ? order.items.map((item: any) => ({
-      productId: item.productId,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice
-    })) : []
-  };
-  isModalOpen.value = true;
-};
-
-const handleViewDetails = (order: any) => {
-  selectedOrder.value = order;
-  isDetailsOpen.value = true;
-};
-
-const handleCancel = async (id: number) => {
-  if (!confirm('Tem certeza que deseja cancelar este pedido?')) return;
+const handleEdit = async (order: any) => {
   try {
-    await orderService.updateStatus(id, 'Cancelled', 'Cancelado pelo usuário');
-    fetchOrders();
+    const fullOrder = await orderService.getById(order.id);
+    editingId.value = fullOrder.id as any;
+    formData.value = {
+      customerName: fullOrder.customerName || '',
+      customerEmail: fullOrder.customerEmail || '',
+      shippingAddress: fullOrder.shippingAddress || '',
+      items: fullOrder.items ? fullOrder.items.map((item: any) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice
+      })) : []
+    };
+    fetchProductsList();
+    isModalOpen.value = true;
   } catch (error) {
     // Erro tratado pelo interceptor
+  }
+};
+
+const handleViewDetails = async (order: any) => {
+  try {
+    const fullOrder = await orderService.getById(order.id);
+    selectedOrder.value = fullOrder;
+    isDetailsOpen.value = true;
+  } catch (error) {
+    // Erro tratado pelo interceptor
+  }
+};
+
+const isCancelModalOpen = ref(false);
+const orderToCancel = ref<number | null>(null);
+
+const handleCancel = (id: number) => {
+  orderToCancel.value = id;
+  isCancelModalOpen.value = true;
+};
+
+const confirmCancel = async () => {
+  if (orderToCancel.value) {
+    try {
+      await orderService.updateStatus(orderToCancel.value, 'Cancelled', 'Cancelado pelo usuário');
+      toast.success('Pedido cancelado com sucesso');
+      fetchOrders();
+    } catch (error) {
+      // Erro tratado pelo interceptor
+    } finally {
+      isCancelModalOpen.value = false;
+      orderToCancel.value = null;
+    }
   }
 };
 
@@ -141,14 +167,23 @@ const handleItemChange = (index: number, field: string, value: any) => {
 };
 
 const handleSubmit = async () => {
+  if (formData.value.items.length === 0) return;
+  if (formData.value.items.some(item => !item.productId)) return;
+
   try {
     if (editingId.value) {
-      await orderService.update(editingId.value, formData.value);
+      const order = orders.value.find(o => o.id === editingId.value);
+      await orderService.update(editingId.value, {
+        ...formData.value,
+        status: order?.status || 'Pending'
+      });
+      toast.success('Pedido atualizado com sucesso');
     } else {
       await orderService.create(formData.value);
+      toast.success('Pedido criado com sucesso');
     }
     isModalOpen.value = false;
-    fetchOrders();
+    handleFetchOrders();
   } catch (error) {
     // Erro tratado pelo interceptor
   }
@@ -181,6 +216,7 @@ onMounted(() => {
   handleFetchOrders();
   fetchProductsList();
 });
+
 </script>
 
 <style scoped>

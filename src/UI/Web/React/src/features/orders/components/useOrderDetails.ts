@@ -1,12 +1,14 @@
 import { orderService } from '../../../api/services/order.service';
+import { notify } from '../../../utils/toast';
 
 export function useOrderDetails(onStatusUpdated: () => void) {
   const handleStatusChange = async (orderId: number | string, newStatus: string) => {
     try {
       await orderService.updateStatus(orderId, newStatus, 'Atualizado via Dashboard React');
+      notify.success('Status Atualizado', `O pedido agora está como ${newStatus}.`);
       onStatusUpdated();
     } catch (error) {
-      alert('Erro ao atualizar status');
+      notify.error('Erro na Atualização', 'Não foi possível alterar o status do pedido.');
     }
   };
 

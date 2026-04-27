@@ -7,7 +7,7 @@
 @using System.Globalization
 @inject IOrderService OrderService
 @inject NavigationManager Navigation
-@rendermode InteractiveAuto
+
 
 <div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
     <div class="mb-16">
@@ -126,6 +126,7 @@
         }
         catch 
         {
+            statistics = new OrderStatisticsDto { TotalOrders = 0, TotalRevenue = 0 };
             // Fallback mock para demonstração se a API demorar
             recentOrders = new List<OrderResponseDto>
             {

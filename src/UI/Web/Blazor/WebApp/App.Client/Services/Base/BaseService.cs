@@ -4,9 +4,9 @@ using ProjectTemplate.Shared.Models;
 
 namespace BlazorApp.Client.Services.Base;
 
-public abstract class BaseService(IHttpClientFactory httpClientFactory, string? resourcePath = null)
+public abstract class BaseService(HttpClient http, string? resourcePath = null)
 {
-    protected readonly HttpClient Http = httpClientFactory.CreateClient("ApiGateway");
+    protected readonly HttpClient Http = http;
     protected readonly string? ResourcePath = resourcePath;
 
     protected async Task<T> GetAsync<T>(string url, CancellationToken ct = default)

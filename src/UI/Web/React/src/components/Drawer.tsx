@@ -16,14 +16,14 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, title, subtitle, child
     <div className="fixed inset-0 z-50 flex items-center justify-end">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" 
+        className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity no-print" 
         onClick={onClose}
       ></div>
 
       {/* Drawer Content */}
       <div className="relative h-full w-full max-w-2xl bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
         {/* Header */}
-        <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+        <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 no-print">
           <div>
             <h2 className="text-2xl font-black text-gray-900 tracking-tight">{title}</h2>
             {subtitle && <p className="text-gray-500 text-sm mt-1">{subtitle}</p>}
@@ -45,7 +45,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, title, subtitle, child
 
         {/* Footer */}
         {footer && (
-          <div className="p-8 border-t border-gray-100 bg-gray-50/30">
+          <div className="p-8 border-t border-gray-100 bg-gray-50/30 no-print">
             {footer}
           </div>
         )}

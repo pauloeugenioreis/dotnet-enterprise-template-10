@@ -53,6 +53,13 @@ export interface UpdateOrderStatusRequest {
   reason: string;
 }
 
+export interface UpdateOrderRequest {
+  customerName: string;
+  status: string;
+  shippingAddress?: string;
+  notes?: string;
+}
+
 export enum OrderStatus {
   Pending = 'Pending',
   Shipped = 'Shipped',

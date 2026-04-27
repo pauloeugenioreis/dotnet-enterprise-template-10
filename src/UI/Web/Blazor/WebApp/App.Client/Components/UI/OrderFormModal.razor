@@ -143,7 +143,7 @@
         productLoading = true;
         try 
         {
-            var result = await ProductService.GetPagedAsync(productPage, 20, null, true);
+            var result = await ProductService.GetPagedAsync(productPage, 20);
             var newOptions = result.Items.Select(p => new DropdownOption 
             { 
                 Label = $"{p.Name} - {p.Price:C}", 

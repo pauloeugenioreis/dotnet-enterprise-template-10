@@ -1,17 +1,33 @@
 import { useState } from 'react';
 import { useProducts } from './useProducts';
 import Modal from '../../components/Modal';
+import ConfirmModal from '../../components/ConfirmModal';
 import Pagination from '../../components/Pagination';
 
 export default function Products() {
   const {
     data, isLoading, page, setPage, pageSize, setPageSize,
-    handleDelete, handleExport, createProduct, updateProduct,
+    deleteProduct, handleExport, createProduct, updateProduct,
     searchTerm, setSearchTerm, isActive, setIsActive
   } = useProducts();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({ name: '', category: '', price: '', stock: '', isActive: true });
+
+  const handleDelete = (id: number) => {
+    setProductToDelete(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (productToDelete) {
+      await deleteProduct(productToDelete);
+      setIsDeleteModalOpen(false);
+      setProductToDelete(null);
+    }
+  };
 
   const totalPages = data?.totalPages || 1;
 
@@ -267,6 +283,13 @@ export default function Products() {
           </button>
         </form>
       </Modal>
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        message="Deseja excluir este produto?"
+        onConfirm={confirmDelete}
+        onCancel={() => setIsDeleteModalOpen(false)}
+      />
     </div>
   );
 }

@@ -32,6 +32,13 @@ export interface CreateOrderRequest {
   }[];
 }
 
+export interface UpdateOrderRequest {
+  customerName: string;
+  status: string;
+  shippingAddress?: string;
+  notes?: string;
+}
+
 export interface OrderStatistics {
   totalOrders: number;
   totalRevenue: number;

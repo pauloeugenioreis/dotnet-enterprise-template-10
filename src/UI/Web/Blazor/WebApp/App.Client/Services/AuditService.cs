@@ -17,8 +17,8 @@ public interface IAuditService
     Task<object?> GetStatisticsAsync();
 }
 
-public class AuditService(IHttpClientFactory httpFactory) 
-    : BaseService(httpFactory, "api/v1/audit"), IAuditService
+public class AuditService(HttpClient http) 
+    : BaseService(http, "api/v1/audit"), IAuditService
 {
     public Task<PagedResponse<DomainEvent>> GetAuditLogsAsync(
         int page = 1, 

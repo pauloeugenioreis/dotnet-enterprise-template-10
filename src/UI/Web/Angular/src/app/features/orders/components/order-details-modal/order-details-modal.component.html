@@ -4,12 +4,19 @@
   [title]="'Pedido #' + order?.orderNumber"
   [subtitle]="order ? 'Realizado em ' + (order.createdAt | date:'dd/MM/yyyy HH:mm') : ''"
 >
-  <div *ngIf="order" class="space-y-10">
+  <div *ngIf="order" class="space-y-10 print-area">
+    <!-- Header para Impressão (Apenas número) -->
+    <div class="hidden print:flex justify-end border-b-2 border-gray-900 pb-4 mb-8">
+      <div class="text-right">
+        <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Pedido Número</p>
+        <p class="text-2xl font-black text-gray-900">#{{ order.orderNumber }}</p>
+      </div>
+    </div>
     <!-- Status & Info -->
     <div class="grid grid-cols-2 gap-8">
-      <div>
+      <div class="print:border-b print:pb-4">
         <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2">Status do Pedido</p>
-        <span [class]="'px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest ' + getStatusClass(order.status)">
+        <span [class]="'px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest print:border print:px-2 ' + getStatusClass(order.status)">
           {{ order.status }}
         </span>
       </div>

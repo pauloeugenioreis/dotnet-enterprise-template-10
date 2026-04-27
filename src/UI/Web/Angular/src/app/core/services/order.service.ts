@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BaseService } from './base.service';
-import { PagedResponse, OrderResponse, OrderStatistics, CreateOrderRequest } from '../../shared/models';
+import { PagedResponse, OrderResponse, OrderStatistics, CreateOrderRequest, UpdateOrderRequest } from '../../shared/models';
 
 @Injectable({ providedIn: 'root' })
-export class OrderService extends BaseService<OrderResponse, CreateOrderRequest> {
+export class OrderService extends BaseService<OrderResponse, CreateOrderRequest, UpdateOrderRequest> {
   protected override entityPath = 'api/v1/Order';
 
   getOrders(page = 1, pageSize = 10, search = '', status = '', from?: Date, to?: Date) {

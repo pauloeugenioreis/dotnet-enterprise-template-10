@@ -6,7 +6,14 @@
     :subtitle="order ? 'Realizado em ' + formatDate(order.createdAt) : ''"
   >
     <template v-if="order">
-      <div class="space-y-10">
+      <div class="space-y-10 print-area">
+        <!-- Header para Impressão (Apenas número) -->
+        <div class="hidden print:flex justify-end border-b-2 border-gray-900 pb-4 mb-8">
+          <div class="text-right">
+            <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Pedido Número</p>
+            <p class="text-2xl font-black text-gray-900">#{{ order.orderNumber }}</p>
+          </div>
+        </div>
         <!-- Status & Info -->
         <div class="grid grid-cols-2 gap-8">
           <div>
@@ -109,6 +116,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useToast } from 'vue-toastification';
 import { orderService } from '../../../api/services/OrderService';
 import Dropdown from '../../../components/Dropdown.vue';
 import Drawer from '../../../components/Drawer.vue';
@@ -134,11 +142,13 @@ watch(() => props.order, (newOrder) => {
 
 const handleStatusChange = async (newStatus: string) => {
   if (!props.order) return;
+  const toast = useToast();
   try {
     await orderService.updateStatus(props.order.id, newStatus, 'Atualizado via Dashboard Vue');
+    toast.success('Status atualizado com sucesso');
     emit('onStatusUpdated');
   } catch (error) {
-    alert('Erro ao atualizar status');
+    // Erro tratado pelo interceptor
   }
 };
 

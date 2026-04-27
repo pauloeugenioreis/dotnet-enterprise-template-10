@@ -2,13 +2,15 @@ import { useOrders } from './useOrders';
 import Drawer from '../../components/Drawer';
 import Pagination from '../../components/Pagination';
 import Dropdown from '../../components/Dropdown';
+import ConfirmModal from '../../components/ConfirmModal';
 import OrderDetailsModal from './components/OrderDetailsModal';
 import { OrderResponse } from '../../types';
+import { useState } from 'react';
 
 export default function Orders() {
   const {
     data, isLoading, getStatusColor, page, setPage, pageSize, setPageSize,
-    handleCancel, handleExport,
+    cancelOrder, handleExport,
     status, setStatus, searchTerm, setSearchTerm, startDate, setStartDate, endDate, setEndDate,
     
     // Data from hooks
@@ -23,16 +25,31 @@ export default function Orders() {
     editingId,
     formData,
     setFormData,
-    
-    // Handlers
     handleSubmit,
     handleEdit,
     handleAddItem,
     handleRemoveItem,
     handleItemChange,
     handleOpenNew,
-    handleViewDetails
+    handleViewDetails,
+    refresh
   } = useOrders();
+
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState<number | null>(null);
+
+  const handleCancel = (id: number) => {
+    setOrderToCancel(id);
+    setIsCancelModalOpen(true);
+  };
+
+  const confirmCancel = async () => {
+    if (orderToCancel) {
+      await cancelOrder(orderToCancel);
+      setIsCancelModalOpen(false);
+      setOrderToCancel(null);
+    }
+  };
 
   const totalPages = data?.totalPages || 1;
 
@@ -333,10 +350,15 @@ export default function Orders() {
         order={selectedOrder}
         onStatusUpdated={() => {
           setIsDetailsOpen(false);
-          // The useOrders hook should provide a reload method, but usually just changing page or status reloads it.
-          // Let's assume setPage(page) or similar triggers it.
-          setPage(page);
+          refresh();
         }}
+      />
+
+      <ConfirmModal
+        isOpen={isCancelModalOpen}
+        message="Deseja cancelar este pedido?"
+        onConfirm={confirmCancel}
+        onCancel={() => setIsCancelModalOpen(false)}
       />
     </div>
   );

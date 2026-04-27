@@ -52,7 +52,14 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, isOpen, on
       }
     >
       {order && (
-        <div className="space-y-10">
+        <div className="space-y-10 print-area">
+          {/* Header para Impressão (Apenas número) */}
+          <div className="hidden print:flex justify-end border-b-2 border-gray-900 pb-4 mb-8">
+            <div className="text-right">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Pedido Número</p>
+              <p className="text-2xl font-black text-gray-900">#{order.orderNumber}</p>
+            </div>
+          </div>
           {/* Status & Info */}
           <div className="grid grid-cols-2 gap-8">
             <div>

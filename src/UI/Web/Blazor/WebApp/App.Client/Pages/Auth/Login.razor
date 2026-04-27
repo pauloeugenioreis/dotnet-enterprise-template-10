@@ -10,7 +10,7 @@
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 @inject AuthenticationStateProvider AuthStateProvider
-@rendermode InteractiveAuto
+@inject TokenProvider TokenProvider
 @attribute [AllowAnonymous]
 
 <div class="min-h-screen flex items-center justify-center bg-primary-50 p-6">
@@ -104,6 +104,7 @@
             var result = await AuthService.LoginAsync(loginRequest);
             if (result != null && !string.IsNullOrEmpty(result.AccessToken))
             {
+                TokenProvider.Token = result.AccessToken;
                 ((CustomAuthenticationStateProvider)AuthStateProvider).NotifyUserAuthentication(result.AccessToken);
                 Snackbar.Add($"Bem-vindo, {result.User.FirstName}!", Severity.Success);
                 Navigation.NavigateTo("/");

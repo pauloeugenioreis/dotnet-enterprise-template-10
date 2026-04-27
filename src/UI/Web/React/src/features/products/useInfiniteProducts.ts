@@ -10,10 +10,10 @@ export function useInfiniteProducts() {
     isLoading
   } = useInfiniteQuery({
     queryKey: ['products-infinite'],
-    queryFn: ({ pageParam = 1 }) => productService.list(pageParam as number, 20, { isActive: true }),
+    queryFn: ({ pageParam = 1 }) => productService.list(pageParam as number, 100),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
-      if (lastPage.items.length < 20) return undefined;
+      if (lastPage.items.length < 100) return undefined;
       return lastPage.page + 1;
     },
   });

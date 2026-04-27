@@ -1,7 +1,7 @@
 import { BaseService } from '../base.service';
-import { OrderResponse, CreateOrderRequest, OrderStatistics } from '../../types';
+import { OrderResponse, CreateOrderRequest, UpdateOrderRequest, OrderStatistics } from '../../types';
 
-export class OrderService extends BaseService<OrderResponse, CreateOrderRequest> {
+export class OrderService extends BaseService<OrderResponse, CreateOrderRequest, UpdateOrderRequest> {
   constructor() {
     super('/api/v1/Order');
   }

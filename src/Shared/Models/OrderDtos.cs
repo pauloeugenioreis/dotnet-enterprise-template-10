@@ -64,6 +64,7 @@ public record UpdateOrderRequest
     public required string Status { get; init; }
     public string? ShippingAddress { get; init; }
     public string? Notes { get; init; }
+    public List<OrderItemDto>? Items { get; init; }
 }
 
 /// <summary>

@@ -197,4 +197,12 @@
       </button>
     </form>
   </Modal>
+
+  <!-- Modal Confirmação -->
+  <ConfirmModal
+    :isOpen="isDeleteModalOpen"
+    message="Deseja excluir este produto?"
+    @confirm="confirmDelete"
+    @cancel="isDeleteModalOpen = false"
+  />
 </div>

@@ -4,6 +4,7 @@
 @using BlazorApp.Client.Services
 @using ProjectTemplate.Shared.Models
 @inject ICustomerReviewService ReviewService
+@inject IDialogService DialogService
 
 <div class="p-10 max-w-7xl mx-auto space-y-10 animate-in fade-in duration-700">
     <!-- Header -->
@@ -14,15 +15,15 @@
         </div>
         <div class="flex gap-4">
             <div class="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 flex gap-2">
-                <button @onclick="() => FilterByApproval(null)" 
+                <button @onclick="() => FilterByApproval(null)"
                         class="px-6 py-2 rounded-xl font-bold transition-all @(!isApproved.HasValue ? "bg-gray-900 text-white" : "text-gray-500 hover:bg-gray-50")">
                     Todos
                 </button>
-                <button @onclick="() => FilterByApproval(true)" 
+                <button @onclick="() => FilterByApproval(true)"
                         class="px-6 py-2 rounded-xl font-bold transition-all @(isApproved == true ? "bg-green-600 text-white" : "text-gray-500 hover:bg-gray-50")">
                     Aprovados
                 </button>
-                <button @onclick="() => FilterByApproval(false)" 
+                <button @onclick="() => FilterByApproval(false)"
                         class="px-6 py-2 rounded-xl font-bold transition-all @(isApproved == false ? "bg-amber-500 text-white" : "text-gray-500 hover:bg-gray-50")">
                     Pendentes
                 </button>
@@ -176,10 +177,21 @@
     private async Task LoadReviews()
     {
         loading = true;
-        var response = await ReviewService.GetReviewsAsync(currentPage, pageSize, productName, minRating, isApproved);
-        reviews = response.Items.ToList();
-        totalCount = response.TotalCount;
-        loading = false;
+        try
+        {
+            var response = await ReviewService.GetReviewsAsync(currentPage, pageSize, productName, minRating, isApproved);
+            reviews = response.Items.ToList();
+            totalCount = response.TotalCount;
+        }
+        catch (Exception)
+        {
+            reviews = new List<CustomerReviewResponseDto>();
+            totalCount = 0;
+        }
+        finally
+        {
+            loading = false;
+        }
     }
 
     private async Task OnMinRatingChanged(ChangeEventArgs e)
@@ -223,7 +235,19 @@
 
     private async Task HandleDelete(string id)
     {
-        // Simplificação: no Blazor real usaríamos um Modal de confirmação
+        var parameters = new DialogParameters<ConfirmationDialog>
+        {
+            { x => x.Title, "Tem certeza que deseja excluir esta avaliação?" }
+        };
+
+        var dialog = await DialogService.ShowAsync<ConfirmationDialog>("", parameters);
+        var result = await dialog.Result;
+
+        if (result == null || result.Canceled)
+        {
+            return;
+        }
+
         await ReviewService.DeleteAsync(id);
         await LoadReviews();
     }

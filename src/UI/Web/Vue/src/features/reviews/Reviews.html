@@ -118,4 +118,12 @@
               class="px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest disabled:opacity-30 enabled:hover:bg-gray-50 transition-all">Próxima</button>
     </div>
   </footer>
+
+  <!-- Modal Confirmação -->
+  <ConfirmModal
+    :isOpen="isDeleteModalOpen"
+    message="Deseja excluir esta avaliação?"
+    @confirm="confirmDelete"
+    @cancel="isDeleteModalOpen = false"
+  />
 </div>
