@@ -66,7 +66,7 @@ const handleDelete = async (id: number) => {
     await deleteProduct(id);
     handleFetchProducts();
   } catch (error) {
-    alert('Erro ao excluir produto');
+    // Erro tratado pelo interceptor
   }
 };
 
@@ -86,7 +86,7 @@ const handleSubmit = async () => {
     isModalOpen.value = false;
     fetchProducts();
   } catch (error) {
-    alert('Erro ao salvar produto');
+    // Erro tratado pelo interceptor
   }
 };
 

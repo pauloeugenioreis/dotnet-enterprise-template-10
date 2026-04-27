@@ -117,7 +117,7 @@ const handleCancel = async (id: number) => {
     await orderService.updateStatus(id, 'Cancelled', 'Cancelado pelo usuário');
     fetchOrders();
   } catch (error) {
-    alert('Erro ao cancelar pedido');
+    // Erro tratado pelo interceptor
   }
 };
 
@@ -150,7 +150,7 @@ const handleSubmit = async () => {
     isModalOpen.value = false;
     fetchOrders();
   } catch (error) {
-    alert('Erro ao salvar pedido. Verifique se todos os campos estão preenchidos.');
+    // Erro tratado pelo interceptor
   }
 };
 

@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { useToast } from 'vue-toastification';
 import { productService } from '../../api/services/ProductService';
 import { ProductResponse, CreateProductRequest } from '../../types';
 
@@ -6,6 +7,7 @@ export function useProducts() {
   const products = ref<ProductResponse[]>([]);
   const totalCount = ref(0);
   const loading = ref(false);
+  const toast = useToast();
 
   const fetchProducts = async (page = 1, pageSize = 10, filters = {}) => {
     loading.value = true;
@@ -21,10 +23,13 @@ export function useProducts() {
 
   const deleteProduct = async (id: number | string) => {
     await productService.delete(id);
+    toast.success('Produto excluído com sucesso.');
   };
 
   const createProduct = async (product: CreateProductRequest) => {
-    return await productService.create(product);
+    const result = await productService.create(product);
+    toast.success('Produto criado com sucesso.');
+    return result;
   };
 
   return {

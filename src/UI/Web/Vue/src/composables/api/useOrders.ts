@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { useToast } from 'vue-toastification';
 import { orderService } from '../../api/services/OrderService';
 import { OrderResponse, PagedResponse, OrderStatistics } from '../../types';
 
@@ -7,6 +8,7 @@ export function useOrders() {
   const totalCount = ref(0);
   const loading = ref(false);
   const statistics = ref<OrderStatistics | null>(null);
+  const toast = useToast();
 
   const fetchOrders = async (page = 1, pageSize = 10, filters = {}) => {
     loading.value = true;
@@ -32,6 +34,7 @@ export function useOrders() {
     loading.value = true;
     try {
       await orderService.cancel(id);
+      toast.success('Pedido cancelado com sucesso.');
     } finally {
       loading.value = false;
     }

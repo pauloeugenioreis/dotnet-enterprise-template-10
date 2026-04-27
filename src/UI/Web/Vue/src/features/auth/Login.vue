@@ -15,7 +15,7 @@ const handleLogin = async () => {
       password: password.value
     });
   } catch (error) {
-    alert('Erro ao entrar');
+    // Erro tratado pelo interceptor
   }
 };
 </script>

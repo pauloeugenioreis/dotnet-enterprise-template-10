@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { notify } from '../../utils/toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productService } from '../../api/services/product.service';
 
@@ -16,17 +17,26 @@ export function useProducts() {
 
   const createMutation = useMutation({
     mutationFn: (product: any) => productService.create(product),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      notify.success('Produto Criado', 'O produto foi adicionado ao catálogo.');
+    },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, product }: { id: number, product: any }) => productService.update(id, product),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      notify.success('Produto Atualizado', 'As alterações foram salvas.');
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => productService.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      notify.success('Produto Excluído', 'O produto foi removido permanentemente.');
+    },
   });
 
   const handleDelete = async (id: number) => {
@@ -34,7 +44,7 @@ export function useProducts() {
       try {
         await deleteMutation.mutateAsync(id);
       } catch (error) {
-        alert('Erro ao excluir produto');
+        // Erro já tratado no interceptor
       }
     }
   };
@@ -49,8 +59,9 @@ export function useProducts() {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      notify.success('Exportação Concluída', 'O arquivo Excel foi gerado.');
     } catch (error) {
-      alert('Erro ao exportar produtos');
+      notify.error('Erro na Exportação', 'Não foi possível gerar o arquivo Excel.');
     }
   };
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { notify } from '../../utils/toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orderService } from '../../api/services/order.service';
 import { OrderResponse } from '../../types';
@@ -21,12 +22,18 @@ export function useOrders() {
 
   const createMutation = useMutation({
     mutationFn: (order: any) => orderService.create(order),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['orders'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      notify.success('Pedido Criado', 'O pedido foi registrado com sucesso.');
+    },
   });
 
   const cancelMutation = useMutation({
     mutationFn: (id: number | string) => orderService.cancel(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['orders'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      notify.success('Pedido Cancelado', 'O status do pedido foi atualizado.');
+    },
   });
 
   const handleCancel = async (id: number) => {
@@ -34,7 +41,7 @@ export function useOrders() {
       try {
         await cancelMutation.mutateAsync(id);
       } catch (error) {
-        alert('Erro ao cancelar pedido');
+        // Erro já tratado no interceptor global
       }
     }
   };
@@ -49,8 +56,9 @@ export function useOrders() {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      notify.success('Exportação Concluída', 'O arquivo Excel foi gerado.');
     } catch (error) {
-      alert('Erro ao exportar pedidos');
+      notify.error('Erro na Exportação', 'Não foi possível gerar o arquivo Excel.');
     }
   };
 
@@ -86,7 +94,7 @@ export function useOrders() {
       setIsModalOpen(false);
       setFormData({ customerName: '', customerEmail: '', shippingAddress: '', items: [] });
     } catch (error) {
-      alert('Erro ao criar pedido. Verifique se todos os campos estão preenchidos.');
+      // Erro tratado no interceptor
     }
   };
 
