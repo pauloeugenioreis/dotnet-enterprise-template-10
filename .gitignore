@@ -127,4 +127,7 @@ build/
 **/android/app/profile
 **/android/app/release
 **/ios/Flutter/.last_build_id
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
 **/*.flutter-plugins*
