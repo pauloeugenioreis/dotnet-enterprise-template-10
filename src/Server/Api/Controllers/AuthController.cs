@@ -120,7 +120,6 @@ public class AuthController : ApiControllerBase
     /// </summary>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>User data</returns>
-    [Authorize]
     [HttpGet("me")]
     [ProducesResponseType(typeof(UserDto), 200)]
     [ProducesResponseType(401)]
@@ -137,7 +136,6 @@ public class AuthController : ApiControllerBase
     /// <param name="dto">Password change data</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>No content</returns>
-    [Authorize]
     [HttpPost("change-password")]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
@@ -156,7 +154,6 @@ public class AuthController : ApiControllerBase
     /// <param name="dto">Profile update data</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Updated user data</returns>
-    [Authorize]
     [HttpPut("profile")]
     [ProducesResponseType(typeof(UserDto), 200)]
     [ProducesResponseType(400)]

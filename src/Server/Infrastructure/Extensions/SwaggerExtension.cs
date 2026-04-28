@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ProjectTemplate.Infrastructure.Extensions;
 
@@ -23,8 +25,9 @@ public static class SwaggerExtension
                 Description = "Enterprise .NET Template API with JWT Authentication",
                 Contact = new OpenApiContact
                 {
-                    Name = "Your Name",
-                    Email = "your.email@example.com"
+                    Name = "Paulo Eugênio",
+                    Email = "pauloeugenioreis@msn.com",
+                    Url = new Uri("https://www.linkedin.com/in/pauloeugenioreis")
                 }
             });
 
@@ -38,24 +41,8 @@ public static class SwaggerExtension
                 Scheme = "Bearer"
             });
 
-            // TODO: AddSecurityRequirement API mudou no Microsoft.OpenApi 2.x
-            // Temporariamente comentado até ajustar para a nova API
-            /*
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
-                }
-            });
-            */
+            // DocumentFilter: tem acesso ao OpenApiDocument e cria referências corretamente no OpenApi 2.x
+            c.DocumentFilter<AuthorizeDocumentFilter>();
 
             // Include XML comments if available
             var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -69,18 +56,51 @@ public static class SwaggerExtension
         return services;
     }
 
-    /// <summary>
-    /// Use Swagger UI
-    /// </summary>
     public static IApplicationBuilder UseSwaggerWithAuth(this IApplicationBuilder app)
     {
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "ProjectTemplate API v1");
-            c.RoutePrefix = string.Empty; // Serve Swagger UI at root
+            c.RoutePrefix = string.Empty;
         });
 
         return app;
+    }
+}
+
+internal sealed class AuthorizeDocumentFilter : IDocumentFilter
+{
+    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+    {
+        foreach (var path in swaggerDoc.Paths)
+        {
+            if (path.Value?.Operations is null) continue;
+            foreach (var (operationType, operation) in path.Value.Operations)
+            {
+                var httpMethod = operationType.ToString();
+                var relativePath = path.Key.TrimStart('/');
+
+                var apiDesc = context.ApiDescriptions.FirstOrDefault(d =>
+                    string.Equals(d.HttpMethod, httpMethod, StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(d.RelativePath?.TrimEnd('/') ?? string.Empty, relativePath.TrimEnd('/'), StringComparison.OrdinalIgnoreCase));
+
+                if (apiDesc is null) continue;
+
+                var metadata = apiDesc.ActionDescriptor.EndpointMetadata;
+
+                if (metadata.OfType<IAllowAnonymous>().Any()) continue;
+                if (!metadata.OfType<IAuthorizeData>().Any()) continue;
+
+                operation.Security ??= [];
+                operation.Security.Add(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecuritySchemeReference("Bearer", swaggerDoc),
+                        []
+                    }
+                });
+            }
+        }
     }
 }

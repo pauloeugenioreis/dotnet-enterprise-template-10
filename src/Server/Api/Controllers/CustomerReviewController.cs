@@ -1,6 +1,6 @@
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 using ProjectTemplate.Shared.Models;
 using ProjectTemplate.Domain.Interfaces;
 
