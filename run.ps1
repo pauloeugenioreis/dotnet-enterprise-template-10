@@ -209,12 +209,16 @@ switch ($choice) {
 
         Write-Host "`n$($YELLOW)Compilando serviços sequencialmente para garantir estabilidade...$($NC)"
         foreach ($service in $START_LIST) {
-            Write-Host "$($CYAN)Compilando: $service...$($NC)"
-            docker-compose build $service
-            if ($LASTEXITCODE -ne 0) {
-                Write-Host "`n$($RED)Falha ao compilar o serviço: $service$($NC)"
-                Write-Host "$($YELLOW)Dica: Tente rodar 'docker-compose build $service' manualmente para ver o erro detalhado.$($NC)"
-                exit 1
+            # Verifica se o serviço tem uma seção de build no docker-compose.yml para evitar o WARN "No services to build"
+            $configJson = docker-compose config $service --format json 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue
+            if ($configJson -and $configJson.services.$service.build) {
+                Write-Host "$($CYAN)Compilando: $service...$($NC)"
+                docker-compose build $service
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Host "`n$($RED)Falha ao compilar o serviço: $service$($NC)"
+                    Write-Host "$($YELLOW)Dica: Tente rodar 'docker-compose build $service' manualmente para ver o erro detalhado.$($NC)"
+                    exit 1
+                }
             }
         }
 

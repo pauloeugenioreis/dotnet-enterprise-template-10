@@ -1,6 +1,6 @@
 #!/bin/bash
 
-clear
+#clear
 
 # Cores para o terminal
 CYAN='\033[0;36m'
@@ -15,26 +15,26 @@ PORTS="5000 5001 5432 5433 6379 15672 5672 27017 3000 16686 9090 4200 5173 5174 
 
 clean_environment() {
     echo -e "\n${RED}🛑 Limpando ambiente e liberando portas...${NC}"
-    
+
     # 1. Para todos os containers do projeto atual
     docker-compose down --remove-orphans > /dev/null 2>&1
-    
+
     # 2. Busca e para QUALQUER container docker que esteja usando as portas críticas
     for port in $PORTS; do
         # Encontra IDs de containers que estão usando a porta no HOST
         cont_ids=$(docker ps -a --format "{{.ID}} {{.Ports}}" | grep ":$port->" | awk '{print $1}')
-        
+
         if [ ! -z "$cont_ids" ]; then
             for id in $cont_ids; do
                 echo -e "  - Removendo container ($id) na porta $port"
                 docker rm -f $id > /dev/null 2>&1
             done
         fi
-        
+
         # Mata processos locais (ex: dotnet run que ficou pendurado)
         # Tenta fuser primeiro (mais agressivo), depois lsof
         fuser -k $port/tcp > /dev/null 2>&1
-        
+
         pid=$(lsof -t -i:$port)
         if [ ! -z "$pid" ]; then
             echo -e "  - Matando processo na porta $port (PID: $pid)"
@@ -56,7 +56,7 @@ clean_environment() {
             echo -e "     Dica: Tente rodar 'sudo kill -9 $check' manualmente."
         fi
     done
-    
+
     echo -e "${GREEN}✅ Ambiente pronto!${NC}"
 }
 
@@ -92,28 +92,28 @@ select_database() {
     fi
 
     case $DB_CHOICE in
-        2) 
+        2)
             DB_TYPE="sqlserver"
             DB_SERVICE="sqlserver"
             DB_CONN="Server=sqlserver;Database=ProjectTemplateDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True"
             ;;
-        3) 
+        3)
             DB_TYPE="mysql"
             DB_SERVICE="mysql"
             DB_CONN="Server=mysql;Port=3306;Database=ProjectTemplate;Uid=appuser;Pwd=AppPass123;"
             ;;
-        4) 
+        4)
             DB_TYPE="oracle"
             DB_SERVICE="oracle"
             DB_CONN="Data Source=oracle:1521/ProjectTemplate;User Id=appuser;Password=AppPass123"
             ;;
-        *) 
+        *)
             DB_TYPE="postgresql"
             DB_SERVICE="postgres"
             DB_CONN="Host=postgres;Database=ProjectTemplate;Username=postgres;Password=PostgresPass123;Port=5432"
             ;;
     esac
-    
+
     # Event Sourcing sempre precisa de Postgres (Marten)
     DB_EVENTS_CONN="Host=postgres-events;Database=ProjectTemplateEvents;Username=postgres;Password=postgres"
 }
@@ -134,12 +134,12 @@ case $choice in
     1)
         select_database
         clean_environment
-        
+
         # Define o nome do projeto baseado no diretório atual (necessário para o docker-compose)
         export PROJECT_NAME=$(basename "$(pwd)")
-        
+
         echo -e "\n${GREEN}🚀 Iniciando via Docker Compose com $DB_TYPE...${NC}"
-        
+
         # Determina containers de banco
         DB_CONTAINERS="$DB_SERVICE"
         if [ "$DB_TYPE" != "postgresql" ]; then
@@ -149,7 +149,7 @@ case $choice in
         fi
 
         # Inicia apenas os serviços que existem no docker-compose.yml
-        # Isso garante que no template ele respeite o banco escolhido, 
+        # Isso garante que no template ele respeite o banco escolhido,
         # e no projeto gerado ele funcione mesmo com serviços removidos.
         CORE_SERVICES="api redis rabbitmq mongodb jaeger prometheus grafana angular-web react-web vue-web blazor-app"
         START_LIST=""
@@ -165,44 +165,47 @@ case $choice in
 
         echo -e "\n${YELLOW}🛠️ Compilando serviços sequencialmente para garantir estabilidade...${NC}"
         for service in $START_LIST; do
-            echo -e "${CYAN}Compilando: $service...${NC}"
-            docker-compose build $service
-            if [ $? -ne 0 ]; then
-                echo -e "\n${RED}❌ Falha ao compilar o serviço: $service${NC}"
-                echo -e "${YELLOW}Dica: Tente rodar 'docker-compose build $service' manualmente para ver o erro detalhado.${NC}"
-                exit 1
+            # Verifica se o serviço tem uma seção de build no docker-compose.yml para evitar o WARN "No services to build"
+            if docker-compose config "$service" --format json 2>/dev/null | jq -e ".services[\"$service\"].build" > /dev/null 2>&1; then
+                echo -e "${CYAN}Compilando: $service...${NC}"
+                docker-compose build $service
+                if [ $? -ne 0 ]; then
+                    echo -e "\n${RED}❌ Falha ao compilar o serviço: $service${NC}"
+                    echo -e "${YELLOW}Dica: Tente rodar 'docker-compose build $service' manualmente para ver o erro detalhado.${NC}"
+                    exit 1
+                fi
             fi
         done
 
         echo -e "\n${GREEN}🚀 Subindo containers...${NC}"
         docker-compose up -d $START_LIST
-        
+
         echo -e "\n${BLUE}----------------------------------------------------------------${NC}"
         echo -e "${GREEN}🚀 Ambiente Docker Iniciado!${NC}"
         echo -e "${BLUE}----------------------------------------------------------------${NC}"
-        
+
         echo -e "${CYAN}Aguardando serviços subirem... aqui estão os links de acesso:${NC}"
         echo -e "🚀 Aplicações (Frontends & API)"
         echo -e "API (.NET 10):       http://localhost:5000"
-        
+
         [ -d "src/UI/Web/Angular" ] && echo -e "Angular:             http://localhost:4200"
         [ -d "src/UI/Web/React" ] && echo -e "React:               http://localhost:5173"
         [ -d "src/UI/Web/Vue" ] && echo -e "Vue:                 http://localhost:5174"
         [ -d "src/UI/Web/Blazor" ] && echo -e "Blazor WebApp:       http://localhost:5188"
-        
+
         echo -e " "
         echo -e "📊 Observabilidade & Infraestrutura"
-        
+
         # Verifica serviços de infra no docker-compose.yml
         if grep -q "grafana:" docker-compose.yml; then echo -e "Grafana:             http://localhost:3000"; fi
         if grep -q "jaeger:" docker-compose.yml; then echo -e "Jaeger:              http://localhost:16686"; fi
         if grep -q "rabbitmq:" docker-compose.yml; then echo -e "RabbitMQ Management: http://localhost:15672"; fi
         if grep -q "prometheus:" docker-compose.yml; then echo -e "Prometheus:          http://localhost:9090"; fi
-        
+
         echo -e "${BLUE}----------------------------------------------------------------${NC}"
 
         echo -e "\n${YELLOW}⏳ Verificando saúde da API... (isso pode levar um minuto)${NC}"
-        
+
         # Loop de espera pela API (timeout de 60 segundos)
         for i in {1..60}; do
             if curl -s http://localhost:5000/health > /dev/null 2>&1; then
@@ -218,7 +221,7 @@ case $choice in
         else
             echo -e "\n\n${RED}⚠ A API demorou para responder. Verifique os logs com: 'docker-compose logs -f api'${NC}"
         fi
-        
+
         echo -e "${BLUE}----------------------------------------------------------------${NC}"
         echo -e "${YELLOW}Dica: O ambiente continuará subindo em background.${NC}"
         ;;
