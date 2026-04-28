@@ -9,13 +9,19 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.6" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.6" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.7" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.7" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../../../../Shared/Shared.csproj" />
     <ProjectReference Include="../WebApp/App.Client/App.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.203" />
+    <PackageReference Update="SonarAnalyzer.CSharp" Version="10.25.0.139117" />
   </ItemGroup>
 
 </Project>

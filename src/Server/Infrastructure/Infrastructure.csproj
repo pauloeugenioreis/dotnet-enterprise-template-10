@@ -17,8 +17,8 @@
 
     <!-- Swagger/API Documentation -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
-    <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.1" />
-    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
+    <PackageReference Include="Asp.Versioning.Mvc" Version="10.0.0" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.0.0" />
 
     <!-- Health Checks -->
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
@@ -31,11 +31,11 @@
     <!-- <PackageReference Include="AspNetCore.HealthChecks.RabbitMQ" Version="9.0.0" /> -->
 
     <!-- Caching -->
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.7" />
     <!-- Microsoft.Extensions.Caching.Memory REMOVED - Already included in Microsoft.AspNetCore.App framework -->
 
     <!-- InMemory Database -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.7" />
 
     <!-- ORM Support (Uncomment as needed) -->
     <!-- Linq2Db - Required when using Linq2Db ORM -->
@@ -45,30 +45,30 @@
     <PackageReference Include="AspNetCoreRateLimit" Version="5.0.0" />
 
     <!-- Job Scheduling (Commented - uncomment to enable) -->
-    <PackageReference Include="Quartz" Version="3.18.0" />
-    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.18.0" />
+    <PackageReference Include="Quartz" Version="3.18.1" />
+    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.18.1" />
 
     <!-- Message Queue (Commented - uncomment to enable) -->
-    <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.2.1" />
 
     <!-- Cloud Storage -->
     <PackageReference Include="Google.Cloud.Storage.V1" Version="4.14.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.27.0" />
     <PackageReference Include="Azure.Identity" Version="1.21.0" />
-    <PackageReference Include="AWSSDK.S3" Version="4.0.21.1" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.22.1" />
 
     <!-- NoSQL Databases (Commented - uncomment to enable) -->
-    <PackageReference Include="MongoDB.Driver" Version="2.30.0" />
+    <PackageReference Include="MongoDB.Driver" Version="3.8.0" />
 
     <!-- Observability (OpenTelemetry) -->
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.15.3" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.3" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.3" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.2" />
     <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.10" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.15.1" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.15.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.15.2" />
 
     <!-- Telemetry Exporters -->
     <!-- OpenTelemetry.Exporter.Jaeger REMOVED - Deprecated/Legacy -->
@@ -79,12 +79,12 @@
     <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.7.0" />
 
     <!-- Event Sourcing -->
-    <PackageReference Include="Marten" Version="8.29.3" />
-    <PackageReference Include="Marten.AspNetCore" Version="8.29.3" />
+    <PackageReference Include="Marten" Version="8.33.0" />
+    <PackageReference Include="Marten.AspNetCore" Version="8.33.0" />
     <PackageReference Include="Npgsql" Version="10.0.2" />
 
     <!-- Authentication -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.7" />
 
     <!-- Resilience -->
     <PackageReference Include="Polly" Version="8.6.6" />
@@ -108,8 +108,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.201" />
-    <PackageReference Update="SonarAnalyzer.CSharp" Version="10.23.0.137933" />
+    <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.203" />
+    <PackageReference Update="SonarAnalyzer.CSharp" Version="10.25.0.139117" />
   </ItemGroup>
 
 </Project>

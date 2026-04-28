@@ -9,15 +9,15 @@
 
   <ItemGroup>
     <!-- Entity Framework Core (Default ORM) -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.5">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.7">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 
     <!-- Database Providers - All enabled by default -->
     <!-- Note: PostgreSQL and MySQL providers are using .NET 9 versions (compatible with .NET 10) -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.7" />
     <PackageReference Include="Oracle.EntityFrameworkCore" Version="10.23.26200" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
     <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.1" />
@@ -27,7 +27,7 @@
     <!-- System.Data.SqlClient REMOVED - Obsolete/Replaced -->
     <!-- Use Microsoft.Data.SqlClient instead (modern, actively maintained) -->
     <!-- Version 6.1.1+ required by EF Core 10.0.2 -->
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
 
     <!-- Other ORMs - Uncomment if needed -->
     <!-- NHibernate -->
@@ -42,7 +42,7 @@
     <PackageReference Include="AutoMapper" Version="16.1.1" />
 
     <!-- MongoDB Driver (used by MongoRepository) -->
-    <PackageReference Include="MongoDB.Driver" Version="2.30.0" />
+    <PackageReference Include="MongoDB.Driver" Version="3.8.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -61,8 +61,8 @@
     <Compile Remove="Repository\Linq2Db\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.201" />
-    <PackageReference Update="SonarAnalyzer.CSharp" Version="10.23.0.137933" />
+    <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.203" />
+    <PackageReference Update="SonarAnalyzer.CSharp" Version="10.25.0.139117" />
   </ItemGroup>
 
   <!-- All ORM implementations are now compiled -->

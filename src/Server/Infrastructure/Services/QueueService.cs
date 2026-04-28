@@ -53,7 +53,7 @@ public class QueueService : IQueueService
         var retryPolicy = Policy
             .Handle<BrokerUnreachableException>()
             .Or<AlreadyClosedException>()
-            .WaitAndRetry(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                 (exception, timeSpan, retryCount, context) =>
                 {
                     _logger.LogWarning(exception,
@@ -61,29 +61,32 @@ public class QueueService : IQueueService
                         retryCount, timeSpan.TotalSeconds);
                 });
 
-        await Task.Run(() => retryPolicy.Execute(() =>
+        await retryPolicy.ExecuteAsync(async (ct) =>
         {
-            using var connection = factory.CreateConnection();
-            using var channel = connection.CreateModel();
+            await using var connection = await factory.CreateConnectionAsync(ct);
+            await using var channel = await connection.CreateChannelAsync(cancellationToken: ct);
 
             // Declare queue (idempotent operation)
-            channel.QueueDeclare(
+            await channel.QueueDeclareAsync(
                 queue: queueName,
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
-                arguments: null);
+                arguments: null,
+                cancellationToken: ct);
 
             var body = Encoding.UTF8.GetBytes(message);
 
             // Publish message
-            channel.BasicPublish(
+            await channel.BasicPublishAsync(
                 exchange: string.Empty,
                 routingKey: queueName,
-                basicProperties: null,
-                body: body);
+                mandatory: false,
+                basicProperties: new BasicProperties(),
+                body: body,
+                cancellationToken: ct);
 
             _logger.LogInformation("Message published to queue {Queue}", queueName);
-        }), cancellationToken);
+        }, cancellationToken);
     }
 }

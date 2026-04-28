@@ -13,21 +13,27 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.0.0" />
-    <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.0.0" />
-    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.0.0" />
-    <PackageReference Include="Aspire.Hosting.Redis" Version="9.0.0" />
-    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="9.0.0" />
-    <PackageReference Include="Aspire.Hosting.MongoDB" Version="9.0.0" />
-    <PackageReference Include="Aspire.Hosting.SqlServer" Version="9.0.0" />
-    <PackageReference Include="Aspire.Hosting.MySql" Version="9.0.0" />
-    <PackageReference Include="Aspire.Hosting.Oracle" Version="9.0.0" />
-    <PackageReference Include="KubernetesClient" Version="17.0.14" />
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="13.2.4" />
+    <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.2.4" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="13.2.4" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.2.4" />
+    <PackageReference Include="Aspire.Hosting.MongoDB" Version="13.2.4" />
+    <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.2.4" />
+    <PackageReference Include="Aspire.Hosting.MySql" Version="13.2.4" />
+    <PackageReference Include="Aspire.Hosting.Oracle" Version="13.2.4" />
+    <PackageReference Include="KubernetesClient" Version="19.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.7" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Server\Api\Api.csproj" />
     <ProjectReference Include="..\..\UI\Web\Blazor\WebApp\App\App.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.203" />
+    <PackageReference Update="SonarAnalyzer.CSharp" Version="10.25.0.139117" />
   </ItemGroup>
 
 </Project>
