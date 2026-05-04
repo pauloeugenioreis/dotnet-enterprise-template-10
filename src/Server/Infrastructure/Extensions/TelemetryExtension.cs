@@ -19,11 +19,11 @@ public static class TelemetryExtension
 {
     public static IServiceCollection AddTelemetry(
         this IServiceCollection services,
-        IOptions<AppSettings> appSettings)
+        AppSettings appSettings)
     {
-        var settings = appSettings.Value;
+        var settings = appSettings;
 
-        if (!appSettings.Value.Infrastructure.Telemetry.Enabled)
+        if (!appSettings.Infrastructure.Telemetry.Enabled)
         {
             Console.WriteLine("⚠️  Telemetry is disabled");
             return services;
@@ -85,7 +85,7 @@ public static class TelemetryExtension
                         };
                     });
 
-                if (appSettings.Value.Infrastructure.Telemetry.EnableSqlInstrumentation)
+                if (appSettings.Infrastructure.Telemetry.EnableSqlInstrumentation)
                 {
                     tracerProvider.AddSqlClientInstrumentation(options =>
                     {
@@ -97,9 +97,9 @@ public static class TelemetryExtension
                     .AddEntityFrameworkCoreInstrumentation();
 
                 // Sampling (reduz volume em produção)
-                if (appSettings.Value.Infrastructure.Telemetry.SamplingRatio > 0 && appSettings.Value.Infrastructure.Telemetry.SamplingRatio < 1.0)
+                if (appSettings.Infrastructure.Telemetry.SamplingRatio > 0 && appSettings.Infrastructure.Telemetry.SamplingRatio < 1.0)
                 {
-                    tracerProvider.SetSampler(new TraceIdRatioBasedSampler(appSettings.Value.Infrastructure.Telemetry.SamplingRatio));
+                    tracerProvider.SetSampler(new TraceIdRatioBasedSampler(appSettings.Infrastructure.Telemetry.SamplingRatio));
                 }
 
                 // Configurar exportadores baseado no provider
@@ -124,9 +124,9 @@ public static class TelemetryExtension
 
     private static void ConfigureTraceExporters(
         TracerProviderBuilder builder,
-        IOptions<AppSettings> appSettings)
+        AppSettings appSettings)
     {
-        var settings = appSettings.Value;
+        var settings = appSettings;
 
         foreach (var provider in settings.Infrastructure.Telemetry.Providers)
         {

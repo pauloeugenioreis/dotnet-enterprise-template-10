@@ -19,9 +19,9 @@ public static class EventSourcingExtension
     /// <summary>
     /// Add Event Sourcing services to the DI container
     /// </summary>
-    public static IServiceCollection AddEventSourcing(this IServiceCollection services, IOptions<AppSettings> appSettings)
+    public static IServiceCollection AddEventSourcing(this IServiceCollection services, AppSettings appSettings)
     {
-        var settings = appSettings.Value.Infrastructure.EventSourcing;
+        var settings = appSettings.Infrastructure.EventSourcing;
 
         // Register settings so repositories/controllers can resolve even when disabled
         services.AddSingleton(settings);

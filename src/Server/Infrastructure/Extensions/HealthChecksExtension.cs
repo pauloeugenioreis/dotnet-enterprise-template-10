@@ -10,7 +10,7 @@ namespace ProjectTemplate.Infrastructure.Extensions;
 /// </summary>
 public static class HealthChecksExtension
 {
-    public static IServiceCollection AddHealthChecksConfiguration(this IServiceCollection services, IOptions<AppSettings> appSettings)
+    public static IServiceCollection AddHealthChecksConfiguration(this IServiceCollection services, AppSettings appSettings)
     {
         var healthChecksBuilder = services.AddHealthChecks();
 
@@ -18,10 +18,10 @@ public static class HealthChecksExtension
         // healthChecksBuilder.AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "ready" });
 
         // Database health check
-        var connectionString = appSettings.Value.Infrastructure.Database.ConnectionString;
+        var connectionString = appSettings.Infrastructure.Database.ConnectionString;
         if (!string.IsNullOrEmpty(connectionString))
         {
-            var dbType = appSettings.Value.Infrastructure.Database.DatabaseType.ToLower();
+            var dbType = appSettings.Infrastructure.Database.DatabaseType.ToLower();
 
             // Database health checks require specific packages to be installed
             // Uncomment and install the appropriate package:

@@ -17,22 +17,23 @@ public static class AuthenticationExtension
     /// <summary>
     /// Add JWT Authentication services
     /// </summary>
-    public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IOptions<AppSettings> appSettings)
+    public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, AppSettings appSettings)
     {
         // Register authentication validator
         services.AddSingleton<IValidateOptions<AppSettings>, AuthenticationSettingsValidator>();
 
         // Register authentication settings from appSettings
-        services.Configure<AuthenticationSettings>(options => 
+        services.Configure<AuthenticationSettings>(options =>
         {
-            options.Jwt = appSettings.Value.Authentication.Jwt;
-            options.OAuth2 = appSettings.Value.Authentication.OAuth2;
-            options.PasswordPolicy = appSettings.Value.Authentication.PasswordPolicy;
-            options.RefreshToken = appSettings.Value.Authentication.RefreshToken;
-            options.Enabled = appSettings.Value.Authentication.Enabled;
+            options.Jwt = appSettings.Authentication.Jwt;
+            options.OAuth2 = appSettings.Authentication.OAuth2;
+            options.PasswordPolicy = appSettings.Authentication.PasswordPolicy;
+            options.RefreshToken = appSettings.Authentication.RefreshToken;
+            options.Enabled = appSettings.Authentication.Enabled;
         });
 
         // Register authentication services
+        services.AddSingleton<IPasswordHasherService, PasswordHasherService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ITokenService, JwtTokenService>();
 
@@ -55,7 +56,7 @@ public static class AuthenticationExtension
         /*
         var tempProvider = services.BuildServiceProvider();
         var appSettings = tempProvider.GetRequiredService<IOptions<AppSettings>>().Value;
-        
+
         if (appSettings.Authentication.OAuth2.Enabled)
         {
             // Google OAuth2

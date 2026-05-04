@@ -29,14 +29,17 @@ services:
         condition: service_healthy
       jaeger:
         condition: service_healthy
+        required: false
       prometheus:
         condition: service_healthy
+        required: false
     networks:
       - app-network
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sqlserver
+    profiles: ["db-sqlserver"]
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=YourStrong@Passw0rd
@@ -58,6 +61,7 @@ services:
   oracle:
     image: gvenzl/oracle-free:latest
     container_name: oracle
+    profiles: ["db-oracle"]
     environment:
       - ORACLE_PASSWORD=OraclePass123
       - ORACLE_DATABASE=ProjectTemplate
@@ -80,6 +84,7 @@ services:
   postgres:
     image: postgres:17-alpine
     container_name: postgres
+    profiles: ["db-postgres"]
     environment:
       - POSTGRES_DB=ProjectTemplate
       - POSTGRES_USER=postgres
@@ -100,6 +105,7 @@ services:
   mysql:
     image: mysql:8
     container_name: mysql
+    profiles: ["db-mysql"]
     environment:
       - MYSQL_ROOT_PASSWORD=MySqlPass123
       - MYSQL_DATABASE=ProjectTemplate
@@ -197,6 +203,7 @@ services:
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: jaeger
+    profiles: ["observability"]
     restart: unless-stopped
     ports:
       - "16686:16686"     # Jaeger UI
@@ -230,6 +237,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    profiles: ["observability"]
     restart: unless-stopped
     ports:
       - "9090:9090"
@@ -253,6 +261,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+    profiles: ["observability"]
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -291,6 +300,7 @@ services:
   # Blazor Web Application
   blazor-app:
     container_name: web-blazor
+    profiles: ["web-blazor"]
     build:
       context: .
       dockerfile: src/UI/Web/Blazor/WebApp/App/Dockerfile
@@ -307,6 +317,7 @@ services:
   # Angular Web Application
   angular-web:
     container_name: web-angular
+    profiles: ["web-angular"]
     build:
       context: src/UI/Web/Angular
       dockerfile: Dockerfile
@@ -322,6 +333,7 @@ services:
   # React Web Application
   react-web:
     container_name: web-react
+    profiles: ["web-react"]
     build:
       context: src/UI/Web/React
       dockerfile: Dockerfile
@@ -339,6 +351,7 @@ services:
   # Vue Web Application
   vue-web:
     container_name: web-vue
+    profiles: ["web-vue"]
     build:
       context: src/UI/Web/Vue
       dockerfile: Dockerfile
@@ -375,10 +388,10 @@ services:
       echo ' '"
     depends_on:
       api: { condition: service_started }
-      angular-web: { condition: service_started }
-      react-web: { condition: service_started }
-      vue-web: { condition: service_started }
-      blazor-app: { condition: service_started }
+      angular-web: { condition: service_started, required: false }
+      react-web: { condition: service_started, required: false }
+      vue-web: { condition: service_started, required: false }
+      blazor-app: { condition: service_started, required: false }
     networks:
       - app-network
 

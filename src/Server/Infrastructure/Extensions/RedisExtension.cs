@@ -9,9 +9,9 @@ namespace ProjectTemplate.Infrastructure.Extensions;
 /// </summary>
 public static class RedisExtension
 {
-    public static IServiceCollection AddRedis(this IServiceCollection services, IOptions<AppSettings> appSettings)
+    public static IServiceCollection AddRedis(this IServiceCollection services, AppSettings appSettings)
     {
-        var connectionString = appSettings.Value.Infrastructure?.Redis?.ConnectionString;
+        var connectionString = appSettings.Infrastructure?.Redis?.ConnectionString;
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {

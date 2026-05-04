@@ -19,8 +19,8 @@ $PORTS = @(5000, 5001, 5432, 5433, 6379, 15672, 5672, 27017, 3000, 16686, 9090, 
 function Clean-Environment {
     Write-Host "`n$($RED)Limpando ambiente e liberando portas...$($NC)"
 
-    # 1. Para todos os containers do projeto atual
-    docker-compose down --remove-orphans 2>$null | Out-Null
+    # 1. Para todos os containers do projeto atual (incluindo volumes)
+    docker-compose down --remove-orphans -v 2>$null | Out-Null
 
     # 2. Busca e para QUALQUER container docker que esteja usando as portas críticas
     foreach ($port in $PORTS) {
@@ -133,21 +133,25 @@ function Select-Database {
         "2" {
             $script:DB_TYPE = "sqlserver"
             $script:DB_SERVICE = "sqlserver"
+            $script:DB_PROFILE = "db-sqlserver"
             $script:DB_CONN = "Server=sqlserver;Database=ProjectTemplateDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True"
         }
         "3" {
             $script:DB_TYPE = "mysql"
             $script:DB_SERVICE = "mysql"
+            $script:DB_PROFILE = "db-mysql"
             $script:DB_CONN = "Server=mysql;Port=3306;Database=ProjectTemplate;Uid=appuser;Pwd=AppPass123;"
         }
         "4" {
             $script:DB_TYPE = "oracle"
             $script:DB_SERVICE = "oracle"
+            $script:DB_PROFILE = "db-oracle"
             $script:DB_CONN = "Data Source=oracle:1521/ProjectTemplate;User Id=appuser;Password=AppPass123"
         }
         Default {
             $script:DB_TYPE = "postgresql"
             $script:DB_SERVICE = "postgres"
+            $script:DB_PROFILE = "db-postgres"
             $script:DB_CONN = "Host=postgres;Database=ProjectTemplate;Username=postgres;Password=PostgresPass123;Port=5432"
         }
     }
@@ -179,51 +183,32 @@ switch ($choice) {
 
         Write-Host "`n$($GREEN)🚀 Iniciando via Docker Compose com $script:DB_TYPE...$($NC)"
 
-        $DB_CONTAINERS = $script:DB_SERVICE
-        if ($script:DB_TYPE -ne "postgresql") {
-            $DB_CONTAINERS = "$($script:DB_SERVICE) postgres-events"
-        } else {
-            $DB_CONTAINERS = "postgres postgres-events"
-        }
+        # Monta a lista de profiles do compose com base no banco escolhido,
+        # observabilidade (sempre ligada por padrão) e UIs presentes no workspace.
+        $composeContent = Get-Content "docker-compose.yml" -Raw
+        $profiles = @($script:DB_PROFILE, "observability")
+        if ((Test-Path "src/UI/Web/Angular") -and ($composeContent -match "(?m)^  angular-web:")) { $profiles += "web-angular" }
+        if ((Test-Path "src/UI/Web/React")   -and ($composeContent -match "(?m)^  react-web:"))   { $profiles += "web-react" }
+        if ((Test-Path "src/UI/Web/Vue")     -and ($composeContent -match "(?m)^  vue-web:"))     { $profiles += "web-vue" }
+        if ((Test-Path "src/UI/Web/Blazor")  -and ($composeContent -match "(?m)^  blazor-app:"))  { $profiles += "web-blazor" }
 
-        # Configura variáveis de ambiente para o comando
+        $env:COMPOSE_PROFILES = ($profiles -join ",")
         $env:DB_TYPE = $script:DB_TYPE
         $env:DB_CONNECTION_STRING = $script:DB_CONN
         $env:DB_EVENTS_CONNECTION_STRING = $script:DB_EVENTS_CONN
 
-        # Inicia apenas os serviços que existem no docker-compose.yml
-        # Isso garante que no template ele respeite o banco escolhido,
-        # e no projeto gerado ele funcione mesmo com serviços removidos.
-        $CORE_SERVICES = @("api", "redis", "rabbitmq", "mongodb", "jaeger", "prometheus", "grafana", "angular-web", "react-web", "vue-web", "blazor-app")
-        $composeContent = Get-Content "docker-compose.yml" -Raw
-        $START_LIST = @()
+        Write-Host "$($CYAN)Profiles ativos: $($env:COMPOSE_PROFILES)$($NC)"
 
-        # Adiciona containers de banco se existirem no compose
-        foreach ($service in $DB_CONTAINERS.Split(" ", [System.StringSplitOptions]::RemoveEmptyEntries)) {
-            if ($composeContent -match "(?m)^  ${service}:") { $START_LIST += $service }
-        }
-        # Adiciona demais serviços se existirem no compose
-        foreach ($service in $CORE_SERVICES) {
-            if ($composeContent -match "(?m)^  ${service}:") { $START_LIST += $service }
-        }
-
-        Write-Host "`n$($YELLOW)Compilando serviços sequencialmente para garantir estabilidade...$($NC)"
-        foreach ($service in $START_LIST) {
-            # Verifica se o serviço tem uma seção de build no docker-compose.yml para evitar o WARN "No services to build"
-            $configJson = docker-compose config $service --format json 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue
-            if ($configJson -and $configJson.services.$service.build) {
-                Write-Host "$($CYAN)Compilando: $service...$($NC)"
-                docker-compose build $service
-                if ($LASTEXITCODE -ne 0) {
-                    Write-Host "`n$($RED)Falha ao compilar o serviço: $service$($NC)"
-                    Write-Host "$($YELLOW)Dica: Tente rodar 'docker-compose build $service' manualmente para ver o erro detalhado.$($NC)"
-                    exit 1
-                }
-            }
+        Write-Host "`n$($YELLOW)Compilando serviços...$($NC)"
+        docker-compose build
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "`n$($RED)Falha ao compilar os serviços.$($NC)"
+            Write-Host "$($YELLOW)Dica: Tente rodar 'docker-compose build' manualmente para ver o erro detalhado.$($NC)"
+            exit 1
         }
 
         Write-Host "`n$($GREEN)Subindo containers...$($NC)"
-        docker-compose up -d $START_LIST
+        docker-compose up -d
 
         Write-Host "`n$($BLUE)----------------------------------------------------------------$($NC)"
         Write-Host "$($GREEN)Ambiente Docker iniciado!$($NC)"

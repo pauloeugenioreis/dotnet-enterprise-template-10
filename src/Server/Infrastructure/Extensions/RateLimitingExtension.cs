@@ -17,9 +17,9 @@ namespace ProjectTemplate.Infrastructure.Extensions;
 /// </summary>
 public static class RateLimitingExtension
 {
-    public static IServiceCollection AddRateLimitingConfiguration(this IServiceCollection services, IOptions<AppSettings> appSettings)
+    public static IServiceCollection AddRateLimitingConfiguration(this IServiceCollection services, AppSettings appSettings)
     {
-        var settings = appSettings.Value.Infrastructure.RateLimiting;
+        var settings = appSettings.Infrastructure.RateLimiting;
 
         if (!settings.Enabled)
         {

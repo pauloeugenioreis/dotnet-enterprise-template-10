@@ -48,9 +48,9 @@ namespace ProjectTemplate.Infrastructure.Extensions;
 /// </summary>
 public static class DatabaseExtension
 {
-    public static IServiceCollection AddDatabaseConfiguration(this IServiceCollection services, IOptions<AppSettings> appSettings)
+    public static IServiceCollection AddDatabaseConfiguration(this IServiceCollection services, AppSettings appSettings)
     {
-        var dbSettings = appSettings.Value.Infrastructure.Database;
+        var dbSettings = appSettings.Infrastructure.Database;
         var connectionString = dbSettings.ConnectionString
             ?? throw new InvalidOperationException("Database connection string is required");
 
@@ -155,7 +155,7 @@ public static class DatabaseExtension
             }
 
             options.EnableDetailedErrors();
-            
+
             // Ignore pending model changes warning (EF Core 10 strictness)
             options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
         });

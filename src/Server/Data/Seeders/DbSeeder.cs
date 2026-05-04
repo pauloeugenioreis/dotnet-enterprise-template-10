@@ -18,6 +18,7 @@ public class DbSeeder
 {
     private readonly ApplicationDbContext _context;
     private readonly IEventStore _eventStore;
+    private readonly IPasswordHasherService _passwordHasher;
 
     // Lists for generating realistic fake data
     private static readonly string[] FirstNames = { "João", "Maria", "Pedro", "Ana", "Lucas", "Juliana", "Carlos", "Beatriz", "Rafael", "Camila", "Fernando", "Patricia", "Rodrigo", "Amanda", "Bruno", "Mariana", "Diego", "Larissa", "Thiago", "Gabriela" };
@@ -28,10 +29,11 @@ public class DbSeeder
     private static readonly string[] Cities = { "São Paulo", "Rio de Janeiro", "Belo Horizonte", "Porto Alegre", "Curitiba", "Brasília", "Salvador", "Fortaleza", "Recife", "Manaus" };
     private static readonly string[] States = { "SP", "RJ", "MG", "RS", "PR", "DF", "BA", "CE", "PE", "AM" };
 
-    public DbSeeder(ApplicationDbContext context, IEventStore eventStore)
+    public DbSeeder(ApplicationDbContext context, IEventStore eventStore, IPasswordHasherService passwordHasher)
     {
         _context = context;
         _eventStore = eventStore;
+        _passwordHasher = passwordHasher;
     }
 
     /// <summary>
@@ -150,15 +152,9 @@ public class DbSeeder
     }
 
     /// <summary>
-    /// Simple password hashing using SHA256 (matches AuthService implementation)
+    /// Hashes a password using the configured secure password hasher (PBKDF2 via ASP.NET Core Identity).
     /// </summary>
-    private string HashPassword(string password)
-    {
-        using var sha256 = System.Security.Cryptography.SHA256.Create();
-        var bytes = System.Text.Encoding.UTF8.GetBytes(password);
-        var hash = sha256.ComputeHash(bytes);
-        return Convert.ToBase64String(hash);
-    }
+    private string HashPassword(string password) => _passwordHasher.Hash(password);
 
     /// <summary>
     /// Seeds products into the database

@@ -17,13 +17,21 @@ public static class InfrastructureExtensions
         IConfiguration configuration,
         IHostEnvironment environment)
     {
-        // Core settings - MUST be registered first
-        services.AddAppSettingsConfiguration(configuration);
+        // Bind, validate and register AppSettings.
+        // - IOptions<AppSettings> pipeline (with on-start validation) for runtime consumers.
+        // - Singleton AppSettings (POCO) for direct injection.
+        // - Local POCO instance reused below to configure registration-time extensions
+        //   without resorting to BuildServiceProvider (anti-pattern ASP0000).
+        services.AddOptions<AppSettings>()
+            .Bind(configuration.GetSection("AppSettings"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
-        // Build a service provider to resolve IOptions<AppSettings> for other extensions
-        // This is done once here to avoid multiple BuildServiceProvider calls
-        using var tempProvider = services.BuildServiceProvider();
-        var appSettings = tempProvider.GetRequiredService<IOptions<AppSettings>>();
+        var appSettings = configuration.GetSection("AppSettings").Get<AppSettings>()
+            ?? throw new InvalidOperationException(
+                "Configuration section 'AppSettings' is missing or invalid.");
+
+        services.AddSingleton<IOptions<AppSettings>>(Options.Create(appSettings));
 
         // Database
         services.AddDatabaseConfiguration(appSettings);
@@ -77,19 +85,22 @@ public static class InfrastructureExtensions
             options.EnableForHttps = true;
         });
 
+        // ProblemDetails service (RFC 7807) consumed by GlobalExceptionHandler
+        services.AddProblemDetails();
+
         // API Versioning
         services.AddCustomizedApiVersioning();
 
         // Application dependencies
-        services.AddApplicationDependencies(appSettings.Value);
+        services.AddApplicationDependencies(appSettings);
 
         return services;
     }
 
     public static IApplicationBuilder UseInfrastructureMiddleware(this IApplicationBuilder app)
     {
-        // Global Exception Handler
-        app.UseMiddleware<ProjectTemplate.Infrastructure.Middleware.ExceptionMiddleware>();
+        // Global Exception Handler (RFC 7807 ProblemDetails)
+        app.UseGlobalExceptionHandler();
 
         // CORS
         app.UseCors("DefaultCorsPolicy");
@@ -102,7 +113,7 @@ public static class InfrastructureExtensions
 
         // Rate Limiting - Only if enabled in configuration
         var serviceProvider = app.ApplicationServices;
-        var appSettings = serviceProvider.GetRequiredService<AppSettings>();
+        var appSettings = serviceProvider.GetRequiredService<IOptions<AppSettings>>().Value;
         if (appSettings.Infrastructure.RateLimiting.Enabled)
         {
             app.UseRateLimiter();

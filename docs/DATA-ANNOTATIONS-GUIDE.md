@@ -236,13 +236,13 @@ public class TelemetrySettings
 
 ## ⚙️ Habilitando Validação
 
-### No AppSettingsExtension
+### No InfrastructureExtensions
 
 ```csharp
-// Infrastructure/Extensions/AppSettingsExtension.cs
-public static class AppSettingsExtension
+// Infrastructure/Extensions/InfrastructureExtensions.cs
+public static class InfrastructureExtensions
 {
-    public static IServiceCollection AddAppSettingsConfiguration(
+    public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services,
         IConfiguration configuration,
         IHostEnvironment environment)
@@ -253,10 +253,16 @@ public static class AppSettingsExtension
             .ValidateDataAnnotations() // ✅ Habilita validação de Data Annotations
             .ValidateOnStart(); // ✅ Valida no startup (falha rápido)
 
-        // Registrar como singleton
-        services.AddSingleton(sp =>
-            sp.GetRequiredService<IOptions<AppSettings>>().Value);
+        // Bind manual para uso em tempo de registro nas demais extensões
+        var appSettings = configuration.GetSection("AppSettings").Get<AppSettings>()
+            ?? throw new InvalidOperationException(
+                "Configuration section 'AppSettings' is missing or invalid.");
 
+        // Registrar instances como singleton
+        services.AddSingleton(appSettings);
+        services.AddSingleton<IOptions<AppSettings>>(Options.Create(appSettings));
+
+        // ... demais extensões de infraestrutura
         return services;
     }
 }

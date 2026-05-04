@@ -16,8 +16,8 @@ PORTS="5000 5001 5432 5433 6379 15672 5672 27017 3000 16686 9090 4200 5173 5174 
 clean_environment() {
     echo -e "\n${RED}🛑 Limpando ambiente e liberando portas...${NC}"
 
-    # 1. Para todos os containers do projeto atual
-    docker-compose down --remove-orphans > /dev/null 2>&1
+    # 1. Para todos os containers do projeto atual (incluindo volumes)
+    docker-compose down --remove-orphans -v > /dev/null 2>&1
 
     # 2. Busca e para QUALQUER container docker que esteja usando as portas críticas
     for port in $PORTS; do
@@ -95,21 +95,25 @@ select_database() {
         2)
             DB_TYPE="sqlserver"
             DB_SERVICE="sqlserver"
+            DB_PROFILE="db-sqlserver"
             DB_CONN="Server=sqlserver;Database=ProjectTemplateDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True"
             ;;
         3)
             DB_TYPE="mysql"
             DB_SERVICE="mysql"
+            DB_PROFILE="db-mysql"
             DB_CONN="Server=mysql;Port=3306;Database=ProjectTemplate;Uid=appuser;Pwd=AppPass123;"
             ;;
         4)
             DB_TYPE="oracle"
             DB_SERVICE="oracle"
+            DB_PROFILE="db-oracle"
             DB_CONN="Data Source=oracle:1521/ProjectTemplate;User Id=appuser;Password=AppPass123"
             ;;
         *)
             DB_TYPE="postgresql"
             DB_SERVICE="postgres"
+            DB_PROFILE="db-postgres"
             DB_CONN="Host=postgres;Database=ProjectTemplate;Username=postgres;Password=PostgresPass123;Port=5432"
             ;;
     esac
@@ -140,45 +144,31 @@ case $choice in
 
         echo -e "\n${GREEN}🚀 Iniciando via Docker Compose com $DB_TYPE...${NC}"
 
-        # Determina containers de banco
-        DB_CONTAINERS="$DB_SERVICE"
-        if [ "$DB_TYPE" != "postgresql" ]; then
-            DB_CONTAINERS="$DB_SERVICE postgres-events"
-        else
-            DB_CONTAINERS="postgres postgres-events"
-        fi
+        # Monta a lista de profiles do compose com base no banco escolhido,
+        # observabilidade (sempre ligada por padrão) e UIs presentes no workspace.
+        PROFILES="$DB_PROFILE,observability"
+        [ -d "src/UI/Web/Angular" ] && grep -q "^  angular-web:" docker-compose.yml && PROFILES="$PROFILES,web-angular"
+        [ -d "src/UI/Web/React" ]   && grep -q "^  react-web:"   docker-compose.yml && PROFILES="$PROFILES,web-react"
+        [ -d "src/UI/Web/Vue" ]     && grep -q "^  vue-web:"     docker-compose.yml && PROFILES="$PROFILES,web-vue"
+        [ -d "src/UI/Web/Blazor" ]  && grep -q "^  blazor-app:"  docker-compose.yml && PROFILES="$PROFILES,web-blazor"
 
-        # Inicia apenas os serviços que existem no docker-compose.yml
-        # Isso garante que no template ele respeite o banco escolhido,
-        # e no projeto gerado ele funcione mesmo com serviços removidos.
-        CORE_SERVICES="api redis rabbitmq mongodb jaeger prometheus grafana angular-web react-web vue-web blazor-app"
-        START_LIST=""
-        for service in $DB_CONTAINERS $CORE_SERVICES; do
-            if grep -q "^  $service:" docker-compose.yml; then
-                START_LIST="$START_LIST $service"
-            fi
-        done
-
+        export COMPOSE_PROFILES="$PROFILES"
         export DB_TYPE=$DB_TYPE
         export DB_CONNECTION_STRING="$DB_CONN"
         export DB_EVENTS_CONNECTION_STRING="$DB_EVENTS_CONN"
 
-        echo -e "\n${YELLOW}🛠️ Compilando serviços sequencialmente para garantir estabilidade...${NC}"
-        for service in $START_LIST; do
-            # Verifica se o serviço tem uma seção de build no docker-compose.yml para evitar o WARN "No services to build"
-            if docker-compose config "$service" --format json 2>/dev/null | jq -e ".services[\"$service\"].build" > /dev/null 2>&1; then
-                echo -e "${CYAN}Compilando: $service...${NC}"
-                docker-compose build $service
-                if [ $? -ne 0 ]; then
-                    echo -e "\n${RED}❌ Falha ao compilar o serviço: $service${NC}"
-                    echo -e "${YELLOW}Dica: Tente rodar 'docker-compose build $service' manualmente para ver o erro detalhado.${NC}"
-                    exit 1
-                fi
-            fi
-        done
+        echo -e "${CYAN}Profiles ativos: $COMPOSE_PROFILES${NC}"
+
+        echo -e "\n${YELLOW}🛠️ Compilando serviços...${NC}"
+        docker-compose build
+        if [ $? -ne 0 ]; then
+            echo -e "\n${RED}❌ Falha ao compilar os serviços.${NC}"
+            echo -e "${YELLOW}Dica: Tente rodar 'docker-compose build' manualmente para ver o erro detalhado.${NC}"
+            exit 1
+        fi
 
         echo -e "\n${GREEN}🚀 Subindo containers...${NC}"
-        docker-compose up -d $START_LIST
+        docker-compose up -d
 
         echo -e "\n${BLUE}----------------------------------------------------------------${NC}"
         echo -e "${GREEN}🚀 Ambiente Docker Iniciado!${NC}"

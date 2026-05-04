@@ -213,7 +213,8 @@ public class CleanupJob : IJob
 
 ```csharp
 // Add Quartz with Jobs (OPTIONAL)
-builder.Services.AddCustomizedQuartz((q, settings) =>
+var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>()!;
+builder.Services.AddCustomizedQuartz(appSettings, (q, settings) =>
 {
     // Daily cleanup at 3 AM
     var cleanupJobKey = new JobKey("cleanup-job");

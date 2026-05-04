@@ -600,6 +600,7 @@ COMPOSE_HEADER
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sqlserver
+    profiles: ["db-sqlserver"]
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=YourStrong@Passw0rd
@@ -625,6 +626,7 @@ COMPOSE_DB
   oracle:
     image: gvenzl/oracle-free:latest
     container_name: oracle
+    profiles: ["db-oracle"]
     environment:
       - ORACLE_PASSWORD=OraclePass123
       - ORACLE_DATABASE=$PROJECT_NAME
@@ -651,6 +653,7 @@ COMPOSE_DB
   postgres:
     image: postgres:17-alpine
     container_name: postgres
+    profiles: ["db-postgres"]
     environment:
       - POSTGRES_DB=$PROJECT_NAME
       - POSTGRES_USER=postgres
@@ -675,6 +678,7 @@ COMPOSE_DB
   mysql:
     image: mysql:8
     container_name: mysql
+    profiles: ["db-mysql"]
     environment:
       - MYSQL_ROOT_PASSWORD=MySqlPass123
       - MYSQL_DATABASE=$PROJECT_NAME
@@ -768,6 +772,7 @@ COMPOSE_RABBIT
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: jaeger
+    profiles: ["observability"]
     restart: unless-stopped
     ports:
       - "16686:16686"
@@ -794,6 +799,7 @@ COMPOSE_RABBIT
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    profiles: ["observability"]
     restart: unless-stopped
     ports:
       - "9090:9090"
@@ -810,6 +816,7 @@ COMPOSE_RABBIT
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+    profiles: ["observability"]
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -921,8 +928,8 @@ COMPOSE_API
         echo "      mongo: { condition: service_healthy }" >> "$COMPOSE_FILE"
     fi
     if [ "$TELEMETRY" = "yes" ]; then
-        echo "      jaeger: { condition: service_healthy }" >> "$COMPOSE_FILE"
-        echo "      prometheus: { condition: service_healthy }" >> "$COMPOSE_FILE"
+        echo "      jaeger: { condition: service_healthy, required: false }" >> "$COMPOSE_FILE"
+        echo "      prometheus: { condition: service_healthy, required: false }" >> "$COMPOSE_FILE"
     fi
 
     cat >> "$COMPOSE_FILE" << 'COMPOSE_API_END'
@@ -937,6 +944,7 @@ COMPOSE_API_END
             cat >> "$COMPOSE_FILE" << 'COMPOSE_WEB_ANGULAR'
   angular-web:
     container_name: web-angular
+    profiles: ["web-angular"]
     build:
       context: src/UI/Web/Angular
       dockerfile: Dockerfile
@@ -955,6 +963,7 @@ COMPOSE_WEB_ANGULAR
             cat >> "$COMPOSE_FILE" << 'COMPOSE_WEB_REACT'
   react-web:
     container_name: web-react
+    profiles: ["web-react"]
     build:
       context: src/UI/Web/React
       dockerfile: Dockerfile
@@ -973,6 +982,7 @@ COMPOSE_WEB_REACT
             cat >> "$COMPOSE_FILE" << 'COMPOSE_WEB_VUE'
   vue-web:
     container_name: web-vue
+    profiles: ["web-vue"]
     build:
       context: src/UI/Web/Vue
       dockerfile: Dockerfile
@@ -991,6 +1001,7 @@ COMPOSE_WEB_VUE
             cat >> "$COMPOSE_FILE" << 'COMPOSE_WEB_BLAZOR'
   blazor-app:
     container_name: web-blazor
+    profiles: ["web-blazor"]
     build:
       context: .
       dockerfile: src/UI/Web/Blazor/WebApp/App/Dockerfile

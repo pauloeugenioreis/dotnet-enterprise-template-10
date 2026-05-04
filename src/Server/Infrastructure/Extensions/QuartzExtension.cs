@@ -16,14 +16,15 @@ public static class QuartzExtension
     /// Configures scheduler with custom settings
     /// </summary>
     /// <param name="services">Service collection</param>
+    /// <param name="appSettings">Application settings (already bound)</param>
     /// <param name="configureJobs">Optional action to configure jobs</param>
     public static IServiceCollection AddCustomizedQuartz(
         this IServiceCollection services,
+        AppSettings appSettings,
         Action<IServiceCollectionQuartzConfigurator, AppSettings>? configureJobs = null)
     {
-        // Resolve AppSettings from provider
-        using var sp = services.BuildServiceProvider();
-        var appSettings = sp.GetRequiredService<AppSettings>();
+        ArgumentNullException.ThrowIfNull(appSettings);
+
         var maxConcurrency = appSettings.Infrastructure?.Quartz?.MaxConcurrency ?? 10;
 
         services.AddQuartz(q =>

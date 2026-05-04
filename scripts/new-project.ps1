@@ -542,6 +542,7 @@ if ($needsCompose) {
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sqlserver
+    profiles: ["db-sqlserver"]
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=YourStrong@Passw0rd
@@ -566,6 +567,7 @@ if ($needsCompose) {
   oracle:
     image: gvenzl/oracle-free:latest
     container_name: oracle
+    profiles: ["db-oracle"]
     environment:
       - ORACLE_PASSWORD=OraclePass123
       - ORACLE_DATABASE=$ProjectName
@@ -591,6 +593,7 @@ if ($needsCompose) {
   postgres:
     image: postgres:17-alpine
     container_name: postgres
+    profiles: ["db-postgres"]
     environment:
       - POSTGRES_DB=$ProjectName
       - POSTGRES_USER=postgres
@@ -614,6 +617,7 @@ if ($needsCompose) {
   mysql:
     image: mysql:8
     container_name: mysql
+    profiles: ["db-mysql"]
     environment:
       - MYSQL_ROOT_PASSWORD=MySqlPass123
       - MYSQL_DATABASE=$ProjectName
@@ -698,6 +702,7 @@ if ($needsCompose) {
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: jaeger
+    profiles: ["observability"]
     restart: unless-stopped
     ports:
       - "16686:16686"
@@ -724,6 +729,7 @@ if ($needsCompose) {
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    profiles: ["observability"]
     restart: unless-stopped
     ports:
       - "9090:9090"
@@ -740,6 +746,7 @@ if ($needsCompose) {
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+    profiles: ["observability"]
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -852,6 +859,7 @@ $($dependsOn.ToString().TrimEnd())
             [void]$services.AppendLine(@"
   angular-web:
     container_name: web-angular
+    profiles: ["web-angular"]
     build:
       context: src/UI/Web/Angular
       dockerfile: Dockerfile
@@ -869,6 +877,7 @@ $($dependsOn.ToString().TrimEnd())
             [void]$services.AppendLine(@"
   react-web:
     container_name: web-react
+    profiles: ["web-react"]
     build:
       context: src/UI/Web/React
       dockerfile: Dockerfile
@@ -886,6 +895,7 @@ $($dependsOn.ToString().TrimEnd())
             [void]$services.AppendLine(@"
   vue-web:
     container_name: web-vue
+    profiles: ["web-vue"]
     build:
       context: src/UI/Web/Vue
       dockerfile: Dockerfile
@@ -903,6 +913,7 @@ $($dependsOn.ToString().TrimEnd())
             [void]$services.AppendLine(@"
   blazor-app:
     container_name: web-blazor
+    profiles: ["web-blazor"]
     build:
       context: .
       dockerfile: src/UI/Web/Blazor/WebApp/App/Dockerfile

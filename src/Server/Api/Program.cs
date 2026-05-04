@@ -56,7 +56,8 @@ builder.Services.AddMongo<Program>();
 // builder.AddCustomLogging();
 
 // Add Quartz.NET (background job scheduler)
-// builder.Services.AddCustomizedQuartz((q, settings) =>
+// var quartzAppSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>()!;
+// builder.Services.AddCustomizedQuartz(quartzAppSettings, (q, settings) =>
 // {
 //     // Example: Daily cleanup at 3 AM
 //     // var cleanupJobKey = new JobKey("cleanup-job");
@@ -157,7 +158,10 @@ if (app.Environment.IsDevelopment())
              throw; // Rethrow to trigger Polly retry if connection fails
         }
 
-        var seeder = new DbSeeder(context, eventStore);
+        var seeder = new DbSeeder(
+            context,
+            eventStore,
+            scope.ServiceProvider.GetRequiredService<ProjectTemplate.Domain.Interfaces.IPasswordHasherService>());
         await seeder.SeedAsync();
     });
 

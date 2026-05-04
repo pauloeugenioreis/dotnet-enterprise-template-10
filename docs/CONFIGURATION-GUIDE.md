@@ -23,7 +23,7 @@ Este template usa o **IOptions Pattern** do ASP.NET Core para gerenciar configur
 
 ### Princípios Fundamentais
 
-1. ✅ **AppSettingsExtension** é o ÚNICO lugar que lê `IConfiguration`
+1. ✅ **InfrastructureExtensions** é o ÚNICO lugar que lê `IConfiguration`
 2. ✅ Todas as configurações estão em `AppSettings.cs` (Domain layer)
 3. ✅ Use **IOptions<AppSettings>** para injetar configurações
 4. ✅ Validação automática no startup via `ValidateOnStart()`
@@ -200,7 +200,7 @@ public class MySingletonService
 **Vantagens:**
 
 - Mais simples
-- Registrado como Singleton em `AppSettingsExtension`
+- Registrado como Singleton em `InfrastructureExtensions.AddInfrastructureServices`
 
 ---
 
@@ -1002,11 +1002,11 @@ Antes de fazer deploy, verifique:
 
 ### Problema: Erro "Cannot resolve IOptions<AppSettings>"
 
-**Causa:** Esqueceu de chamar `AddAppSettingsConfiguration`
+**Causa:** Esqueceu de chamar `AddInfrastructureServices`
 
 ```csharp
-// Program.cs ou InfrastructureExtensions.cs
-services.AddAppSettingsConfiguration(configuration, environment); // ✅ Necessário
+// Program.cs
+services.AddInfrastructureServices(configuration, environment); // ✅ Necessário
 ```
 
 ### Problema: Validação não acontece

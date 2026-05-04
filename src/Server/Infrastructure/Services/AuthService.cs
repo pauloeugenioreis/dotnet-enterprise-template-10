@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ProjectTemplate.Domain;
@@ -17,16 +15,19 @@ public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
     private readonly ITokenService _tokenService;
+    private readonly IPasswordHasherService _passwordHasher;
     private readonly PasswordPolicySettings _passwordPolicy;
     private readonly AuthenticationSettings _authSettings;
 
     public AuthService(
         IUserRepository userRepository,
         ITokenService tokenService,
+        IPasswordHasherService passwordHasher,
         IOptions<AuthenticationSettings> authSettings)
     {
         _userRepository = userRepository;
         _tokenService = tokenService;
+        _passwordHasher = passwordHasher;
         _authSettings = authSettings.Value;
         _passwordPolicy = authSettings.Value.PasswordPolicy;
     }
@@ -274,18 +275,9 @@ public class AuthService : IAuthService
         }
     }
 
-    private string HashPassword(string password)
-    {
-        using var sha256 = SHA256.Create();
-        var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-        return Convert.ToBase64String(hashedBytes);
-    }
+    private string HashPassword(string password) => _passwordHasher.Hash(password);
 
-    private bool VerifyPassword(string password, string passwordHash)
-    {
-        var hash = HashPassword(password);
-        return hash == passwordHash;
-    }
+    private bool VerifyPassword(string password, string passwordHash) => _passwordHasher.Verify(password, passwordHash);
 
     private async Task<UserDto> MapToUserDto(User user, CancellationToken cancellationToken)
     {
