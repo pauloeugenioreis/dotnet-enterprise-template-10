@@ -1,5 +1,4 @@
 using ProjectTemplate.Shared.Models;
-using ProjectTemplate.Shared.Models;
 using ProjectTemplate.Domain.Entities;
 
 namespace ProjectTemplate.Domain.Interfaces;

@@ -1,7 +1,6 @@
 using ProjectTemplate.Shared.Models;
 using System;
 using System.Threading.Tasks;
-using ProjectTemplate.Shared.Models;
 
 namespace ProjectTemplate.Domain.Interfaces;
 

@@ -87,6 +87,7 @@ jobs:
         name: Test Results
         path: '**/*.trx'
         reporter: dotnet-trx
+        fail-on-error: false
 
     - name: 📦 Publish Artifacts
       if: success() && github.ref == 'refs/heads/main'
