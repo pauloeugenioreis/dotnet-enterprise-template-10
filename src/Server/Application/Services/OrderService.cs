@@ -142,6 +142,21 @@ public class OrderService : Service<Order>, IOrderService
         return MapToResponseDto(order);
     }
 
+    public async Task UpdateOrderAsync(long id, UpdateOrderRequest dto, CancellationToken cancellationToken = default)
+    {
+        var order = await _orderRepository.GetByIdAsync(id, cancellationToken);
+
+        if (order == null)
+        {
+            throw new NotFoundException($"Order {id} not found");
+        }
+
+        ApplyUpdate(order, dto);
+
+        await _orderRepository.UpdateAsync(order, cancellationToken);
+        await _orderRepository.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<OrderResponseDto?> GetOrderDetailsAsync(long id, CancellationToken cancellationToken = default)
     {
         var order = await _orderRepository.GetByIdAsync(id, cancellationToken);
@@ -167,12 +182,12 @@ public class OrderService : Service<Order>, IOrderService
     }
 
     public async Task<(IEnumerable<OrderResponseDto> Items, int Total)> GetAllOrderDetailsAsync(
-        string? status = null, 
+        string? status = null,
         string? searchTerm = null,
         DateTime? startDate = null,
         DateTime? endDate = null,
-        int? page = null, 
-        int? pageSize = null, 
+        int? page = null,
+        int? pageSize = null,
         CancellationToken cancellationToken = default)
     {
         var (orders, total) = await _orderRepository.GetByFilterAsync(status, searchTerm, startDate, endDate, page, pageSize, cancellationToken);
@@ -224,6 +239,29 @@ public class OrderService : Service<Order>, IOrderService
             CreatedAt = order.CreatedAt,
             UpdatedAt = order.UpdatedAt
         };
+    }
+
+    private static void ApplyUpdate(Order order, UpdateOrderRequest dto)
+    {
+        order.CustomerName = dto.CustomerName;
+
+        if (!OrderStatus.TryNormalize(dto.Status, out var normalizedStatus))
+        {
+            throw new ValidationException(
+                $"Status must be one of: {string.Join(", ", OrderStatus.AllowedStatuses)}");
+        }
+
+        order.Status = normalizedStatus;
+
+        if (!string.IsNullOrWhiteSpace(dto.ShippingAddress))
+        {
+            order.ShippingAddress = dto.ShippingAddress;
+        }
+
+        if (dto.Notes != null)
+        {
+            order.Notes = dto.Notes;
+        }
     }
 
     private static string GenerateOrderNumber()

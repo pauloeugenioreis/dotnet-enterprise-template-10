@@ -260,6 +260,36 @@ public class OrderServiceTests
         capturedOrder.Notes.Should().Contain("Initial notes");
     }
 
+    [Fact]
+    public async Task UpdateOrderAsync_WithValidRequest_MapsFieldsAndPersistsChanges()
+    {
+        var order = CreateOrder(1);
+        _mockOrderRepo.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(order);
+
+        var request = new UpdateOrderRequest
+        {
+            CustomerName = "Maria Souza",
+            Status = "shipped",
+            ShippingAddress = "Rua Nova, 456",
+            Notes = "Updated note"
+        };
+
+        Order? capturedOrder = null;
+        _mockOrderRepo
+            .Setup(r => r.UpdateAsync(It.IsAny<Order>(), It.IsAny<CancellationToken>()))
+            .Callback<Order, CancellationToken>((o, _) => capturedOrder = o)
+            .Returns(Task.CompletedTask);
+
+        await _service.UpdateOrderAsync(1, request);
+
+        capturedOrder.Should().NotBeNull();
+        capturedOrder!.CustomerName.Should().Be(request.CustomerName);
+        capturedOrder.Status.Should().Be("Shipped");
+        capturedOrder.ShippingAddress.Should().Be(request.ShippingAddress);
+        capturedOrder.Notes.Should().Be(request.Notes);
+        _mockOrderRepo.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
     // ── GetOrderDetailsAsync ─────────────────────────────────────────────────
 
     [Fact]

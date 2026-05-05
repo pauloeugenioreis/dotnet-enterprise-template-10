@@ -1,5 +1,4 @@
 using ProjectTemplate.Shared.Models;
-using ProjectTemplate.Shared.Models;
 using ProjectTemplate.Domain.Entities;
 
 namespace ProjectTemplate.Domain.Interfaces;
@@ -18,6 +17,11 @@ public interface IOrderService : IService<Order>
     /// Update order status
     /// </summary>
     Task<OrderResponseDto> UpdateOrderStatusAsync(long id, UpdateOrderStatusDto dto, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Update an existing order using manual mapping in the application layer.
+    /// </summary>
+    Task UpdateOrderAsync(long id, UpdateOrderRequest dto, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get order details with calculated totals
@@ -39,12 +43,12 @@ public interface IOrderService : IService<Order>
     /// When page/pageSize are null, returns all records.
     /// </summary>
     Task<(IEnumerable<OrderResponseDto> Items, int Total)> GetAllOrderDetailsAsync(
-        string? status = null, 
+        string? status = null,
         string? searchTerm = null,
         DateTime? startDate = null,
         DateTime? endDate = null,
-        int? page = null, 
-        int? pageSize = null, 
+        int? page = null,
+        int? pageSize = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

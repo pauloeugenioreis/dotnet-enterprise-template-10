@@ -127,18 +127,7 @@ public class OrderController : ApiControllerBase
         [FromBody] UpdateOrderRequest dto,
         CancellationToken cancellationToken)
     {
-        // For simplicity, we'll map the DTO to the entity here if the service doesn't have a direct DTO method
-        // But since we want to follow Clean Architecture, we should check if IOrderService has UpdateAsync
-        // It inherits from IService<Order>, so we can fetch and update
-        var order = await _orderService.GetByIdAsync(id, cancellationToken);
-        if (order == null) return NotFound();
-
-        order.CustomerName = dto.CustomerName;
-        order.Status = dto.Status;
-        if (dto.ShippingAddress != null) order.ShippingAddress = dto.ShippingAddress;
-        if (dto.Notes != null) order.Notes = dto.Notes;
-
-        await _orderService.UpdateAsync(id, order, cancellationToken);
+        await _orderService.UpdateOrderAsync(id, dto, cancellationToken);
         return NoContent();
     }
 

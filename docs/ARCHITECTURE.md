@@ -23,7 +23,7 @@ Visão geral da arquitetura Clean Architecture implementada neste template.
                           ▼
 ┌────────────────────────── APPLICATION LAYER ────────────────────────────┐
 │ • Services (Business Logic), Orchestration, Workflows                   │
-│ • DTOs & AutoMapper Profiles                                            │
+│ • DTOs & manual mapping                                                 │
 │ • Validators (FluentValidation)                                         │
 └─────────────────────────────────────────────────────────────────────────┘
                           │ Business Ops │
@@ -219,7 +219,7 @@ public class Repository<T> : IRepository<T> where T : EntityBase
 **Contém:**
 
 - `Services/` - Services de aplicação
-- `Mappings/` - AutoMapper profiles
+- `Mappings/` - Manual mapping helpers and EF configurations
 - `Builders/` - Object builders
 - `Helpers/` - Funções auxiliares
 

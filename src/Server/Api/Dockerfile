@@ -1,11 +1,11 @@
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.0-alpine AS base
 WORKDIR /app
 EXPOSE 8080
 
 # Install curl for Docker healthcheck
-RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache curl
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.0-alpine AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /app
 

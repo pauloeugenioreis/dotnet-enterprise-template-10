@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <!-- Core Infrastructure -->
-    <PackageReference Include="AutoMapper" Version="16.1.1" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.5.0" />
     <PackageReference Include="Scrutor" Version="7.0.0" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />

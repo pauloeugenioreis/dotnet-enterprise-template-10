@@ -11,7 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="16.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -34,5 +33,5 @@
     <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.203" />
     <PackageReference Update="SonarAnalyzer.CSharp" Version="10.25.0.139117" />
   </ItemGroup>
-  
+
 </Project>

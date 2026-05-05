@@ -149,7 +149,14 @@ code_quality:outdated:
   script:
     - echo "📦 Checking for outdated packages..."
     - dotnet tool install --global dotnet-outdated-tool
-    - dotnet outdated
+    - export PATH="$PATH:$HOME/.dotnet/tools"
+    - dotnet outdated --output outdated-packages.json --format json || true
+
+  artifacts:
+    paths:
+      - outdated-packages.json
+    expire_in: 30 days
+    when: always
 
   allow_failure: true
   only:
@@ -195,20 +202,8 @@ sonarcloud:
     - main
     - develop
     - merge_requests
-    - dotnet tool install --global dotnet-outdated-tool
-    - export PATH="$PATH:$HOME/.dotnet/tools"
-    - dotnet outdated --output outdated-packages.json --format json || true
-
-  artifacts:
-    paths:
-      - outdated-packages.json
-    expire_in: 30 days
-    when: always
 
   allow_failure: true
-  only:
-    - main
-    - develop
 
 # ===================================
 # DOCKER STAGE
