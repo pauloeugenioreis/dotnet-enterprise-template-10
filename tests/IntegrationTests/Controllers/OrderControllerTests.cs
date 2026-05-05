@@ -375,7 +375,7 @@ public class OrderControllerTests
 
         var response = await _client.PostAsJsonAsync("/api/v1/Order", orderDto);
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
         var content = await response.Content.ReadAsStringAsync();
         content.Should().Contain("Insufficient stock");
     }
@@ -408,7 +408,7 @@ public class OrderControllerTests
 
         var response = await _client.PostAsJsonAsync("/api/v1/Order", orderDto);
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
         var content = await response.Content.ReadAsStringAsync();
         content.Should().Contain("not available");
     }
